@@ -20,7 +20,7 @@ public class BugFixCommand {
 			return context.hasPermissionLevel(2);
 		});
 		
-		Collection<Setting<?>> bugFixes = Settings.getSettings("bugfix");
+		Collection<Setting<?>> bugFixes = Settings.getSettings("bug_fix");
 		
 		builder.then(CommandManager.literal("RESET").executes(context -> {
 			return resetBugFixes(context.getSource(), bugFixes);
