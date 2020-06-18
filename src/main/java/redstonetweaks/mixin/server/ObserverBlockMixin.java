@@ -45,9 +45,9 @@ public class ObserverBlockMixin {
 	// If the bug fix for MC-189954 (https://bugs.mojang.com/browse/MC-189954)
 	// is enabled, we call the isTicking method rather than
 	// the isScheduled method.
-	// The isScheduled method will return true if the observer
+	// The isScheduled method will return false if the observer
 	// is scheduled to tick at the current world time, while
-	// the isTicking method will return false.
+	// the isTicking method will return true.
 	// The second part of this bug fix is to change the tick priority
 	// of the observer if it detects an observer facing away from it.
 	// That way 4 tick observer clocks still work if the bug fix is enabled.
