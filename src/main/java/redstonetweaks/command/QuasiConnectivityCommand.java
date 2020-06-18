@@ -23,7 +23,7 @@ public class QuasiConnectivityCommand {
 		Collection<Setting<?>> qcSettings = Settings.getSettings("qc");
 		
 		for (Setting<?> qcSetting : qcSettings) {
-			builder.then(CommandManager.literal(qcSetting.getName()).executes(context -> {
+			builder.then(CommandManager.literal(qcSetting.getCommandIdentifier()).executes(context -> {
 				return queryValue(context.getSource(), qcSetting);
 			}).then(qcSetting.argument("value").executes(context -> {
 				return setValue(context, qcSetting);
@@ -34,13 +34,13 @@ public class QuasiConnectivityCommand {
 	}
 	
 	private static int queryValue(ServerCommandSource source, Setting<?> qcSetting) {
-		source.sendFeedback(new TranslatableText("Quasi-Connectivity is currently %s for the %s direction", (boolean)qcSetting.get() ? "enabled" : "disabled", qcSetting.getName()), false);
+		source.sendFeedback(new TranslatableText("Quasi-Connectivity is currently %s for the %s direction", (boolean)qcSetting.get() ? "enabled" : "disabled", qcSetting.getCommandIdentifier()), false);
 		return 1;
 	}
 	
 	private static int setValue(CommandContext<ServerCommandSource> context, Setting<?> qcSetting) throws CommandSyntaxException {
 		qcSetting.setFromArgument(context, "value");
-		context.getSource().sendFeedback(new TranslatableText("Quasi-Connectivity has been %s for the %s direction", (boolean)qcSetting.getFromArgument(context, "value") ? "enabled" : "disabled", qcSetting.getName()), false);
+		context.getSource().sendFeedback(new TranslatableText("Quasi-Connectivity has been %s for the %s direction", (boolean)qcSetting.getFromArgument(context, "value") ? "enabled" : "disabled", qcSetting.getCommandIdentifier()), false);
 		return 1;
 	}
 }
