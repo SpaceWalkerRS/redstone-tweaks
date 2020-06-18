@@ -29,7 +29,7 @@ public class DelayCommand {
 		for (Setting<?> blockDelay : blockDelays) {
 			builder.then(CommandManager.literal(blockDelay.getCommandIdentifier()).executes(context -> {
 				return queryDelay(context.getSource(), blockDelay);
-			}).then(blockDelay.argument("value").executes(context -> {
+			}).then(blockDelay.argument("value").suggests((context, suggestionsBuilder) -> CommandSource.suggestMatching(new String[] {blockDelay.getDefault().toString()}, suggestionsBuilder)).executes(context -> {
 				return setDelay(context, blockDelay);
 			})));
 		}
