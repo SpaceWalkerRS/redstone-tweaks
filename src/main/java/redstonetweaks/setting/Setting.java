@@ -10,6 +10,7 @@ public abstract class Setting<T> {
 	
 	private final String category;
 	private final String name;
+	private final String commandIdentifier;
 	private final T defaultValue;
 	
 	public Setting(String settingTypeID, String category, String name, T defaultValue) {
@@ -17,6 +18,16 @@ public abstract class Setting<T> {
 		
 		this.category = category;
 		this.name = name;
+		this.commandIdentifier = name;
+		this.defaultValue = defaultValue;
+	}
+	
+	public Setting(String settingTypeID, String category, String name, String commandIdentifier, T defaultValue) {
+		this.settingTypeID = settingTypeID;
+		
+		this.category = category;
+		this.name = name;
+		this.commandIdentifier = commandIdentifier;
 		this.defaultValue = defaultValue;
 	}
 	
@@ -30,6 +41,10 @@ public abstract class Setting<T> {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String getCommandIdentifier() {
+		return commandIdentifier;
 	}
 	
 	public T getDefault() {
