@@ -18,8 +18,8 @@ public class Settings {
 	public static Setting<?> lavaDefaultDelay;
 	public static Setting<?> lavaNetherDelay;
 	public static Setting<?> leavesDelay;
-	public static Setting<?> leverOnDelay;
 	public static Setting<?> leverOffDelay;
+	public static Setting<?> leverOnDelay;
 	public static Setting<?> observerDelay;
 	public static Setting<?> pistonDelay;
 	public static Setting<?> pistonActivationDelay;
@@ -43,6 +43,8 @@ public class Settings {
 	public static Setting<?> woodenButtonOnDelay;
 	
 	// Settings changed with the /bugfix command
+	public static Setting<?> MC136566;
+	public static Setting<?> MC137127;
 	public static Setting<?> MC189954;
 	
 	// Settings changed with the /quasiconnectivity command
@@ -85,8 +87,8 @@ public class Settings {
 		lavaDefaultDelay = register("lava_default", new IntegerSetting("block_delay", "lava_default", 30, 1, 127));
 		lavaNetherDelay = register("lava_nether", new IntegerSetting("block_delay", "lava_nether", 10, 1, 127));
 		leavesDelay = register("leaves", new IntegerSetting("block_delay", "leaves", 1, 1, 127));
-		leverOnDelay = register("lever_ON", new IntegerSetting("block_delay", "lever_ON", 0, 0, 127));
 		leverOffDelay = register("lever_OFF", new IntegerSetting("block_delay", "lever_OFF", 0, 0, 127));
+		leverOnDelay = register("lever_ON", new IntegerSetting("block_delay", "lever_ON", 0, 0, 127));
 		observerDelay = register("observer", new IntegerSetting("block_delay", "observer", 2, 1, 127));
 		pistonDelay = register("piston", new IntegerSetting("block_delay", "piston", 2, 0, 127));
 		pistonActivationDelay = register("piston_ACTIVATION", new IntegerSetting("block_delay", "piston_ACTIVATION", 0, 0, 127));
@@ -109,6 +111,8 @@ public class Settings {
 		woodenButtonDelay = register("wooden_button", new IntegerSetting("block_delay", "wooden_button", 30, 1, 127));
 		woodenButtonOnDelay = register("wooden_button_ON", new IntegerSetting("block_delay", "wooden_button_ON", 0, 0, 127));
 		
+		MC136566 = register("MC-136566", new BooleanSetting("bugfix", "MC-136566", false));
+		MC137127 = register("MC-137127", new BooleanSetting("bugfix", "MC-137127", false));
 		MC189954 = register("MC-189954", new BooleanSetting("bugfix", "MC-189954", false));
 		
 		quasiConnectivityDown = register("quasiConnectivityDown", new BooleanSetting("qc", "down", false));
