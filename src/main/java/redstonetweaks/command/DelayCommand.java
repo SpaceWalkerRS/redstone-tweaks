@@ -27,7 +27,7 @@ public class DelayCommand {
 		}));
 		
 		for (Setting<?> blockDelay : blockDelays) {
-			builder.then(CommandManager.literal(blockDelay.getName()).executes(context -> {
+			builder.then(CommandManager.literal(blockDelay.getCommandIdentifier()).executes(context -> {
 				return queryDelay(context.getSource(), blockDelay);
 			}).then(blockDelay.argument("value").executes(context -> {
 				return setDelay(context, blockDelay);
@@ -46,13 +46,13 @@ public class DelayCommand {
 	}
 	
 	private static int queryDelay(ServerCommandSource source, Setting<?> blockDelay) {
-		source.sendFeedback(new TranslatableText("The %s delay is currently set to %s", blockDelay.getName(), blockDelay.get()), false);
+		source.sendFeedback(new TranslatableText("The %s delay is currently set to %s", blockDelay.getCommandIdentifier(), blockDelay.get()), false);
 		return 1;
 	}
 	
 	private static int setDelay(CommandContext<ServerCommandSource> context, Setting<?> blockDelay) throws CommandSyntaxException {
 		blockDelay.setFromArgument(context, "value");
-		context.getSource().sendFeedback(new TranslatableText("The %s delay has been set to %s", blockDelay.getName(), blockDelay.getFromArgument(context, "value")), false);
+		context.getSource().sendFeedback(new TranslatableText("The %s delay has been set to %s", blockDelay.getCommandIdentifier(), blockDelay.getFromArgument(context, "value")), false);
 		return 1;
 	}
 }
