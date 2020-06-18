@@ -27,7 +27,7 @@ public class TweakCommand {
 		}));
 		
 		for (Setting<?> tweak : tweaks) {
-			builder.then(CommandManager.literal(tweak.getName()).executes(context -> {
+			builder.then(CommandManager.literal(tweak.getCommandIdentifier()).executes(context -> {
 				return queryValue(context.getSource(), tweak);
 			}).then(tweak.argument("value").executes(context -> {
 				return setValue(context, tweak);
@@ -46,13 +46,13 @@ public class TweakCommand {
 	}
 	
 	private static int queryValue(ServerCommandSource source, Setting<?> tweak) {
-		source.sendFeedback(new TranslatableText("The %s setting is currently set to %s", tweak.getName(), tweak.get()), false);
+		source.sendFeedback(new TranslatableText("The %s setting is currently set to %s", tweak.getCommandIdentifier(), tweak.get()), false);
 		return 1;
 	}
 	
 	private static int setValue(CommandContext<ServerCommandSource> context, Setting<?> tweak) throws CommandSyntaxException {
 		tweak.setFromArgument(context, "value");
-		context.getSource().sendFeedback(new TranslatableText("The %s setting has been set to %s", tweak.getName(), tweak.getFromArgument(context, "value")), false);
+		context.getSource().sendFeedback(new TranslatableText("The %s setting has been set to %s", tweak.getCommandIdentifier(), tweak.getFromArgument(context, "value")), false);
 		return 1;
 	}
 }
