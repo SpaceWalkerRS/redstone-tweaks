@@ -111,9 +111,9 @@ public class Settings {
 		woodenButtonDelay = register("wooden_button", new IntegerSetting("block_delay", "wooden_button", 30, 1, 127));
 		woodenButtonOnDelay = register("wooden_button_ON", new IntegerSetting("block_delay", "wooden_button_ON", 0, 0, 127));
 		
-		MC136566 = register("MC-136566", new BooleanSetting("bugfix", "MC-136566", false));
-		MC137127 = register("MC-137127", new BooleanSetting("bugfix", "MC-137127", false));
-		MC189954 = register("MC-189954", new BooleanSetting("bugfix", "MC-189954", false));
+		MC136566 = register("MC-136566", new BooleanSetting("bug_fix", "MC-136566", false));
+		MC137127 = register("MC-137127", new BooleanSetting("bug_fix", "MC-137127", false));
+		MC189954 = register("MC-189954", new BooleanSetting("bug_fix", "MC-189954", false));
 		
 		quasiConnectivityDown = register("quasiConnectivityDown", new BooleanSetting("qc", "down", false));
 		quasiConnectivityEast = register("quasiConnectivityEast", new BooleanSetting("qc", "east", false));
