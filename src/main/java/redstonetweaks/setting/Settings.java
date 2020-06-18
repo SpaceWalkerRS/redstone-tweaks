@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Settings {
-	//TODO: fix scaffolding, fix weighted pressure plate on delay, add forceUpdatePoweredPistons, add extendingPistonsIgnoreUpdates
 	
 	// Settings changed with the /delay command
 	public static Setting<?> bubbleColumnDelay;
