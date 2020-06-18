@@ -12,7 +12,6 @@ public class Settings {
 	public static Setting<?> detectorRailDelay;
 	public static Setting<?> dispenserDelay;
 	public static Setting<?> dropperDelay;
-	public static Setting<?> fallingBlockDelay;
 	public static Setting<?> gravityBlockDelay;
 	public static Setting<?> hopperDelay;
 	public static Setting<?> lavaDefaultDelay;
@@ -81,7 +80,6 @@ public class Settings {
 		detectorRailDelay = register("detector_rail", new IntegerSetting("block_delay", "detector_rail", 20, 1, 127));
 		dispenserDelay = register("dispenser", new IntegerSetting("block_delay", "dispenser", 4, 1, 127));
 		dropperDelay = register("dropper", new IntegerSetting("block_delay", "dropper", 4, 1, 127));
-		fallingBlockDelay = register("falling_block", new IntegerSetting("block_delay", "falling_block", 1, 1, 127));
 		gravityBlockDelay = register("gravity_block", new IntegerSetting("block_delay", "gravity_block", 2, 1, 127));
 		hopperDelay = register("hopper", new IntegerSetting("block_delay", "hopper", 1, 1, 127));
 		lavaDefaultDelay = register("lava_default", new IntegerSetting("block_delay", "lava_default", 30, 1, 127));
