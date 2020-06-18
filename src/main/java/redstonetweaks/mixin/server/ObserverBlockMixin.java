@@ -17,6 +17,24 @@ import redstonetweaks.setting.Settings;
 @Mixin(ObserverBlock.class)
 public class ObserverBlockMixin {
 	
+	// To fix MC-136566 (https://bugs.mojang.com/browse/MC-136566)
+	// and MC-137127 (https://bugs.mojang.com/browse/MC-137127)
+	// we change the flags argument given to the setBlockState call.
+	// Adding 1 to the flags makes sure neighboring blocks are updated,
+	// fixing MC-136566. Adding 48 to the flags makes sure neighboring
+	// observers are updated, fixing MC-137127.
+	@ModifyConstant(method = "onBlockAdded", constant = @Constant(intValue = 18))
+	private int onBlockAddedFlags(int oldFlags) {
+		int flags = oldFlags;
+		if ((boolean)Settings.MC136566.get()) {
+			flags += 1;
+		}
+		if ((boolean)Settings.MC137127.get()) {
+			flags += 48;
+		}
+		return flags;
+	}
+	
 	@ModifyConstant(method = "scheduledTick", constant = @Constant(intValue = 2, ordinal = 2))
 	private int scheduledTickObserverDelay(int oldDelay) {
 		return (int)Settings.observerDelay.get();
