@@ -27,7 +27,7 @@ public class BugFixCommand {
 		}));
 		
 		for (Setting<?> bugFix : bugFixes) {
-			builder.then(CommandManager.literal(bugFix.getName()).executes(context -> {
+			builder.then(CommandManager.literal(bugFix.getCommandIdentifier()).executes(context -> {
 				return queryValue(context.getSource(), bugFix);
 			}).then(bugFix.argument("value").executes(context -> {
 				return setValue(context, bugFix);
@@ -46,13 +46,13 @@ public class BugFixCommand {
 	}
 	
 	private static int queryValue(ServerCommandSource source, Setting<?> bugFix) {
-		source.sendFeedback(new TranslatableText("The bug fix for %s is currently %s", bugFix.getName(), (boolean)bugFix.get() ? "enabled" : "disabled"), false);
+		source.sendFeedback(new TranslatableText("The bug fix for %s is currently %s", bugFix.getCommandIdentifier(), (boolean)bugFix.get() ? "enabled" : "disabled"), false);
 		return 1;
 	}
 	
 	private static int setValue(CommandContext<ServerCommandSource> context, Setting<?> bugFix) throws CommandSyntaxException {
 		bugFix.setFromArgument(context, "value");
-		context.getSource().sendFeedback(new TranslatableText("The bug fix for %s has been %s", bugFix.getName(), (boolean)bugFix.getFromArgument(context, "value") ? "enabled" : "disabled"), false);
+		context.getSource().sendFeedback(new TranslatableText("The bug fix for %s has been %s", bugFix.getCommandIdentifier(), (boolean)bugFix.getFromArgument(context, "value") ? "enabled" : "disabled"), false);
 		return 1;
 	}
 }
