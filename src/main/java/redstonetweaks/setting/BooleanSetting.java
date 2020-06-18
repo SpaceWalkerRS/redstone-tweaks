@@ -11,7 +11,13 @@ public class BooleanSetting extends Setting<Boolean> {
 	private boolean value;
 	
 	public BooleanSetting(String category, String name, boolean defaultValue) {
-		super("bool", category, name, defaultValue);
+		super("bool", category, name, name, defaultValue);
+		
+		value = defaultValue;
+	}
+	
+	public BooleanSetting(String category, String name, String commandIdentifier, boolean defaultValue) {
+		super("bool", category, name, commandIdentifier, defaultValue);
 		
 		value = defaultValue;
 	}
