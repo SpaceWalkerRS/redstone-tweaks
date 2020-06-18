@@ -13,15 +13,6 @@ public abstract class Setting<T> {
 	private final String commandIdentifier;
 	private final T defaultValue;
 	
-	public Setting(String settingTypeID, String category, String name, T defaultValue) {
-		this.settingTypeID = settingTypeID;
-		
-		this.category = category;
-		this.name = name;
-		this.commandIdentifier = name;
-		this.defaultValue = defaultValue;
-	}
-	
 	public Setting(String settingTypeID, String category, String name, String commandIdentifier, T defaultValue) {
 		this.settingTypeID = settingTypeID;
 		
