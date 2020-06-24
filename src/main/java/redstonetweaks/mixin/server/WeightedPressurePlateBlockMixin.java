@@ -47,6 +47,7 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 	// We need to override this function because when the blocks
 	// are initialized, and this function is called, 
 	// the Redstone Tweaks settings have not yet been initialized.
+	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, EntityContext context) {
 		return state.get(POWER) > 0 ? PRESSED_SHAPE : DEFAULT_SHAPE;
 	}
