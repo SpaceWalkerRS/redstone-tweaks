@@ -6,13 +6,13 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import net.minecraft.block.piston.PistonHandler;
 
-import redstonetweaks.setting.Settings;
+import static redstonetweaks.setting.Settings.pushLimit;;
 
 @Mixin(PistonHandler.class)
 public class PistonHandlerMixin {
 	
 	@ModifyConstant(method = "tryMove", constant = @Constant(intValue = 12))
 	private int pushLimit(int oldPushLimit) {
-		return (int)Settings.pushLimit.get();
+		return pushLimit.get();
 	}
 }
