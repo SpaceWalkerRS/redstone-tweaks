@@ -10,16 +10,14 @@ import net.minecraft.server.command.ServerCommandSource;
 public class BooleanSetting extends Setting<Boolean> {
 	private boolean value;
 	
-	public BooleanSetting(String category, String name, boolean defaultValue) {
-		super("bool", category, name, name, defaultValue);
-		
-		value = defaultValue;
+	public BooleanSetting(String name, boolean defaultValue) {
+		this(name, name, defaultValue);
 	}
 	
-	public BooleanSetting(String category, String name, String commandIdentifier, boolean defaultValue) {
-		super("bool", category, name, commandIdentifier, defaultValue);
+	public BooleanSetting(String name, String commandIdentifier, boolean defaultValue) {
+		super("bool", name, commandIdentifier, new Boolean[] {false, true}, defaultValue);
 		
-		value = defaultValue;
+		set(defaultValue);
 	}
 	
 	@Override
@@ -39,7 +37,7 @@ public class BooleanSetting extends Setting<Boolean> {
 	
 	@Override
 	public void setFromArgument(CommandContext<ServerCommandSource> context, String name) {
-        value = BoolArgumentType.getBool(context, name);
+        set(BoolArgumentType.getBool(context, name));
      }
 	
 	public RequiredArgumentBuilder<ServerCommandSource, ?> argument(String name) {
