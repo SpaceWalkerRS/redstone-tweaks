@@ -90,6 +90,7 @@ public abstract class PistonBlockMixin extends FacingBlock {
 		}
 	}
 	
+	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		if (!world.isClient && !world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
 	       newTryMove(world, pos, state, true);
