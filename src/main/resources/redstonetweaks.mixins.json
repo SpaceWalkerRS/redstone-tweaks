@@ -11,7 +11,7 @@
 	"server.ComparatorBlockMixin",
 	"server.DetectorRailBlockMixin",
 	"server.DispenserBlockMixin",
-  "server.DropperBlockMixin",
+	"server.DropperBlockMixin",
 	"server.FallingBlockMixin",
 	"server.HopperBlockEntityMixin",
 	"server.LavaFluidMixin",
