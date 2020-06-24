@@ -13,20 +13,16 @@ public class IntegerSetting extends Setting<Integer> {
 	
 	private int value;
 	
-	public IntegerSetting(String category, String name, int defaultValue, int minValue, int maxValue) {
-		super("str", category, name, name, defaultValue);
-		this.minValue = minValue;
-		this.maxValue = maxValue;
-		
-		value = defaultValue;
+	public IntegerSetting(String name, int defaultValue, int minValue, int maxValue) {
+		this(name, name, defaultValue, minValue, maxValue);
 	}
 	
-	public IntegerSetting(String category, String name, String commandIdentifier, int defaultValue, int minValue, int maxValue) {
-		super("str", category, name, commandIdentifier, defaultValue);
+	public IntegerSetting(String name, String commandIdentifier, int defaultValue, int minValue, int maxValue) {
+		super("str", name, commandIdentifier, new Integer[] {defaultValue}, defaultValue);
+		
 		this.minValue = minValue;
 		this.maxValue = maxValue;
-		
-		value = defaultValue;
+		set(defaultValue);
 	}
 	
 	public int getMin() {
@@ -54,7 +50,7 @@ public class IntegerSetting extends Setting<Integer> {
 	
 	@Override
 	public void setFromArgument(CommandContext<ServerCommandSource> context, String name) {
-        value = IntegerArgumentType.getInteger(context, name);
+        set(IntegerArgumentType.getInteger(context, name));
      }
 	
 	public RequiredArgumentBuilder<ServerCommandSource, ?> argument(String name) {
