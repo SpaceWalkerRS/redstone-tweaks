@@ -16,6 +16,7 @@ import redstonetweaks.command.BugFixCommand;
 import redstonetweaks.command.DelayCommand;
 import redstonetweaks.command.DelayMultiplierCommand;
 import redstonetweaks.command.QuasiConnectivityCommand;
+import redstonetweaks.command.SignalCommand;
 import redstonetweaks.command.TweakCommand;
 
 @Mixin(CommandManager.class)
@@ -25,9 +26,10 @@ public class CommandManagerMixin {
 	
 	@Inject(method="<init>", at = @At("RETURN"))
 	private void registerCommands(boolean isServer, CallbackInfo ci) {
-		BugFixCommand.registerCommand(dispatcher);
 		DelayCommand.registerCommand(dispatcher);
 		DelayMultiplierCommand.registerCommand(dispatcher);
+		SignalCommand.registerCommand(dispatcher);
+		BugFixCommand.registerCommand(dispatcher);
 		QuasiConnectivityCommand.registerCommand(dispatcher);
 		TweakCommand.registerCommand(dispatcher);
 	}
