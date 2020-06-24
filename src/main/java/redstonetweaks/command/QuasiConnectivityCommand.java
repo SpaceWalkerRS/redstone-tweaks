@@ -1,6 +1,6 @@
 package redstonetweaks.command;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
@@ -20,27 +21,27 @@ public class QuasiConnectivityCommand {
 			return context.hasPermissionLevel(2);
 		});
 		
-		Collection<Setting<?>> qcSettings = Settings.getSettings("qc");
+		ArrayList<Setting<?>> settings = Settings.getSettings("quasiconnectivity");
 		
-		for (Setting<?> qcSetting : qcSettings) {
-			builder.then(CommandManager.literal(qcSetting.getCommandIdentifier()).executes(context -> {
-				return queryValue(context.getSource(), qcSetting);
-			}).then(qcSetting.argument("value").executes(context -> {
-				return setValue(context, qcSetting);
+		for (Setting<?> setting : settings) {
+			builder.then(CommandManager.literal(setting.getCommandArgumentIdentifier()).executes(context -> {
+				return queryValue(context.getSource(), setting);
+			}).then(setting.argument("value").suggests((context, suggestionsBuilder) -> CommandSource.suggestMatching(setting.getCommandSuggestions(), suggestionsBuilder)).executes(context -> {
+				return setValue(context, setting);
 			})));
 		}
 		
 		dispatcher.register(builder);
 	}
 	
-	private static int queryValue(ServerCommandSource source, Setting<?> qcSetting) {
-		source.sendFeedback(new TranslatableText("Quasi-Connectivity is currently %s for the %s direction", (boolean)qcSetting.get() ? "enabled" : "disabled", qcSetting.getCommandIdentifier()), false);
+	private static int queryValue(ServerCommandSource source, Setting<?> setting) {
+		source.sendFeedback(new TranslatableText("Quasi-Connectivity is currently %s for the %s direction", (boolean)setting.get() ? "enabled" : "disabled", setting.getCommandArgumentIdentifier()), false);
 		return 1;
 	}
 	
-	private static int setValue(CommandContext<ServerCommandSource> context, Setting<?> qcSetting) throws CommandSyntaxException {
-		qcSetting.setFromArgument(context, "value");
-		context.getSource().sendFeedback(new TranslatableText("Quasi-Connectivity has been %s for the %s direction", (boolean)qcSetting.getFromArgument(context, "value") ? "enabled" : "disabled", qcSetting.getCommandIdentifier()), false);
+	private static int setValue(CommandContext<ServerCommandSource> context, Setting<?> setting) throws CommandSyntaxException {
+		setting.setFromArgument(context, "value");
+		context.getSource().sendFeedback(new TranslatableText("Quasi-Connectivity has been %s for the %s direction", (boolean)setting.getFromArgument(context, "value") ? "enabled" : "disabled", setting.getCommandArgumentIdentifier()), false);
 		return 1;
 	}
 }
