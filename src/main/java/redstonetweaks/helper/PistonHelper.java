@@ -33,7 +33,8 @@ public class PistonHelper {
 			// we check if Quasi-Connectivity is enabled in that direction
 			// or if the randomizeQuasiConnectivity setting is enabled,
 			// and if so, check if that position is receiving redstone power.
-			if (randomizeQuasiConnectivity.get() ? (new Random()).nextBoolean() : quasiConnectivityDown.get()) {
+			boolean randQC = randomizeQuasiConnectivity.get();
+			if (randQC ? (new Random()).nextBoolean() : quasiConnectivityDown.get()) {
 				BlockPos blockPos1 = pos.down();
 				for (Direction direction : directions) {
 					if (direction != Direction.UP && world.isEmittingRedstonePower(blockPos1.offset(direction), direction)) {
@@ -41,7 +42,7 @@ public class PistonHelper {
 					}
 				}
 			}
-			if (randomizeQuasiConnectivity.get() ? (new Random()).nextBoolean() : quasiConnectivityEast.get()) {
+			if (randQC ? (new Random()).nextBoolean() : quasiConnectivityEast.get()) {
 				BlockPos blockPos2 = pos.east();
 				for (Direction direction : directions) {
 					if (direction != Direction.WEST && world.isEmittingRedstonePower(blockPos2.offset(direction), direction)) {
@@ -49,7 +50,7 @@ public class PistonHelper {
 					}
 				}
 			}
-			if (randomizeQuasiConnectivity.get() ? (new Random()).nextBoolean() : quasiConnectivityNorth.get()) {
+			if (randQC ? (new Random()).nextBoolean() : quasiConnectivityNorth.get()) {
 				BlockPos blockPos3 = pos.north();
 				for (Direction direction : directions) {
 					if (direction != Direction.SOUTH && world.isEmittingRedstonePower(blockPos3.offset(direction), direction)) {
@@ -57,7 +58,7 @@ public class PistonHelper {
 					}
 				}
 			}
-			if (randomizeQuasiConnectivity.get() ? (new Random()).nextBoolean() : quasiConnectivitySouth.get()) {
+			if (randQC ? (new Random()).nextBoolean() : quasiConnectivitySouth.get()) {
 				BlockPos blockPos4 = pos.south();
 				for (Direction direction : directions) {
 					if (direction != Direction.NORTH && world.isEmittingRedstonePower(blockPos4.offset(direction), direction)) {
@@ -65,7 +66,7 @@ public class PistonHelper {
 					}
 				}
 			}
-			if (randomizeQuasiConnectivity.get() ? (new Random()).nextBoolean() : quasiConnectivityUp.get()) {
+			if (randQC ? (new Random()).nextBoolean() : quasiConnectivityUp.get()) {
 				BlockPos blockPos5 = pos.up();
 				for (Direction direction : directions) {
 					if (direction != Direction.DOWN && world.isEmittingRedstonePower(blockPos5.offset(direction), direction)) {
@@ -73,7 +74,7 @@ public class PistonHelper {
 					}
 				}
 			}
-			if (randomizeQuasiConnectivity.get() ? (new Random()).nextBoolean() : quasiConnectivityWest.get()) {
+			if (randQC ? (new Random()).nextBoolean() : quasiConnectivityWest.get()) {
 				BlockPos blockPos6 = pos.west();
 				for (Direction direction : directions) {
 					if (direction != Direction.EAST && world.isEmittingRedstonePower(blockPos6.offset(direction), direction)) {
