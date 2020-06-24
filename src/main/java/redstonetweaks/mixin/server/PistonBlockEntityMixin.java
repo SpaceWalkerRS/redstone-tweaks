@@ -1,5 +1,8 @@
 package redstonetweaks.mixin.server;
 
+import static redstonetweaks.setting.Settings.delayMultiplier;
+import static redstonetweaks.setting.Settings.pistonDelay;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.entity.PistonBlockEntity;
-import redstonetweaks.setting.Settings;
 
 @Mixin(PistonBlockEntity.class)
 public class PistonBlockEntityMixin {
@@ -32,12 +34,12 @@ public class PistonBlockEntityMixin {
 	@ModifyConstant(method = "finish", constant = @Constant(floatValue = 1.0f), allow = 2)
 	private float finishMaxProgress(float maxProgress) {
 		int pistonDelay = getPistonDelay();
-		return (float) (pistonDelay == 0? 1 : pistonDelay);
+		return pistonDelay == 0 ? 1 : pistonDelay;
 	}
 	
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 1.0f), allow = 3)
 	private float tickMaxProgress(float maxProgress) {
-		return (float) getPistonDelay();
+		return getPistonDelay();
 	}
 	
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5f))
@@ -47,17 +49,17 @@ public class PistonBlockEntityMixin {
 	
 	@ModifyConstant(method = "getCollisionShape", constant = @Constant(doubleValue = 1.0D), allow = 3)
 	private double getCollisionShapeMaxProgress(double maxProgress) {
-		return (double) getPistonDelay();
+		return getPistonDelay();
 	}
 	
 	@ModifyConstant(method = "getCollisionShape", constant = @Constant(floatValue = 4.0f))
 	private float getCollisionShapePistonHeadMaxProgress(float maxProgress) {
-		return (float) getPistonDelay();
+		return getPistonDelay();
 	}
 	
 	private int getPistonDelay() {
-		int delay = (int)Settings.pistonDelay.get();
-		int delayMultiplier =(int)Settings.delayMultiplier.get();
-		return delay * delayMultiplier;
+		int delay = pistonDelay.get();
+		int multiplier = delayMultiplier.get();
+		return multiplier * delay;
 	}
 }
