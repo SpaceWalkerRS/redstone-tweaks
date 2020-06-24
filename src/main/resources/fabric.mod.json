@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "redstonetweaks",
+  "version": "${version}",
+
+  "name": "Redstone Tweaks",
+  "description": "Redstone Tweaks adds settings that allow players to experiment with delays of redstone components, bug fixes or other tweaks to redstone behavior",
+  "authors": [
+    "Space Walker"
+  ],
+  "contact": {
+    "homepage": "https://www.youtube.com/user/SpaceCuberMinecraft"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/redstonetweaks/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "redstonetweaks.RedstoneTweaks"
+    ]
+  },
+  "mixins": [
+    "redstonetweaks.mixins.json"
+  ],
+
+  "depends": {
+    "minecraft": "1.15.x"
+  }
+}
