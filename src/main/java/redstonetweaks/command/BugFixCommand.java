@@ -1,6 +1,6 @@
 package redstonetweaks.command;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
@@ -20,39 +21,39 @@ public class BugFixCommand {
 			return context.hasPermissionLevel(2);
 		});
 		
-		Collection<Setting<?>> bugFixes = Settings.getSettings("bug_fix");
+		ArrayList<Setting<?>> settings = Settings.getSettings("bugfix");
 		
 		builder.then(CommandManager.literal("RESET").executes(context -> {
-			return resetBugFixes(context.getSource(), bugFixes);
+			return resetSettings(context.getSource(), settings);
 		}));
 		
-		for (Setting<?> bugFix : bugFixes) {
-			builder.then(CommandManager.literal(bugFix.getCommandIdentifier()).executes(context -> {
-				return queryValue(context.getSource(), bugFix);
-			}).then(bugFix.argument("value").executes(context -> {
-				return setValue(context, bugFix);
+		for (Setting<?> setting : settings) {
+			builder.then(CommandManager.literal(setting.getCommandArgumentIdentifier()).executes(context -> {
+				return queryValue(context.getSource(), setting);
+			}).then(setting.argument("value").suggests((context, suggestionsBuilder) -> CommandSource.suggestMatching(setting.getCommandSuggestions(), suggestionsBuilder)).executes(context -> {
+				return setValue(context, setting);
 			})));
 		}
 		
 		dispatcher.register(builder);
 	}
 	
-	private static int resetBugFixes(ServerCommandSource source, Collection<Setting<?>> bugFixes) {
-		for (Setting<?> bugFix : bugFixes) {
-			bugFix.reset();
+	private static int resetSettings(ServerCommandSource source, ArrayList<Setting<?>> settings) {
+		for (Setting<?> setting : settings) {
+			setting.reset();
 		}
 		source.sendFeedback(new TranslatableText("All bug fixes have been disabled"), false);
 		return 1;
 	}
 	
-	private static int queryValue(ServerCommandSource source, Setting<?> bugFix) {
-		source.sendFeedback(new TranslatableText("The bug fix for %s is currently %s", bugFix.getCommandIdentifier(), (boolean)bugFix.get() ? "enabled" : "disabled"), false);
+	private static int queryValue(ServerCommandSource source, Setting<?> setting) {
+		source.sendFeedback(new TranslatableText("The bug fix for %s is currently %s", setting.getCommandArgumentIdentifier(), (boolean)setting.get() ? "enabled" : "disabled"), false);
 		return 1;
 	}
 	
-	private static int setValue(CommandContext<ServerCommandSource> context, Setting<?> bugFix) throws CommandSyntaxException {
-		bugFix.setFromArgument(context, "value");
-		context.getSource().sendFeedback(new TranslatableText("The bug fix for %s has been %s", bugFix.getCommandIdentifier(), (boolean)bugFix.getFromArgument(context, "value") ? "enabled" : "disabled"), false);
+	private static int setValue(CommandContext<ServerCommandSource> context, Setting<?> setting) throws CommandSyntaxException {
+		setting.setFromArgument(context, "value");
+		context.getSource().sendFeedback(new TranslatableText("The bug fix for %s has been %s", setting.getCommandArgumentIdentifier(), (boolean)setting.getFromArgument(context, "value") ? "enabled" : "disabled"), false);
 		return 1;
 	}
 }
