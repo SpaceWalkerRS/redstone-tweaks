@@ -1,5 +1,7 @@
 package redstonetweaks.setting;
 
+import java.util.ArrayList;
+
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
@@ -7,18 +9,18 @@ import net.minecraft.server.command.ServerCommandSource;
 
 public abstract class Setting<T> {
 	private final String settingTypeID;
-	
-	private final String category;
 	private final String name;
-	private final String commandIdentifier;
+	private final String commandArgumentIdentifier;
+	private final T[] commandSuggestions;
 	private final T defaultValue;
 	
-	public Setting(String settingTypeID, String category, String name, String commandIdentifier, T defaultValue) {
+	protected ArrayList<Setting<?>> subSettings;
+	
+	public Setting(String settingTypeID, String name, String commandArgumentIdentifier, T[] commandSuggestions, T defaultValue) {
 		this.settingTypeID = settingTypeID;
-		
-		this.category = category;
 		this.name = name;
-		this.commandIdentifier = commandIdentifier;
+		this.commandArgumentIdentifier = commandArgumentIdentifier;
+		this.commandSuggestions = commandSuggestions;
 		this.defaultValue = defaultValue;
 	}
 	
@@ -26,16 +28,21 @@ public abstract class Setting<T> {
 		return settingTypeID;
 	}
 	
-	public String getCategory() {
-		return category;
-	}
-	
 	public String getName() {
 		return name;
 	}
 	
-	public String getCommandIdentifier() {
-		return commandIdentifier;
+	public String getCommandArgumentIdentifier() {
+		return commandArgumentIdentifier;
+	}
+	
+	public String[] getCommandSuggestions() {
+		int l = this.commandSuggestions.length;
+		String[] commandSuggestions = new String[l];
+		for (int i = 0; i < l; i++) {
+			commandSuggestions[i] = String.valueOf(this.commandSuggestions[i]);
+		}
+		return commandSuggestions;
 	}
 	
 	public T getDefault() {
