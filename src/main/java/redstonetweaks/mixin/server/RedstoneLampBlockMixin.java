@@ -6,13 +6,13 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import net.minecraft.block.RedstoneLampBlock;
 
-import redstonetweaks.setting.Settings;
+import static redstonetweaks.setting.Settings.redstoneLampDelay;
 
 @Mixin(RedstoneLampBlock.class)
 public class RedstoneLampBlockMixin {
 	
 	@ModifyConstant(method = "neighborUpdate", constant = @Constant(intValue = 4))
-	private int neighborUpdateRedstoneLampDelay(int oldScheduledTickDelay) {
-		return (int)Settings.redstoneLampDelay.get();
+	private int getRedstoneLampDelay(int oldValue) {
+		return redstoneLampDelay.get();
 	}
 }
