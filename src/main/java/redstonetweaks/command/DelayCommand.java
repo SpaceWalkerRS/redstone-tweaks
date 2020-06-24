@@ -1,6 +1,6 @@
 package redstonetweaks.command;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
@@ -20,39 +21,39 @@ public class DelayCommand {
 			return context.hasPermissionLevel(2);
 		});
 		
-		Collection<Setting<?>> blockDelays = Settings.getSettings("block_delay");
+		ArrayList<Setting<?>> settings = Settings.getSettings("delay");
 		
 		builder.then(CommandManager.literal("RESET").executes(context -> {
-			return resetDelays(context.getSource(), blockDelays);
+			return resetValues(context.getSource(), settings);
 		}));
 		
-		for (Setting<?> blockDelay : blockDelays) {
-			builder.then(CommandManager.literal(blockDelay.getCommandIdentifier()).executes(context -> {
-				return queryDelay(context.getSource(), blockDelay);
-			}).then(blockDelay.argument("value").suggests((context, suggestionsBuilder) -> CommandSource.suggestMatching(new String[] {blockDelay.getDefault().toString()}, suggestionsBuilder)).executes(context -> {
-				return setDelay(context, blockDelay);
+		for (Setting<?> setting : settings) {
+			builder.then(CommandManager.literal(setting.getCommandArgumentIdentifier()).executes(context -> {
+				return queryValue(context.getSource(), setting);
+			}).then(setting.argument("value").suggests((context, suggestionsBuilder) -> CommandSource.suggestMatching(setting.getCommandSuggestions(), suggestionsBuilder)).executes(context -> {
+				return setValue(context, setting);
 			})));
 		}
 		
 		dispatcher.register(builder);
 	}
 	
-	private static int resetDelays(ServerCommandSource source, Collection<Setting<?>> blockDelays) {
-		for (Setting<?> blockDelay : blockDelays) {
-			blockDelay.reset();
+	private static int resetValues(ServerCommandSource source, ArrayList<Setting<?>> settings) {
+		for (Setting<?> setting : settings) {
+			setting.reset();
 		}
 		source.sendFeedback(new TranslatableText("All delays have been reset to their default values"), false);
 		return 1;
 	}
 	
-	private static int queryDelay(ServerCommandSource source, Setting<?> blockDelay) {
-		source.sendFeedback(new TranslatableText("The %s delay is currently set to %s", blockDelay.getCommandIdentifier(), blockDelay.get()), false);
+	private static int queryValue(ServerCommandSource source, Setting<?> setting) {
+		source.sendFeedback(new TranslatableText("The %s delay is currently set to %s", setting.getCommandArgumentIdentifier(), setting.get()), false);
 		return 1;
 	}
 	
-	private static int setDelay(CommandContext<ServerCommandSource> context, Setting<?> blockDelay) throws CommandSyntaxException {
-		blockDelay.setFromArgument(context, "value");
-		context.getSource().sendFeedback(new TranslatableText("The %s delay has been set to %s", blockDelay.getCommandIdentifier(), blockDelay.getFromArgument(context, "value")), false);
+	private static int setValue(CommandContext<ServerCommandSource> context, Setting<?> setting) throws CommandSyntaxException {
+		setting.setFromArgument(context, "value");
+		context.getSource().sendFeedback(new TranslatableText("The %s delay has been set to %s", setting.getCommandArgumentIdentifier(), setting.getFromArgument(context, "value")), false);
 		return 1;
 	}
 }
