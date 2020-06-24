@@ -1,197 +1,216 @@
 package redstonetweaks.setting;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Settings {
 	
 	// Settings changed with the /delay command
-	public static Setting<?> bubbleColumnDelay;
-	public static Setting<?> comparatorDelay;
-	public static Setting<?> detectorRailDelay;
-	public static Setting<?> dispenserDelay;
-	public static Setting<?> dropperDelay;
-	public static Setting<?> gravityBlockDelay;
-	public static Setting<?> heavyWeightedPressurePlateDelay;
-	public static Setting<?> heavyWeightedPressurePlateOnDelay;
-	public static Setting<?> hopperDelay;
-	public static Setting<?> lavaDefaultDelay;
-	public static Setting<?> lavaNetherDelay;
-	public static Setting<?> leavesDelay;
-	public static Setting<?> leverOffDelay;
-	public static Setting<?> leverOnDelay;
-	public static Setting<?> lightWeightedPressurePlateDelay;
-	public static Setting<?> lightWeightedPressurePlateOnDelay;
-	public static Setting<?> observerDelay;
-	public static Setting<?> pistonDelay;
-	public static Setting<?> pistonActivationDelay;
-	public static Setting<?> redstoneLampDelay;
-	public static Setting<?> redstoneTorchDelay;
-	public static Setting<?> redstoneTorchBurnoutDelay;
-	public static Setting<?> redstoneTorchBurnoutTimerDelay;
-	public static Setting<?> repeaterDelay;
-	public static Setting<?> scaffoldingDelay;
-	public static Setting<?> stoneButtonDelay;
-	public static Setting<?> stoneButtonOnDelay;
-	public static Setting<?> stonePressurePlateDelay;
-	public static Setting<?> stonePressurePlateOnDelay;
-	public static Setting<?> tntDelay;
-	public static Setting<?> tripwireDelay;
-	public static Setting<?> tripwireHookDelay;
-	public static Setting<?> waterDelay;
-	public static Setting<?> woodenButtonDelay;
-	public static Setting<?> woodenButtonOnDelay;
-	public static Setting<?> woodenPressurePlateDelay;
-	public static Setting<?> woodenPressurePlateOnDelay;
-	
-	// Settings changed with the /signal command
-	public static Setting<?> detectorRailSignal;
-	public static Setting<?> leverSignal;
-	public static Setting<?> observerSignal;
-	public static Setting<?> redstoneBlockSignal;
-	public static Setting<?> redstoneTorchSignal;
-	public static Setting<?> repeaterSignal;
-	public static Setting<?> stoneButtonSignal;
-	public static Setting<?> stonePressurePlateSignal;
-	public static Setting<?> tripwireHookSignal;
-	public static Setting<?> woodenButtonSignal;
-	public static Setting<?> woodenPressurePlateSignal;
-	
-	// Settings changed with the /bugfix command
-	public static Setting<?> MC136566;
-	public static Setting<?> MC137127;
-	public static Setting<?> MC189954;
-	
-	// Settings changed with the /quasiconnectivity command
-	public static Setting<?> quasiConnectivityDown;
-	public static Setting<?> quasiConnectivityEast;
-	public static Setting<?> quasiConnectivityNorth;
-	public static Setting<?> quasiConnectivitySouth;
-	public static Setting<?> quasiConnectivityUp;
-	public static Setting<?> quasiConnectivityWest;
-	
-	// Miscellaneous settings. These are changed with the /tweak command
-	public static Setting<?> extendingPistonsIgnoreUpdates;
-	public static Setting<?> fastBlockDropping;
-	public static Setting<?> forceUpdatePoweredPistons;
-	public static Setting<?> heavyWeightedPressurePlateWeight;
-	public static Setting<?> lightWeightedPressurePlateWeight;
-	public static Setting<?> pistonsCheckPoweredOnce;
-	public static Setting<?> pistonsPowerRedstoneTorches;
-	public static Setting<?> pushLimit;
-	public static Setting<?> randomizeQuasiConnectivity;
-	public static Setting<?> redstoneBlocksEmitDirectSignal;
+	public static Setting<Integer> bubbleColumnDelay;
+	public static Setting<Integer> comparatorDelay;
+	public static Setting<Integer> detectorRailDelay;
+	public static Setting<Integer> dispenserDelay;
+	public static Setting<Integer> dropperDelay;
+	public static Setting<Integer> gravityBlockDelay;
+	public static Setting<Integer> heavyWeightedPressurePlateDelay;
+	public static Setting<Integer> heavyWeightedPressurePlateOnDelay;
+	public static Setting<Integer> hopperDelay;
+	public static Setting<Integer> lavaDefaultDelay;
+	public static Setting<Integer> lavaNetherDelay;
+	public static Setting<Integer> leavesDelay;
+	public static Setting<Integer> leverOffDelay;
+	public static Setting<Integer> leverOnDelay;
+	public static Setting<Integer> lightWeightedPressurePlateDelay;
+	public static Setting<Integer> lightWeightedPressurePlateOnDelay;
+	public static Setting<Integer> observerDelay;
+	public static Setting<Integer> pistonDelay;
+	public static Setting<Integer> pistonActivationDelay;
+	public static Setting<Integer> redstoneLampDelay;
+	public static Setting<Integer> redstoneTorchDelay;
+	public static Setting<Integer> redstoneTorchBurnoutDelay;
+	public static Setting<Integer> redstoneTorchBurnoutTimerDelay;
+	public static Setting<Integer> repeaterDelay;
+	public static Setting<Integer> scaffoldingDelay;
+	public static Setting<Integer> stoneButtonDelay;
+	public static Setting<Integer> stoneButtonOnDelay;
+	public static Setting<Integer> stonePressurePlateDelay;
+	public static Setting<Integer> stonePressurePlateOnDelay;
+	public static Setting<Integer> tntDelay;
+	public static Setting<Integer> tripwireDelay;
+	public static Setting<Integer> tripwireHookDelay;
+	public static Setting<Integer> waterDelay;
+	public static Setting<Integer> woodenButtonDelay;
+	public static Setting<Integer> woodenButtonOnDelay;
+	public static Setting<Integer> woodenPressurePlateDelay;
+	public static Setting<Integer> woodenPressurePlateOnDelay;
 	
 	// The delayMultiplier setting is changed with the /delaymultiplier command
-	public static Setting<?> delayMultiplier;
+	public static Setting<Integer> delayMultiplier;
 	
-	// This map contains all settings
+	// Settings changed with the /signal command
+	public static Setting<Integer> detectorRailSignal;
+	public static Setting<Integer> leverSignal;
+	public static Setting<Integer> observerSignal;
+	public static Setting<Integer> redstoneBlockSignal;
+	public static Setting<Integer> redstoneTorchSignal;
+	public static Setting<Integer> repeaterSignal;
+	public static Setting<Integer> stoneButtonSignal;
+	public static Setting<Integer> stonePressurePlateSignal;
+	public static Setting<Integer> tripwireHookSignal;
+	public static Setting<Integer> woodenButtonSignal;
+	public static Setting<Integer> woodenPressurePlateSignal;
+	
+	// Settings changed with the /bugfix command
+	public static Setting<Boolean> MC136566;
+	public static Setting<Boolean> MC137127;
+	public static Setting<Boolean> MC189954;
+	
+	// Settings changed with the /quasiconnectivity command
+	public static Setting<Boolean> quasiConnectivityDown;
+	public static Setting<Boolean> quasiConnectivityEast;
+	public static Setting<Boolean> quasiConnectivityNorth;
+	public static Setting<Boolean> quasiConnectivitySouth;
+	public static Setting<Boolean> quasiConnectivityUp;
+	public static Setting<Boolean> quasiConnectivityWest;
+	
+	// Settings changed directly with the /tweak command
+	public static Setting<Boolean> extendingPistonsIgnoreUpdates;
+	public static Setting<Boolean> fastBlockDropping;
+	public static Setting<Boolean> forceUpdatePoweredPistons;
+	public static Setting<Integer> heavyWeightedPressurePlateWeight;
+	public static Setting<Integer> lightWeightedPressurePlateWeight;
+	public static Setting<Boolean> pistonsCheckPoweredOnce;
+	public static Setting<Integer> poweredRailLimit;
+	public static Setting<Integer> pushLimit;
+	public static Setting<Boolean> randomizeQuasiConnectivity;
+	public static Setting<Boolean> redstoneBlocksEmitDirectSignal;
+	public static Setting<Boolean> softInversion;
+	
+	// Maps containing all settings
+	// The orderedSettings map contains maps containing settings sorted by group
 	private static Map<String, Setting<?>> settings = new LinkedHashMap<>();
+	private static Map<String, Map<String, Setting<?>>> orderedSettings = new LinkedHashMap<>();
 	
-	public static Setting<?> register(Setting<?> setting) {
+	public static Map<String, Setting<?>> register(String settingGroup, Map<String, Setting<?>> settingsMap) {
+		orderedSettings.put(settingGroup, settingsMap);
+		return settingsMap;
+	}
+	
+	public static <T> void register(Setting<T> setting) {
 		settings.put(setting.getName(), setting);
-		return setting;
+	}
+	
+	public static <T> void register(String settingGroup, Setting<T> setting) {
+		register(setting);
+		orderedSettings.get(settingGroup).put(setting.getName(), setting);
 	}
 	
 	public static void registerSettings() {
-		bubbleColumnDelay = register(new IntegerSetting("block_delay", "bubble_column_delay", "bubble_column", 5, 1, 127));
-		comparatorDelay = register(new IntegerSetting("block_delay", "comparator_delay", "comparator", 2, 1, 127));
-		detectorRailDelay = register(new IntegerSetting("block_delay", "detector_rail_delay", "detector_rail", 20, 1, 127));
-		dispenserDelay = register(new IntegerSetting("block_delay", "dispenser_delay", "dispenser", 4, 1, 127));
-		dropperDelay = register(new IntegerSetting("block_delay", "dropper_delay", "dropper", 4, 1, 127));
-		gravityBlockDelay = register(new IntegerSetting("block_delay", "gravity_block_delay", "gravity_block", 2, 1, 127));
-		heavyWeightedPressurePlateDelay = register(new IntegerSetting("block_delay", "heavy_weighted_pressure_plate_delay", "heavy_weighted_pressure_plate", 10, 1, 127));
-		heavyWeightedPressurePlateOnDelay = register(new IntegerSetting("block_delay", "heavy_weighted_pressure_plate_on_delay", "heavy_weighted_pressure_plate_on", 0, 0, 127));
-		hopperDelay = register(new IntegerSetting("block_delay", "hopper_delay", "hopper", 1, 1, 127));
-		lavaDefaultDelay = register(new IntegerSetting("block_delay", "lava_default_delay", "lava_default", 30, 1, 127));
-		lavaNetherDelay = register(new IntegerSetting("block_delay", "lava_nether_delay", "lava_nether", 10, 1, 127));
-		leavesDelay = register(new IntegerSetting("block_delay", "leaves_delay", "leaves", 1, 1, 127));
-		leverOffDelay = register(new IntegerSetting("block_delay", "lever_off_Delay", "lever_off", 0, 0, 127));
-		leverOnDelay = register(new IntegerSetting("block_delay", "lever_on_delay", "lever_on", 0, 0, 127));
-		lightWeightedPressurePlateDelay = register(new IntegerSetting("block_delay", "light_weighted_pressure_plate_delay", "light_weighted_pressure_plate", 10, 1, 127));
-		lightWeightedPressurePlateOnDelay = register(new IntegerSetting("block_delay", "light_weighted_pressure_plate_on_delay", "light_weighted_pressure_plate_on", 0, 0, 127));
-		observerDelay = register(new IntegerSetting("block_delay", "observer_delay", "observer", 2, 1, 127));
-		pistonDelay = register(new IntegerSetting("block_delay", "piston_delay", "piston", 2, 0, 127));
-		pistonActivationDelay = register(new IntegerSetting("block_delay", "piston_activation_delay", "piston_activation", 0, 0, 127));
-		redstoneLampDelay = register(new IntegerSetting("block_delay", "redstone_lamp_delay", "redstone_lamp", 4, 1, 127));
-		redstoneTorchDelay = register(new IntegerSetting("block_delay", "redstone_torch_delay", "redstone_torch", 2, 1, 127));
-		redstoneTorchBurnoutDelay = register(new IntegerSetting("block_delay", "redstone_torch_burnout_delay", "redstone_torch_burnout", 160, 1, 2047));
-		redstoneTorchBurnoutTimerDelay = register(new IntegerSetting("block_delay", "redstone_torch_burnout_timer_delay", "redstone_torch_burnout_timer", 60, 1, 1023));
-		repeaterDelay = register(new IntegerSetting("block_delay", "repeater_delay", "repeater", 2, 1, 127));
-		scaffoldingDelay = register(new IntegerSetting("block_delay", "scaffolding_delay", "scaffolding", 1, 1, 127));
-		stoneButtonDelay = register(new IntegerSetting("block_delay", "stone_button_delay", "stone_button", 20, 1, 127));
-		stoneButtonOnDelay = register(new IntegerSetting("block_delay", "stone_button_on_delay", "stone_button_on", 0, 0, 127));
-		stonePressurePlateDelay = register(new IntegerSetting("block_delay", "stone_pressure_plate_delay", "stone_pressure_plate", 20, 1, 127));
-		stonePressurePlateOnDelay = register(new IntegerSetting("block_delay", "stone_pressure_plate_on_delay", "stone_pressure_plate_on", 0, 0, 127));
-		tntDelay = register(new IntegerSetting("block_delay", "tnt_delay", "tnt", 80, 1, 127));
-		tripwireDelay = register(new IntegerSetting("block_delay", "tripwire_delay", "tripwire", 10, 1, 127));
-		tripwireHookDelay = register(new IntegerSetting("block_delay", "tripwire_hook_delay", "tripwire_hook", 10, 1, 127));
-		waterDelay = register(new IntegerSetting("block_delay", "water_delay", "water", 5, 1, 127));
-		woodenButtonDelay = register(new IntegerSetting("block_delay", "wooden_button_delay", "wooden_button", 30, 1, 127));
-		woodenButtonOnDelay = register(new IntegerSetting("block_delay", "wooden_button_on_delay", "wooden_button_on", 0, 0, 127));
-		woodenPressurePlateDelay = register(new IntegerSetting("block_delay", "wooden_pressure_plate_delay", "wooden_pressure_plate", 20, 1, 127));
-		woodenPressurePlateOnDelay = register(new IntegerSetting("block_delay", "wooden_pressure_plate_on_delay", "wooden_pressure_plate_on", 0, 0, 127));
+		// Registering the maps that hold the settings accessed by a specific subcommand
+		register("delay", new LinkedHashMap<>());
+		register("signal", new LinkedHashMap<>());
+		register("bugfix", new LinkedHashMap<>());
+		register("quasiconnectivity", new LinkedHashMap<>());
+		register("tweak", new LinkedHashMap<>());
 		
-		detectorRailSignal = register(new IntegerSetting("block_signal", "detector_rail_signal", "detector_rail", 15, 0, 127));
-		leverSignal = register(new IntegerSetting("block_signal", "lever_signal", "lever", 15, 0, 127));
-		observerSignal = register(new IntegerSetting("block_signal", "observer_signal", "observer", 15, 0, 127));
-		redstoneBlockSignal = register(new IntegerSetting("block_signal", "redstone_block_signal", "redstone_block", 15, 0, 127));
-		redstoneTorchSignal = register(new IntegerSetting("block_signal", "redstone_torch_signal", "redstone_torch", 15, 0, 127));
-		repeaterSignal = register(new IntegerSetting("block_signal", "repeater_signal", "repeater", 15, 0, 127));
-		stoneButtonSignal = register(new IntegerSetting("block_signal", "stone_button_signal", "stone_button", 15, 0, 127));
-		stonePressurePlateSignal = register(new IntegerSetting("block_signal", "stone_pressure_plate_signal", "stone_pressure_plate", 15, 0, 127));
-		tripwireHookSignal = register(new IntegerSetting("block_signal", "tripwire_hook_signal", "tripwire_hook", 15, 0, 127));
-		woodenButtonSignal = register(new IntegerSetting("block_signal", "wooden_button_signal", "wooden_button", 15, 0, 127));
-		woodenPressurePlateSignal = register(new IntegerSetting("block_signal", "wooden_pressure_plate_signal", "wooden_pressure_plate", 15, 0, 127));
+		register("delay", bubbleColumnDelay = new IntegerSetting("bubbleColumnDelay", "bubble_column", 5, 1, 127));
+		register("delay", comparatorDelay = new IntegerSetting("comparatorDelay", "comparator", 2, 1, 127));
+		register("delay", detectorRailDelay = new IntegerSetting("detectorRailDelay", "detector_rail", 20, 1, 127));
+		register("delay", dispenserDelay = new IntegerSetting("dispenserDelay", "dispenser", 4, 1, 127));
+		register("delay", dropperDelay = new IntegerSetting("dropperDelay", "dropper", 4, 1, 127));
+		register("delay", gravityBlockDelay = new IntegerSetting("gravityBlockDelay", "gravity_block", 2, 1, 127));
+		register("delay", heavyWeightedPressurePlateDelay = new IntegerSetting("heavyWeightedPressurePlateDelay", "heavy_weighted_pressure_plate", 10, 1, 127));
+		register("delay", heavyWeightedPressurePlateOnDelay = new IntegerSetting("heavyWeightedPressurePlateOnDelay", "heavy_weighted_pressure_plate_on", 0, 0, 127));
+		register("delay", hopperDelay = new IntegerSetting("hopperDelay", "hopper", 1, 1, 127));
+		register("delay", lavaDefaultDelay = new IntegerSetting("lavaDefaultDelay", "lava_default", 30, 1, 127));
+		register("delay", lavaNetherDelay = new IntegerSetting("lavaNetherDelay", "lava_nether", 10, 1, 127));
+		register("delay", leavesDelay = new IntegerSetting("leavesDelay", "leaves", 1, 1, 127));
+		register("delay", leverOffDelay = new IntegerSetting("leverOffDelay", "lever_off", 0, 0, 127));
+		register("delay", leverOnDelay = new IntegerSetting("leverOnDelay", "lever_on", 0, 0, 127));
+		register("delay", lightWeightedPressurePlateDelay = new IntegerSetting("lightWeightedPressurePlateDelay", "light_weighted_pressure_plate", 10, 1, 127));
+		register("delay", lightWeightedPressurePlateOnDelay = new IntegerSetting("lightWeightedPressurePlateOnDelay", "light_weighted_pressure_plate_on", 0, 0, 127));
+		register("delay", observerDelay = new IntegerSetting("observerDelay", "observer", 2, 1, 127));
+		register("delay", pistonDelay = new IntegerSetting("pistonDelay", "piston", 2, 0, 127));
+		register("delay", pistonActivationDelay = new IntegerSetting("pistonActivationDelay", "piston_activation", 0, 0, 127));
+		register("delay", redstoneLampDelay = new IntegerSetting("redstoneLampDelay", "redstone_lamp", 4, 1, 127));
+		register("delay", redstoneTorchDelay = new IntegerSetting("redstoneTorchDelay", "redstone_torch", 2, 1, 127));
+		register("delay", redstoneTorchBurnoutDelay = new IntegerSetting("redstoneTorchBurnoutDelay", "redstone_torch_burnout", 160, 1, 2047));
+		register("delay", redstoneTorchBurnoutTimerDelay = new IntegerSetting("redstoneTorchBurnoutTimerDelay", "redstone_torch_burnout_timer", 60, 1, 1023));
+		register("delay", repeaterDelay = new IntegerSetting("repeaterDelay", "repeater", 2, 1, 127));
+		register("delay", scaffoldingDelay = new IntegerSetting("scaffoldingDelay", "scaffolding", 1, 1, 127));
+		register("delay", stoneButtonDelay = new IntegerSetting("stoneButtonDelay", "stone_button", 20, 1, 127));
+		register("delay", stoneButtonOnDelay = new IntegerSetting("stoneButtonOnDelay", "stone_button_on", 0, 0, 127));
+		register("delay", stonePressurePlateDelay = new IntegerSetting("stonePressurePlateDelay", "stone_pressure_plate", 20, 1, 127));
+		register("delay", stonePressurePlateOnDelay = new IntegerSetting("stonePressurePlateOnDelay", "stone_pressure_plate_on", 0, 0, 127));
+		register("delay", tntDelay = new IntegerSetting("tntDelay", "tnt", 80, 1, 127));
+		register("delay", tripwireDelay = new IntegerSetting("tripwireDelay", "tripwire", 10, 1, 127));
+		register("delay", tripwireHookDelay = new IntegerSetting("tripwireHookDelay", "tripwire_hook", 10, 1, 127));
+		register("delay", waterDelay = new IntegerSetting("waterDelay", "water", 5, 1, 127));
+		register("delay", woodenButtonDelay = new IntegerSetting("woodenButtonDelay", "wooden_button", 30, 1, 127));
+		register("delay", woodenButtonOnDelay = new IntegerSetting("woodenButtonOnDelay", "wooden_button_on", 0, 0, 127));
+		register("delay", woodenPressurePlateDelay = new IntegerSetting("woodenPressurePlateDelay", "wooden_pressure_plate", 20, 1, 127));
+		register("delay", woodenPressurePlateOnDelay = new IntegerSetting("woodenPressurePlateOnDelay", "wooden_pressure_plate_on", 0, 0, 127));
 		
-		MC136566 = register(new BooleanSetting("bug_fix", "MC-136566", false));
-		MC137127 = register(new BooleanSetting("bug_fix", "MC-137127", false));
-		MC189954 = register(new BooleanSetting("bug_fix", "MC-189954", false));
+		register(delayMultiplier = new IntegerSetting("delay_multiplier", 1, 1, 127));
 		
-		quasiConnectivityDown = register(new BooleanSetting("qc", "quasiConnectivityDown", "down", false));
-		quasiConnectivityEast = register(new BooleanSetting("qc", "quasiConnectivityEast", "east", false));
-		quasiConnectivityNorth = register(new BooleanSetting("qc", "quasiConnectivityNorth", "north", false));
-		quasiConnectivitySouth = register(new BooleanSetting("qc", "quasiConnectivitySouth", "south", false));
-		quasiConnectivityUp = register(new BooleanSetting("qc", "quasiConnectivityUp", "up", true));
-		quasiConnectivityWest = register(new BooleanSetting("qc", "quasiConnectivityWest", "west", false));
+		register("signal", detectorRailSignal = new IntegerSetting("detectorRailSignal", "detector_rail", 15, 0, 127));
+		register("signal", leverSignal = new IntegerSetting("leverSignal", "lever", 15, 0, 127));
+		register("signal", observerSignal = new IntegerSetting("observerSignal", "observer", 15, 0, 127));
+		register("signal", redstoneBlockSignal = new IntegerSetting("redstoneBlockSignal", "redstone_block", 15, 0, 127));
+		register("signal", redstoneTorchSignal = new IntegerSetting("redstoneTorchSignal", "redstone_torch", 15, 0, 127));
+		register("signal", repeaterSignal = new IntegerSetting("repeaterSignal", "repeater", 15, 0, 127));
+		register("signal", stoneButtonSignal = new IntegerSetting("stoneButtonSignal", "stone_button", 15, 0, 127));
+		register("signal", stonePressurePlateSignal = new IntegerSetting("stonePressurePlateSignal", "stone_pressure_plate", 15, 0, 127));
+		register("signal", tripwireHookSignal = new IntegerSetting("tripwireHookSignal", "tripwire_hook", 15, 0, 127));
+		register("signal", woodenButtonSignal = new IntegerSetting("woodenTuttonSignal", "wooden_button", 15, 0, 127));
+		register("signal", woodenPressurePlateSignal = new IntegerSetting("woodenPressurePlateSignal", "wooden_pressure_plate", 15, 0, 127));
 		
-		extendingPistonsIgnoreUpdates = register(new BooleanSetting("tweak", "extendingPistonsIgnoreUpdates", false));
-		fastBlockDropping = register(new BooleanSetting("tweak", "fastBlockDropping", true));
-		forceUpdatePoweredPistons = register(new BooleanSetting("tweak", "forceUpdatePoweredPistons", false));
-		heavyWeightedPressurePlateWeight = register(new IntegerSetting("tweak", "heavyWeightedPressurePlateWeight", 150, 1, 1023));
-		lightWeightedPressurePlateWeight = register(new IntegerSetting("tweak", "lightWeightedPressurePlateWeight", 15, 1, 1023));
-		pistonsCheckPoweredOnce = register(new BooleanSetting("tweak", "pistonsCheckPoweredOnce", false));
-		pistonsPowerRedstoneTorches = register(new BooleanSetting("tweak", "pistonsPowerRedstoneTorches", false));
-		pushLimit = register(new IntegerSetting("tweak", "pushLimit", 12, 0, 127));
-		randomizeQuasiConnectivity = register(new BooleanSetting("tweak", "randomizeQuasiConnectivity", false));
-		redstoneBlocksEmitDirectSignal = register(new BooleanSetting("tweak", "redstoneBlocksEmitDirectSignal", false));
+		register("bugfix", MC136566 = new BooleanSetting("MC-136566", false));
+		register("bugfix", MC137127 = new BooleanSetting("MC-137127", false));
+		register("bugfix", MC189954 = new BooleanSetting("MC-189954", false));
 		
-		delayMultiplier = register(new IntegerSetting("", "delay_multiplier", 1, 1, 127));
+		register("quasiconnectivity", quasiConnectivityDown = new BooleanSetting("quasiConnectivityDown", "down", false));
+		register("quasiconnectivity", quasiConnectivityEast = new BooleanSetting("quasiConnectivityEast", "east", false));
+		register("quasiconnectivity", quasiConnectivityNorth = new BooleanSetting("quasiConnectivityNorth", "north", false));
+		register("quasiconnectivity", quasiConnectivitySouth = new BooleanSetting("quasiConnectivitySouth", "south", false));
+		register("quasiconnectivity", quasiConnectivityUp = new BooleanSetting("quasiConnectivityUp", "up", true));
+		register("quasiconnectivity", quasiConnectivityWest = new BooleanSetting("quasiConnectivityWest", "west", false));
+		
+		register("tweak", extendingPistonsIgnoreUpdates = new BooleanSetting("extendingPistonsIgnoreUpdates", false));
+		register("tweak", fastBlockDropping = new BooleanSetting("fastBlockDropping", true));
+		register("tweak", forceUpdatePoweredPistons = new BooleanSetting("forceUpdatePoweredPistons", false));
+		register("tweak", heavyWeightedPressurePlateWeight = new IntegerSetting("heavyWeightedPressurePlateWeight", 150, 1, 1023));
+		register("tweak", lightWeightedPressurePlateWeight = new IntegerSetting("lightWeightedPressurePlateWeight", 15, 1, 1023));
+		register("tweak", pistonsCheckPoweredOnce = new BooleanSetting("pistonsCheckPoweredOnce", false));
+		register("tweak", softInversion = new BooleanSetting("pistonsPowerRedstoneTorches", false));
+		register("tweak", poweredRailLimit = new IntegerSetting("poweredRailLimit", 9, 1, 127));
+		register("tweak", pushLimit = new IntegerSetting("pushLimit", 12, 0, 127));
+		register("tweak", randomizeQuasiConnectivity = new BooleanSetting("randomizeQuasiConnectivity", false));
+		register("tweak", redstoneBlocksEmitDirectSignal = new BooleanSetting("redstoneBlocksEmitDirectSignal", false));
 	}
 	
-	public static Collection<Setting<?>> getSettings() {
-		return settings.values();
-	}
-	
-	// Each setting has a category field which is used by the
-	// command classes so they can get a list of
-	// only the settings they need to access
-	public static Collection<Setting<?>> getSettings(String settingCategory) {
-		Map<String, Setting<?>> settingsOfCategory = new LinkedHashMap<>();
-		for (Setting<?> setting : getSettings()) {
-			if (setting.getCategory() == settingCategory) {
-				settingsOfCategory.put(setting.getName(), setting);
-			}
+	public static ArrayList<Setting<?>> getSettings() {
+		ArrayList<Setting<?>> settingsArray = new ArrayList<>();
+		for (Setting<?> setting : settings.values()) {
+			settingsArray.add(setting);
 		}
-		return settingsOfCategory.values();
+		return settingsArray;
+	}
+	
+	public static Map<String, Map<String, Setting<?>>> getOrderedSettings() {
+		return orderedSettings;
+	}
+	
+	public static ArrayList<Setting<?>> getSettings(String settingGroup) {
+		ArrayList<Setting<?>> settingsArray = new ArrayList<>();
+		for (Setting<?> setting : orderedSettings.get(settingGroup).values()) {
+			settingsArray.add(setting);
+		}
+		return settingsArray;
 	}
 	
 	public static Setting<?> getSettingFromName(String name) {
 		return settings.get(name);
-	}
-	
-	public static void loadSettings() {
-		
 	}
 }
