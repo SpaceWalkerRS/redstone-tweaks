@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeverBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,11 +31,16 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
 @Mixin(LeverBlock.class)
-public abstract class LeverBlockMixin {
+public abstract class LeverBlockMixin extends Block {
+
 
 	@Shadow @Final public static BooleanProperty POWERED;
 	
 	@Shadow public abstract BlockState method_21846(BlockState blockState, World world, BlockPos blockPos);
+	
+	public LeverBlockMixin(Settings settings) {
+		super(settings);
+	}
 	
 	// If the player has added activation delay to the lever,
 	// the lever should not update its state immediately,
@@ -61,9 +67,10 @@ public abstract class LeverBlockMixin {
 		return leverSignal.get();
 	}
 	
+	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		BlockState blockState = this.method_21846(state, world, pos);
-        	float pitch = blockState.get(POWERED) ? 0.6F : 0.5F;
-        	world.playSound((PlayerEntity)null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, pitch);
+        float pitch = blockState.get(POWERED) ? 0.6F : 0.5F;
+        world.playSound((PlayerEntity)null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, pitch);
 	}
 }
