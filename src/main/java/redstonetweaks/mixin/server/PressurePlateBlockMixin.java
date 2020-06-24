@@ -41,6 +41,7 @@ public abstract class PressurePlateBlockMixin extends AbstractPressurePlateBlock
 	// calls the getRedstoneOutput(BlockState), but the Redstone
 	// Tweaks settings have not yet been initialized, which would
 	// cause a crash.
+	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, EntityContext context) {
 		return state.get(POWERED) ? PRESSED_SHAPE : DEFAULT_SHAPE;
 	}
