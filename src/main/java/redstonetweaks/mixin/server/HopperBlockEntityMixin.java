@@ -1,7 +1,6 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.Settings.delayMultiplier;
-import static redstonetweaks.setting.Settings.hopperDelay;
+import static redstonetweaks.setting.SettingsManager.*;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,12 +22,12 @@ public class HopperBlockEntityMixin {
 	
 	@Inject(method = "setCooldown", at = @At(value = "HEAD"), cancellable = true)
 	private void onSetCooldown(int oldCooldown, CallbackInfo ci) {
-		this.transferCooldown = delayMultiplier.get() * hopperDelay.get() * oldCooldown;
+		transferCooldown = GLOBAL.get(DELAY_MULTIPLIER) * HOPPER.get(DELAY) * oldCooldown;
 		ci.cancel();
 	}
 	
 	@ModifyConstant(method = "isDisabled", constant = @Constant(intValue = 8))
 	private int getHopperDelay(int oldMaxCooldown) {
-		return delayMultiplier.get() * hopperDelay.get() * oldMaxCooldown;
+		return GLOBAL.get(DELAY_MULTIPLIER) * HOPPER.get(DELAY) * oldMaxCooldown;
 	}
 }
