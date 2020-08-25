@@ -2,17 +2,15 @@ package redstonetweaks;
 
 import net.fabricmc.api.ModInitializer;
 
-import redstonetweaks.setting.Settings;
-
 public class RedstoneTweaks implements ModInitializer {
 	
-	public static RedstoneTweaks instance;
+	public static final RedstoneTweaksVersion VERSION = new RedstoneTweaksVersion(0, 6, 1);
+	
+	private static RedstoneTweaks instance;
 	
 	@Override
 	public void onInitialize() {
 		instance = this;
-		
-		Settings.registerSettings();
 	}
 	
 	public static RedstoneTweaks getInstance() {
