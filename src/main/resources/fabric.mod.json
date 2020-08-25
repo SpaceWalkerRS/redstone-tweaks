@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Redstone Tweaks",
-  "description": "Redstone Tweaks adds settings that allow players to experiment with delays of redstone components, bug fixes or other tweaks to redstone behavior",
+  "description": "Redstone Tweaks adds customizability to nearly every aspect of redstone and adds a handful of new features as well.",
   "authors": [
     "Space Walker"
   ],
@@ -12,7 +12,7 @@
     "homepage": "https://www.youtube.com/user/SpaceCuberMinecraft"
   },
 
-  "license": "CC0-1.0",
+  "license": "MIT License",
   "icon": "assets/redstonetweaks/icon.png",
 
   "environment": "*",
@@ -26,6 +26,6 @@
   ],
 
   "depends": {
-    "minecraft": "1.15.x"
+    "minecraft": "1.16.x"
   }
 }
