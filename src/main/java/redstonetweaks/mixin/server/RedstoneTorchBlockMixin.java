@@ -1,60 +1,53 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.Settings.softInversion;
-import static redstonetweaks.setting.Settings.redstoneTorchBurnoutDelay;
-import static redstonetweaks.setting.Settings.redstoneTorchBurnoutTimerDelay;
-import static redstonetweaks.setting.Settings.redstoneTorchDelay;
-import static redstonetweaks.setting.Settings.redstoneTorchSignal;
+import static redstonetweaks.setting.SettingsManager.*;
 
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PistonBlock;
 import net.minecraft.block.RedstoneTorchBlock;
-import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.server.world.ServerTickScheduler;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
-import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.helper.PistonBlockHelper;
 
 @Mixin(RedstoneTorchBlock.class)
-public class RedstoneTorchBlockMixin {
+public abstract class RedstoneTorchBlockMixin {
 	
-	@Shadow @Final private static BooleanProperty LIT;
+	@Shadow protected abstract boolean shouldUnpower(World world, BlockPos pos, BlockState state);
 	
-	@ModifyConstant(method = "getTickRate", constant = @Constant(intValue = 2))
-	private int getRedstoneTorchDelay(int oldDelay) {
-		return redstoneTorchDelay.get();
-	}
-	
-	@ModifyConstant(method = "update", constant = @Constant(longValue = 60L))
-	private static long updateBurnoutTimerDelay(long oldDelay) {
-		return redstoneTorchBurnoutTimerDelay.get();
-	}
-	
-	@ModifyConstant(method = "update", constant = @Constant(intValue = 160))
-	private static int updateBurnoutDelay(int oldDelay) {
-		return redstoneTorchBurnoutDelay.get();
+	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
+	private int onGetWeakRedstonePower(int oldValue) {
+		return REDSTONE_TORCH.get(WEAK_POWER);
 	}
 	
 	@Inject(method = "shouldUnpower", at = @At(value = "HEAD"), cancellable = true)
 	private void shouldUnpower(World world, BlockPos pos, BlockState state, CallbackInfoReturnable<Boolean> cir) {
 		BlockPos blockPos = pos.down();
 		
-		// If the pistonsPowerRedstoneTorches setting is enabled,
+		// If the softInversion setting is enabled,
 		// return true if the torch is attached to a piston that is
 		// receiving redstone power.
-		if (softInversion.get()) {
+		if (REDSTONE_TORCH.get(SOFT_INVERSION)) {
 			BlockState blockState = world.getBlockState(blockPos);
 			
 			if (blockState.getBlock() instanceof PistonBlock) {
-				if (PistonHelper.shouldExtend(world, blockPos, blockState.get(PistonBlock.FACING))) {
+				if (PistonBlockHelper.isReceivingPower(world, blockPos, blockState, blockState.get(Properties.FACING))) {
 					cir.setReturnValue(true);
 					cir.cancel();
 				}
@@ -62,8 +55,38 @@ public class RedstoneTorchBlockMixin {
 		}
 	}
 	
-	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
-	private int onGetWeakRedstonePower(int oldValue) {
-		return redstoneTorchSignal.get();
+	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RedstoneTorchBlock;shouldUnpower(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
+	private boolean onScheduledRedirectShouldUnpower(RedstoneTorchBlock torch, World world, BlockPos pos, BlockState state) {
+		boolean powered = state.get(Properties.LIT);
+		boolean lazy = powered ? REDSTONE_TORCH.get(FALLING_LAZY) : REDSTONE_TORCH.get(RISING_LAZY);
+		return lazy ? powered : shouldUnpower(world, pos, state);
+	}
+	
+	@ModifyConstant(method = "scheduledTick", constant = @Constant(longValue = 60L))
+	private long updateBurnoutTimerDelay(long oldValue) {
+		return REDSTONE_TORCH.get(BURNOUT_TIMER);
+	}
+	
+	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
+		tickScheduler.schedule(pos, object, REDSTONE_TORCH.get(BURNOUT_DELAY), REDSTONE_TORCH.get(BURNOUT_TICK_PRIORITY));
+	}
+	
+	@Inject(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V", shift = Shift.BEFORE), cancellable = true)
+	private void onNeighborUpdateRedirectSchedule(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
+		int delay = state.get(Properties.LIT) ? REDSTONE_TORCH.get(FALLING_DELAY) : REDSTONE_TORCH.get(RISING_DELAY);
+		TickPriority priority = state.get(Properties.LIT) ? REDSTONE_TORCH.get(FALLING_TICK_PRIORITY) : REDSTONE_TORCH.get(RISING_TICK_PRIORITY);
+		world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
+	}
+	
+	@Inject(method = "getStrongRedstonePower", at = @At(value = "HEAD"), cancellable = true)
+	private void onGetStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(direction == Direction.DOWN && state.get(Properties.LIT) ? REDSTONE_TORCH.get(STRONG_POWER) : 0);
+		cir.cancel();
+	}
+	
+	@ModifyConstant(method = "isBurnedOut", constant = @Constant(intValue = 8))
+	private static int onIsBurnedOutModifyBurnoutCount(int oldValue) {
+		return REDSTONE_TORCH.get(BURNOUT_COUNT);
 	}
 }
