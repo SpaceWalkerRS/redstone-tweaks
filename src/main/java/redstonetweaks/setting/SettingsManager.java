@@ -307,8 +307,8 @@ public abstract class SettingsManager {
 		register(REDSTONE_LAMP, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(REDSTONE_TORCH, BURNOUT_COUNT, new IntegerProperty(8, 0, 127));
-		register(REDSTONE_TORCH, BURNOUT_DELAY, new IntegerProperty(160, 1, 1023));
-		register(REDSTONE_TORCH, BURNOUT_TIMER, new IntegerProperty(60, 1, 127));
+		register(REDSTONE_TORCH, BURNOUT_DELAY, new IntegerProperty(160, 0, 1023));
+		register(REDSTONE_TORCH, BURNOUT_TIMER, new IntegerProperty(60, 0, 127));
 		register(REDSTONE_TORCH, FALLING_DELAY, new IntegerProperty(2, 0, 127));
 		register(REDSTONE_TORCH, RISING_DELAY, new IntegerProperty(2, 0, 127));
 		register(REDSTONE_TORCH, FALLING_LAZY, new BooleanProperty(false));

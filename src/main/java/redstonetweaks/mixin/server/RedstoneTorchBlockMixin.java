@@ -73,7 +73,10 @@ public abstract class RedstoneTorchBlockMixin {
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
-		tickScheduler.schedule(pos, object, REDSTONE_TORCH.get(BURNOUT_DELAY), REDSTONE_TORCH.get(BURNOUT_TICK_PRIORITY));
+		int delay = REDSTONE_TORCH.get(BURNOUT_DELAY);
+		if (delay > 0) {
+			tickScheduler.schedule(pos, object, delay, REDSTONE_TORCH.get(BURNOUT_TICK_PRIORITY));
+		}
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
