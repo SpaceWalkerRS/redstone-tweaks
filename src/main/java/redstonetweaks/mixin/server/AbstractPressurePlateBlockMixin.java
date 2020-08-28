@@ -35,7 +35,7 @@ public abstract class AbstractPressurePlateBlockMixin {
 	
 	@Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;updatePlateState(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)V"))
 	public void onEntityCollisionRedirectUpdatePlateState(AbstractPressurePlateBlock pressurePlate, World world, BlockPos pos, BlockState state, int i) {
-		SettingsPack settings = BLOCK_TO_SETTINGS_PACK.get(state.getBlock());
+		SettingsPack settings = ((PressurePlateHelper)this).getSettings(state);
 		
 		int delay = settings.get(RISING_DELAY);
 		if (delay > 0) {
@@ -47,7 +47,7 @@ public abstract class AbstractPressurePlateBlockMixin {
 	
 	@Redirect(method = "updatePlateState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void updatePlateStateRedirectScheduleTick(TickScheduler<?> tickScheduler, BlockPos pos, T Object, int oldDelay, World world, BlockPos blockPos, BlockState state) {
-		SettingsPack settings = BLOCK_TO_SETTINGS_PACK.get(state.getBlock());
+		SettingsPack settings = ((PressurePlateHelper)this).getSettings(state);
 		
 		int delay = settings.get(FALLING_DELAY);
 		TickPriority priority = settings.get(FALLING_TICK_PRIORITY);

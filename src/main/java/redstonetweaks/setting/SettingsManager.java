@@ -20,8 +20,10 @@ public abstract class SettingsManager {
 	public static final Setting<BooleanProperty> ADDITION_MODE = register(new Setting<>("additionMode"));
 	public static final Setting<IntegerProperty> BURNOUT_COUNT = register(new Setting<>("burnoutCount"));
 	public static final Setting<IntegerProperty> BURNOUT_DELAY = register(new Setting<>("burnoutDelay"));
-	public static final Setting<BooleanProperty> CONNECTS_TO_WIRE = register(new Setting<>("connectsToWire"));
 	public static final Setting<IntegerProperty> BURNOUT_TIMER = register(new Setting<>("burnoutTimer"));
+	public static final Setting<BooleanProperty> CONNECTS_TO_WIRE = register(new Setting<>("connectsToWire"));
+	public static final Setting<IntegerProperty> COOLDOWN = register(new Setting<>("cooldown"));
+	public static final Setting<IntegerProperty> PRIORITY_COOLDOWN = register(new Setting<>("priorityCooldown"));
 	public static final Setting<IntegerProperty> DELAY = register(new Setting<>("delay"));
 	public static final Setting<IntegerProperty> NETHER_DELAY = register(new Setting<>("netherDelay"));
 	public static final Setting<IntegerProperty> FALLING_DELAY = register(new Setting<>("fallingEdgeDelay"));
@@ -40,7 +42,6 @@ public abstract class SettingsManager {
 	public static final Setting<BooleanProperty> FORCE_UPDATE_WHEN_POWERED = register(new Setting<>("forceUpdateWhenPowered"));
 	public static final Setting<IntegerProperty> FUSE_TIME = register(new Setting<>("fuseTime"));
 	public static final Setting<BooleanProperty> HEAD_UPDATES_ON_EXTENSION = register(new Setting<>("headUpdatesOnExtension"));
-	public static final Setting<BooleanProperty> HAS_FULL_SOLID_SIDES = register(new Setting<>("hasFullSolidSides"));
 	public static final Setting<BooleanProperty> IGNORE_UPDATES_WHEN_EXTENDING = register(new Setting<>("ignoreUpdatesWhenExtending"));
 	public static final Setting<BooleanProperty> IS_POWER_DIODE = register(new Setting<>("isPowerDiode"));
 	public static final Setting<BooleanProperty> INVERT_FLOW_ON_GLASS = register(new Setting<>("invertFlowOnGlass"));
@@ -74,6 +75,7 @@ public abstract class SettingsManager {
 	public static final Setting<IntegerProperty> SPEED = register(new Setting<>("speed"));
 	public static final Setting<IntegerProperty> FALLING_SPEED = register(new Setting<>("fallingEdgeSpeed"));
 	public static final Setting<IntegerProperty> RISING_SPEED = register(new Setting<>("risingEdgeSpeed"));
+	public static final Setting<BooleanProperty> SUPPORTS_BRITTLE_BLOCKS = register(new Setting<>("supportsBrittleBlocks"));
 	public static final Setting<TickPriorityProperty> TICK_PRIORITY = register(new Setting<>("tickPriority"));
 	public static final Setting<TickPriorityProperty> BURNOUT_TICK_PRIORITY = register(new Setting<>("burnoutTickPriority"));
 	public static final Setting<TickPriorityProperty> FACING_DIODE_TICK_PRIORITY = register(new Setting<>("facingDiodeTickPriority"));
@@ -175,7 +177,7 @@ public abstract class SettingsManager {
 		register(COMMAND_BLOCK, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(COMPARATOR, ADDITION_MODE, new BooleanProperty(false));
-		register(COMPARATOR, DELAY, new IntegerProperty(2, 1, 127));
+		register(COMPARATOR, DELAY, new IntegerProperty(2, 0, 127));
 		register(COMPARATOR, REDSTONE_BLOCKS_POWER_SIDES, new BooleanProperty(true));
 		register(COMPARATOR, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(COMPARATOR, FACING_DIODE_TICK_PRIORITY, new TickPriorityProperty(TickPriority.HIGH));
@@ -216,7 +218,14 @@ public abstract class SettingsManager {
 		register(HEAVY_WEIGHTED_PRESSURE_PLATE, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(HEAVY_WEIGHTED_PRESSURE_PLATE, WEIGHT, new IntegerProperty(150, 1, 1023));
 		
-		register(HOPPER, DELAY, new IntegerProperty(1, 1, 127));
+		register(HOPPER, FALLING_DELAY, new IntegerProperty(0, 0, 127));
+		register(HOPPER, RISING_DELAY, new IntegerProperty(0, 0, 127));
+		register(HOPPER, COOLDOWN, new IntegerProperty(8, 0, 127));
+		register(HOPPER, PRIORITY_COOLDOWN, new IntegerProperty(7, 0, 127));
+		register(HOPPER, FALLING_LAZY, new BooleanProperty(false));
+		register(HOPPER, RISING_LAZY, new BooleanProperty(false));
+		register(HOPPER, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		register(HOPPER, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(LAVA, DELAY, new IntegerProperty(30, 1, 127));
 		register(LAVA, NETHER_DELAY, new IntegerProperty(10, 1, 127));
@@ -243,7 +252,7 @@ public abstract class SettingsManager {
 		register(NORMAL_PISTON, CONNECTS_TO_WIRE, new BooleanProperty(false));
 		register(NORMAL_PISTON, FALLING_DELAY, new IntegerProperty(0, 0, 127));
 		register(NORMAL_PISTON, RISING_DELAY, new IntegerProperty(0, 0, 127));
-		register(NORMAL_PISTON, HAS_FULL_SOLID_SIDES, new BooleanProperty(false));
+		register(NORMAL_PISTON, SUPPORTS_BRITTLE_BLOCKS, new BooleanProperty(false));
 		register(NORMAL_PISTON, FORCE_UPDATE_WHEN_POWERED, new BooleanProperty(false));
 		register(NORMAL_PISTON, HEAD_UPDATES_ON_EXTENSION, new BooleanProperty(true));
 		register(NORMAL_PISTON, IGNORE_UPDATES_WHEN_EXTENDING, new BooleanProperty(false));
@@ -266,8 +275,8 @@ public abstract class SettingsManager {
 		register(NOTE_BLOCK, LAZY, new BooleanProperty(false));
 		register(NOTE_BLOCK, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(OBSERVER, FALLING_DELAY, new IntegerProperty(2, 1, 127));
-		register(OBSERVER, RISING_DELAY, new IntegerProperty(2, 1, 127));
+		register(OBSERVER, FALLING_DELAY, new IntegerProperty(2, 0, 127));
+		register(OBSERVER, RISING_DELAY, new IntegerProperty(2, 0, 127));
 		register(OBSERVER, DISABLE, new BooleanProperty(false));
 		register(OBSERVER, STRONG_POWER, new IntegerProperty(15, 0, 15));
 		register(OBSERVER, WEAK_POWER, new IntegerProperty(15, 0, 15));
@@ -295,8 +304,8 @@ public abstract class SettingsManager {
 		register(REDSTONE_TORCH, BURNOUT_COUNT, new IntegerProperty(8, 0, 127));
 		register(REDSTONE_TORCH, BURNOUT_DELAY, new IntegerProperty(160, 1, 1023));
 		register(REDSTONE_TORCH, BURNOUT_TIMER, new IntegerProperty(60, 1, 127));
-		register(REDSTONE_TORCH, FALLING_DELAY, new IntegerProperty(2, 1, 127));
-		register(REDSTONE_TORCH, RISING_DELAY, new IntegerProperty(2, 1, 127));
+		register(REDSTONE_TORCH, FALLING_DELAY, new IntegerProperty(2, 0, 127));
+		register(REDSTONE_TORCH, RISING_DELAY, new IntegerProperty(2, 0, 127));
 		register(REDSTONE_TORCH, FALLING_LAZY, new BooleanProperty(false));
 		register(REDSTONE_TORCH, RISING_LAZY, new BooleanProperty(false));
 		register(REDSTONE_TORCH, STRONG_POWER, new IntegerProperty(15, 0, 15));
@@ -310,11 +319,11 @@ public abstract class SettingsManager {
 		register(REDSTONE_WIRE, DIRECTIONAL_UPDATE_ORDER, new BooleanProperty(false));
 		register(REDSTONE_WIRE, INVERT_FLOW_ON_GLASS, new BooleanProperty(false));
 		register(REDSTONE_WIRE, RANDOM_UPDATE_ORDER, new BooleanProperty(false));
-		register(REDSTONE_WIRE, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(REDSTONE_WIRE, SLABS_ALLOW_UP_CONNECTION, new BooleanProperty(true));
+		register(REDSTONE_WIRE, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(REPEATER, FALLING_DELAY, new IntegerProperty(2, 1, 127));
-		register(REPEATER, RISING_DELAY, new IntegerProperty(2, 1, 127));
+		register(REPEATER, FALLING_DELAY, new IntegerProperty(2, 0, 127));
+		register(REPEATER, RISING_DELAY, new IntegerProperty(2, 0, 127));
 		register(REPEATER, FALLING_LAZY, new BooleanProperty(false));
 		register(REPEATER, RISING_LAZY, new BooleanProperty(true));
 		register(REPEATER, STRONG_POWER, new IntegerProperty(15, 0, 15));
@@ -331,7 +340,7 @@ public abstract class SettingsManager {
 		register(STICKY_PISTON, FALLING_DELAY, new IntegerProperty(0, 0, 127));
 		register(STICKY_PISTON, RISING_DELAY, new IntegerProperty(0, 0, 127));
 		register(STICKY_PISTON, FAST_BLOCK_DROPPING, new BooleanProperty(true));
-		register(STICKY_PISTON, HAS_FULL_SOLID_SIDES, new BooleanProperty(false));
+		register(STICKY_PISTON, SUPPORTS_BRITTLE_BLOCKS, new BooleanProperty(false));
 		register(STICKY_PISTON, FORCE_UPDATE_WHEN_POWERED, new BooleanProperty(false));
 		register(STICKY_PISTON, HEAD_UPDATES_ON_EXTENSION, new BooleanProperty(true));
 		register(STICKY_PISTON, IGNORE_UPDATES_WHEN_EXTENDING, new BooleanProperty(false));
@@ -405,13 +414,13 @@ public abstract class SettingsManager {
 		register(BUG_FIXES, MC137127, new BooleanProperty(false));
 		register(BUG_FIXES, MC172213, new BooleanProperty(false));
 		
-		register(GLOBAL, RANDOMIZE_SCHEDULED_TICK_DELAYS, new BooleanProperty(false));
 		register(GLOBAL, DELAY_MULTIPLIER, new IntegerProperty(1, 1, 127));
 		register(GLOBAL, DO_BLOCK_UPDATES, new BooleanProperty(true));
 		register(GLOBAL, DO_STATE_UPDATES, new BooleanProperty(true));
 		register(GLOBAL, DO_COMPARATOR_UPDATES, new BooleanProperty(true));
 		register(GLOBAL, DOUBLE_RETRACTION, new BooleanProperty(false));
 		register(GLOBAL, RANDOMIZE_BLOCK_EVENTS, new BooleanProperty(false));
+		register(GLOBAL, RANDOMIZE_SCHEDULED_TICK_DELAYS, new BooleanProperty(false));
 		register(GLOBAL, RANDOMIZE_TICK_PRIORITIES, new BooleanProperty(false));
 		register(GLOBAL, SHOW_NEIGHBOR_UPDATES, new BooleanProperty(false));
 		register(GLOBAL, SHOW_PROCESSING_ORDER, new IntegerProperty(0, 0, 127));

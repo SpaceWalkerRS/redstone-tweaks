@@ -112,7 +112,7 @@ public class ServerSettingsManager extends SettingsManager {
 		} else if (property instanceof TickPriorityProperty) {
 			pack.set((Setting<TickPriorityProperty>)setting, TickPriority.byIndex(value));
 		} else {
-			throw new IllegalStateException("unknown setting type");
+			throw new IllegalStateException("unknown setting type \"" + setting.getName() + "\" for pack \"" + pack.getName() + "\"");
 		}
 	}
 	

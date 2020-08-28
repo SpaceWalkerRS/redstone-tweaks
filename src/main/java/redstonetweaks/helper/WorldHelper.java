@@ -48,8 +48,8 @@ public interface WorldHelper {
 		if (settings != null) {
 			boolean randQC = settings.get(RANDOMIZE_QC);
 			for (Direction direction : Direction.values()) {
-				if (settings.get(DIRECTION_TO_QC_SETTING.get(direction)) && (!randQC || world.random.nextBoolean())) {
-					if (forceCheck || (randQC && world.random.nextBoolean())) {
+				if (settings.get(DIRECTION_TO_QC_SETTING.get(direction))) {
+					if (forceCheck || !randQC || world.random.nextBoolean()) {
 						if (world.isReceivingRedstonePower(pos.offset(direction))) {
 							return true;
 						}

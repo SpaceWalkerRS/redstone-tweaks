@@ -12,13 +12,12 @@ public abstract class BlockHelper extends AbstractBlock {
 		super(settings);
 	}
 
-	public static BlockState PostProcessState(World world, BlockState state, BlockPos pos) {
+	public static BlockState postProcessState(World world, BlockState state, BlockPos pos) {
 		BlockState blockState = state;
-		BlockPos.Mutable mutable = new BlockPos.Mutable();
-
+		
 		for (Direction direction : FACINGS) {
-			mutable.set(pos, direction);
-			blockState = blockState.getStateForNeighborUpdate(direction, world.getBlockState(mutable), world, pos, mutable);
+			BlockPos neighborPos = pos.offset(direction);
+			blockState = blockState.getStateForNeighborUpdate(direction, world.getBlockState(neighborPos), world, pos, neighborPos);
 		}
 		return blockState;
 	}

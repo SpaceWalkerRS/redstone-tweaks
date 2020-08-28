@@ -34,6 +34,6 @@ public interface AbstractBlockHelper {
 	}
 	
 	public static boolean isPistonRigid(boolean sticky) {
-		return sticky ? STICKY_PISTON.get(HAS_FULL_SOLID_SIDES) : NORMAL_PISTON.get(HAS_FULL_SOLID_SIDES);
+		return sticky ? STICKY_PISTON.get(SUPPORTS_BRITTLE_BLOCKS) : NORMAL_PISTON.get(SUPPORTS_BRITTLE_BLOCKS);
 	}
 }
