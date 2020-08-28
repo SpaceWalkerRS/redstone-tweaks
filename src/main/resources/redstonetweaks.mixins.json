@@ -19,6 +19,7 @@
 	"server.FlowableFluidMixin",
 	"server.FluidBlockMixin",
 	"server.HopperBlockEntityMixin",
+	"server.HopperBlockMixin",
 	"server.LavaFluidMixin",
 	"server.LeavesBlockMixin",
 	"server.LeverBlockMixin",
