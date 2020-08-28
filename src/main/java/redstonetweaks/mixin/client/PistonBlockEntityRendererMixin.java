@@ -49,6 +49,7 @@ public class PistonBlockEntityRendererMixin {
 	private int getPistonDelay() {
 		SettingsPack settings = sticky ? STICKY_PISTON : NORMAL_PISTON;
 		Setting<IntegerProperty> speedSetting = extending ? RISING_SPEED : FALLING_SPEED;
-		return GLOBAL.get(DELAY_MULTIPLIER) * settings.get(speedSetting);
+		
+		return settings.get(speedSetting);
 	}
 }

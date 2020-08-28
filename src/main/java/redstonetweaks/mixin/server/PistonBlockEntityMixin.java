@@ -105,6 +105,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Bloc
 		SettingsPack settings = isMovedByStickyPiston ? STICKY_PISTON : NORMAL_PISTON;
 		Setting<IntegerProperty> speedSetting = extending ? RISING_SPEED : FALLING_SPEED;
 		
-		return GLOBAL.get(DELAY_MULTIPLIER) * settings.get(speedSetting);
+		return settings.get(speedSetting);
 	}
 }
