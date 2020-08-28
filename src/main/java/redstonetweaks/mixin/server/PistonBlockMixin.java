@@ -101,10 +101,9 @@ public abstract class PistonBlockMixin extends Block implements AbstractBlockHel
 	// the value of bl is is inferred from the current value
 	// of the EXTENDED property.
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;shouldExtend(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;)Z"))
-	private boolean onOnBlockActionRedirectShouldExtend(PistonBlock piston, World world, BlockPos pos, Direction direction) {
+	private boolean onOnBlockActionRedirectShouldExtend(PistonBlock piston, World world1, BlockPos pos1, Direction direction, BlockState state, World world, BlockPos pos, int type, int data) {
 		SettingsPack settings = BLOCK_TO_SETTINGS_PACK.get(piston);
-		BlockState state = world.getBlockState(pos);
-		boolean extended = state.get(Properties.EXTENDED);
+		boolean extended = state.get(Properties.EXTENDED) || type != 0;
 		boolean lazy = extended ? settings.get(FALLING_LAZY) : settings.get(RISING_LAZY);
 		return lazy ? !extended : PistonBlockHelper.isReceivingPower(world, pos, state, direction, true);
 	}
