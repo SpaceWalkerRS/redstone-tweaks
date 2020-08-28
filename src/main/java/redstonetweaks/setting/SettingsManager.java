@@ -168,7 +168,7 @@ public abstract class SettingsManager {
 		register(ACTIVATOR_RAIL, RISING_DELAY, new IntegerProperty(0, 0, 127));
 		register(ACTIVATOR_RAIL, FALLING_LAZY, new BooleanProperty(false));
 		register(ACTIVATOR_RAIL, RISING_LAZY, new BooleanProperty(false));
-		register(ACTIVATOR_RAIL, POWER_LIMIT, new IntegerProperty(9, 1, 127));
+		register(ACTIVATOR_RAIL, POWER_LIMIT, new IntegerProperty(8, 0, 127));
 		register(ACTIVATOR_RAIL, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(ACTIVATOR_RAIL, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
@@ -292,7 +292,7 @@ public abstract class SettingsManager {
 		register(POWERED_RAIL, RISING_DELAY, new IntegerProperty(0, 0, 127));
 		register(POWERED_RAIL, FALLING_LAZY, new BooleanProperty(false));
 		register(POWERED_RAIL, RISING_LAZY, new BooleanProperty(false));
-		register(POWERED_RAIL, POWER_LIMIT, new IntegerProperty(9, 1, 127));
+		register(POWERED_RAIL, POWER_LIMIT, new IntegerProperty(8, 0, 127));
 		register(POWERED_RAIL, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(POWERED_RAIL, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
