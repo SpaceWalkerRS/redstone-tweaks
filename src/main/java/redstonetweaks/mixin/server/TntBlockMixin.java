@@ -31,27 +31,27 @@ public abstract class TntBlockMixin extends AbstractBlock {
 
 	@Inject(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/TntBlock;primeTnt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V", shift = Shift.BEFORE), cancellable = true)
 	private void onOnBlockAddedInjectBeforePrimeTnt(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo ci) {
-		if (!world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
+		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
+			ci.cancel();
+		} else {
 			int delay = TNT.get(DELAY);
 			if (delay > 0) {
 				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, TNT.get(TICK_PRIORITY));
 				ci.cancel();
 			}
-		} else {
-			ci.cancel();
 		}
 	}
 	
 	@Inject(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/TntBlock;primeTnt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V", shift = Shift.BEFORE), cancellable = true)
 	private void onNeighborUpdateInjectBeforePrimeTnt(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
-		if (!world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
+		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
+			ci.cancel();
+		} else {
 			int delay = TNT.get(DELAY);
 			if (delay > 0) {
 				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, TNT.get(TICK_PRIORITY));
 				ci.cancel();
 			}
-		} else {
-			ci.cancel();
 		}
 	}
 	

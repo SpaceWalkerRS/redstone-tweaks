@@ -386,8 +386,8 @@ public abstract class SettingsManager {
 		register(TARGET_BLOCK, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(TARGET_BLOCK, PERSISTENT_PROJECTILE_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(TNT, DELAY, new IntegerProperty(0, 1, 127));
-		register(TNT, FUSE_TIME, new IntegerProperty(80, 1, 1023));
+		register(TNT, DELAY, new IntegerProperty(0, 0, 127));
+		register(TNT, FUSE_TIME, new IntegerProperty(80, 0, 1023));
 		register(TNT, LAZY, new BooleanProperty(true));
 		register(TNT, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
