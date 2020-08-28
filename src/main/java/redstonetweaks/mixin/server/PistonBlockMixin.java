@@ -215,9 +215,7 @@ public abstract class PistonBlockMixin extends Block implements AbstractBlockHel
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		if (!world.isClient()) {
-	       newTryMove(world, pos, state, true);
-	    }
+		newTryMove(world, pos, state, true);
 	}
 	
 	@Override
