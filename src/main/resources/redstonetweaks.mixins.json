@@ -35,6 +35,7 @@
 	"server.PressurePlateBlockMixin",
 	"server.RedstoneBlockMixin",
 	"server.RedstoneLampBlockMixin",
+	"server.RedstoneOreBlockMixin",
 	"server.RedstoneTorchBlockMixin",
 	"server.RedstoneWireBlockMixin",
 	"server.RepeaterBlockMixin",

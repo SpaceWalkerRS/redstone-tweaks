@@ -110,6 +110,7 @@ public abstract class SettingsManager {
 	public static final SettingsPack POWERED_RAIL = register(new SettingsPack("powered_rail"), Blocks.POWERED_RAIL);
 	public static final SettingsPack REDSTONE_BLOCK = register(new SettingsPack("redstone_block"), Blocks.REDSTONE_BLOCK);
 	public static final SettingsPack REDSTONE_LAMP = register(new SettingsPack("redstone_lamp"), Blocks.REDSTONE_LAMP);
+	public static final SettingsPack REDSTONE_ORE = register(new SettingsPack("redstone_ore"), Blocks.REDSTONE_ORE);
 	public static final SettingsPack REDSTONE_TORCH = register(new SettingsPack("redstone_torch"), Blocks.REDSTONE_TORCH);
 	public static final SettingsPack REDSTONE_WIRE = register(new SettingsPack("redstone_wire"), Blocks.REDSTONE_WIRE);
 	public static final SettingsPack REPEATER = register(new SettingsPack("repeater"), Blocks.REPEATER);
@@ -305,6 +306,11 @@ public abstract class SettingsManager {
 		register(REDSTONE_LAMP, RISING_LAZY, new BooleanProperty(false));
 		register(REDSTONE_LAMP, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(REDSTONE_LAMP, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(REDSTONE_ORE, DELAY, new IntegerProperty(0, 0, 127));
+		register(REDSTONE_ORE, STRONG_POWER, new IntegerProperty(0, 0, 127));
+		register(REDSTONE_ORE, WEAK_POWER, new IntegerProperty(0, 0, 127));
+		register(REDSTONE_ORE, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(REDSTONE_TORCH, BURNOUT_COUNT, new IntegerProperty(8, 0, 127));
 		register(REDSTONE_TORCH, BURNOUT_DELAY, new IntegerProperty(160, 0, 1023));
