@@ -209,7 +209,7 @@ public abstract class SettingsManager {
 		register(DROPPER, RANDOMIZE_QC, new BooleanProperty(false));
 		register(DROPPER, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(GRAVITY_BLOCK, DELAY, new IntegerProperty(2, 1, 127));
+		register(GRAVITY_BLOCK, DELAY, new IntegerProperty(2, 0, 127));
 		register(GRAVITY_BLOCK, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(HEAVY_WEIGHTED_PRESSURE_PLATE, FALLING_DELAY, new IntegerProperty(10, 1, 127));
@@ -227,8 +227,8 @@ public abstract class SettingsManager {
 		register(HOPPER, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(HOPPER, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(LAVA, DELAY, new IntegerProperty(30, 1, 127));
-		register(LAVA, NETHER_DELAY, new IntegerProperty(10, 1, 127));
+		register(LAVA, DELAY, new IntegerProperty(30, 0, 127));
+		register(LAVA, NETHER_DELAY, new IntegerProperty(10, 0, 127));
 		register(LAVA, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(LEAVES, DELAY, new IntegerProperty(1, 1, 127));
@@ -391,7 +391,7 @@ public abstract class SettingsManager {
 		register(TRIPWIRE, DELAY, new IntegerProperty(10, 1, 127));
 		register(TRIPWIRE, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(WATER, DELAY, new IntegerProperty(5, 1, 127));
+		register(WATER, DELAY, new IntegerProperty(5, 0, 127));
 		register(WATER, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(WOODEN_BUTTON, FALLING_DELAY, new IntegerProperty(30, 1, 127));
