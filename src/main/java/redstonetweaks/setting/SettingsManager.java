@@ -337,7 +337,7 @@ public abstract class SettingsManager {
 		register(REPEATER, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.VERY_HIGH));
 		register(REPEATER, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.HIGH));
 		
-		register(SCAFFOLDING, DELAY, new IntegerProperty(1, 1, 127));
+		register(SCAFFOLDING, DELAY, new IntegerProperty(1, 0, 127));
 		register(SCAFFOLDING, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(SOUL_SAND, DELAY, new IntegerProperty(20, 0, 127));
