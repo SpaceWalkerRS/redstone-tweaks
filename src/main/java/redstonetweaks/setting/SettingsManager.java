@@ -367,7 +367,7 @@ public abstract class SettingsManager {
 		register(STICKY_PISTON, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(STICKY_PISTON, PUSH_LIMIT, new IntegerProperty(12, 0, 127));
 		
-		register(STONE_BUTTON, FALLING_DELAY, new IntegerProperty(20, 1, 127));
+		register(STONE_BUTTON, FALLING_DELAY, new IntegerProperty(20, 0, 127));
 		register(STONE_BUTTON, RISING_DELAY, new IntegerProperty(0, 0, 127));
 		register(STONE_BUTTON, STRONG_POWER, new IntegerProperty(15, 0, 15));
 		register(STONE_BUTTON, WEAK_POWER, new IntegerProperty(15, 0, 15));
@@ -402,7 +402,7 @@ public abstract class SettingsManager {
 		register(WATER, DELAY, new IntegerProperty(5, 0, 127));
 		register(WATER, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(WOODEN_BUTTON, FALLING_DELAY, new IntegerProperty(30, 1, 127));
+		register(WOODEN_BUTTON, FALLING_DELAY, new IntegerProperty(30, 0, 127));
 		register(WOODEN_BUTTON, RISING_DELAY, new IntegerProperty(0, 0, 127));
 		register(WOODEN_BUTTON, STRONG_POWER, new IntegerProperty(15, 0, 15));
 		register(WOODEN_BUTTON, WEAK_POWER, new IntegerProperty(15, 0, 15));

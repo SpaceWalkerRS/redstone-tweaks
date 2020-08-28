@@ -36,6 +36,7 @@ public abstract class AbstractButtonBlockMixin {
 	
 	@Shadow public abstract void powerOn(BlockState blockState, World world, BlockPos blockPos);
 	@Shadow protected abstract void playClickSound(PlayerEntity player, WorldAccess world, BlockPos pos, boolean powered);
+	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	
 	@ModifyConstant(method = "getPressTicks", constant = @Constant(intValue = 30))
 	private int onGetPressTicksWoodenButtonDelay(int oldValue) {
@@ -63,9 +64,16 @@ public abstract class AbstractButtonBlockMixin {
 	}
 	
 	@Redirect(method = "powerOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onPowerOnRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T object, int delay) {
-		TickPriority priority = wooden ? WOODEN_BUTTON.get(FALLING_TICK_PRIORITY) : STONE_BUTTON.get(FALLING_TICK_PRIORITY);
-		tickScheduler.schedule(pos, object, delay, priority);
+	private <T> void onPowerOnRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, World world, BlockPos pos) {
+		if (delay == 0) {
+			if (!world.isClient()) {
+				scheduledTick(world.getBlockState(pos), (ServerWorld)world, pos, world.getRandom());
+			}
+		} else {
+			TickPriority priority = wooden ? WOODEN_BUTTON.get(FALLING_TICK_PRIORITY) : STONE_BUTTON.get(FALLING_TICK_PRIORITY);
+			tickScheduler.schedule(pos, object, delay, priority);
+		}
+		
 	}
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
