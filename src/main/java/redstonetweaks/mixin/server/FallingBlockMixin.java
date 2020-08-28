@@ -40,7 +40,6 @@ public abstract class FallingBlockMixin {
 		} else {
 			tickScheduler.schedule(pos, object, delay, GRAVITY_BLOCK.get(TICK_PRIORITY));
 		}
-		
 	}
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
