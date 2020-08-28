@@ -233,7 +233,7 @@ public abstract class SettingsManager {
 		register(LAVA, NETHER_DELAY, new IntegerProperty(10, 0, 127));
 		register(LAVA, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(LEAVES, DELAY, new IntegerProperty(1, 1, 127));
+		register(LEAVES, DELAY, new IntegerProperty(1, 0, 127));
 		register(LEAVES, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(LEVER, FALLING_DELAY, new IntegerProperty(0, 0, 127));
