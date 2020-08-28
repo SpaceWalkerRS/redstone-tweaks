@@ -2,6 +2,8 @@ package redstonetweaks.mixin.server;
 
 import static redstonetweaks.setting.SettingsManager.*;
 
+import java.util.Random;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -17,6 +21,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ComparatorBlock;
 import net.minecraft.block.enums.ComparatorMode;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -37,6 +42,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	@Shadow protected abstract int getUpdateDelayInternal(BlockState state);
 	@Shadow protected abstract int calculateOutputSignal(World world, BlockPos pos, BlockState state);
 	@Shadow protected abstract int getPower(World world, BlockPos pos, BlockState state);
+	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	
 	@ModifyConstant(method = "getUpdateDelayInternal", constant = @Constant(intValue = 2))
 	private int onGetUpdateDelayInternalModifyDelay(int oldDelay) {
@@ -62,6 +68,17 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 				cir.setReturnValue(backPower + sidePower > 0);
 				cir.cancel();
 			}
+		}
+	}
+	
+	@Inject(method = "updatePowered", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
+	private void onUpdatePoweredInjectBeforePriorityHigh(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
+		if (getUpdateDelayInternal(state) == 0) {
+			if (!world.isClient()) {
+				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
+			}
+			
+			ci.cancel();
 		}
 	}
 	

@@ -2,15 +2,15 @@ package redstonetweaks.mixin.server;
 
 import static redstonetweaks.setting.SettingsManager.*;
 
+import java.util.Random;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.Block;
@@ -18,17 +18,21 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.PistonBlock;
 import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.server.world.ServerTickScheduler;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
+import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
+
 import redstonetweaks.helper.PistonBlockHelper;
 
 @Mixin(RedstoneTorchBlock.class)
 public abstract class RedstoneTorchBlockMixin {
 	
+	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract boolean shouldUnpower(World world, BlockPos pos, BlockState state);
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
@@ -72,11 +76,16 @@ public abstract class RedstoneTorchBlockMixin {
 		tickScheduler.schedule(pos, object, REDSTONE_TORCH.get(BURNOUT_DELAY), REDSTONE_TORCH.get(BURNOUT_TICK_PRIORITY));
 	}
 	
-	@Inject(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V", shift = Shift.BEFORE), cancellable = true)
-	private void onNeighborUpdateRedirectSchedule(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
+	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int oldDelay, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
 		int delay = state.get(Properties.LIT) ? REDSTONE_TORCH.get(FALLING_DELAY) : REDSTONE_TORCH.get(RISING_DELAY);
-		TickPriority priority = state.get(Properties.LIT) ? REDSTONE_TORCH.get(FALLING_TICK_PRIORITY) : REDSTONE_TORCH.get(RISING_TICK_PRIORITY);
-		world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
+		if (delay == 0) {
+			scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
+		} else {
+			TickPriority priority = state.get(Properties.LIT) ? REDSTONE_TORCH.get(FALLING_TICK_PRIORITY) : REDSTONE_TORCH.get(RISING_TICK_PRIORITY);
+			tickScheduler.schedule(pos, object, delay, priority);
+		}
+		
 	}
 	
 	@Inject(method = "getStrongRedstonePower", at = @At(value = "HEAD"), cancellable = true)
