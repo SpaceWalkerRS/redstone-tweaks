@@ -422,7 +422,7 @@ public abstract class SettingsManager {
 		register(BUG_FIXES, MC137127, new BooleanProperty(false));
 		register(BUG_FIXES, MC172213, new BooleanProperty(false));
 		
-		register(GLOBAL, DELAY_MULTIPLIER, new IntegerProperty(1, 1, 127));
+		register(GLOBAL, DELAY_MULTIPLIER, new IntegerProperty(1, 0, 127));
 		register(GLOBAL, DO_BLOCK_UPDATES, new BooleanProperty(true));
 		register(GLOBAL, DO_STATE_UPDATES, new BooleanProperty(true));
 		register(GLOBAL, DO_COMPARATOR_UPDATES, new BooleanProperty(true));

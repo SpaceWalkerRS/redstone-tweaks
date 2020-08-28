@@ -14,7 +14,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerChunkManager;
@@ -44,6 +47,15 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 	private boolean isTicking;
 	
 	@Shadow abstract void addScheduledTick(ScheduledTick<T> scheduledTick);
+	
+	@Inject(method = "schedule", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
+	private void onScheduleInjectBeforeAddScheduledTick(BlockPos pos, T object, int delay, TickPriority priority, CallbackInfo ci) {
+		if (GLOBAL.get(DELAY_MULTIPLIER) == 0) {
+			tickConsumer.accept(new ScheduledTick<>(pos, object, delay, priority));
+			
+			ci.cancel();
+		}
+	}
 	
 	@ModifyArg(method = "schedule", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ScheduledTick;<init>(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;JLnet/minecraft/world/TickPriority;)V"))
 	private long onScheduleOnNewScheduledTickModifyTime(long time) {
