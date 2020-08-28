@@ -103,6 +103,7 @@ public abstract class SettingsManager {
 	public static final SettingsPack LEVER = register(new SettingsPack("lever"), Blocks.LEVER);
 	public static final SettingsPack LIGHT_WEIGHTED_PRESSURE_PLATE = register(new SettingsPack("light_weighted_pressure_plate"), Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE);
 	public static final SettingsPack MAGENTA_GLAZED_TERRACOTTA = register(new SettingsPack("magenta_glazed_terracotta"), Blocks.MAGENTA_GLAZED_TERRACOTTA);
+	public static final SettingsPack MAGMA_BLOCK = register(new SettingsPack("magma_block"), Blocks.MAGMA_BLOCK);
 	public static final SettingsPack NORMAL_PISTON = register(new SettingsPack("normal_piston"), Blocks.PISTON);
 	public static final SettingsPack NOTE_BLOCK = register(new SettingsPack("note_block"), Blocks.NOTE_BLOCK);
 	public static final SettingsPack OBSERVER = register(new SettingsPack("observer"), Blocks.OBSERVER);
@@ -113,6 +114,7 @@ public abstract class SettingsManager {
 	public static final SettingsPack REDSTONE_WIRE = register(new SettingsPack("redstone_wire"), Blocks.REDSTONE_WIRE);
 	public static final SettingsPack REPEATER = register(new SettingsPack("repeater"), Blocks.REPEATER);
 	public static final SettingsPack SCAFFOLDING = register(new SettingsPack("scaffolding"), Blocks.SCAFFOLDING);
+	public static final SettingsPack SOUL_SAND = register(new SettingsPack("soul_sand"), Blocks.SOUL_SAND);
 	public static final SettingsPack STICKY_PISTON = register(new SettingsPack("sticky_piston"), Blocks.STICKY_PISTON);
 	public static final SettingsPack STONE_BUTTON = register(new SettingsPack("stone_button"));
 	public static final SettingsPack STONE_PRESSURE_PLATE = register(new SettingsPack("stone_pressure_plate"));
@@ -249,6 +251,9 @@ public abstract class SettingsManager {
 		
 		register(MAGENTA_GLAZED_TERRACOTTA, IS_POWER_DIODE, new BooleanProperty(false));
 		
+		register(MAGMA_BLOCK, DELAY, new IntegerProperty(20, 0, 127));
+		register(MAGMA_BLOCK, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
 		register(NORMAL_PISTON, CONNECTS_TO_WIRE, new BooleanProperty(false));
 		register(NORMAL_PISTON, FALLING_DELAY, new IntegerProperty(0, 0, 127));
 		register(NORMAL_PISTON, RISING_DELAY, new IntegerProperty(0, 0, 127));
@@ -334,6 +339,9 @@ public abstract class SettingsManager {
 		
 		register(SCAFFOLDING, DELAY, new IntegerProperty(1, 1, 127));
 		register(SCAFFOLDING, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(SOUL_SAND, DELAY, new IntegerProperty(20, 0, 127));
+		register(SOUL_SAND, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(STICKY_PISTON, CONNECTS_TO_WIRE, new BooleanProperty(false));
 		register(STICKY_PISTON, DO_BLOCK_DROPPING, new BooleanProperty(true));
