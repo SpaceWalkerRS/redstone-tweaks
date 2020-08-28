@@ -381,8 +381,8 @@ public abstract class SettingsManager {
 		register(STONE_PRESSURE_PLATE, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(STONE_PRESSURE_PLATE, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(TARGET_BLOCK, DELAY, new IntegerProperty(8, 1, 127));
-		register(TARGET_BLOCK, PERSISTENT_PROJECTILE_DELAY, new IntegerProperty(20, 1, 127));
+		register(TARGET_BLOCK, DELAY, new IntegerProperty(8, 0, 127));
+		register(TARGET_BLOCK, PERSISTENT_PROJECTILE_DELAY, new IntegerProperty(20, 0, 127));
 		register(TARGET_BLOCK, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(TARGET_BLOCK, PERSISTENT_PROJECTILE_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
