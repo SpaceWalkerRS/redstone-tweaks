@@ -29,6 +29,9 @@ public abstract class SettingsManager {
 	public static final Setting<IntegerProperty> FALLING_DELAY = register(new Setting<>("fallingEdgeDelay"));
 	public static final Setting<IntegerProperty> RISING_DELAY = register(new Setting<>("risingEdgeDelay"));
 	public static final Setting<IntegerProperty> PERSISTENT_PROJECTILE_DELAY = register(new Setting<>("persistentProjectileDelay"));
+	public static final Setting<IntegerProperty> DELAY_RANGE = register(new Setting<>("delayRange"));
+	public static final Setting<IntegerProperty> DELAY_MIN = register(new Setting<>("delayMin"));
+	public static final Setting<IntegerProperty> DELAY_MAX = register(new Setting<>("delayMax"));
 	public static final Setting<BooleanProperty> RANDOMIZE_SCHEDULED_TICK_DELAYS = register(new Setting<>("randomizeScheduledTickDelays"));
 	public static final Setting<IntegerProperty> DELAY_MULTIPLIER = register(new Setting<>("delayMultiplier"));
 	public static final Setting<BooleanProperty> DISABLE = register(new Setting<>("disable"));
@@ -89,17 +92,28 @@ public abstract class SettingsManager {
 	public static final Setting<BooleanProperty> EXPERIMENTAL_SET_BLOCK_STATE = register(new Setting<>("EXPERIMENTAL_SET_BLOCK_STATE"));
 	
 	public static final SettingsPack ACTIVATOR_RAIL = register(new SettingsPack("activator_rail"), Blocks.ACTIVATOR_RAIL);
+	public static final SettingsPack BAMBOO = register(new SettingsPack("bamboo"), Blocks.BAMBOO);
 	public static final SettingsPack BUBBLE_COLUMN = register(new SettingsPack("bubble_column"), Blocks.BUBBLE_COLUMN);
-	public static final SettingsPack COMMAND_BLOCK = register(new SettingsPack("command_block"));
+	public static final SettingsPack CACTUS = register(new SettingsPack("bubble_column"), Blocks.BUBBLE_COLUMN);
+	public static final SettingsPack CHORUS_PLANT = register(new SettingsPack("chorus_plant"));
+	public static final SettingsPack COMMAND_BLOCK = register(new SettingsPack("cactus"), Blocks.CACTUS);
 	public static final SettingsPack COMPARATOR = register(new SettingsPack("comparator"), Blocks.COMPARATOR);
+	public static final SettingsPack COMPOSTER = register(new SettingsPack("composter"), Blocks.COMPOSTER);
+	public static final SettingsPack CORAL = register(new SettingsPack("coral"));
+	public static final SettingsPack CORAL_BLOCK = register(new SettingsPack("coral_block"));
 	public static final SettingsPack DETECTOR_RAIL = register(new SettingsPack("detector_rail"), Blocks.DETECTOR_RAIL);
 	public static final SettingsPack DISPENSER = register(new SettingsPack("dispenser"), Blocks.DISPENSER);
 	public static final SettingsPack DROPPER = register(new SettingsPack("dropper"), Blocks.DROPPER);
+	public static final SettingsPack FARMLAND = register(new SettingsPack("farm_land"), Blocks.FARMLAND);
+	public static final SettingsPack FIRE = register(new SettingsPack("fire"), Blocks.FIRE);
+	public static final SettingsPack FROSTED_ICE = register(new SettingsPack("frosted_ice"), Blocks.FROSTED_ICE);
+	public static final SettingsPack GRASS_PATH = register(new SettingsPack("grass_path"), Blocks.GRASS_PATH);
 	public static final SettingsPack GRAVITY_BLOCK = register(new SettingsPack("gravity_block"));
 	public static final SettingsPack HEAVY_WEIGHTED_PRESSURE_PLATE = register(new SettingsPack("heavy_weighted_pressure_plate"), Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE);
 	public static final SettingsPack HOPPER = register(new SettingsPack("hopper"), Blocks.HOPPER);
 	public static final SettingsPack LAVA = register(new SettingsPack("lava"), Blocks.LAVA);
 	public static final SettingsPack LEAVES = register(new SettingsPack("leaves"));
+	public static final SettingsPack LECTERN = register(new SettingsPack("lectern"), Blocks.LECTERN);
 	public static final SettingsPack LEVER = register(new SettingsPack("lever"), Blocks.LEVER);
 	public static final SettingsPack LIGHT_WEIGHTED_PRESSURE_PLATE = register(new SettingsPack("light_weighted_pressure_plate"), Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE);
 	public static final SettingsPack MAGENTA_GLAZED_TERRACOTTA = register(new SettingsPack("magenta_glazed_terracotta"), Blocks.MAGENTA_GLAZED_TERRACOTTA);
@@ -120,6 +134,7 @@ public abstract class SettingsManager {
 	public static final SettingsPack STICKY_PISTON = register(new SettingsPack("sticky_piston"), Blocks.STICKY_PISTON);
 	public static final SettingsPack STONE_BUTTON = register(new SettingsPack("stone_button"));
 	public static final SettingsPack STONE_PRESSURE_PLATE = register(new SettingsPack("stone_pressure_plate"));
+	public static final SettingsPack SUGAR_CANE = register(new SettingsPack("sugar_cane"));
 	public static final SettingsPack TARGET_BLOCK = register(new SettingsPack("target_block"), Blocks.TARGET);
 	public static final SettingsPack TNT = register(new SettingsPack("tnt"), Blocks.TNT);
 	public static final SettingsPack TRIPWIRE_HOOK = register(new SettingsPack("tripwire_hook"), Blocks.TRIPWIRE_HOOK);
@@ -174,8 +189,14 @@ public abstract class SettingsManager {
 		register(ACTIVATOR_RAIL, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(ACTIVATOR_RAIL, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
-		register(BUBBLE_COLUMN, DELAY, new IntegerProperty(5, 1, 127));
+		register(BAMBOO, DELAY, new IntegerProperty(1, 0, 127));
+		register(BAMBOO, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(BUBBLE_COLUMN, DELAY, new IntegerProperty(5, 0, 127));
 		register(BUBBLE_COLUMN, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(CACTUS, DELAY, new IntegerProperty(1, 0, 127));
+		register(CACTUS, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(COMMAND_BLOCK, DELAY, new IntegerProperty(1, 1, 127));
 		register(COMMAND_BLOCK, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
@@ -185,6 +206,17 @@ public abstract class SettingsManager {
 		register(COMPARATOR, REDSTONE_BLOCKS_POWER_SIDES, new BooleanProperty(true));
 		register(COMPARATOR, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(COMPARATOR, FACING_DIODE_TICK_PRIORITY, new TickPriorityProperty(TickPriority.HIGH));
+		
+		register(COMPOSTER, DELAY, new IntegerProperty(20, 0, 127));
+		register(COMPOSTER, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(CORAL, DELAY_MIN, new IntegerProperty(60, 0, 1023));
+		register(CORAL, DELAY_MAX, new IntegerProperty(100, 0, 1023));
+		register(CORAL, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(CORAL_BLOCK, DELAY_MIN, new IntegerProperty(60, 0, 1023));
+		register(CORAL_BLOCK, DELAY_MAX, new IntegerProperty(100, 0, 1023));
+		register(CORAL_BLOCK, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(DETECTOR_RAIL, DELAY, new IntegerProperty(20, 1, 127));
 		register(DETECTOR_RAIL, STRONG_POWER, new IntegerProperty(15, 0, 15));
@@ -213,6 +245,20 @@ public abstract class SettingsManager {
 		register(DROPPER, RANDOMIZE_QC, new BooleanProperty(false));
 		register(DROPPER, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
+		register(FARMLAND, DELAY, new IntegerProperty(1, 0, 127));
+		register(FARMLAND, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(FIRE, DELAY_MIN, new IntegerProperty(30, 1, 1023));
+		register(FIRE, DELAY_MAX, new IntegerProperty(10, 1, 1023));
+		register(FIRE, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(FROSTED_ICE, DELAY_MIN, new IntegerProperty(20, 0, 1023));
+		register(FROSTED_ICE, DELAY_MAX, new IntegerProperty(40, 0, 1023));
+		register(FROSTED_ICE, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(GRASS_PATH, DELAY, new IntegerProperty(1, 0, 127));
+		register(GRASS_PATH, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
 		register(GRAVITY_BLOCK, DELAY, new IntegerProperty(2, 0, 127));
 		register(GRAVITY_BLOCK, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
@@ -237,6 +283,13 @@ public abstract class SettingsManager {
 		
 		register(LEAVES, DELAY, new IntegerProperty(1, 0, 127));
 		register(LEAVES, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(LECTERN, FALLING_DELAY, new IntegerProperty(0, 0, 127));
+		register(LECTERN, RISING_DELAY, new IntegerProperty(2, 0, 127));
+		register(LECTERN, STRONG_POWER, new IntegerProperty(15, 0, 15));
+		register(LECTERN, WEAK_POWER, new IntegerProperty(15, 0, 15));
+		register(LECTERN, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		register(LECTERN, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(LEVER, FALLING_DELAY, new IntegerProperty(0, 0, 127));
 		register(LEVER, RISING_DELAY, new IntegerProperty(0, 0, 127));
@@ -390,6 +443,9 @@ public abstract class SettingsManager {
 		register(STONE_PRESSURE_PLATE, WEAK_POWER, new IntegerProperty(15, 0, 15));
 		register(STONE_PRESSURE_PLATE, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(STONE_PRESSURE_PLATE, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(SUGAR_CANE, DELAY, new IntegerProperty(1, 0, 127));
+		register(SUGAR_CANE, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(TARGET_BLOCK, DELAY, new IntegerProperty(8, 0, 127));
 		register(TARGET_BLOCK, PERSISTENT_PROJECTILE_DELAY, new IntegerProperty(20, 0, 127));

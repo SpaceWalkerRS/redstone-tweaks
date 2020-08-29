@@ -46,6 +46,10 @@ public class TweakCommand {
 						buildSubCommandTwoArgs(builder, pack, DELAY, RISING_DELAY, FALLING_DELAY, "risingEdge", "fallingEdge");
 					} else if (setting == FALLING_DELAY) {
 						
+					} else if (setting == DELAY_MIN) {
+						buildSubCommandTwoArgs(builder, pack, DELAY_RANGE, DELAY_MIN, DELAY_MAX, "minimum", "maximum");
+					} else if (setting == DELAY_MAX) {
+					
 					} else if (setting == RISING_LAZY) { 
 						buildSubCommandTwoArgs(builder, pack, LAZY, RISING_LAZY, FALLING_LAZY, "risingEdge", "fallingEdge");
 					} else if (setting == FALLING_LAZY) { 
