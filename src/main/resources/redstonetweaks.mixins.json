@@ -5,6 +5,7 @@
   "mixins": [
 	"server.AbstractBlockStateMixin",
 	"server.AbstractButtonBlockMixin",
+	"server.AbstractPlantBlockMixin",
 	"server.AbstractPressurePlateBlockMixin",
 	"server.AbstractRedstoneGateBlockMixin",
 	"server.BlockMixin",

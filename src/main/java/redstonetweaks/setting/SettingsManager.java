@@ -107,6 +107,7 @@ public abstract class SettingsManager {
 	public static final SettingsPack NORMAL_PISTON = register(new SettingsPack("normal_piston"), Blocks.PISTON);
 	public static final SettingsPack NOTE_BLOCK = register(new SettingsPack("note_block"), Blocks.NOTE_BLOCK);
 	public static final SettingsPack OBSERVER = register(new SettingsPack("observer"), Blocks.OBSERVER);
+	public static final SettingsPack PLANTS = register(new SettingsPack("plants"));
 	public static final SettingsPack POWERED_RAIL = register(new SettingsPack("powered_rail"), Blocks.POWERED_RAIL);
 	public static final SettingsPack REDSTONE_BLOCK = register(new SettingsPack("redstone_block"), Blocks.REDSTONE_BLOCK);
 	public static final SettingsPack REDSTONE_LAMP = register(new SettingsPack("redstone_lamp"), Blocks.REDSTONE_LAMP);
@@ -288,6 +289,9 @@ public abstract class SettingsManager {
 		register(OBSERVER, WEAK_POWER, new IntegerProperty(15, 0, 15));
 		register(OBSERVER, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(OBSERVER, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(PLANTS, DELAY, new IntegerProperty(1, 0, 15));
+		register(PLANTS, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
 		register(POWERED_RAIL, FALLING_DELAY, new IntegerProperty(0, 0, 127));
 		register(POWERED_RAIL, RISING_DELAY, new IntegerProperty(0, 0, 127));
