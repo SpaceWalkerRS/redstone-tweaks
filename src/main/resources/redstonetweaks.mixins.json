@@ -6,6 +6,7 @@
 	"server.AbstractBlockStateMixin",
 	"server.AbstractButtonBlockMixin",
 	"server.AbstractPlantBlockMixin",
+	"server.AbstractPlantStemBlockMixin",
 	"server.AbstractPressurePlateBlockMixin",
 	"server.AbstractRedstoneGateBlockMixin",
 	"server.BlockMixin",
