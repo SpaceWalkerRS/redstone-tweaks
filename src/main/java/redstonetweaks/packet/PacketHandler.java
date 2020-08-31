@@ -14,9 +14,9 @@ public abstract class PacketHandler {
 	public Packet<?> encodePacket(RedstoneTweaksPacket packet) {
 		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 		
-		buffer.writeByte(RedstoneTweaks.VERSION.major);
-		buffer.writeByte(RedstoneTweaks.VERSION.minor);
-		buffer.writeByte(RedstoneTweaks.VERSION.patch);
+		buffer.writeByte(RedstoneTweaks.MOD_VERSION.major);
+		buffer.writeByte(RedstoneTweaks.MOD_VERSION.minor);
+		buffer.writeByte(RedstoneTweaks.MOD_VERSION.patch);
 		
 		PacketType packetType = getTypeFromPacket(packet);
 		if (packetType == PacketType.INVALID) {

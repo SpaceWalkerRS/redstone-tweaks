@@ -50,7 +50,7 @@ public class ServerSettingsManager extends SettingsManager {
 					return;
 				}
 				RedstoneTweaksVersion settingsVersion = RedstoneTweaksVersion.fromString(line);
-				if (!RedstoneTweaks.VERSION.equals(settingsVersion)) {
+				if (!RedstoneTweaks.SETTINGS_VERSION.equals(settingsVersion)) {
 					return;
 				}
 				
@@ -83,7 +83,7 @@ public class ServerSettingsManager extends SettingsManager {
 		}
 		
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(settingsFile))) {
-			bw.write(RedstoneTweaks.VERSION.toString());
+			bw.write(RedstoneTweaks.SETTINGS_VERSION.toString());
 			bw.newLine();
 			
 			for (SettingsPack pack : SETTINGS_PACKS.values()) {

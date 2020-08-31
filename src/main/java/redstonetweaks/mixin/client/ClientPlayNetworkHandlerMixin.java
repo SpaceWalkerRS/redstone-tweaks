@@ -36,7 +36,7 @@ public class ClientPlayNetworkHandlerMixin {
 			PacketByteBuf buffer = packet.getData();
 			RedstoneTweaksVersion serverVersion = new RedstoneTweaksVersion(buffer.readByte(), buffer.readByte(), buffer.readByte());
 			
-			if (serverVersion.equals(RedstoneTweaks.VERSION)) {
+			if (serverVersion.equals(RedstoneTweaks.MOD_VERSION)) {
 				((MinecraftClientHelper)client).getPacketHandler().onPacketReceived(buffer);
 			}
 			
