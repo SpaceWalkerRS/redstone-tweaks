@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.RedstoneOreBlock;
 import net.minecraft.server.world.ServerWorld;
@@ -23,7 +23,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
 @Mixin(RedstoneOreBlock.class)
-public class RedstoneOreBlockMixin extends Block {
+public abstract class RedstoneOreBlockMixin extends AbstractBlock {
 	
 	@Shadow private native static void light(BlockState state, World world, BlockPos pos);
 	
@@ -69,6 +69,11 @@ public class RedstoneOreBlockMixin extends Block {
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		light(state, world, pos);
+	}
+	
+	@Override
+	public boolean emitsRedstonePower(BlockState state) {
+		return REDSTONE_ORE.get(CONNECTS_TO_WIRE);
 	}
 	
 	@Override

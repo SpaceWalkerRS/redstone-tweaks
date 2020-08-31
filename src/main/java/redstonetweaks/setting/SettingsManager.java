@@ -364,6 +364,7 @@ public abstract class SettingsManager {
 		register(REDSTONE_LAMP, FALLING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		register(REDSTONE_LAMP, RISING_TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
 		
+		register(REDSTONE_ORE, CONNECTS_TO_WIRE, new BooleanProperty(false));
 		register(REDSTONE_ORE, DELAY, new IntegerProperty(0, 0, 127));
 		register(REDSTONE_ORE, STRONG_POWER, new IntegerProperty(0, 0, 127));
 		register(REDSTONE_ORE, WEAK_POWER, new IntegerProperty(0, 0, 127));
