@@ -59,8 +59,8 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 	
 	@ModifyArg(method = "schedule", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ScheduledTick;<init>(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;JLnet/minecraft/world/TickPriority;)V"))
 	private long onScheduleOnNewScheduledTickModifyTime(long time) {
-		long delay = GLOBAL.get(RANDOMIZE_SCHEDULED_TICK_DELAYS) ? world.random.nextInt(127) + 1 : time - world.getTime();
-		return world.getTime() + GLOBAL.get(DELAY_MULTIPLIER) * delay;
+		int delay = getRandomDelay();
+		return delay == 0 ? time : world.getTime() + delay;
 	}
 	
 	// Generate a random tick priority if random tick priorities is enabled.
@@ -151,5 +151,12 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 		} else {
 			return false;
 		}
+	}
+	
+	private int getRandomDelay() {
+		int min = GLOBAL.get(RANDOMIZE_DELAYS_MIN);
+		int max = GLOBAL.get(RANDOMIZE_DELAYS_MAX);
+		
+		return min + world.getRandom().nextInt(max);
 	}
 }

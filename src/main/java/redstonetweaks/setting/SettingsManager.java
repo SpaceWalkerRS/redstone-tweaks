@@ -32,7 +32,9 @@ public abstract class SettingsManager {
 	public static final Setting<IntegerProperty> DELAY_RANGE = register(new Setting<>("delayRange"));
 	public static final Setting<IntegerProperty> DELAY_MIN = register(new Setting<>("delayMin"));
 	public static final Setting<IntegerProperty> DELAY_MAX = register(new Setting<>("delayMax"));
-	public static final Setting<BooleanProperty> RANDOMIZE_SCHEDULED_TICK_DELAYS = register(new Setting<>("randomizeScheduledTickDelays"));
+	public static final Setting<IntegerProperty> RANDOMIZE_DELAYS = register(new Setting<>("randomizeDelays"));
+	public static final Setting<IntegerProperty> RANDOMIZE_DELAYS_MIN = register(new Setting<>("randomizeDelaysMin"));
+	public static final Setting<IntegerProperty> RANDOMIZE_DELAYS_MAX = register(new Setting<>("randomizeDelaysMax"));
 	public static final Setting<IntegerProperty> DELAY_MULTIPLIER = register(new Setting<>("delayMultiplier"));
 	public static final Setting<BooleanProperty> DISABLE = register(new Setting<>("disable"));
 	public static final Setting<BooleanProperty> DIRECTIONAL_UPDATE_ORDER = register(new Setting<>("directionalUpdateOrder"));
@@ -495,7 +497,8 @@ public abstract class SettingsManager {
 		register(GLOBAL, DO_COMPARATOR_UPDATES, new BooleanProperty(true));
 		register(GLOBAL, DOUBLE_RETRACTION, new BooleanProperty(false));
 		register(GLOBAL, RANDOMIZE_BLOCK_EVENTS, new BooleanProperty(false));
-		register(GLOBAL, RANDOMIZE_SCHEDULED_TICK_DELAYS, new BooleanProperty(false));
+		register(GLOBAL, RANDOMIZE_DELAYS_MIN, new IntegerProperty(0, 0, 127));
+		register(GLOBAL, RANDOMIZE_DELAYS_MAX, new IntegerProperty(0, 0, 127));
 		register(GLOBAL, RANDOMIZE_TICK_PRIORITIES, new BooleanProperty(false));
 		register(GLOBAL, SHOW_NEIGHBOR_UPDATES, new BooleanProperty(false));
 		register(GLOBAL, SHOW_PROCESSING_ORDER, new IntegerProperty(0, 0, 127));
