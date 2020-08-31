@@ -14,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
-import redstonetweaks.helper.AbstractBlockHelper;
+
 import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
@@ -26,7 +26,7 @@ public abstract class AbstractBlockStateMixin {
 	@Inject(method = "isSideSolidFullSquare", cancellable = true, at = @At(value = "RETURN"))
 	private void onIsSideSolidFullSquareInjectAtReturn(BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (!cir.getReturnValueZ()) {
-			cir.setReturnValue(AbstractBlockHelper.isRigidPistonBase(world, pos, (BlockState)(Object)this));
+			cir.setReturnValue(BlockHelper.isRigidPistonBase(world, pos, (BlockState)(Object)this));
 			cir.cancel();
 		}
 	}
