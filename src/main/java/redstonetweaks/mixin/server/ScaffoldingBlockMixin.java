@@ -16,7 +16,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;;
+import net.minecraft.world.WorldAccess;
+
+import redstonetweaks.helper.TickSchedulerHelper;;
 
 @Mixin(ScaffoldingBlock.class)
 public abstract class ScaffoldingBlockMixin {
@@ -24,26 +26,17 @@ public abstract class ScaffoldingBlockMixin {
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		delay = SCAFFOLDING.get(DELAY);
-		if (delay == 0) {
-			if (!world.isClient()) {
-				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
-			}
-		} else {
-			tickScheduler.schedule(pos, object, delay, SCAFFOLDING.get(TICK_PRIORITY));
-		}
+	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, SCAFFOLDING.get(DELAY), SCAFFOLDING.get(TICK_PRIORITY));
 	}
 	
-	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		delay = SCAFFOLDING.get(DELAY);
-		if (delay == 0) {
-			if (!world.isClient()) {
-				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
-			}
-		} else {
-			tickScheduler.schedule(pos, object, delay, SCAFFOLDING.get(TICK_PRIORITY));
-		}
+	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	private <T> void onGetStateForNeighborUpdateRedirectSchedule0(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, WATER.get(TICK_PRIORITY));
+	}
+	
+	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	private <T> void onGetStateForNeighborUpdateRedirectSchedule1(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, SCAFFOLDING.get(DELAY), SCAFFOLDING.get(TICK_PRIORITY));
 	}
 }

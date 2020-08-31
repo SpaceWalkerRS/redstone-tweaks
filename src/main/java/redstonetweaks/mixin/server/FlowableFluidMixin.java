@@ -8,7 +8,7 @@ import redstonetweaks.helper.FluidHelper;
 
 @Mixin(FlowableFluid.class)
 public class FlowableFluidMixin implements FluidHelper {
-
+	
 	@Override
 	public TickPriority getTickPriority() {
 		return TickPriority.NORMAL;

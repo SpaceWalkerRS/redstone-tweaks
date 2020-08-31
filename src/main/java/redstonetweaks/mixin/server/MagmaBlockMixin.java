@@ -18,32 +18,20 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
+import redstonetweaks.helper.TickSchedulerHelper;
+
 @Mixin(MagmaBlock.class)
 public abstract class MagmaBlockMixin {
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		delay = MAGMA_BLOCK.get(DELAY);
-		if (delay == 0) {
-			if (!world.isClient()) {
-				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
-			}
-		} else {
-			tickScheduler.schedule(pos, object, delay, MAGMA_BLOCK.get(TICK_PRIORITY));
-		}
+	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, MAGMA_BLOCK.get(DELAY), MAGMA_BLOCK.get(TICK_PRIORITY));
 	}
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		delay = MAGMA_BLOCK.get(DELAY);
-		if (delay == 0) {
-			if (!world.isClient()) {
-				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
-			}
-		} else {
-			tickScheduler.schedule(pos, object, delay, MAGMA_BLOCK.get(TICK_PRIORITY));
-		}
+	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, MAGMA_BLOCK.get(DELAY), MAGMA_BLOCK.get(TICK_PRIORITY));
 	}
 }

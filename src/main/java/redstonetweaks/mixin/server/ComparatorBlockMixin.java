@@ -45,7 +45,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	
 	@ModifyConstant(method = "getUpdateDelayInternal", constant = @Constant(intValue = 2))
-	private int onGetUpdateDelayInternalModifyDelay(int oldDelay) {
+	private int onGetUpdateDelayInternalModify2(int oldDelay) {
 		return COMPARATOR.get(DELAY);
 	}
 	

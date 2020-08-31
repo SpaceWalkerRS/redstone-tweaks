@@ -17,20 +17,15 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 
+import redstonetweaks.helper.TickSchedulerHelper;
+
 @Mixin(GrassPathBlock.class)
 public abstract class GrassPathBlockMixin {
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		delay = GRASS_PATH.get(DELAY);
-		if (delay == 0) {
-			if (!world.isClient()) {
-				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
-			}
-		} else {
-			tickScheduler.schedule(pos, object, delay, GRASS_PATH.get(TICK_PRIORITY));
-		}
+	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, GRASS_PATH.get(DELAY), PLANTS.get(TICK_PRIORITY));
 	}
 }

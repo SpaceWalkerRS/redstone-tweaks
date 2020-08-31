@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.AbstractBlock.AbstractBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
@@ -23,10 +24,9 @@ import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 public abstract class AbstractBlockStateMixin {
 
 	@Inject(method = "isSideSolidFullSquare", cancellable = true, at = @At(value = "RETURN"))
-	private void onIsSideSolidFullSquareInjectAtReturn(BlockView world, BlockPos pos, Direction direction,
-			CallbackInfoReturnable<Boolean> cir) {
+	private void onIsSideSolidFullSquareInjectAtReturn(BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (!cir.getReturnValueZ()) {
-			cir.setReturnValue(AbstractBlockHelper.isRigidPistonBase(world, pos, world.getBlockState(pos)));
+			cir.setReturnValue(AbstractBlockHelper.isRigidPistonBase(world, pos, (BlockState)(Object)this));
 			cir.cancel();
 		}
 	}
@@ -38,8 +38,7 @@ public abstract class AbstractBlockStateMixin {
 				if (!world.isClient()) {
 					for (Direction direction : BlockHelper.getFacings()) {
 						BlockPos neighborPos = pos.offset(direction);
-						((ServerWorldHelper) world).getNeighborUpdateScheduler().schedule(neighborPos, pos,
-								direction.getOpposite(), flags, maxUpdateDepth, UpdateType.STATE_UPDATE);
+						((ServerWorldHelper)world).getNeighborUpdateScheduler().schedule(neighborPos, pos, direction.getOpposite(), flags, maxUpdateDepth, UpdateType.STATE_UPDATE);
 					}
 				}
 

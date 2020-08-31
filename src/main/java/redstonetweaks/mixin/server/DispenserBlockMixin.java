@@ -34,10 +34,10 @@ public abstract class DispenserBlockMixin {
 	}
 
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay, BlockState state, World world, BlockPos blockPos, Block sourceBlock, BlockPos fromPos, boolean notify) {
+	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay, BlockState state, World world, BlockPos blockPos, Block sourceBlock, BlockPos fromPos, boolean notify) {
 		int delay = getDelay(state);
 		if (delay > 0) {
-			tickScheduler.schedule(pos, object, delay, getTickPriority(state));
+			tickScheduler.schedule(pos, block, delay, getTickPriority(state));
 		}
 	}
 

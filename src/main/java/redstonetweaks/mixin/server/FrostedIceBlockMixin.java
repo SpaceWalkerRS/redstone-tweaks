@@ -16,20 +16,16 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
+import redstonetweaks.helper.TickSchedulerHelper;
+
 @Mixin(FrostedIceBlock.class)
 public abstract class FrostedIceBlockMixin {
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
+	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		delay = MathHelper.nextInt(random, FROSTED_ICE.get(DELAY_MIN), FROSTED_ICE.get(DELAY_MAX));
-		if (delay == 0) {
-			if (!world.isClient()) {
-				scheduledTick(state, (ServerWorld)world, pos, random);
-			}
-		} else {
-			tickScheduler.schedule(pos, object, delay, FROSTED_ICE.get(TICK_PRIORITY));
-		}
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, delay, FROSTED_ICE.get(TICK_PRIORITY));
 	}
 }

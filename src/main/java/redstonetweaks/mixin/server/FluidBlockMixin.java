@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.FluidHelper;
+import redstonetweaks.helper.TickSchedulerHelper;
 
 @Mixin(FluidBlock.class)
 public class FluidBlockMixin {
@@ -24,29 +25,17 @@ public class FluidBlockMixin {
 	@Shadow @Final private FlowableFluid fluid;
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		if (delay == 0) {
-			fluid.onScheduledTick(world, pos, state.getFluidState());
-		} else {
-			tickScheduler.schedule(pos, object, delay, ((FluidHelper)fluid).getTickPriority());
-		}
+	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, ((FluidHelper)this.fluid).getTickPriority());
 	}
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		if (delay == 0) {
-			fluid.onScheduledTick((World)world, pos, state.getFluidState());
-		} else {
-			tickScheduler.schedule(pos, object, delay, ((FluidHelper)fluid).getTickPriority());
-		}
+	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, ((FluidHelper)this.fluid).getTickPriority());
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-		if (delay == 0) {
-			fluid.onScheduledTick(world, pos, state.getFluidState());
-		} else {
-			tickScheduler.schedule(pos, object, delay, ((FluidHelper)fluid).getTickPriority());
-		}
+	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, ((FluidHelper)this.fluid).getTickPriority());
 	}
 }

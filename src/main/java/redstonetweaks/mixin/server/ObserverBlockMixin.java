@@ -29,6 +29,7 @@ import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.AbstractBlockHelper;
 import redstonetweaks.helper.ServerWorldHelper;
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.world.server.UnfinishedEvent.Source;
 
@@ -40,13 +41,8 @@ public abstract class ObserverBlockMixin implements AbstractBlockHelper {
 	@Shadow protected abstract void updateNeighbors(World world, BlockPos pos, BlockState state);
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T object, int oldDelay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		int delay = OBSERVER.get(FALLING_DELAY);
-		if (delay == 0) {
-			scheduledTick(world.getBlockState(pos), world, pos, random);
-		} else {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, OBSERVER.get(FALLING_TICK_PRIORITY));
-		}
+	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T block, int oldDelay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
+		TickSchedulerHelper.schedule(world, world.getBlockState(pos), tickScheduler, pos, block, OBSERVER.get(FALLING_DELAY), OBSERVER.get(FALLING_TICK_PRIORITY));
 	}
 	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/ObserverBlock;updateNeighbors(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
@@ -90,8 +86,7 @@ public abstract class ObserverBlockMixin implements AbstractBlockHelper {
 	// fixing MC-136566. Disabling the 16 flag makes sure neighboring
 	// observers are updated, fixing MC-137127.
 	@ModifyConstant(method = "onBlockAdded", constant = @Constant(intValue = 18))
-	private int onBlockAddedFlags(int oldFlags) {
-		int flags = oldFlags;
+	private int onBlockAddedFlags(int flags) {
 		if (BUG_FIXES.get(MC136566)) {
 			flags |= 1;
 		}

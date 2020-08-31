@@ -29,10 +29,10 @@ public abstract class NoteBlockMixin extends AbstractBlock {
 	private void onNeighborUpdateRedirectPlayNote(NoteBlock noteBlock, World world, BlockPos pos) {
 		if (!world.getBlockTickScheduler().isTicking(pos, noteBlock)) {
 			int delay = NOTE_BLOCK.get(DELAY);
-			if (delay > 0) {
-				world.getBlockTickScheduler().schedule(pos, noteBlock, delay, NOTE_BLOCK.get(TICK_PRIORITY));
-			} else {
+			if (delay == 0) {
 				playNote(world, pos);
+			} else {
+				world.getBlockTickScheduler().schedule(pos, noteBlock, delay, NOTE_BLOCK.get(TICK_PRIORITY));
 			}
 		}
 	}

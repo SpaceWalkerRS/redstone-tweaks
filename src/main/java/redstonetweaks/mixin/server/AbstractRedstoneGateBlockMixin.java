@@ -130,8 +130,8 @@ public abstract class AbstractRedstoneGateBlockMixin extends Block implements Ab
 		if (delay == 0) {
 			scheduledTick(world.getBlockState(pos), world, pos, random);
 		} else { 
-			TickPriority tickPriority = powered ? REPEATER.get(FALLING_TICK_PRIORITY) : REPEATER.get(RISING_TICK_PRIORITY);
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), state.get(Properties.DELAY) * delay, tickPriority);
+			TickPriority priority = powered ? REPEATER.get(FALLING_TICK_PRIORITY) : REPEATER.get(RISING_TICK_PRIORITY);
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), state.get(Properties.DELAY) * delay, priority);
 		}
 	}
 }

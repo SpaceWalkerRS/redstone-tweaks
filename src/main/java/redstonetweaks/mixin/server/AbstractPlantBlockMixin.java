@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickScheduler;
@@ -20,19 +19,12 @@ import redstonetweaks.helper.TickSchedulerHelper;
 public abstract class AbstractPlantBlockMixin {
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onGetStateForNeighborUpdateRedirectSchedule0(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		delay = PLANTS.get(DELAY);
-		if (delay == 0) {
-			if (!world.isClient()) {
-				state.scheduledTick((ServerWorld)world, pos, world.getRandom());
-			}
-		} else {
-			tickScheduler.schedule(pos, object, delay, PLANTS.get(TICK_PRIORITY));
-		}
+	private <T> void onGetStateForNeighborUpdateRedirectSchedule0(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, PLANTS.get(DELAY), PLANTS.get(TICK_PRIORITY));
 	}
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule1(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay);
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, WATER.get(TICK_PRIORITY));
 	}
 }

@@ -15,12 +15,12 @@ import net.minecraft.world.TickScheduler;
 public class CommandBlockMixin {
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
-		tickScheduler.schedule(pos, object, COMMAND_BLOCK.get(DELAY), COMMAND_BLOCK.get(TICK_PRIORITY));
+	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay) {
+		tickScheduler.schedule(pos, block, COMMAND_BLOCK.get(DELAY), COMMAND_BLOCK.get(TICK_PRIORITY));
 	}
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
-		tickScheduler.schedule(pos, object, COMMAND_BLOCK.get(DELAY), COMMAND_BLOCK.get(TICK_PRIORITY));
+	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay) {
+		tickScheduler.schedule(pos, block, COMMAND_BLOCK.get(DELAY), COMMAND_BLOCK.get(TICK_PRIORITY));
 	}
 }

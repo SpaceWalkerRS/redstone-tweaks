@@ -38,21 +38,21 @@ public abstract class AbstractPressurePlateBlockMixin {
 		SettingsPack settings = ((PressurePlateHelper)this).getSettings(state);
 		
 		int delay = settings.get(RISING_DELAY);
-		if (delay > 0) {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, settings.get(RISING_TICK_PRIORITY));
-		} else {
+		if (delay == 0) {
 			updatePlateState(world, pos, state, i);
+		} else {
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, settings.get(RISING_TICK_PRIORITY));
 		}
 	}
 	
 	@Redirect(method = "updatePlateState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void updatePlateStateRedirectScheduleTick(TickScheduler<?> tickScheduler, BlockPos pos, T Object, int oldDelay, World world, BlockPos blockPos, BlockState state) {
+	private <T> void updatePlateStateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay, World world, BlockPos blockPos, BlockState state) {
 		SettingsPack settings = ((PressurePlateHelper)this).getSettings(state);
 		
 		int delay = settings.get(FALLING_DELAY);
 		TickPriority priority = settings.get(FALLING_TICK_PRIORITY);
 		
-		world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
+		tickScheduler.schedule(pos, block, delay, priority);
 	}
 	
 	@Redirect(method = "getWeakRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;getRedstoneOutput(Lnet/minecraft/block/BlockState;)I"))

@@ -24,10 +24,10 @@ public class RedstoneLampBlockMixin {
 	@Inject(method = "neighborUpdate", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private void onNeighborUpdateInjectBeforeSchedule(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
 		int delay = REDSTONE_LAMP.get(FALLING_DELAY);
-		if (delay > 0) {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, REDSTONE_LAMP.get(FALLING_TICK_PRIORITY));
-		} else {
+		if (delay == 0) {
 			world.setBlockState(pos, state.cycle(Properties.LIT), 2);
+		} else {
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, REDSTONE_LAMP.get(FALLING_TICK_PRIORITY));
 		}
 		ci.cancel();
 	}

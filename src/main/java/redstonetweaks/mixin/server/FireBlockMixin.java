@@ -20,8 +20,8 @@ import net.minecraft.util.math.BlockPos;
 public class FireBlockMixin {
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		tickScheduler.schedule(pos, object, delay, FIRE.get(TICK_PRIORITY));
+	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
+		tickScheduler.schedule(pos, block, delay, FIRE.get(TICK_PRIORITY));
 	}
 	
 	@ModifyConstant(method = "method_26155", constant = @Constant(intValue = 30))

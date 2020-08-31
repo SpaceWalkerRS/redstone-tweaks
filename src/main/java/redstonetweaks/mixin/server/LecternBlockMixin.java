@@ -41,14 +41,14 @@ public abstract class LecternBlockMixin {
 	
 	@Redirect(method = "setPowered(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private static <T> void onSetPoweredRedirectSchedule0(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, World world, BlockPos pos, BlockState state) {
-		scheduleDepower(world, pos, state);
+		depower(world, pos, state);
 	}
 	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "HEAD"))
 	private void onScheduledTickInjectAtHead(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		if (!state.get(Properties.POWERED)) {
-			setPowered(world, pos, state, false);
-			scheduleDepower(world, pos, state);
+			setPowered(world, pos, state, true);
+			depower(world, pos, state);
 			
 			ci.cancel();
 		}
@@ -64,7 +64,7 @@ public abstract class LecternBlockMixin {
 		return LECTERN.get(STRONG_POWER);
 	}
 	
-	private static void scheduleDepower(World world, BlockPos pos, BlockState state) {
+	private static void depower(World world, BlockPos pos, BlockState state) {
 		int delay = LECTERN.get(FALLING_DELAY);
 		if (delay == 0) {
 			if (!world.isClient()) {

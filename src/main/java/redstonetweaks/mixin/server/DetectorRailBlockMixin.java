@@ -26,7 +26,7 @@ public class DetectorRailBlockMixin {
 	}
 	
 	@Redirect(method = "updatePoweredStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onUpdatePoweredStatusRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
-		tickScheduler.schedule(pos, object, DETECTOR_RAIL.get(DELAY), DETECTOR_RAIL.get(TICK_PRIORITY));
+	private <T> void onUpdatePoweredStatusRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay) {
+		tickScheduler.schedule(pos, block, DETECTOR_RAIL.get(DELAY), DETECTOR_RAIL.get(TICK_PRIORITY));
 	}
 }

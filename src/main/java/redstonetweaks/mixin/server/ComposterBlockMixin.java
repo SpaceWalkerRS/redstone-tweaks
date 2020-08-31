@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import redstonetweaks.helper.TickSchedulerHelper;
 
 @Mixin(ComposterBlock.class)
 public abstract class ComposterBlockMixin {
@@ -24,26 +25,12 @@ public abstract class ComposterBlockMixin {
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		delay = COMPOSTER.get(DELAY);
-		if (delay == 0) {
-			if (!world.isClient()) {
-				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
-			}
-		} else {
-			tickScheduler.schedule(pos, object, delay, COMPOSTER.get(TICK_PRIORITY));
-		}
+	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, COMPOSTER.get(DELAY), COMPOSTER.get(TICK_PRIORITY));
 	}
 	
 	@Redirect(method = "addToComposter", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private static <T> void onAddToComposterRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, WorldAccess world, BlockPos pos, ItemStack item) {
-		delay = COMPOSTER.get(DELAY);
-		if (delay == 0) {
-			if (!world.isClient()) {
-				state.scheduledTick((ServerWorld)world, pos, world.getRandom());
-			}
-		} else {
-			tickScheduler.schedule(pos, object, delay, COMPOSTER.get(TICK_PRIORITY));
-		}
+	private static <T> void onAddToComposterRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, WorldAccess world, BlockPos pos, ItemStack item) {
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, COMPOSTER.get(DELAY), COMPOSTER.get(TICK_PRIORITY));
 	}
 }
