@@ -47,7 +47,7 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 	
 	@Shadow abstract void addScheduledTick(ScheduledTick<T> scheduledTick);
 	
-	@Inject(method = "schedule", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
+	@Inject(method = "schedule", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
 	private void onScheduledInjectBeforeAddScheduledTick(BlockPos pos, T object, int delay, TickPriority priority, CallbackInfo ci) {
 		if (GLOBAL.get(DELAY_MULTIPLIER) == 0) {
 			tickConsumer.accept(new ScheduledTick<>(pos, object, 0, priority));
