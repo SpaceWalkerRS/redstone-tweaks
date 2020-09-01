@@ -33,7 +33,7 @@ import net.minecraft.world.TickScheduler;
 import redstonetweaks.helper.ServerTickSchedulerHelper;
 
 @Mixin(ServerTickScheduler.class)
-public abstract class ServerTickSchedulerMixin<T> implements ServerTickSchedulerHelper<T>, TickScheduler<T> {
+public abstract class ServerTickSchedulerMixin<T> implements ServerTickSchedulerHelper, TickScheduler<T> {
 	
 	@Shadow ServerWorld world;
 	@Shadow Predicate<T> invalidObjPredicate;
@@ -64,7 +64,7 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 	}
 	
 	@Override
-	public boolean hasScheduledTickAtTime(BlockPos pos, T object, int delay) {
+	public boolean hasScheduledTickAtTime(BlockPos pos, Object object, int delay) {
 		long time = world.getTime() + delay;
 		for (ScheduledTick<T> tick : scheduledTickActions) {
 			if (tick.pos.equals(pos) && tick.getObject() == object && tick.time == time) {
