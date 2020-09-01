@@ -2,9 +2,9 @@ package redstonetweaks.helper;
 
 import net.minecraft.util.math.BlockPos;
 
-public interface ServerTickSchedulerHelper {
+public interface ServerTickSchedulerHelper<T> {
 	
-	public <T> boolean isScheduledAtTime(BlockPos pos, T object, int delay);
+	public boolean hasScheduledTickAtTime(BlockPos pos, T object, int delay);
 	
 	public void startTicking();
 	

@@ -15,9 +15,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerChunkManager;
@@ -34,13 +33,13 @@ import net.minecraft.world.TickScheduler;
 import redstonetweaks.helper.ServerTickSchedulerHelper;
 
 @Mixin(ServerTickScheduler.class)
-public abstract class ServerTickSchedulerMixin<T> implements ServerTickSchedulerHelper, TickScheduler<T> {
+public abstract class ServerTickSchedulerMixin<T> implements ServerTickSchedulerHelper<T>, TickScheduler<T> {
 	
 	@Shadow ServerWorld world;
 	@Shadow Predicate<T> invalidObjPredicate;
 	@Shadow @Final Set<ScheduledTick<T>> scheduledTickActions;
 	@Shadow @Final private TreeSet<ScheduledTick<T>> scheduledTickActionsInOrder;
-	@Shadow @Final private  List<ScheduledTick<T>> consumedTickActions;
+	@Shadow @Final private List<ScheduledTick<T>> consumedTickActions;
 	@Shadow @Final private Queue<ScheduledTick<T>> currentTickActions;
 	@Shadow @Final private Consumer<ScheduledTick<T>> tickConsumer;
 	
@@ -48,35 +47,26 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 	
 	@Shadow abstract void addScheduledTick(ScheduledTick<T> scheduledTick);
 	
-	@Inject(method = "schedule", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
-	private void onScheduleInjectBeforeAddScheduledTick(BlockPos pos, T object, int delay, TickPriority priority, CallbackInfo ci) {
+	@Inject(method = "schedule", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
+	private void onScheduledInjectBeforeAddScheduledTick(BlockPos pos, T object, int delay, TickPriority priority, CallbackInfo ci) {
 		if (GLOBAL.get(DELAY_MULTIPLIER) == 0) {
-			tickConsumer.accept(new ScheduledTick<>(pos, object, delay, priority));
+			tickConsumer.accept(new ScheduledTick<>(pos, object, 0, priority));
+		} else {
+			if (GLOBAL.get(RANDOMIZE_TICK_PRIORITIES)) {
+				int index = world.getRandom().nextInt(TickPriority.values().length) + TickPriority.values()[0].getIndex();
+				priority = TickPriority.byIndex(index);
+			}
 			
-			ci.cancel();
+			addScheduledTick(new ScheduledTick<>(pos, object, world.getTime() + getDelay(delay), priority));
 		}
-	}
-	
-	@ModifyArg(method = "schedule", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ScheduledTick;<init>(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;JLnet/minecraft/world/TickPriority;)V"))
-	private long onScheduleOnNewScheduledTickModifyTime(long time) {
-		int delay = getRandomDelay();
-		return delay == 0 ? time : world.getTime() + delay;
-	}
-	
-	// Generate a random tick priority if random tick priorities is enabled.
-	@ModifyArg(method = "schedule", index = 3, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ScheduledTick;<init>(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;JLnet/minecraft/world/TickPriority;)V"))
-	private TickPriority onScheduleOnNewScheduledTickModifyTickPriority(TickPriority tickPriority) {
-		if (GLOBAL.get(RANDOMIZE_TICK_PRIORITIES)) {
-			int index = world.random.nextInt(TickPriority.values().length) + TickPriority.values()[0].getIndex();
-			tickPriority = TickPriority.byIndex(index);
-		}
-		return tickPriority;
+		
+		ci.cancel();
 	}
 	
 	@Override
-	public boolean isScheduledAtTime(BlockPos pos, Object object, int delay) {
+	public boolean hasScheduledTickAtTime(BlockPos pos, T object, int delay) {
 		long time = world.getTime() + delay;
-		for (ScheduledTick<?> tick : scheduledTickActions) {
+		for (ScheduledTick<T> tick : scheduledTickActions) {
 			if (tick.pos.equals(pos) && tick.getObject() == object && tick.time == time) {
 				return true;
 			}
@@ -153,10 +143,13 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 		}
 	}
 	
-	private int getRandomDelay() {
+	private int getDelay(int delay) {
 		int min = GLOBAL.get(RANDOMIZE_DELAYS_MIN);
 		int max = GLOBAL.get(RANDOMIZE_DELAYS_MAX);
 		
+		if (min + max == 0) {
+			return GLOBAL.get(DELAY_MULTIPLIER) * delay;
+		}
 		return min + world.getRandom().nextInt(max);
 	}
 }

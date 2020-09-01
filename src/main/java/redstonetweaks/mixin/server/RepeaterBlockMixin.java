@@ -47,7 +47,7 @@ public abstract class RepeaterBlockMixin implements RedstoneDiodeHelper {
 			return false;
 		}
 		if (frontState.get(Properties.POWERED)) {
-			return ((ServerTickSchedulerHelper)world.getBlockTickScheduler()).isScheduledAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
+			return ((ServerTickSchedulerHelper)world.getBlockTickScheduler()).hasScheduledTickAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
 		} else {
 			return world.getBlockTickScheduler().isTicking(frontPos, frontState.getBlock());
 		}

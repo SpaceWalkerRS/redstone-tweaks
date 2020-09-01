@@ -119,6 +119,6 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 		if (state.get(Properties.POWERED) == frontState.get(Properties.POWERED)) {
 			return false;
 		}
-		return ((ServerTickSchedulerHelper)world.getBlockTickScheduler()).isScheduledAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
+		return ((ServerTickSchedulerHelper)world.getBlockTickScheduler()).hasScheduledTickAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
 	}
 }
