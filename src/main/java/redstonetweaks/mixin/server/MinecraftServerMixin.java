@@ -22,6 +22,7 @@ import redstonetweaks.helper.ServerChunkManagerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.setting.ServerSettingsManager;
+import redstonetweaks.world.server.ServerTickHandler;
 import redstonetweaks.world.server.ServerWorldHandler;
 
 @Mixin(MinecraftServer.class)
@@ -31,6 +32,7 @@ public abstract class MinecraftServerMixin implements MinecraftServerHelper {
 	
 	private ServerSettingsManager settingsManager;
 	private ServerPacketHandler packetHandler;
+	private ServerTickHandler tickHandler;
 	private ServerWorldHandler worldHandler;
 	private boolean tickedWorldHandler = false;
 	
@@ -40,6 +42,7 @@ public abstract class MinecraftServerMixin implements MinecraftServerHelper {
 	private void onInitInjectAtReturn(CallbackInfo ci) {
 		settingsManager = new ServerSettingsManager((MinecraftServer)(Object)this);
 		packetHandler = new ServerPacketHandler((MinecraftServer)(Object)this);
+		tickHandler = new ServerTickHandler((MinecraftServer)(Object)this);
 	}
 	
 	@Inject(method = "loadWorld", at = @At(value = "RETURN"))
@@ -59,11 +62,13 @@ public abstract class MinecraftServerMixin implements MinecraftServerHelper {
 	
 	@Redirect(method = "tickWorlds", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z"))
 	private boolean onTickWorldsRedirectHasNext(Iterator<ServerWorld> iterator) {
-		if (GLOBAL.get(SHOW_PROCESSING_ORDER) > 0 || worldHandler.isTicking()) {
-			return !tickedWorldHandler;
-		} else {
+		if (tickHandler.shouldTick()) {
+			if (GLOBAL.get(SHOW_PROCESSING_ORDER) > 0 || worldHandler.isTicking()) {
+				return !tickedWorldHandler;
+			}
 			return iterator.hasNext();
 		}
+		return false;
 	}
 	
 	@Redirect(method = "tickWorlds", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tick(Ljava/util/function/BooleanSupplier;)V"))
@@ -101,6 +106,11 @@ public abstract class MinecraftServerMixin implements MinecraftServerHelper {
 	@Override
 	public ServerPacketHandler getPacketHandler() {
 		return packetHandler;
+	}
+	
+	@Override
+	public ServerTickHandler getTickHandler() {
+		return tickHandler;
 	}
 	
 	@Override
