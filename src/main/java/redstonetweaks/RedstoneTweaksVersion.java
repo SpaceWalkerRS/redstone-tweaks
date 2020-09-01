@@ -36,6 +36,7 @@ public class RedstoneTweaksVersion {
 				int major = Integer.parseInt(args[0]);
 				int minor = Integer.parseInt(args[1]);
 				int patch = Integer.parseInt(args[2]);
+				
 				if (major >= 0 && minor >= 0 && patch >= 0)
 			        return new RedstoneTweaksVersion(major, minor, patch);
 			} catch (NumberFormatException ignore) {

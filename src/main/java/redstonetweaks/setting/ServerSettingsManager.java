@@ -49,8 +49,7 @@ public class ServerSettingsManager extends SettingsManager {
 				if ((line = br.readLine()) == null) {
 					return;
 				}
-				RedstoneTweaksVersion settingsVersion = RedstoneTweaksVersion.fromString(line);
-				if (!RedstoneTweaks.SETTINGS_VERSION.equals(settingsVersion)) {
+				if (!RedstoneTweaks.SETTINGS_VERSION.equals(RedstoneTweaksVersion.fromString(line))) {
 					return;
 				}
 				
@@ -58,11 +57,13 @@ public class ServerSettingsManager extends SettingsManager {
 				while ((line = br.readLine()) != null) {
 					if (line.endsWith(":")) {
 						currentPack = SETTINGS_PACKS.get(line.substring(0, line.length() - 1));
-					} else {
+					} else if (currentPack != null) {
 						String[] args = line.split("=", 0);
 						Setting<?> setting = SETTINGS.get(args[0]);
-						int value = Integer.parseInt(args[1]);
-						loadSettingFromInt(currentPack, setting, value);
+						if (setting != null) {
+							int value = Integer.parseInt(args[1]);
+							loadSettingFromInt(currentPack, setting, value);
+						}
 					}
 				}
 			} catch (IOException e) {
@@ -112,12 +113,12 @@ public class ServerSettingsManager extends SettingsManager {
 		} else if (property instanceof TickPriorityProperty) {
 			pack.set((Setting<TickPriorityProperty>)setting, TickPriority.byIndex(value));
 		} else {
-			throw new IllegalStateException("unknown setting type \"" + setting.getName() + "\" for pack \"" + pack.getName() + "\"");
+			throw new IllegalStateException("unknown setting \"" + setting.getName() + "\" for pack \"" + pack.getName() + "\"");
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Integer settingToInt(SettingsPack pack, Setting<?> setting) {
+	private int settingToInt(SettingsPack pack, Setting<?> setting) {
 		Property<?> property = pack.getProperty(setting);
 		if (property instanceof BooleanProperty) {
 			return pack.get((Setting<BooleanProperty>)setting) ? 1 : 0;
@@ -127,7 +128,7 @@ public class ServerSettingsManager extends SettingsManager {
 			return pack.get((Setting<TickPriorityProperty>)setting).getIndex();
 		}
 		
-		throw new IllegalStateException("unknown setting type");
+		throw new IllegalStateException("unknown setting");
 	}
 	
 	private File getCacheDir() {
