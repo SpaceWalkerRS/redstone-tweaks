@@ -26,9 +26,9 @@ public interface WorldHelper {
 	
 	public void tickBlockEntity(BlockEntity blockEntity, Profiler profiler);
 	
-	public boolean shouldSeparateWorldTick();
+	public boolean tickWorldsNormally();
 	
-	public boolean shouldSeparateUpdates();
+	public boolean updateNeighborsNormally();
 	
 	public static BlockState getStateForPower(World world, BlockPos pos, Direction direction) {
 		BlockState state = world.getBlockState(pos);

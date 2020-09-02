@@ -2,8 +2,7 @@ package redstonetweaks.helper;
 
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.setting.ServerSettingsManager;
-import redstonetweaks.world.server.ServerTickHandler;
-import redstonetweaks.world.server.ServerWorldHandler;
+import redstonetweaks.world.server.ServerWorldTickHandler;
 
 public interface MinecraftServerHelper {
 	
@@ -11,7 +10,8 @@ public interface MinecraftServerHelper {
 	
 	public ServerPacketHandler getPacketHandler();
 	
-	public ServerTickHandler getTickHandler();
+	public ServerWorldTickHandler getWorldTickHandler();
 	
-	public ServerWorldHandler getWorldHandler();
+	public void broadcastChunkData();
+	
 }

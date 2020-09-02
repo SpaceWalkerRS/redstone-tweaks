@@ -85,12 +85,12 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	@Redirect(method = "updateNeighbor", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;neighborUpdate(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;Z)V"))
 	private void onUpdateNeighborRedirectNeighborUpdate(BlockState blockState, World world, BlockPos pos, Block sourceBlock, BlockPos notifierPos, boolean notify) {
 		if (GLOBAL.get(DO_BLOCK_UPDATES)) {
-			if (shouldSeparateUpdates()) {
+			if (updateNeighborsNormally()) {
+				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
+			} else {
 				if (!world.isClient()) {
 					((ServerWorldHelper)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, null, UpdateType.BLOCK_UPDATE);
 				}
-			} else {
-				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
 			}
 		}
 	}
@@ -98,12 +98,12 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	@Redirect(method = "updateComparators", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;neighborUpdate(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;Z)V"))
 	private void onUpdateComparatorsRedirectNeighborUpdate(BlockState blockState, World world, BlockPos pos, Block sourceBlock, BlockPos notifierPos, boolean notify) {
 		if (GLOBAL.get(DO_COMPARATOR_UPDATES)) {
-			if (shouldSeparateUpdates()) {
+			if (updateNeighborsNormally()) {
+				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
+			} else {
 				if (!world.isClient) {
 					((ServerWorldHelper)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, null, UpdateType.COMPARATOR_UPDATE);
 				}
-			} else {
-				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
 			}
 		}
 	}

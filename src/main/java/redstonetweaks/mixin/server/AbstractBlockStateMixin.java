@@ -34,7 +34,7 @@ public abstract class AbstractBlockStateMixin {
 	@Inject(method = "updateNeighbors(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;II)V", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(WorldAccess world, BlockPos pos, int flags, int maxUpdateDepth, CallbackInfo ci) {
 		if (GLOBAL.get(DO_STATE_UPDATES)) {
-			if (((WorldHelper) world).shouldSeparateUpdates()) {
+			if (!((WorldHelper) world).updateNeighborsNormally()) {
 				if (!world.isClient()) {
 					for (Direction direction : BlockHelper.getFacings()) {
 						BlockPos neighborPos = pos.offset(direction);

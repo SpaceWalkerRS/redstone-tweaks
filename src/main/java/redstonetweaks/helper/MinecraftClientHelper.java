@@ -2,7 +2,7 @@ package redstonetweaks.helper;
 
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.setting.ClientSettingsManager;
-import redstonetweaks.world.client.ClientWorldHandler;
+import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.client.NeighborUpdateVisualizer;
 import redstonetweaks.world.client.TickInfoLabelRenderer;
 
@@ -14,7 +14,7 @@ public interface MinecraftClientHelper {
 	
 	public ClientPacketHandler getPacketHandler();
 	
-	public ClientWorldHandler getWorldHandler();
+	public ClientWorldTickHandler getWorldTickHandler();
 	
 	public TickInfoLabelRenderer getTickInfoLabelRenderer();
 	

@@ -3,8 +3,9 @@ package redstonetweaks.world.common;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
 
-public abstract class WorldHandler {
+public abstract class WorldTickHandler {
 	
+	protected boolean doWorldTicks;
 	protected Status status;
 	protected World currentWorld;
 	protected Profiler profiler;
@@ -12,10 +13,15 @@ public abstract class WorldHandler {
 	protected boolean shouldSwitchTask;
 	protected boolean doTasks;
 	
-	public WorldHandler() {
+	public WorldTickHandler() {
+		this.doWorldTicks = true;
 		this.status = Status.IDLE;
 		this.shouldSwitchTask = true;
 		this.doTasks = true;
+	}
+	
+	public boolean doWorldTicks() {
+		return doWorldTicks;
 	}
 	
 	protected abstract void setStatus(Status newStatus);
@@ -24,7 +30,7 @@ public abstract class WorldHandler {
 	
 	protected abstract void setCurrentTask(Task task);
 	
-	public boolean isTicking() {
+	public boolean isTickingWorlds() {
 		return status != Status.IDLE;
 	}
 	

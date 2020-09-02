@@ -56,18 +56,16 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock {
 	
 	@Redirect(method = "prepare", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
 	private BlockState onPrepareRedirectGetStateForNeighborUpdate(BlockState state, Direction direction, BlockState blockState, WorldAccess world, BlockPos mutable, BlockPos notifierPos) {
-		return ((WorldHelper)world).shouldSeparateUpdates() || !GLOBAL.get(DO_STATE_UPDATES) ? state : state.getStateForNeighborUpdate(direction, blockState, world, mutable, notifierPos);
+		return GLOBAL.get(DO_STATE_UPDATES) && ((WorldHelper)world).updateNeighborsNormally() ? state.getStateForNeighborUpdate(direction, blockState, world, mutable, notifierPos) : state;
 	}
 	
 	@Inject(method = "prepare", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
 	private void onPrepareInjectAfterGetStateForNeighborUpdate(BlockState state, WorldAccess world, BlockPos blockPos, int flags, int depth, CallbackInfo ci, BlockPos.Mutable mutable, Iterator<Direction> horizontalDirections, Direction direction) {
-		if (GLOBAL.get(DO_STATE_UPDATES)) {
-			if (((WorldHelper)world).shouldSeparateUpdates()) {
-				if (!world.isClient()) {
-					BlockPos pos = mutable.toImmutable();
-					BlockPos notifierPos = pos.offset(direction.getOpposite());
-					((ServerWorldHelper)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, direction.getOpposite(), flags, depth, UpdateType.STATE_UPDATE);
-				}
+		if (GLOBAL.get(DO_STATE_UPDATES) && !((WorldHelper)world).updateNeighborsNormally()) {
+			if (!world.isClient()) {
+				BlockPos pos = mutable.toImmutable();
+				BlockPos notifierPos = pos.offset(direction.getOpposite());
+				((ServerWorldHelper)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, direction.getOpposite(), flags, depth, UpdateType.STATE_UPDATE);
 			}
 		}
 	}

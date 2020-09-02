@@ -8,7 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import redstonetweaks.packet.TaskSyncPacket;
 import redstonetweaks.packet.WorldSyncPacket;
 import redstonetweaks.packet.WorldTimeSyncPacket;
-import redstonetweaks.world.common.WorldHandler.Task;
+import redstonetweaks.world.common.WorldTickHandler.Task;
 
 public class TickInfoLabelRenderer extends DrawableHelper {
 	

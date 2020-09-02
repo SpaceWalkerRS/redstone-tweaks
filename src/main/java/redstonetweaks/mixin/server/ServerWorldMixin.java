@@ -55,6 +55,7 @@ import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;
 import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
+import redstonetweaks.world.server.ServerWorldTickHandler;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World implements WorldHelper, ServerWorldHelper  {
@@ -196,16 +197,15 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	}
 	
 	@Override
-	public boolean shouldSeparateWorldTick() {
-		boolean inTick = ((MinecraftServerHelper)getServer()).getWorldHandler().isTicking();
-		return inTick || GLOBAL.get(SHOW_PROCESSING_ORDER) > 0;
+	public boolean tickWorldsNormally() {
+		ServerWorldTickHandler worldTickHandler = ((MinecraftServerHelper)getServer()).getWorldTickHandler();
+		return worldTickHandler.doWorldTicks() && !(worldTickHandler.isTickingWorlds() || GLOBAL.get(SHOW_PROCESSING_ORDER) > 0);
 	}
 	
 	@Override
-	public boolean shouldSeparateUpdates() {
-		boolean hasNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
-		
-		return shouldSeparateWorldTick() && (hasNeighborUpdates || GLOBAL.get(SHOW_NEIGHBOR_UPDATES));
+	public boolean updateNeighborsNormally() {
+		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
+		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || GLOBAL.get(SHOW_NEIGHBOR_UPDATES));
 	}
 	
 	@Override

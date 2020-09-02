@@ -9,7 +9,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.helper.MinecraftServerHelper;
-import redstonetweaks.world.server.ServerTickHandler;
+import redstonetweaks.world.server.ServerWorldTickHandler;
 
 public class TickCommand {
 	
@@ -34,38 +34,38 @@ public class TickCommand {
 	}
 	
 	private static int pause(ServerCommandSource source) {
-		ServerTickHandler tickHandler = ((MinecraftServerHelper)source.getMinecraftServer()).getTickHandler();
+		ServerWorldTickHandler worldTickHandler = ((MinecraftServerHelper)source.getMinecraftServer()).getWorldTickHandler();
 		
-		if (tickHandler.isPaused()) {
-			source.sendFeedback(new TranslatableText("World ticking is already paused"), false);
-		} else {
-			tickHandler.pause();
+		if (worldTickHandler.doWorldTicks()) {
+			worldTickHandler.pause();
 			source.sendFeedback(new TranslatableText("World ticking has been paused"), false);
+		} else {
+			source.sendFeedback(new TranslatableText("World ticking is already paused"), false);
 		}
 		
 		return 1;
 	}
 	
 	private static int resume(ServerCommandSource source) {
-		ServerTickHandler tickHandler = ((MinecraftServerHelper)source.getMinecraftServer()).getTickHandler();
+		ServerWorldTickHandler worldTickHandler = ((MinecraftServerHelper)source.getMinecraftServer()).getWorldTickHandler();
 		
-		if (tickHandler.isPaused()) {
-			tickHandler.resume();
-			source.sendFeedback(new TranslatableText("World ticking has been resumed"), false);
-		} else {
+		if (worldTickHandler.doWorldTicks()) {
 			source.sendFeedback(new TranslatableText("World ticking is not paused"), false);
+		} else {
+			worldTickHandler.resume();
+			source.sendFeedback(new TranslatableText("World ticking has been resumed"), false);
 		}
 		return 1;
 	}
 	
 	private static int advance(ServerCommandSource source, int count) {
-		ServerTickHandler tickHandler = ((MinecraftServerHelper)source.getMinecraftServer()).getTickHandler();
+		ServerWorldTickHandler worldTickHandler = ((MinecraftServerHelper)source.getMinecraftServer()).getWorldTickHandler();
 		
-		if (tickHandler.isPaused()) {
-			tickHandler.advance(count);
-			source.sendFeedback(new TranslatableText("Worlds will tick %s time%s", count, count == 1 ? "" : "s"), false);
-		} else {
+		if (worldTickHandler.doWorldTicks()) {
 			source.sendFeedback(new TranslatableText("Cannot advance as world ticking is not paused"), false);
+		} else {
+			worldTickHandler.advance(count);
+			source.sendFeedback(new TranslatableText("Worlds will tick %s time%s", count, count == 1 ? "" : "s"), false);
 		}
 		return 1;
 	}

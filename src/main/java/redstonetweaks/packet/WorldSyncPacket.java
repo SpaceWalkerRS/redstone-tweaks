@@ -36,7 +36,7 @@ public class WorldSyncPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((MinecraftClientHelper)client).getWorldHandler().onWorldSyncPacketReceived(this);
+		((MinecraftClientHelper)client).getWorldTickHandler().onWorldSyncPacketReceived(this);
 		((MinecraftClientHelper)client).getTickInfoLabelRenderer().onWorldSyncPacketReceived(this);
 	}
 

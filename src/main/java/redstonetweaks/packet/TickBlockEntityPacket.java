@@ -35,7 +35,7 @@ public class TickBlockEntityPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((MinecraftClientHelper)client).getWorldHandler().onTickBlockEntityPacketReveiced(this);
+		((MinecraftClientHelper)client).getWorldTickHandler().onTickBlockEntityPacketReveiced(this);
 	}
 
 }

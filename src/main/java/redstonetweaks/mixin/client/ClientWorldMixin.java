@@ -26,6 +26,7 @@ import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
 import redstonetweaks.world.client.ClientUnfinishedEventScheduler;
+import redstonetweaks.world.client.ClientWorldTickHandler;
 
 @Mixin(ClientWorld.class)
 public abstract class ClientWorldMixin implements WorldHelper, ClientWorldHelper {
@@ -43,7 +44,7 @@ public abstract class ClientWorldMixin implements WorldHelper, ClientWorldHelper
 	
 	@Redirect(method = "tickEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;tickBlockEntities()V"))
 	private void onTickEntitiesRedirectTickBlockEntities(ClientWorld world) {
-		if (GLOBAL.get(SHOW_PROCESSING_ORDER) == 0 && !((MinecraftClientHelper)client).getWorldHandler().isTicking()) {
+		if (tickWorldsNormally()) {
 			world.tickBlockEntities();
 		}
 	}
@@ -59,15 +60,14 @@ public abstract class ClientWorldMixin implements WorldHelper, ClientWorldHelper
 	}
 	
 	@Override
-	public boolean shouldSeparateWorldTick() {
-		boolean isTicking = ((MinecraftClientHelper)MinecraftClient.getInstance()).getWorldHandler().isTicking();
-		return isTicking || GLOBAL.get(SHOW_PROCESSING_ORDER) > 0;
+	public boolean tickWorldsNormally() {
+		ClientWorldTickHandler worldTickHandler = ((MinecraftClientHelper)client).getWorldTickHandler();
+		return worldTickHandler.doWorldTicks() && !(worldTickHandler.isTickingWorlds() || GLOBAL.get(SHOW_PROCESSING_ORDER) > 0);
 	}
 	
 	@Override
-	public boolean shouldSeparateUpdates() {
-		boolean hasNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
-		
-		return shouldSeparateWorldTick() && (hasNeighborUpdates || GLOBAL.get(SHOW_NEIGHBOR_UPDATES));
+	public boolean updateNeighborsNormally() {
+		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
+		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || GLOBAL.get(SHOW_NEIGHBOR_UPDATES));
 	}
 }

@@ -69,6 +69,9 @@ public abstract class PacketHandler {
 		if (packet instanceof PlayerJoinedServerPacket) {
 			return PacketType.PLAYER_JOINED_SERVER;
 		}
+		if (packet instanceof DoWorldTicksPacket) {
+			return PacketType.DO_WORLD_TICKS;
+		}
 		return PacketType.INVALID;
 	}
 	
@@ -94,6 +97,8 @@ public abstract class PacketHandler {
 			return new TickBlockEntityPacket();
 		case PLAYER_JOINED_SERVER:
 			return new PlayerJoinedServerPacket();
+		case DO_WORLD_TICKS:
+			return new DoWorldTicksPacket();
 		default:
 			return null;
 		}
@@ -114,7 +119,8 @@ public abstract class PacketHandler {
 		WORLD_TIME_SYNC(7),
 		TICK_STATUS(8),
 		TICK_BLOCK_ENTITY(9),
-		PLAYER_JOINED_SERVER(10);
+		PLAYER_JOINED_SERVER(10),
+		DO_WORLD_TICKS(11);
 		
 		public static final PacketType[] PACKET_TYPES;
 		

@@ -9,13 +9,14 @@ import redstonetweaks.packet.TaskSyncPacket;
 import redstonetweaks.packet.TickBlockEntityPacket;
 import redstonetweaks.packet.TickStatusPacket;
 import redstonetweaks.packet.WorldSyncPacket;
-import redstonetweaks.world.common.WorldHandler;
+import redstonetweaks.packet.DoWorldTicksPacket;
+import redstonetweaks.world.common.WorldTickHandler;
 
-public class ClientWorldHandler extends WorldHandler {
+public class ClientWorldTickHandler extends WorldTickHandler {
 	
 	private final MinecraftClient client;
 	
-	public ClientWorldHandler(MinecraftClient client) {
+	public ClientWorldTickHandler(MinecraftClient client) {
 		super();
 		this.client = client;
 		
@@ -38,6 +39,10 @@ public class ClientWorldHandler extends WorldHandler {
 	@Override
 	protected void setCurrentTask(Task task) {
 		currentTask = task;
+	}
+	
+	public void onDoWorldTicksPacketReceived(DoWorldTicksPacket packet) {
+		doWorldTicks = packet.doWorldTicks;
 	}
 	
 	public void onTickStatusPacketReceived(TickStatusPacket packet) {

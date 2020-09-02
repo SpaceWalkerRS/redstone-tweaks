@@ -5,34 +5,93 @@ import static redstonetweaks.setting.SettingsManager.*;
 import java.util.Iterator;
 import java.util.function.BooleanSupplier;
 
+import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.helper.ServerChunkManagerHelper;
 import redstonetweaks.helper.ServerTickSchedulerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.packet.TaskSyncPacket;
 import redstonetweaks.packet.TickStatusPacket;
 import redstonetweaks.packet.WorldSyncPacket;
+import redstonetweaks.packet.DoWorldTicksPacket;
 import redstonetweaks.packet.WorldTimeSyncPacket;
-import redstonetweaks.world.common.WorldHandler;
+import redstonetweaks.world.common.WorldTickHandler;
 
-public class ServerWorldHandler extends WorldHandler {
+public class ServerWorldTickHandler extends WorldTickHandler {
 	
 	private final MinecraftServer server;
 	
 	private long ticks;
 	private boolean shouldUpdateStatus;
 	
-	public ServerWorldHandler(MinecraftServer server) {
+	public ServerWorldTickHandler(MinecraftServer server) {
 		super();
 		this.server = server;
+		this.ticks = Long.MAX_VALUE;
 		this.shouldUpdateStatus = true;
 	}
 	
+	public void pause() {
+		doWorldTicks = false;
+		
+		syncPause();
+	}
+	
+	public void resume() {
+		advance(Long.MAX_VALUE);
+	}
+	
+	public void advance(long count) {
+		doWorldTicks = true;
+		ticks = count;
+		
+		syncPause();
+	}
+	
 	public void tick(BooleanSupplier shouldKeepTicking) {
+		if (doWorldTicks()) {
+			int interval = GLOBAL.get(SHOW_PROCESSING_ORDER);
+			
+			if (interval > 0 || isTickingWorlds()) {
+				if (interval == 0 || server.getTicks() % interval == 0) {
+					tickStepByStep(shouldKeepTicking);
+					broadcastChunkData();
+				}
+			} else {
+				tickWorldsNormally(shouldKeepTicking);
+			}
+			
+			if (ticks == 0) {
+				pause();
+			}
+		}
+	}
+	
+	private void tickWorldsNormally(BooleanSupplier shouldKeepTicking) {
+		for (ServerWorld world : server.getWorlds()) {
+			if (server.getTicks() % 20 == 0) {
+				server.getPlayerManager().sendToDimension(new WorldTimeUpdateS2CPacket(world.getTime(), world.getTimeOfDay(), world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)), world.getRegistryKey());
+			}
+			
+			world.tick(shouldKeepTicking);
+		}
+		if (BUG_FIXES.get(MC172213)) {
+			for (ServerWorld world : server.getWorlds()) {
+				((ServerWorldHelper)world).tickTimeAccess();
+			}
+		}
+		
+		ticks--;
+	}
+	
+	private void tickStepByStep(BooleanSupplier shouldKeepTicking) {
 		if (shouldUpdateStatus) {
 			updateStatus();
 			shouldUpdateStatus = false;
@@ -58,7 +117,6 @@ public class ServerWorldHandler extends WorldHandler {
 	}
 	
 	private void startTick() {
-		ticks = server.getWorlds().iterator().next().getTime() + 1L;
 		syncClientWorldTime();
 		
 		setCurrentWorld(server.getWorlds().iterator().next());
@@ -81,6 +139,8 @@ public class ServerWorldHandler extends WorldHandler {
 		setCurrentTask(Task.NONE);
 		updateStatus();
 		shouldUpdateStatus = true;
+		
+		ticks--;
 	}
 	
 	private void tickWorld(BooleanSupplier shouldKeepTicking) {
@@ -179,8 +239,8 @@ public class ServerWorldHandler extends WorldHandler {
 		setCurrentTask(currentTask.next());
 	}
 	
-	public long getTime() {
-		return ticks;
+	public long getWorldTime() {
+		return server.getWorlds().iterator().next().getTime();
 	}
 	
 	private void tickWorldBorder() {
@@ -286,6 +346,18 @@ public class ServerWorldHandler extends WorldHandler {
 		}
 	}
 	
+	private void broadcastChunkData() {
+		for (ServerWorld world : server.getWorlds()) {
+			ServerChunkManager chunkManager = world.getChunkManager();
+			((ServerChunkManagerHelper)chunkManager).broadcastChunkData();
+		}
+	}
+	
+	private void syncPause() {
+		DoWorldTicksPacket packet = new DoWorldTicksPacket(doWorldTicks());
+		((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+	}
+	
 	private void syncStatus() {
 		TickStatusPacket packet = new TickStatusPacket(status);
 		((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
@@ -297,7 +369,7 @@ public class ServerWorldHandler extends WorldHandler {
 	}
 	
 	private void syncClientWorldTime() {
-		WorldTimeSyncPacket packet = new WorldTimeSyncPacket(getTime());
+		WorldTimeSyncPacket packet = new WorldTimeSyncPacket(getWorldTime());
 		((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
 	}
 	

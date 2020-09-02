@@ -54,10 +54,10 @@ public abstract class AbstractRedstoneGateBlockMixin extends Block implements Ab
 			world.setBlockState(pos, state.with(Properties.POWERED, shouldBePowered), 2);
 			
 			if (shouldBePowered != isReceivingPower) {
-				if (((WorldHelper)world).shouldSeparateUpdates()) {
-					((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
-				} else {
+				if (((WorldHelper)world).updateNeighborsNormally()) {
 					updatePoweredOnScheduledTick(world, pos, state, random, !powered);
+				} else {
+					((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
 				}
 			}
 		}

@@ -23,7 +23,7 @@ public abstract class InGameHudMixin {
 	
 	@Inject(method = "render", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/client/gui/hud/SubtitlesHud;render(Lnet/minecraft/client/util/math/MatrixStack;)V"))
 	public void render(MatrixStack matrixStack, float f, CallbackInfo ci) {
-		if (!client.options.debugEnabled && (GLOBAL.get(SHOW_PROCESSING_ORDER) > 0) || ((MinecraftClientHelper)client).getWorldHandler().isTicking()) {
+		if (!client.options.debugEnabled && (GLOBAL.get(SHOW_PROCESSING_ORDER) > 0) || ((MinecraftClientHelper)client).getWorldTickHandler().isTickingWorlds()) {
 			((MinecraftClientHelper)client).getTickInfoLabelRenderer().render(matrixStack);
 ;		}
 	}

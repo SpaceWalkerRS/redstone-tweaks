@@ -45,7 +45,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Bloc
 	
 	@Inject(method = "getProgress", at = @At(value = "HEAD"), cancellable = true)
 	private void onGetProgressInjectAtHead(float tickDelta, CallbackInfoReturnable<Float> cir) {
-		if (((WorldHelper)world).shouldSeparateWorldTick()) {
+		if (!((WorldHelper)world).tickWorldsNormally()) {
 			cir.setReturnValue(lastProgress);
 			cir.cancel();
 		}

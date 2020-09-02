@@ -81,7 +81,7 @@ public abstract class PistonBlockMixin extends Block implements AbstractBlockHel
 	
 	@Inject(method = "onSyncedBlockEvent", at = @At(value = "HEAD"), cancellable = true)
 	private void onOnSyncedBlockEventInjectAtHead(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
-		if (((WorldHelper)world).shouldSeparateUpdates()) {
+		if (!((WorldHelper)world).updateNeighborsNormally()) {
 			BlockEventHandler blockEventHandler = ((WorldHelper)world).getPistonBlockEventHandler();
 			blockEventHandler.newBlockEvent(state, pos, type, data, sticky);
 			

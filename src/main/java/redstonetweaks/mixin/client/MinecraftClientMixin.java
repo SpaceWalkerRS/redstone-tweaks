@@ -14,7 +14,7 @@ import net.minecraft.client.world.ClientWorld;
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.setting.ClientSettingsManager;
-import redstonetweaks.world.client.ClientWorldHandler;
+import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.client.NeighborUpdateVisualizer;
 import redstonetweaks.world.client.TickInfoLabelRenderer;
 
@@ -26,7 +26,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 	private ClientSettingsManager settingsManager;
 	private NeighborUpdateVisualizer neighborUpdateVisualizer;
 	private ClientPacketHandler packetHandler;
-	private ClientWorldHandler worldHandler;
+	private ClientWorldTickHandler worldHandler;
 	private TickInfoLabelRenderer tickInfoLabelRenderer;
 	
 	@Shadow public abstract boolean isIntegratedServerRunning();
@@ -36,7 +36,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 		settingsManager = new ClientSettingsManager();
 		neighborUpdateVisualizer = new NeighborUpdateVisualizer((MinecraftClient)(Object)this);
 		packetHandler = new ClientPacketHandler((MinecraftClient)(Object)this);
-		worldHandler = new ClientWorldHandler((MinecraftClient)(Object)this);
+		worldHandler = new ClientWorldTickHandler((MinecraftClient)(Object)this);
 		tickInfoLabelRenderer = new TickInfoLabelRenderer((MinecraftClient)(Object)this);
 	}
 	
@@ -67,7 +67,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 	}
 
 	@Override
-	public ClientWorldHandler getWorldHandler() {
+	public ClientWorldTickHandler getWorldTickHandler() {
 		return worldHandler;
 	}
 	
