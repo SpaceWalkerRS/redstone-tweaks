@@ -7,4 +7,5 @@ import net.minecraft.world.World;
 public interface RedstoneDiodeHelper {
 	
 	public boolean isInputBugOccurring(World world, BlockPos pos, BlockState state);
+	
 }
