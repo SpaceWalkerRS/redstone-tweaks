@@ -91,7 +91,7 @@ public class TweakCommand {
 		}
 		if (property instanceof TickPriorityProperty) {
 			int min = TickPriority.values()[0].getIndex();
-			return IntegerArgumentType.integer(min, min + TickPriority.values().length);
+			return IntegerArgumentType.integer(min, min + TickPriority.values().length - 1);
 		}
 		
 		throw new IllegalStateException("Unknown setting");
