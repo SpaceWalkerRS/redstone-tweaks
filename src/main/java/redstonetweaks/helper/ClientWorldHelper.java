@@ -8,4 +8,5 @@ public interface ClientWorldHelper {
 	public ClientNeighborUpdateScheduler getNeighborUpdateScheduler();
 	
 	public ClientUnfinishedEventScheduler getUnfinishedEventScheduler();
+	
 }
