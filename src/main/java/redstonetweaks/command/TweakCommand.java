@@ -90,7 +90,8 @@ public class TweakCommand {
 			return IntegerArgumentType.integer(integerProperty.getMin(), integerProperty.getMax());
 		}
 		if (property instanceof TickPriorityProperty) {
-			return IntegerArgumentType.integer(-3, 3);
+			int min = TickPriority.values()[0].getIndex();
+			return IntegerArgumentType.integer(min, min + TickPriority.values().length);
 		}
 		
 		throw new IllegalStateException("Unknown setting");
