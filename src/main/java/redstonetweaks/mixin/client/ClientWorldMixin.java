@@ -44,9 +44,7 @@ public abstract class ClientWorldMixin implements WorldHelper, ClientWorldHelper
 	
 	@Redirect(method = "tickEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;tickBlockEntities()V"))
 	private void onTickEntitiesRedirectTickBlockEntities(ClientWorld world) {
-		if (tickWorldsNormally()) {
-			world.tickBlockEntities();
-		}
+		
 	}
 	
 	@Override

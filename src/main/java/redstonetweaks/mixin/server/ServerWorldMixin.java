@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Executor;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.spongepowered.asm.mixin.Final;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -53,6 +55,7 @@ import net.minecraft.world.timer.Timer;
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.packet.TickBlockEntitiesPacket;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;
 import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
 import redstonetweaks.world.server.ServerWorldTickHandler;
@@ -103,6 +106,12 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickTime()V"))
 	private void onTickRedirectTickTime(ServerWorld world) {
 		handleTickTime();
+	}
+	
+	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;tickBlockEntities()V"))
+	private void onTickInjectAfterTickBlockEntities(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+		TickBlockEntitiesPacket packet = new TickBlockEntitiesPacket();
+		((MinecraftServerHelper)server).getPacketHandler().sendPacketToDimension(packet, getRegistryKey());
 	}
 	
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/timer/Timer;processEvents(Ljava/lang/Object;J)V"))
