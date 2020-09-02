@@ -25,6 +25,6 @@ public abstract class InGameHudMixin {
 	public void render(MatrixStack matrixStack, float f, CallbackInfo ci) {
 		if (!client.options.debugEnabled && (GLOBAL.get(SHOW_PROCESSING_ORDER) > 0) || ((MinecraftClientHelper)client).getWorldTickHandler().isTickingWorlds()) {
 			((MinecraftClientHelper)client).getTickInfoLabelRenderer().render(matrixStack);
-;		}
+		}
 	}
 }
