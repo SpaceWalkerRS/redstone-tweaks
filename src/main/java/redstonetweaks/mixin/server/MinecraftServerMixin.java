@@ -52,6 +52,7 @@ public abstract class MinecraftServerMixin implements MinecraftServerHelper {
 		return false;
 	}
 	
+	@Override
 	public ServerSettingsManager getSettingsManager() {
 		return settingsManager;
 	}
