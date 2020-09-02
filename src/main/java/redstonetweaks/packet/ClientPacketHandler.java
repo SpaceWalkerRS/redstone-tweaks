@@ -3,6 +3,8 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
+import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.RedstoneTweaksVersion;
 
 public class ClientPacketHandler extends PacketHandler {
 	
@@ -24,6 +26,15 @@ public class ClientPacketHandler extends PacketHandler {
 
 	@Override
 	public void onPacketReceived(PacketByteBuf buffer) {
-		decodePacket(buffer).execute(client);
+		RedstoneTweaksVersion serverVersion = new RedstoneTweaksVersion(buffer.readByte(), buffer.readByte(), buffer.readByte());
+		if (RedstoneTweaks.MOD_VERSION.equals(serverVersion)) {
+			try {
+				decodePacket(buffer).execute(client);
+			} catch (InstantiationException e) {
+				
+			} catch (IllegalAccessException e) {
+				
+			}
+		}
 	}
 }

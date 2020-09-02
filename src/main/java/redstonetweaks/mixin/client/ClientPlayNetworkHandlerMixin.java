@@ -13,8 +13,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 
-import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.packet.PacketHandler;
 import redstonetweaks.packet.PlayerJoinedServerPacket;
@@ -34,11 +32,8 @@ public class ClientPlayNetworkHandlerMixin {
 	private void onOnCustomPayloadInjectAfterForceMainThread(CustomPayloadS2CPacket packet, CallbackInfo ci) {
 		if (PacketHandler.PACKET_IDENTIFIER.equals(packet.getChannel())) {
 			PacketByteBuf buffer = packet.getData();
-			RedstoneTweaksVersion serverVersion = new RedstoneTweaksVersion(buffer.readByte(), buffer.readByte(), buffer.readByte());
 			
-			if (serverVersion.equals(RedstoneTweaks.MOD_VERSION)) {
-				((MinecraftClientHelper)client).getPacketHandler().onPacketReceived(buffer);
-			}
+			((MinecraftClientHelper)client).getPacketHandler().onPacketReceived(buffer);
 			
 			ci.cancel();
 		}

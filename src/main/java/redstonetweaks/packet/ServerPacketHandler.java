@@ -8,6 +8,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.RedstoneTweaksVersion;
 
 public class ServerPacketHandler extends PacketHandler {
 	
@@ -42,6 +44,15 @@ public class ServerPacketHandler extends PacketHandler {
 	
 	@Override
 	public void onPacketReceived(PacketByteBuf buffer) {
-		decodePacket(buffer).execute(server);
+		RedstoneTweaksVersion clientVersion = new RedstoneTweaksVersion(buffer.readByte(), buffer.readByte(), buffer.readByte());
+		if (RedstoneTweaks.MOD_VERSION.equals(clientVersion)) {
+			try {
+				decodePacket(buffer).execute(server);
+			} catch (InstantiationException e) {
+				
+			} catch (IllegalAccessException e) {
+				
+			}
+		}
 	}
 }

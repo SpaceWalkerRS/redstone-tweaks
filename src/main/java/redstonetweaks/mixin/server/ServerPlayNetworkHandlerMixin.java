@@ -11,8 +11,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
-import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.RedstoneTweaksVersion;
+
 import redstonetweaks.helper.CustomPayloadC2SPacketHelper;
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.packet.PacketHandler;
@@ -28,11 +27,8 @@ public class ServerPlayNetworkHandlerMixin {
 		
 		if (PacketHandler.PACKET_IDENTIFIER.equals(packet.getChannel())) {
 			PacketByteBuf buffer = packet.getData();
-			RedstoneTweaksVersion clientVersion = new RedstoneTweaksVersion(buffer.readByte(), buffer.readByte(), buffer.readByte());
 			
-			if (clientVersion.equals(RedstoneTweaks.MOD_VERSION)) {
-				((MinecraftServerHelper)server).getPacketHandler().onPacketReceived(buffer);
-			}
+			((MinecraftServerHelper)server).getPacketHandler().onPacketReceived(buffer);
 			
 			ci.cancel();
 		}
