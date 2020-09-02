@@ -95,8 +95,7 @@
   	"client.ClientWorldMixin",
   	"client.InGameHudMixin",
   	"client.MinecraftClientMixin",
-        "client.PistonBlockEntityRendererMixin",
-        "client.WorldRendererMixin"
+    "client.WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

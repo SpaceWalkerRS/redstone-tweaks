@@ -29,8 +29,6 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 	private ClientWorldTickHandler worldHandler;
 	private TickInfoLabelRenderer tickInfoLabelRenderer;
 	
-	@Shadow public abstract boolean isIntegratedServerRunning();
-	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(RunArgs args, CallbackInfo ci) {
 		settingsManager = new ClientSettingsManager();
