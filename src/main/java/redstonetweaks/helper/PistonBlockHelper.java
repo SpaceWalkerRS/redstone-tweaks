@@ -9,8 +9,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-// This class declares methods for the piston mixin classes
-// that also need to be accessible to other classes.
 public class PistonBlockHelper {
 	
 	// When the doubleRetraction setting is enabled this method is called
@@ -28,7 +26,7 @@ public class PistonBlockHelper {
 			}
 			
 			// We need to send a block change packet regardless of if the piston is extended at this point
-			// It may have depowered earlier in the same tick
+			// It may have depowered earlier in the tick
 			BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
 			((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
 		}
