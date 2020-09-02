@@ -17,7 +17,6 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 
-import redstonetweaks.helper.BlockEntityHelper;
 import redstonetweaks.helper.PistonBlockEntityHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.setting.IntegerProperty;
@@ -25,7 +24,7 @@ import redstonetweaks.setting.Setting;
 import redstonetweaks.setting.SettingsPack;
 
 @Mixin(PistonBlockEntity.class)
-public abstract class PistonBlockEntityMixin extends BlockEntity implements BlockEntityHelper, PistonBlockEntityHelper {
+public abstract class PistonBlockEntityMixin extends BlockEntity implements PistonBlockEntityHelper {
 	
 	@Shadow private boolean extending;
 	@Shadow private float lastProgress;
