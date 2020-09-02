@@ -19,9 +19,8 @@ public class RedstoneTweaksVersion {
 		if (other instanceof RedstoneTweaksVersion) {
 			RedstoneTweaksVersion version = (RedstoneTweaksVersion)other;
 			return this.major == version.major && this.minor == version.minor && this.patch == version.patch;
-		} else {
-			return false;
 		}
+		return false;
 	}
 	
 	@Override
