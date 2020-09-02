@@ -2,7 +2,6 @@ package redstonetweaks.helper;
 
 import static redstonetweaks.setting.SettingsManager.*;
 
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
@@ -13,12 +12,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-public abstract class BlockHelper extends AbstractBlock {
+public interface BlockHelper {
 	
-	public BlockHelper(Settings settings) {
-		super(settings);
-	}
-
+	public static final Direction[] FACINGS = AbstractBlockHelper.FACINGS;
+	
+	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type);
+	
 	public static BlockState postProcessState(World world, BlockState state, BlockPos pos) {
 		BlockState blockState = state;
 		
@@ -27,10 +26,6 @@ public abstract class BlockHelper extends AbstractBlock {
 			blockState = blockState.getStateForNeighborUpdate(direction, world.getBlockState(neighborPos), world, pos, neighborPos);
 		}
 		return blockState;
-	}
-	
-	public static Direction[] getFacings() {
-		return FACINGS;
 	}
 	
 	public static boolean isRigidPistonBase(BlockView world, BlockPos pos, BlockState state) {

@@ -26,14 +26,14 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
-import redstonetweaks.helper.AbstractBlockHelper;
+import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.RedstoneDiodeHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.world.server.UnfinishedEvent.Source;
 
 @Mixin(AbstractRedstoneGateBlock.class)
-public abstract class AbstractRedstoneGateBlockMixin extends Block implements AbstractBlockHelper {
+public abstract class AbstractRedstoneGateBlockMixin extends Block implements BlockHelper {
 	
 	public AbstractRedstoneGateBlockMixin(Settings settings) {
 		super(settings);

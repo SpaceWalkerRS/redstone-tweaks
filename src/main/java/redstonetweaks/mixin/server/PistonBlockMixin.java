@@ -30,7 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-import redstonetweaks.helper.AbstractBlockHelper;
+import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.PistonBlockEntityHelper;
 import redstonetweaks.helper.PistonBlockHelper;
 import redstonetweaks.helper.ServerWorldHelper;
@@ -40,7 +40,7 @@ import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.world.server.UnfinishedEvent.Source;
 
 @Mixin(PistonBlock.class)
-public abstract class PistonBlockMixin extends Block implements AbstractBlockHelper {
+public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Shadow @Final private boolean sticky;
 	

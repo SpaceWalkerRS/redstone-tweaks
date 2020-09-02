@@ -9,10 +9,10 @@ import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import redstonetweaks.helper.AbstractBlockHelper;
+import redstonetweaks.helper.BlockHelper;
 
 @Mixin(PistonExtensionBlock.class)
-public class PistonExtensionBlockMixin implements AbstractBlockHelper {
+public class PistonExtensionBlockMixin implements BlockHelper {
 	
 	@Override
 	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
@@ -22,7 +22,7 @@ public class PistonExtensionBlockMixin implements AbstractBlockHelper {
 			
 			if (pistonBlockEntity.isSource()) {
 				BlockState piston = pistonBlockEntity.getPushedBlock();
-				((AbstractBlockHelper)piston.getBlock()).continueEvent(world, piston, pos, type);
+				((BlockHelper)piston.getBlock()).continueEvent(world, piston, pos, type);
 				
 				return true;
 			}

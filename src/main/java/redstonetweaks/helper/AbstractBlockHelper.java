@@ -1,11 +1,13 @@
 package redstonetweaks.helper;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.util.math.Direction;
 
-public interface AbstractBlockHelper {
+public abstract class AbstractBlockHelper extends AbstractBlock {
 	
-	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type);
-	
+	public AbstractBlockHelper(Settings settings) {
+		super(settings);
+	}
+
+	public static final Direction[] FACINGS = AbstractBlock.FACINGS;
 }

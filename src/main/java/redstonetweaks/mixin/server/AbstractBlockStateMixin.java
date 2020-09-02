@@ -36,7 +36,7 @@ public abstract class AbstractBlockStateMixin {
 		if (GLOBAL.get(DO_STATE_UPDATES)) {
 			if (!((WorldHelper) world).updateNeighborsNormally()) {
 				if (!world.isClient()) {
-					for (Direction direction : BlockHelper.getFacings()) {
+					for (Direction direction : BlockHelper.FACINGS) {
 						BlockPos neighborPos = pos.offset(direction);
 						((ServerWorldHelper)world).getNeighborUpdateScheduler().schedule(neighborPos, pos, direction.getOpposite(), flags, maxUpdateDepth, UpdateType.STATE_UPDATE);
 					}

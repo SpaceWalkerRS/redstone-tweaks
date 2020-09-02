@@ -27,14 +27,14 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
-import redstonetweaks.helper.AbstractBlockHelper;
+import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.world.server.UnfinishedEvent.Source;
 
 @Mixin(ObserverBlock.class)
-public abstract class ObserverBlockMixin implements AbstractBlockHelper {
+public abstract class ObserverBlockMixin implements BlockHelper {
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract void scheduleTick(WorldAccess world, BlockPos pos);
