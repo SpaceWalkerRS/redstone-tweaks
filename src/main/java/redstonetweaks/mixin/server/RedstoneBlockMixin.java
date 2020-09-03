@@ -35,8 +35,7 @@ public abstract class RedstoneBlockMixin extends AbstractBlock {
 	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
 		if (REDSTONE_BLOCK.get(STRONG_POWER) > 0) {
 			for (Direction direction : Direction.values()) {
-				BlockPos neighborPos = pos.offset(direction);
-				world.updateNeighborsExcept(neighborPos, (RedstoneBlock)(Object)this, direction.getOpposite());
+				world.updateNeighborsExcept(pos.offset(direction), (RedstoneBlock)(Object)this, direction.getOpposite());
 			}
 		}
 	}
@@ -46,8 +45,7 @@ public abstract class RedstoneBlockMixin extends AbstractBlock {
 		if (!state.isOf(newState.getBlock())) {
 			if (REDSTONE_BLOCK.get(STRONG_POWER) > 0) {
 				for (Direction direction : Direction.values()) {
-					BlockPos neighborPos = pos.offset(direction);
-					world.updateNeighborsExcept(neighborPos, (RedstoneBlock)(Object)this, direction.getOpposite());
+					world.updateNeighborsExcept(pos.offset(direction), (RedstoneBlock)(Object)this, direction.getOpposite());
 				}
 			}
 		}

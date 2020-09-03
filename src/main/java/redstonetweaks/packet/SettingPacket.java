@@ -1,7 +1,6 @@
 package redstonetweaks.packet;
 
-import static redstonetweaks.setting.SettingsManager.SETTINGS;
-import static redstonetweaks.setting.SettingsManager.SETTINGS_PACKS;
+import static redstonetweaks.setting.SettingsManager.*;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
