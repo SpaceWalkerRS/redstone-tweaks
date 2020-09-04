@@ -287,12 +287,9 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 				} else if (!((ServerWorldHelper)world).hasBlockEvent(pos)) {
 					world.getBlockTickScheduler().schedule(pos, state.getBlock(), activationDelay, settings.get(FALLING_TICK_PRIORITY));
 				}
-			} else if (!isExtended) {
-				// If the piston is unpowered and retracted, update
-				// neighbors if soft inversion is enabled.
-				if (REDSTONE_TORCH.get(SOFT_INVERSION)) {
-					updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
-				}
+			}
+			if (REDSTONE_TORCH.get(SOFT_INVERSION)) {
+				updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
 			}
 		}
 	}
