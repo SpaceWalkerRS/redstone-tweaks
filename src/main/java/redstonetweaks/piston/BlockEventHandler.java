@@ -82,7 +82,7 @@ public class BlockEventHandler {
 	
 	public boolean startBlockEvent() {
 		if (!world.isClient()) {
-			boolean extended = state.get(Properties.EXTENDED);
+			boolean extended = type != 0;
 			boolean lazy = extended ? settings.get(FALLING_LAZY) : settings.get(RISING_LAZY);
 			boolean shouldExtend = lazy ? !extended : PistonBlockHelper.isReceivingPower(world, pos, state, facing, true);
 			
