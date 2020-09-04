@@ -267,15 +267,15 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 					world.getBlockTickScheduler().schedule(pos, state.getBlock(), activationDelay, settings.get(RISING_TICK_PRIORITY));
 				}
 			} else {
-				if (REDSTONE_TORCH.get(SOFT_INVERSION) && !onScheduledTick) {
-					updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
-				}
 				// We must check that the piston is currently not extending.
 				// Otherwise the piston will continually pulse if the
 				// forceUpdatePoweredPistons and lazy settings are both enabled
 				if (powered && settings.get(FORCE_UPDATE_WHEN_POWERED) && !isExtending(world, pos, state, facing)) {
 					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, settings.get(RISING_TICK_PRIORITY));
 				}
+			}
+			if (REDSTONE_TORCH.get(SOFT_INVERSION) && !onScheduledTick) {
+				updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
 			}
 		} else if (!shouldExtend) {
 			if (isExtended && !(settings.get(IGNORE_UPDATES_WHEN_EXTENDING) && isExtending(world, pos, state, facing))) {
