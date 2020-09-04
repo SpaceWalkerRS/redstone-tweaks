@@ -13,10 +13,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.server.MinecraftServer;
@@ -39,6 +41,7 @@ import net.minecraft.world.dimension.DimensionType;
 
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
+import redstonetweaks.helper.StairsHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.packet.TickBlockEntityPacket;
 import redstonetweaks.piston.BlockEventHandler;
@@ -108,11 +111,27 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 		}
 	}
 	
+	@Inject(method = "getReceivedStrongRedstonePower", cancellable = true, at = @At(value = "HEAD"))
+	private void onGetReceivedStrongRedstonePowerInjectAtHead(BlockPos pos, CallbackInfoReturnable<Integer> cir) {
+		if (STAIRS.get(FULL_FACES_ARE_SOLID)) {
+			BlockState state = getBlockState(pos);
+			if (state.getBlock() instanceof StairsBlock) {
+				cir.setReturnValue(StairsHelper.getReceivedStrongRedstonePower((World)(Object)this, pos, state));
+				cir.cancel();
+			}
+		}
+	}
+	
 	@Redirect(method = "getEmittedRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onGetEmittedRedstonePowerRedirectIsSolidBlock(BlockState state, BlockView world, BlockPos pos1, BlockPos pos, Direction direction) {
 		if (MAGENTA_GLAZED_TERRACOTTA.get(IS_POWER_DIODE)) {
 			if (state.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
 				return state.get(Properties.HORIZONTAL_FACING) == direction;
+			}
+		}
+		if (STAIRS.get(FULL_FACES_ARE_SOLID)) {
+			if (state.getBlock() instanceof StairsBlock) {
+				return state.isSideSolidFullSquare(world, pos, direction.getOpposite());
 			}
 		}
 		return state.isSolidBlock(world, pos);

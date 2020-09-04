@@ -45,6 +45,7 @@ public abstract class SettingsManager {
 	public static final Setting<BooleanProperty> DOUBLE_RETRACTION = register(new Setting<>("doubleRetraction"));
 	public static final Setting<BooleanProperty> FAST_BLOCK_DROPPING = register(new Setting<>("fastBlockDropping"));
 	public static final Setting<BooleanProperty> FORCE_UPDATE_WHEN_POWERED = register(new Setting<>("forceUpdateWhenPowered"));
+	public static final Setting<BooleanProperty> FULL_FACES_ARE_SOLID = register(new Setting<>("fullFacesAreSolid"));
 	public static final Setting<IntegerProperty> FUSE_TIME = register(new Setting<>("fuseTime"));
 	public static final Setting<BooleanProperty> HEAD_UPDATES_ON_EXTENSION = register(new Setting<>("headUpdatesOnExtension"));
 	public static final Setting<BooleanProperty> IGNORE_UPDATES_WHEN_EXTENDING = register(new Setting<>("ignoreUpdatesWhenExtending"));
@@ -133,6 +134,7 @@ public abstract class SettingsManager {
 	public static final SettingsPack REPEATER = register(new SettingsPack("repeater"), Blocks.REPEATER);
 	public static final SettingsPack SCAFFOLDING = register(new SettingsPack("scaffolding"), Blocks.SCAFFOLDING);
 	public static final SettingsPack SOUL_SAND = register(new SettingsPack("soul_sand"), Blocks.SOUL_SAND);
+	public static final SettingsPack STAIRS = register(new SettingsPack("stairs"));
 	public static final SettingsPack STICKY_PISTON = register(new SettingsPack("sticky_piston"), Blocks.STICKY_PISTON);
 	public static final SettingsPack STONE_BUTTON = register(new SettingsPack("stone_button"));
 	public static final SettingsPack STONE_PRESSURE_PLATE = register(new SettingsPack("stone_pressure_plate"));
@@ -408,6 +410,8 @@ public abstract class SettingsManager {
 		
 		register(SOUL_SAND, DELAY, new IntegerProperty(20, 0, 127));
 		register(SOUL_SAND, TICK_PRIORITY, new TickPriorityProperty(TickPriority.NORMAL));
+		
+		register(STAIRS, FULL_FACES_ARE_SOLID, new BooleanProperty(false));
 		
 		register(STICKY_PISTON, CONNECTS_TO_WIRE, new BooleanProperty(false));
 		register(STICKY_PISTON, DO_BLOCK_DROPPING, new BooleanProperty(true));
