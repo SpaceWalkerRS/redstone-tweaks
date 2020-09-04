@@ -108,14 +108,14 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 		}
 	}
 	
-	@Redirect(method = "getEmittedRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-	private BlockState onGetEmittedRedstonePowerRedirectGetBlockState(World world, BlockPos pos1, BlockPos pos, Direction direction) {
-		return WorldHelper.getStateForPower(world, pos, direction.getOpposite());
-	}
-	
 	@Redirect(method = "getEmittedRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onGetEmittedRedstonePowerRedirectIsSolidBlock(BlockState state, BlockView world, BlockPos pos1, BlockPos pos, Direction direction) {
-		return state.isSolidBlock(world, pos) && (!MAGENTA_GLAZED_TERRACOTTA.get(IS_POWER_DIODE) || !state.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA) || state.get(Properties.HORIZONTAL_FACING) == direction);
+		if (MAGENTA_GLAZED_TERRACOTTA.get(IS_POWER_DIODE)) {
+			if (state.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
+				return state.get(Properties.HORIZONTAL_FACING) == direction;
+			}
+		}
+		return state.isSolidBlock(world, pos);
 	}
 	
 	@Override

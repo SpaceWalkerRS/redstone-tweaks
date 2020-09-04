@@ -139,7 +139,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock {
 		onNeighborUpdate(world, pos, state);
 	}
 	
-	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "RETURN", ordinal = 1))
+	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "RETURN"))
 	private void onGetWeakRedstonePowerInjectAtReturn(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
 		if (MAGENTA_GLAZED_TERRACOTTA.get(IS_POWER_DIODE)) {
 			int power = cir.getReturnValueI();

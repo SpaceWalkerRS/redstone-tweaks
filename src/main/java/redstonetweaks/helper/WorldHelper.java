@@ -36,7 +36,9 @@ public interface WorldHelper {
 			if (state.isOf(Blocks.REDSTONE_WIRE)) {
 				BlockState downState = world.getBlockState(pos.down());
 				if (downState.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
-					return downState.get(Properties.HORIZONTAL_FACING).getOpposite() == direction ? state : Blocks.AIR.getDefaultState();
+					if (downState.get(Properties.HORIZONTAL_FACING).getOpposite() != direction) {
+						return Blocks.AIR.getDefaultState();
+					}
 				}
 			}
 		}
