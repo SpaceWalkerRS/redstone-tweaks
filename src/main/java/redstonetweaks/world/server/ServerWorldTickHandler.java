@@ -63,6 +63,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 				if (interval == 0 || server.getTicks() % interval == 0) {
 					tickStepByStep(shouldKeepTicking);
 				}
+				broadcastChunkData();
 			} else {
 				tickWorldsNormally(shouldKeepTicking);
 			}
@@ -70,8 +71,9 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			if (ticks == 0) {
 				pause();
 			}
+		} else {
+			broadcastChunkData();
 		}
-		broadcastChunkData();
 	}
 	
 	private void tickWorldsNormally(BooleanSupplier shouldKeepTicking) {
