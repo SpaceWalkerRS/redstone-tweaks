@@ -277,6 +277,9 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 			if (REDSTONE_TORCH.get(SOFT_INVERSION) && !onScheduledTick) {
 				updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
 			}
+			if (PistonBlockHelper.isExtended(world, pos, state, facing) || isExtending(world, pos, state, facing)) {
+				world.setBlockState(pos, state.with(Properties.EXTENDED, true), 18);
+			}
 		} else if (!shouldExtend) {
 			if (isExtended && !(settings.get(IGNORE_UPDATES_WHEN_EXTENDING) && isExtending(world, pos, state, facing))) {
 				if (activationDelay == 0 || onScheduledTick) {
@@ -301,6 +304,9 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	// a moving block that is extending and facing the same direction
 	// as the piston, then we can conclude that the piston is extending.
 	private boolean isExtending(World world, BlockPos pos, BlockState state, Direction facing) {
+		if (!(state.get(Properties.EXTENDED) || GLOBAL.get(DOUBLE_RETRACTION))) {
+			return false;
+		}
 		BlockPos frontPos = pos.offset(facing);
 		BlockState frontState = world.getBlockState(frontPos);
 		if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {

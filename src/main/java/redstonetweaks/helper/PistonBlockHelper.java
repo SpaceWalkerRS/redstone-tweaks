@@ -1,6 +1,9 @@
 package redstonetweaks.helper;
 
+import static redstonetweaks.setting.SettingsManager.*;
+
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.world.ServerWorld;
@@ -32,6 +35,16 @@ public class PistonBlockHelper {
 		}
 		
 		return state;
+	}
+	
+	public static boolean isExtended(World world, BlockPos pos, BlockState state, Direction facing) {
+		boolean isExtended = state.get(Properties.EXTENDED);
+		if (!isExtended && GLOBAL.get(DOUBLE_RETRACTION)) {
+			BlockState frontState = world.getBlockState(pos.offset(facing));
+			isExtended = frontState.isOf(Blocks.PISTON_HEAD) && frontState.get(Properties.FACING) == facing;
+		}
+		
+		return isExtended;
 	}
 	
 	public static boolean isReceivingPower(World world, BlockPos pos, BlockState state, Direction facing) {
