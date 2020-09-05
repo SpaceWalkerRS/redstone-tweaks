@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.MinecraftClient;
@@ -39,6 +40,13 @@ public abstract class ClientWorldMixin implements WorldHelper, ClientWorldHelper
 	private void onInitInjectAtReturn(ClientPlayNetworkHandler clientPlayNetworkHandler, ClientWorld.Properties properties, RegistryKey<World> registryKey, DimensionType dimensionType, int i, Supplier<Profiler> supplier, WorldRenderer worldRenderer, boolean bl, long l, CallbackInfo ci) {
 		neighborUpdateScheduler = new ClientNeighborUpdateScheduler();
 		unfinishedEventScheduler = new ClientUnfinishedEventScheduler((ClientWorld)(Object)this);
+	}
+	
+	@Redirect(method = "tickEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;tickBlockEntities()V"))
+	private void onTickEntitiesRedirectTickBlockEntities(ClientWorld world) {
+		if (tickWorldsNormally()) {
+			world.tickBlockEntities();
+		}
 	}
 	
 	@Override
