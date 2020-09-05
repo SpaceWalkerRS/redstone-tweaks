@@ -140,8 +140,12 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock {
 		BlockPos up = pos.up();
 		BlockState aboveState = world.getBlockState(up);
 		if (STAIRS.get(FULL_FACES_ARE_SOLID)) {
+			Direction direction = DirectionHelper.getFromPositions(pos, side);
+			
+			if (!sideSolid && sideState.getBlock() instanceof StairsBlock) {
+				sideSolid = sideState.isSideSolidFullSquare(world, side, direction.getOpposite());
+			}
 			if (aboveState.getBlock() instanceof StairsBlock) {
-				Direction direction = DirectionHelper.getFromPositions(pos, side);
 				topSolid = aboveState.isSideSolidFullSquare(world, up, Direction.DOWN) || aboveState.isSideSolidFullSquare(world, up, direction);
 			}
 		}
