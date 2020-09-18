@@ -5,7 +5,7 @@ import net.fabricmc.api.ModInitializer;
 public class RedstoneTweaks implements ModInitializer {
 	
 	public static final RedstoneTweaksVersion MOD_VERSION = new RedstoneTweaksVersion(0, 8, 0);
-	public static final RedstoneTweaksVersion SETTINGS_VERSION = new RedstoneTweaksVersion(1, 0, 0);
+	public static final RedstoneTweaksVersion SETTINGS_VERSION = new RedstoneTweaksVersion(1, 1, 0);
 	
 	private static RedstoneTweaks instance;
 	
