@@ -19,4 +19,14 @@ public class SettingsPack {
 	public List<ISetting> getSettings() {
 		return settings;
 	}
+	
+	public ISetting getSettingFromName(String name) {
+		for (ISetting setting : getSettings()) {
+			if (setting.getName() == name) {
+				return setting;
+			}
+		}
+		
+		return null;
+	}
 }
