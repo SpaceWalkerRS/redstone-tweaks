@@ -1,7 +1,5 @@
 package redstonetweaks.world.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.TreeSet;
 
 import net.minecraft.block.Block;
@@ -19,6 +17,7 @@ import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.packet.NeighborUpdateSchedulerPacket;
 import redstonetweaks.packet.NeighborUpdateVisualizerPacket;
 import redstonetweaks.packet.RedstoneTweaksPacket;
+import redstonetweaks.settings.Settings;
 import redstonetweaks.world.common.NeighborUpdateScheduler;
 
 public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {
@@ -47,7 +46,7 @@ public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {
 	public void tick() {
 		tickTime++;
 		
-		if (!GLOBAL.get(SHOW_NEIGHBOR_UPDATES)) {
+		if (!Settings.Global.SHOW_NEIGHBOR_UPDATES.get()) {
 			clearUpdates();
 		} else if (scheduledNeighborUpdates.isEmpty()) {
 			clearCurrentUpdate();
@@ -125,7 +124,7 @@ public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {
 	
 	public void schedule(BlockPos pos, BlockPos notifierPos, Direction direction, int flags, int depth, ScheduledNeighborUpdate.UpdateType updateType) {
 		boolean isEmpty = !hasScheduledNeighborUpdates();
-		long time = GLOBAL.get(SHOW_PROCESSING_ORDER) > 0 ? tickTime : world.getTime();
+		long time = Settings.Global.SHOW_PROCESSING_ORDER.get() > 0 ? tickTime : world.getTime();
 		
 		scheduledNeighborUpdates.add(new ScheduledNeighborUpdate(pos, notifierPos, currentSourcePos, direction, flags | 2, depth, updateType, time));
 		

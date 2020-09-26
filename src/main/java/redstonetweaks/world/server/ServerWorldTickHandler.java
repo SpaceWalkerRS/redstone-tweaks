@@ -1,7 +1,5 @@
 package redstonetweaks.world.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Iterator;
 import java.util.function.BooleanSupplier;
 
@@ -22,6 +20,7 @@ import redstonetweaks.packet.TickStatusPacket;
 import redstonetweaks.packet.WorldSyncPacket;
 import redstonetweaks.packet.DoWorldTicksPacket;
 import redstonetweaks.packet.WorldTimeSyncPacket;
+import redstonetweaks.settings.Settings;
 import redstonetweaks.world.common.WorldTickHandler;
 
 public class ServerWorldTickHandler extends WorldTickHandler {
@@ -57,7 +56,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	
 	public void tick(BooleanSupplier shouldKeepTicking) {
 		if (doWorldTicks()) {
-			int interval = GLOBAL.get(SHOW_PROCESSING_ORDER);
+			int interval = Settings.Global.SHOW_PROCESSING_ORDER.get();
 			
 			if (interval > 0 || isTickingWorlds()) {
 				if (interval == 0 || server.getTicks() % interval == 0) {
@@ -84,7 +83,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			
 			world.tick(shouldKeepTicking);
 		}
-		if (BUG_FIXES.get(MC172213)) {
+		if (Settings.BugFixes.MC172213.get()) {
 			for (ServerWorld world : server.getWorlds()) {
 				((ServerWorldHelper)world).tickTimeAccess();
 			}
@@ -132,7 +131,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	}
 	
 	private void endTick() {
-		if (BUG_FIXES.get(MC172213)) {
+		if (Settings.BugFixes.MC172213.get()) {
 			for (ServerWorld world : server.getWorlds()) {
 				((ServerWorldHelper)world).tickTimeAccess();
 			}

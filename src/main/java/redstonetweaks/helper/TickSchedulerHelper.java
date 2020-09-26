@@ -9,6 +9,7 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import redstonetweaks.settings.Settings;
 
 public class TickSchedulerHelper {
 	
@@ -22,5 +23,9 @@ public class TickSchedulerHelper {
 		} else {
 			tickScheduler.schedule(pos, object, delay, priority);
 		}
+	}
+	
+	public static <T> void scheduleWater(WorldAccess world, BlockState state, TickScheduler<T> tickScheduler, BlockPos pos, T object, int delay) {
+		schedule(world, state, tickScheduler, pos, object, delay, Settings.Water.TICK_PRIORITY.get());
 	}
 }

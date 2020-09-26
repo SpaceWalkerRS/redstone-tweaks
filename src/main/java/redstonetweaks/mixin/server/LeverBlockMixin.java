@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,9 +46,9 @@ public abstract class LeverBlockMixin extends Block {
 			cir.cancel();
 		} else {
 			boolean powered = state.get(Properties.POWERED);
-			int delay = powered ? LEVER.get(FALLING_DELAY) : LEVER.get(RISING_DELAY);
+			int delay = getDelay(powered);
 			if (delay > 0) {
-				TickPriority priority = powered ? LEVER.get(FALLING_TICK_PRIORITY) : LEVER.get(RISING_TICK_PRIORITY);
+				TickPriority priority = getTickPriority(powered);
 				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
 				
 				cir.setReturnValue(ActionResult.SUCCESS);
@@ -61,12 +59,12 @@ public abstract class LeverBlockMixin extends Block {
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {
-		return LEVER.get(WEAK_POWER);
+		return redstonetweaks.settings.Settings.Lever.POWER_WEAK.get();
 	}
 	
 	@ModifyConstant(method = "getStrongRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetStrongRedstonePower(int oldValue) {
-		return LEVER.get(STRONG_POWER);
+		return redstonetweaks.settings.Settings.Lever.POWER_STRONG.get();
 	}
 	
 	@Override
@@ -74,5 +72,13 @@ public abstract class LeverBlockMixin extends Block {
 		BlockState blockState = method_21846(state, world, pos);
         float pitch = blockState.get(Properties.POWERED) ? 0.6F : 0.5F;
         world.playSound((PlayerEntity)null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, pitch);
+	}
+	
+	private int getDelay(boolean powered) {
+		return powered ? redstonetweaks.settings.Settings.Lever.DELAY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.Lever.DELAY_RISING_EDGE.get();
+	}
+	
+	private TickPriority getTickPriority(boolean powered) {
+		return powered ? redstonetweaks.settings.Settings.Lever.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.Lever.TICK_PRIORITY_RISING_EDGE.get();
 	}
 }

@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,9 +32,9 @@ public abstract class TntBlockMixin extends AbstractBlock {
 		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
 			ci.cancel();
 		} else {
-			int delay = TNT.get(DELAY);
+			int delay = redstonetweaks.settings.Settings.TNT.DELAY.get();
 			if (delay > 0) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, TNT.get(TICK_PRIORITY));
+				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, redstonetweaks.settings.Settings.TNT.TICK_PRIORITY.get());
 				ci.cancel();
 			}
 		}
@@ -47,9 +45,9 @@ public abstract class TntBlockMixin extends AbstractBlock {
 		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
 			ci.cancel();
 		} else {
-			int delay = TNT.get(DELAY);
+			int delay = redstonetweaks.settings.Settings.TNT.DELAY.get();
 			if (delay > 0) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, TNT.get(TICK_PRIORITY));
+				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, redstonetweaks.settings.Settings.TNT.TICK_PRIORITY.get());
 				ci.cancel();
 			}
 		}
@@ -62,7 +60,7 @@ public abstract class TntBlockMixin extends AbstractBlock {
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		if (TNT.get(LAZY) || world.isReceivingRedstonePower(pos)) {
+		if (redstonetweaks.settings.Settings.TNT.LAZY.get() || world.isReceivingRedstonePower(pos)) {
 			primeTnt(world, pos);
 			world.removeBlock(pos, false);
 		}

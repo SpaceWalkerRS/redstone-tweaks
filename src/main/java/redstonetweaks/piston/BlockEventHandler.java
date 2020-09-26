@@ -1,7 +1,5 @@
 package redstonetweaks.piston;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +26,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonBlockEntityHelper;
-import redstonetweaks.helper.PistonBlockHelper;
-import redstonetweaks.setting.SettingsPack;
+import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.settings.Settings;
 
 public class BlockEventHandler {
 	
@@ -44,8 +42,6 @@ public class BlockEventHandler {
 	private Direction moveDirection;
 	private BlockPos headPos;
 	private boolean sticky;
-	
-	private SettingsPack settings;
 	
 	private int retractionProgress;
 	
@@ -77,24 +73,23 @@ public class BlockEventHandler {
 		this.moveDirection = extend ? facing : facing.getOpposite();
 		this.headPos = pos.offset(facing);
 		this.sticky = sticky;
-		this.settings = sticky ? STICKY_PISTON : NORMAL_PISTON;;
 	}
 	
 	public boolean startBlockEvent() {
 		if (!world.isClient()) {
 			boolean extended = type != 0;
-			boolean lazy = extended ? settings.get(FALLING_LAZY) : settings.get(RISING_LAZY);
-			boolean shouldExtend = lazy ? !extended : PistonBlockHelper.isReceivingPower(world, pos, state, facing, true);
+			boolean lazy = extended ? PistonHelper.lazyFallingEdge(sticky) : PistonHelper.lazyRisingEdge(sticky);
+			boolean shouldExtend = lazy ? !extended : PistonHelper.isReceivingPower(world, pos, state, facing, true);
 			
 			if (shouldExtend && (type == 1 || type == 2)) {
-				int flags = GLOBAL.get(DOUBLE_RETRACTION) ? 16 : 2;
+				int flags = Settings.Global.DOUBLE_RETRACTION.get() ? 16 : 2;
 				world.setBlockState(pos, state.with(Properties.EXTENDED, true), flags);
 				return false;
 			}
 			
 			if (!shouldExtend && type == 0) {
-				if (settings.get(FORCE_UPDATE_WHEN_POWERED)) {
-					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, settings.get(RISING_TICK_PRIORITY));
+				if (PistonHelper.updateSelfWhilePowered(sticky)) {
+					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, PistonHelper.tickPriorityRisingEdge(sticky));
 				}
 				
 				return false;
@@ -102,7 +97,7 @@ public class BlockEventHandler {
 		}
 		
 		if (type == 0) {
-			PistonBlockHelper.getDoubleRetractionState(world, headPos);
+			PistonHelper.getDoubleRetractionState(world, headPos);
 			
 			if (!startMove()) {
 				return false;
@@ -148,8 +143,8 @@ public class BlockEventHandler {
 				world.updateNeighbors(pos, blockState.getBlock());
 				blockState.updateNeighbors(world, pos, 2);
 				
-				if (GLOBAL.get(DOUBLE_RETRACTION) && !world.isClient()) {
-					PistonBlockHelper.getDoubleRetractionState(world, pos.offset(facing, 2));
+				if (Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
+					PistonHelper.getDoubleRetractionState(world, pos.offset(facing, 2));
 				}
 				
 				retractionProgress++;
@@ -158,7 +153,7 @@ public class BlockEventHandler {
 				if (sticky) {
 					retractionProgress++;
 					
-					if (!STICKY_PISTON.get(DO_BLOCK_DROPPING) || STICKY_PISTON.get(FAST_BLOCK_DROPPING)) {
+					if (!Settings.StickyPiston.DO_BLOCK_DROPPING.get() || Settings.StickyPiston.FAST_BLOCK_DROPPING.get()) {
 						BlockPos frontPos = pos.offset(facing, 2);
 						BlockState frontState = world.getBlockState(frontPos);
 						if (frontState.isOf(Blocks.MOVING_PISTON)) {
@@ -198,7 +193,7 @@ public class BlockEventHandler {
 		BlockState blockState = world.getBlockState(blockPos);;
 		
 		boolean stillRetracting = false;
-		if (!(droppedBlock && STICKY_PISTON.get(DO_BLOCK_DROPPING))) {
+		if (!(droppedBlock && Settings.StickyPiston.DO_BLOCK_DROPPING.get())) {
 			if (blockState.isAir() || !PistonBlock.isMovable(blockState, world, blockPos, moveDirection, false, facing) || blockState.getPistonBehavior() != PistonBehavior.NORMAL && !blockState.isOf(Blocks.PISTON) && !blockState.isOf(Blocks.STICKY_PISTON)) {
 				world.removeBlock(headPos, false);
 			} else {
@@ -348,7 +343,7 @@ public class BlockEventHandler {
 				blockPos = movedBlocksPos.get(index);
 				blockState = affectedBlockStates[affectedBlocksIndex++];
 				world.updateNeighborsAlways(blockPos, blockState.getBlock());
-				if (BUG_FIXES.get(MC120986) && blockState.hasComparatorOutput()) {
+				if (Settings.BugFixes.MC120986.get() && blockState.hasComparatorOutput()) {
 					world.updateComparators(blockPos, blockState.getBlock());
 				}
 				index--;
@@ -359,7 +354,7 @@ public class BlockEventHandler {
 			break;
 		case 6:
 			if (extend) {
-				if (settings.get(HEAD_UPDATES_ON_EXTENSION)) {
+				if (!PistonHelper.suppressHeadUpdatesOnExtension(sticky)) {
 					world.updateNeighborsAlways(headPos, Blocks.PISTON_HEAD);
 				}
 				

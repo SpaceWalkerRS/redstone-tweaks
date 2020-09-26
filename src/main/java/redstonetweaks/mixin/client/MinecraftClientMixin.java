@@ -13,7 +13,7 @@ import net.minecraft.client.world.ClientWorld;
 
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.packet.ClientPacketHandler;
-import redstonetweaks.setting.ClientSettingsManager;
+import redstonetweaks.settings.ClientSettingsManager;
 import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.client.NeighborUpdateVisualizer;
 import redstonetweaks.world.client.TickInfoLabelRenderer;
@@ -31,7 +31,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(RunArgs args, CallbackInfo ci) {
-		settingsManager = new ClientSettingsManager();
+		settingsManager = new ClientSettingsManager((MinecraftClient)(Object)this);
 		neighborUpdateVisualizer = new NeighborUpdateVisualizer((MinecraftClient)(Object)this);
 		packetHandler = new ClientPacketHandler((MinecraftClient)(Object)this);
 		worldHandler = new ClientWorldTickHandler((MinecraftClient)(Object)this);
@@ -46,7 +46,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "RETURN"))
 	private void onDisconnect(Screen screen, CallbackInfo ci) {
 		worldHandler.setCurrentWorld(null);
-		settingsManager.resetSettings();
+		settingsManager.onDisconnect();
 	}
 	
 	@Override

@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +38,7 @@ public abstract class HopperBlockMixin extends Block {
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		boolean enabled = state.get(Properties.ENABLED);
-		boolean lazy = enabled ? HOPPER.get(RISING_LAZY) : HOPPER.get(FALLING_LAZY);
+		boolean lazy = isLazy(enabled);
 		boolean isReceivingPower = world.isReceivingRedstonePower(pos);
 		boolean shouldBeEnabled = lazy ? !enabled : !isReceivingPower;
 		
@@ -54,12 +52,24 @@ public abstract class HopperBlockMixin extends Block {
 	
 	private void update(World world, BlockPos pos, BlockState state) {
 		boolean enabled = state.get(Properties.ENABLED);
-		int delay = enabled ? HOPPER.get(RISING_DELAY) : HOPPER.get(FALLING_DELAY);
+		int delay = getDelay(enabled);
 		if (delay == 0) {
 			updateEnabled(world, pos, state);
 		} else if (!world.isClient()) {
-			TickPriority priority = enabled ? HOPPER.get(RISING_TICK_PRIORITY) : HOPPER.get(FALLING_TICK_PRIORITY);
+			TickPriority priority = getTickPriority(enabled);
 			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
 		}
+	}
+	
+	private int getDelay(boolean enabled) {
+		return enabled ? redstonetweaks.settings.Settings.Hopper.DELAY_RISING_EDGE.get() : redstonetweaks.settings.Settings.Hopper.DELAY_FALLING_EDGE.get();
+	}
+	
+	private boolean isLazy(boolean enabled) {
+		return enabled ? redstonetweaks.settings.Settings.Hopper.LAZY_RISING_EDGE.get() : redstonetweaks.settings.Settings.Hopper.LAZY_FALLING_EDGE.get();
+	}
+	
+	private TickPriority getTickPriority(boolean enabled) {
+		return enabled ? redstonetweaks.settings.Settings.Hopper.TICK_PRIORITY_RISING_EDGE.get() : redstonetweaks.settings.Settings.Hopper.TICK_PRIORITY_FALLING_EDGE.get();
 	}
 }

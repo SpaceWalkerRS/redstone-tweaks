@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.settings.Settings;
 
 @Mixin(MagmaBlock.class)
 public abstract class MagmaBlockMixin {
@@ -27,11 +26,11 @@ public abstract class MagmaBlockMixin {
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, MAGMA_BLOCK.get(DELAY), MAGMA_BLOCK.get(TICK_PRIORITY));
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, Settings.MagmaBlock.DELAY.get(), Settings.MagmaBlock.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, MAGMA_BLOCK.get(DELAY), MAGMA_BLOCK.get(TICK_PRIORITY));
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, Settings.MagmaBlock.DELAY.get(), Settings.MagmaBlock.TICK_PRIORITY.get());
 	}
 }

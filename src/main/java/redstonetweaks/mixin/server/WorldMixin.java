@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
@@ -45,6 +43,7 @@ import redstonetweaks.helper.StairsHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.packet.TickBlockEntityPacket;
 import redstonetweaks.piston.BlockEventHandler;
+import redstonetweaks.settings.Settings;
 import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 
 @Mixin(World.class)
@@ -80,14 +79,9 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 		}
 	}
 	
-	@Redirect(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;II)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-	private BlockState onSetBlockStateModifyBlockState2(World world, BlockPos pos2, BlockPos pos, BlockState state, int flags, int maxUpdateDepth) {
-		return GLOBAL.get(EXPERIMENTAL_SET_BLOCK_STATE) ? state : world.getBlockState(pos2);
-	}
-	
 	@Redirect(method = "updateNeighbor", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;neighborUpdate(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;Z)V"))
 	private void onUpdateNeighborRedirectNeighborUpdate(BlockState blockState, World world, BlockPos pos, Block sourceBlock, BlockPos notifierPos, boolean notify) {
-		if (GLOBAL.get(DO_BLOCK_UPDATES)) {
+		if (Settings.Global.DO_BLOCK_UPDATES.get()) {
 			if (updateNeighborsNormally()) {
 				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
 			} else {
@@ -100,7 +94,7 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	
 	@Redirect(method = "updateComparators", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;neighborUpdate(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;Z)V"))
 	private void onUpdateComparatorsRedirectNeighborUpdate(BlockState blockState, World world, BlockPos pos, Block sourceBlock, BlockPos notifierPos, boolean notify) {
-		if (GLOBAL.get(DO_COMPARATOR_UPDATES)) {
+		if (Settings.Global.DO_COMPARATOR_UPDATES.get()) {
 			if (updateNeighborsNormally()) {
 				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
 			} else {
@@ -113,7 +107,7 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	
 	@Inject(method = "getReceivedStrongRedstonePower", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetReceivedStrongRedstonePowerInjectAtHead(BlockPos pos, CallbackInfoReturnable<Integer> cir) {
-		if (STAIRS.get(FULL_FACES_ARE_SOLID)) {
+		if (Settings.Stairs.FULL_FACES_ARE_SOLID.get()) {
 			BlockState state = getBlockState(pos);
 			if (state.getBlock() instanceof StairsBlock) {
 				cir.setReturnValue(StairsHelper.getReceivedStrongRedstonePower((World)(Object)this, pos, state));
@@ -124,12 +118,12 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	
 	@Redirect(method = "getEmittedRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onGetEmittedRedstonePowerRedirectIsSolidBlock(BlockState state, BlockView world, BlockPos pos1, BlockPos pos, Direction direction) {
-		if (MAGENTA_GLAZED_TERRACOTTA.get(IS_POWER_DIODE)) {
+		if (Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
 			if (state.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
 				return state.get(Properties.HORIZONTAL_FACING) == direction;
 			}
 		}
-		if (STAIRS.get(FULL_FACES_ARE_SOLID)) {
+		if (Settings.Stairs.FULL_FACES_ARE_SOLID.get()) {
 			if (state.getBlock() instanceof StairsBlock) {
 				return state.isSideSolidFullSquare(world, pos, direction.getOpposite());
 			}

@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.settings.Settings;
 
 @Mixin(FrostedIceBlock.class)
 public abstract class FrostedIceBlockMixin {
@@ -25,7 +24,7 @@ public abstract class FrostedIceBlockMixin {
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		delay = MathHelper.nextInt(random, FROSTED_ICE.get(DELAY_MIN), FROSTED_ICE.get(DELAY_MAX));
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, delay, FROSTED_ICE.get(TICK_PRIORITY));
+		delay = MathHelper.nextInt(random, Settings.FrostedIce.DELAY_MIN.get(), Settings.FrostedIce.DELAY_MAX.get());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, delay, Settings.FrostedIce.TICK_PRIORITY.get());
 	}
 }

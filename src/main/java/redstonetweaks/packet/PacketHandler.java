@@ -48,16 +48,17 @@ public abstract class PacketHandler {
 	public enum PacketType {
 		INVALID(0, null),
 		SETTING(1, SettingPacket.class),
-		NEIGHBOR_UPDATE_VISUALIZER(2, NeighborUpdateVisualizerPacket.class),
-		NEIGHBOR_UPDATE_SCHEDULER(3, NeighborUpdateSchedulerPacket.class),
-		WORLD_SYNC(4, WorldSyncPacket.class),
-		TASK_SYNC(5, TaskSyncPacket.class),
-		UNFINISHED_EVENT(6, UnfinishedEventPacket.class),
-		WORLD_TIME_SYNC(7, WorldTimeSyncPacket.class),
-		TICK_STATUS(8, TickStatusPacket.class),
-		TICK_BLOCK_ENTITY(9, TickBlockEntityPacket.class),
-		PLAYER_JOINED_SERVER(10, PlayerJoinedServerPacket.class),
-		DO_WORLD_TICKS(11, DoWorldTicksPacket.class);
+		SETTINGS(2, SettingsPacket.class),
+		NEIGHBOR_UPDATE_VISUALIZER(3, NeighborUpdateVisualizerPacket.class),
+		NEIGHBOR_UPDATE_SCHEDULER(4, NeighborUpdateSchedulerPacket.class),
+		WORLD_SYNC(5, WorldSyncPacket.class),
+		TASK_SYNC(6, TaskSyncPacket.class),
+		UNFINISHED_EVENT(7, UnfinishedEventPacket.class),
+		WORLD_TIME_SYNC(8, WorldTimeSyncPacket.class),
+		TICK_STATUS(9, TickStatusPacket.class),
+		TICK_BLOCK_ENTITY(10, TickBlockEntityPacket.class),
+		PLAYER_JOINED_SERVER(11, PlayerJoinedServerPacket.class),
+		DO_WORLD_TICKS(12, DoWorldTicksPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends RedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;

@@ -21,7 +21,7 @@ public class CommandManagerMixin {
 	
 	@Inject(method="<init>", at = @At("RETURN"))
 	private void registerCommands(CommandManager.RegistrationEnvironment environment, CallbackInfo ci) {
-		TweakCommand.registerCommand(dispatcher);
+		//TweakCommand.registerCommand(dispatcher);
 		TickCommand.registerCommand(dispatcher);
 	}
 }

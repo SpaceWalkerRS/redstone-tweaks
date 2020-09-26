@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
@@ -14,8 +12,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.BlockState;
@@ -31,6 +29,7 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 
 import redstonetweaks.helper.ServerTickSchedulerHelper;
+import redstonetweaks.settings.Settings;
 
 @Mixin(ServerTickScheduler.class)
 public abstract class ServerTickSchedulerMixin<T> implements ServerTickSchedulerHelper, TickScheduler<T> {
@@ -49,10 +48,10 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 	
 	@Inject(method = "schedule", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
 	private void onScheduledInjectBeforeAddScheduledTick(BlockPos pos, T object, int delay, TickPriority priority, CallbackInfo ci) {
-		if (GLOBAL.get(DELAY_MULTIPLIER) == 0) {
+		if (Settings.Global.DELAY_MULTIPLIER.get() == 0) {
 			tickConsumer.accept(new ScheduledTick<>(pos, object, 0, priority));
 		} else {
-			if (GLOBAL.get(RANDOMIZE_TICK_PRIORITIES)) {
+			if (Settings.Global.RANDOMIZE_TICK_PRIORITIES.get()) {
 				int index = world.getRandom().nextInt(TickPriority.values().length) + TickPriority.values()[0].getIndex();
 				priority = TickPriority.byIndex(index);
 			}
@@ -144,12 +143,12 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 	}
 	
 	private int getDelay(int delay) {
-		int min = GLOBAL.get(RANDOMIZE_DELAYS_MIN);
-		int max = GLOBAL.get(RANDOMIZE_DELAYS_MAX);
+		int min = 1;
+		int max = 127;
 		
-		if (min + max == 0) {
-			return GLOBAL.get(DELAY_MULTIPLIER) * delay;
+		if (Settings.Global.RANDOMIZE_DELAYS.get()) {
+			delay = min + world.getRandom().nextInt(max);
 		}
-		return min + world.getRandom().nextInt(max);
+		return delay;
 	}
 }

@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,6 +20,8 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
+import redstonetweaks.settings.Settings;
+
 @Mixin(LecternBlock.class)
 public abstract class LecternBlockMixin {
 	
@@ -29,9 +29,9 @@ public abstract class LecternBlockMixin {
 	
 	@Inject(method = "setPowered(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V", cancellable = true, at = @At(value = "HEAD"))
 	private static void onSetPoweredInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
-		int delay = LECTERN.get(RISING_DELAY);
+		int delay = Settings.Lectern.DELAY_RISING_EDGE.get();
 		if (delay > 0) {
-			TickPriority priority = LECTERN.get(RISING_TICK_PRIORITY);
+			TickPriority priority = Settings.Lectern.TICK_PRIORITY_RISING_EDGE.get();
 			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
 			world.syncWorldEvent(1043, pos, 0);
 			
@@ -56,22 +56,22 @@ public abstract class LecternBlockMixin {
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePowerModify15(int oldValue) {
-		return LECTERN.get(WEAK_POWER);
+		return Settings.Lectern.POWER_WEAK.get();
 	}
 	
 	@ModifyConstant(method = "getStrongRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetStrongRedstonePowerModify15(int oldValue) {
-		return LECTERN.get(STRONG_POWER);
+		return Settings.Lectern.POWER_STRONG.get();
 	}
 	
 	private static void depower(World world, BlockPos pos, BlockState state) {
-		int delay = LECTERN.get(FALLING_DELAY);
+		int delay = Settings.Lectern.DELAY_FALLING_EDGE.get();
 		if (delay == 0) {
 			if (!world.isClient()) {
 				state.scheduledTick((ServerWorld)world, pos, world.getRandom());
 			}
 		} else {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, LECTERN.get(FALLING_TICK_PRIORITY));
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Settings.Lectern.TICK_PRIORITY_FALLING_EDGE.get());
 		}
 	}
 }

@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,25 +16,27 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import redstonetweaks.settings.Settings;
+
 @Mixin(RedstoneLampBlock.class)
 public class RedstoneLampBlockMixin {
 
 	@Inject(method = "neighborUpdate", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private void onNeighborUpdateInjectBeforeSchedule(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
-		int delay = REDSTONE_LAMP.get(FALLING_DELAY);
+		int delay = Settings.RedstoneLamp.DELAY_FALLING_EDGE.get();
 		if (delay == 0) {
 			world.setBlockState(pos, state.cycle(Properties.LIT), 2);
 		} else {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, REDSTONE_LAMP.get(FALLING_TICK_PRIORITY));
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Settings.RedstoneLamp.TICK_PRIORITY_FALLING_EDGE.get());
 		}
 		ci.cancel();
 	}
 
 	@Inject(method = "neighborUpdate", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onNeighborUpdateInjectBeforeSetBlockState(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
-		int delay = REDSTONE_LAMP.get(RISING_DELAY);
+		int delay = Settings.RedstoneLamp.DELAY_RISING_EDGE.get();
 		if (delay > 0) {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, REDSTONE_LAMP.get(RISING_TICK_PRIORITY));
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Settings.RedstoneLamp.TICK_PRIORITY_RISING_EDGE.get());
 			ci.cancel();
 		}
 	}
@@ -57,6 +57,6 @@ public class RedstoneLampBlockMixin {
 	}
 
 	private boolean isLazy(boolean currentlyPowered) {
-		return currentlyPowered ? REDSTONE_LAMP.get(FALLING_LAZY) : REDSTONE_LAMP.get(RISING_LAZY);
+		return currentlyPowered ? Settings.RedstoneLamp.LAZY_FALLING_EDGE.get() : Settings.RedstoneLamp.LAZY_RISING_EDGE.get();
 	}
 }

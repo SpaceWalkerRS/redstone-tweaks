@@ -1,7 +1,5 @@
 package redstonetweaks.helper;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
@@ -11,6 +9,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+
+import redstonetweaks.settings.Settings;
 
 public interface BlockHelper {
 	
@@ -47,6 +47,6 @@ public interface BlockHelper {
 	}
 	
 	public static boolean isPistonRigid(boolean sticky) {
-		return sticky ? STICKY_PISTON.get(SUPPORTS_BRITTLE_BLOCKS) : NORMAL_PISTON.get(SUPPORTS_BRITTLE_BLOCKS);
+		return sticky ? Settings.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.get() : Settings.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.get();
 	}
 }

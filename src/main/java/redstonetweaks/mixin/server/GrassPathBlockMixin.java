@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,6 +16,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.settings.Settings;
 
 @Mixin(GrassPathBlock.class)
 public abstract class GrassPathBlockMixin {
@@ -26,6 +25,6 @@ public abstract class GrassPathBlockMixin {
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, GRASS_PATH.get(DELAY), PLANTS.get(TICK_PRIORITY));
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, Settings.GrassPath.DELAY.get(), Settings.GrassPath.TICK_PRIORITY.get());
 	}
 }

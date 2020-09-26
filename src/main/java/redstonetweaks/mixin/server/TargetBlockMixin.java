@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
@@ -16,6 +14,8 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 
+import redstonetweaks.settings.Settings;
+
 @Mixin(TargetBlock.class)
 public class TargetBlockMixin {
 	
@@ -24,13 +24,18 @@ public class TargetBlockMixin {
 	@ModifyConstant(method = "trigger", constant = @Constant(intValue = 20))
 	private static int onTriggerPersistentProjectileDelay(int oldValue) {
 		persistentProjectile = true;
-		return TARGET_BLOCK.get(PERSISTENT_PROJECTILE_DELAY);
+		return Settings.TargetBlock.DELAY_PERSISTENT_PROJECTILE.get();
 	}
 	
 	@ModifyConstant(method = "trigger", constant = @Constant(intValue = 8))
 	private static int onTriggerDefaultDelay(int oldValue) {
 		persistentProjectile = false;
-		return TARGET_BLOCK.get(DELAY);
+		return Settings.TargetBlock.DELAY_DEFAULT.get();
+	}
+	
+	@ModifyConstant(method = "calculatePower", constant = @Constant(doubleValue = 15.0D))
+	private static double onCalculatePowerModify15(double oldValue) {
+		return Settings.Global.POWER_MAX.get();
 	}
 	
 	@Redirect(method = "setPower", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
@@ -38,7 +43,7 @@ public class TargetBlockMixin {
 		if (delay == 0) {
 			state.scheduledTick((ServerWorld)world, pos, world.getRandom());
 		} else {
-			TickPriority priority = persistentProjectile ? TARGET_BLOCK.get(PERSISTENT_PROJECTILE_TICK_PRIORITY) : TARGET_BLOCK.get(TICK_PRIORITY);
+			TickPriority priority = persistentProjectile ? Settings.TargetBlock.TICK_PRIORITY_PERSISTENT_PROJECTILE.get() : Settings.TargetBlock.TICK_PRIORITY_DEFAULT.get();
 			tickScheduler.schedule(pos, object, delay, priority);
 		}
 	}

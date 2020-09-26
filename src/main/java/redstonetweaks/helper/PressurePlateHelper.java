@@ -1,15 +1,20 @@
 package redstonetweaks.helper;
 
 import net.minecraft.block.BlockState;
-
-import redstonetweaks.setting.SettingsPack;
+import net.minecraft.world.TickPriority;
 
 public interface PressurePlateHelper {
 	
-	public SettingsPack getSettings(BlockState state);
+	public int delayRisingEdge(BlockState state);
 	
-	public int getWeakPower(BlockState state);
+	public int delayFallingEdge(BlockState state);
 	
-	public int getStrongPower(BlockState state);
+	public int powerWeak(BlockState state);
+	
+	public int powerStrong(BlockState state);
+	
+	public TickPriority tickPriorityRisingEdge(BlockState state);
+	
+	public TickPriority tickPriorityFallingEdge(BlockState state);
 	
 }

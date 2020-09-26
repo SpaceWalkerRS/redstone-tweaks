@@ -1,75 +1,48 @@
 package redstonetweaks.packet;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.TickPriority;
 
-import redstonetweaks.helper.MinecraftClientHelper;
-import redstonetweaks.setting.BooleanProperty;
-import redstonetweaks.setting.IntegerProperty;
-import redstonetweaks.setting.Property;
-import redstonetweaks.setting.Setting;
-import redstonetweaks.setting.SettingsPack;
-import redstonetweaks.setting.TickPriorityProperty;
+import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.settings.Settings;
+import redstonetweaks.settings.types.ISetting;
 
-public class SettingPacket<T> extends RedstoneTweaksPacket {
+public class SettingPacket extends RedstoneTweaksPacket {
 	
-	public SettingsPack pack;
-	public Setting<? extends Property<T>> setting;
-	public T value;
+	public ISetting setting;
+	public String value;
 	
 	public SettingPacket() {
 		
 	}
 	
-	public SettingPacket(SettingsPack pack, Setting<? extends Property<T>> setting) {
-		this.pack = pack;
+	public SettingPacket(ISetting setting) {
 		this.setting = setting;
-		this.value = pack.get(setting);
+		this.value = setting.getAsText();
 	}
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		buffer.writeString(pack.getName());
-		buffer.writeString(setting.getName());
-		
-		if (value instanceof Boolean) {
-			buffer.writeBoolean((boolean)(Object)value);
-		}
-		if (value instanceof Integer) {
-			buffer.writeInt((int)(Object)value);
-		}
-		if (value instanceof TickPriority) {
-			buffer.writeInt(((TickPriority)(Object)value).getIndex());
-		}
+		buffer.writeString(setting.getId());
+		buffer.writeString(value);
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		pack = SETTINGS_PACKS.get(buffer.readString());
-		setting = (Setting<? extends Property<T>>)SETTINGS.get(buffer.readString());
-		
-		Property<T> property = pack.getProperty(setting);
-		if (property instanceof BooleanProperty) {
-			value = (T)(Object)buffer.readBoolean();
-		} else if (property instanceof IntegerProperty) {
-			value = (T)(Object)buffer.readInt();
-		} else if (property instanceof TickPriorityProperty) {
-			value = (T)TickPriority.byIndex(buffer.readInt());
-		}
+		setting = Settings.getSettingFromId(buffer.readString());
+		value = buffer.readString();
 	}
-
+	
 	@Override
 	public void execute(MinecraftServer server) {
-
+		setting.setFromText(value);
+		
+		((MinecraftServerHelper)server).getSettingsManager().onSettingChanged(setting);
 	}
-
+	
 	@Override
 	public void execute(MinecraftClient client) {
-		((MinecraftClientHelper)client).getSettingsManager().updateSetting(pack, setting, value);
+		setting.setFromText(value);
 	}
 }

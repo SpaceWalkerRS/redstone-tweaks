@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.client;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.function.Supplier;
 
 import org.spongepowered.asm.mixin.Final;
@@ -24,6 +22,7 @@ import net.minecraft.world.dimension.DimensionType;
 import redstonetweaks.helper.ClientWorldHelper;
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.settings.Settings;
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
 import redstonetweaks.world.client.ClientUnfinishedEventScheduler;
 import redstonetweaks.world.client.ClientWorldTickHandler;
@@ -62,12 +61,12 @@ public abstract class ClientWorldMixin implements WorldHelper, ClientWorldHelper
 	@Override
 	public boolean tickWorldsNormally() {
 		ClientWorldTickHandler worldTickHandler = ((MinecraftClientHelper)client).getWorldTickHandler();
-		return worldTickHandler.doWorldTicks() && !(worldTickHandler.isTickingWorlds() || GLOBAL.get(SHOW_PROCESSING_ORDER) > 0);
+		return worldTickHandler.doWorldTicks() && !(worldTickHandler.isTickingWorlds() || Settings.Global.SHOW_PROCESSING_ORDER.get() > 0);
 	}
 	
 	@Override
 	public boolean updateNeighborsNormally() {
 		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
-		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || GLOBAL.get(SHOW_NEIGHBOR_UPDATES));
+		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || Settings.Global.SHOW_NEIGHBOR_UPDATES.get());
 	}
 }

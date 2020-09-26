@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -13,15 +11,16 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.block.AbstractPressurePlateBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.WeightedPressurePlateBlock;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.block.WeightedPressurePlateBlock;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.TickPriority;
 
 import redstonetweaks.helper.PressurePlateHelper;
-import redstonetweaks.setting.SettingsPack;
 
 @Mixin(WeightedPressurePlateBlock.class)
 public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePlateBlock implements PressurePlateHelper {
@@ -34,12 +33,12 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 	
 	@Redirect(method = "getRedstoneOutput", at = @At(value = "FIELD", target = "Lnet/minecraft/block/WeightedPressurePlateBlock;weight:I"))
 	private int getPlateWeight(WeightedPressurePlateBlock pressurePlate) {
-		return BLOCK_TO_SETTINGS_PACK.get(pressurePlate).get(WEIGHT);
+		return pressurePlate == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.WEIGHT.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.WEIGHT.get();
 	}
 	
 	@ModifyConstant(method = "getTickRate", constant = @Constant(intValue = 10))
 	private int getWeightedPressurePlateDelay(int oldDelay) {
-		return BLOCK_TO_SETTINGS_PACK.get((Block)(Object)this).get(FALLING_DELAY);
+		return (Block)(Object)this == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.DELAY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.DELAY_FALLING_EDGE.get();
 	}
 	
 	// We need to override this function because when the blocks
@@ -51,17 +50,36 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 	}
 	
 	@Override
-	public SettingsPack getSettings(BlockState state) {
-		return BLOCK_TO_SETTINGS_PACK.get(state.getBlock());
-	}
-	
-	@Override
-	public int getWeakPower(BlockState state) {
+	public int powerWeak(BlockState state) {
 		return getRedstoneOutput(state);
 	}
 	
 	@Override
-	public int getStrongPower(BlockState state) {
+	public int powerStrong(BlockState state) {
 		return getRedstoneOutput(state);
+	}
+	
+	@Override
+	public int delayRisingEdge(BlockState state) {
+		return isLight(state) ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.DELAY_RISING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.DELAY_RISING_EDGE.get();
+	}
+	
+	@Override
+	public int delayFallingEdge(BlockState state) {
+		return isLight(state) ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.DELAY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.DELAY_FALLING_EDGE.get();
+	}
+	
+	@Override
+	public TickPriority tickPriorityRisingEdge(BlockState state) {
+		return isLight(state) ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.TICK_PRIORITY_RISING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.TICK_PRIORITY_RISING_EDGE.get();
+	}
+	
+	@Override
+	public TickPriority tickPriorityFallingEdge(BlockState state) {
+		return isLight(state) ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.TICK_PRIORITY_FALLING_EDGE.get();
+	}
+	
+	private boolean isLight(BlockState state) {
+		return state.isOf(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE);
 	}
 }

@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,10 +16,8 @@ import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 
 import redstonetweaks.helper.PistonBlockEntityHelper;
+import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.setting.IntegerProperty;
-import redstonetweaks.setting.Setting;
-import redstonetweaks.setting.SettingsPack;
 
 @Mixin(PistonBlockEntity.class)
 public abstract class PistonBlockEntityMixin extends BlockEntity implements PistonBlockEntityHelper {
@@ -73,9 +69,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	}
 	
 	private int getPistonSpeed() {
-		SettingsPack settings = isMovedByStickyPiston ? STICKY_PISTON : NORMAL_PISTON;
-		Setting<IntegerProperty> speedSetting = extending ? RISING_SPEED : FALLING_SPEED;
-		
-		return settings.get(speedSetting);
+		return extending ? PistonHelper.speedRisingEdge(isMovedByStickyPiston) : PistonHelper.speedFallingEdge(isMovedByStickyPiston);
 	}
 }

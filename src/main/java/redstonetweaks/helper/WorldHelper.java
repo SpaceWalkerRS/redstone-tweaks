@@ -1,7 +1,5 @@
 package redstonetweaks.helper;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -12,7 +10,8 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
 
 import redstonetweaks.piston.BlockEventHandler;
-import redstonetweaks.setting.SettingsPack;
+import redstonetweaks.settings.Settings;
+import redstonetweaks.settings.types.DirectionalBooleanSetting;
 
 public interface WorldHelper {
 	
@@ -32,7 +31,7 @@ public interface WorldHelper {
 	
 	public static BlockState getStateForPower(World world, BlockPos pos, Direction direction) {
 		BlockState state = world.getBlockState(pos);
-		if (MAGENTA_GLAZED_TERRACOTTA.get(IS_POWER_DIODE)) {
+		if (Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
 			if (state.isOf(Blocks.REDSTONE_WIRE)) {
 				BlockState downState = world.getBlockState(pos.down());
 				if (downState.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
@@ -45,20 +44,17 @@ public interface WorldHelper {
 		return state;
 	}
 	
-	public static boolean isQCPowered(World world, BlockPos pos, BlockState state, boolean forceCheck) {
-		SettingsPack settings = BLOCK_TO_SETTINGS_PACK.get(state.getBlock());
-		if (settings != null) {
-			boolean randQC = settings.get(RANDOMIZE_QC);
-			for (Direction direction : Direction.values()) {
-				if (settings.get(DIRECTION_TO_QC_SETTING.get(direction))) {
-					if (forceCheck || !randQC || world.random.nextBoolean()) {
-						if (world.isReceivingRedstonePower(pos.offset(direction))) {
-							return true;
-						}
+	public static boolean isQCPowered(World world, BlockPos pos, BlockState state, boolean forceCheck, DirectionalBooleanSetting qc, boolean randQC) {
+		for (Direction dir : Direction.values()) {
+			if (qc.get(dir)) {
+				if (forceCheck || !randQC || world.getRandom().nextBoolean()) {
+					if (world.isReceivingRedstonePower(pos.offset(dir))) {
+						return true;
 					}
 				}
 			}
 		}
+		
 		return false;
 	}
 }

@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,6 +51,7 @@ import net.minecraft.world.timer.Timer;
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.settings.Settings;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;
 import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
 import redstonetweaks.world.server.ServerWorldTickHandler;
@@ -107,14 +106,14 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/timer/Timer;processEvents(Ljava/lang/Object;J)V"))
 	private <T> void onTickTimeRedirectProcessEvents(Timer<T> timer, T server, long time) {
-		if (!BUG_FIXES.get(MC172213)) {
+		if (!Settings.BugFixes.MC172213.get()) {
 			timer.processEvents(server, time);
 		}
 	}
 	
 	@Redirect(method = "addSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;add(Ljava/lang/Object;)Z"))
 	private <T> boolean onAddSyncedBlockEventRedirectAdd(ObjectLinkedOpenHashSet<T> set, T event) {
-		if (set.add(event) && isProcessingBlockEvents && GLOBAL.get(RANDOMIZE_BLOCK_EVENTS)) {
+		if (set.add(event) && isProcessingBlockEvents && Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.add((BlockEvent)event);
 		}
 		return true;
@@ -124,7 +123,7 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	private void onProcessSyncedBlockEventsInjectAtHead(CallbackInfo ci) {
 		isProcessingBlockEvents = true;
 		
-		if (GLOBAL.get(RANDOMIZE_BLOCK_EVENTS)) {
+		if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.ensureCapacity(syncedBlockEventQueue.size());
 			for (BlockEvent event : syncedBlockEventQueue) {
 				blockEventList.add(event);
@@ -139,7 +138,7 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	
 	@Redirect(method = "processSyncedBlockEvents", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;removeFirst()Ljava/lang/Object;"))
 	private Object onProcessSyncedBlockEventsRedirectRemoveFirst(ObjectLinkedOpenHashSet<BlockEvent> set) {
-		if (GLOBAL.get(RANDOMIZE_BLOCK_EVENTS)) {
+		if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			int index = random.nextInt(set.size());
 			int lastIndex = blockEventList.size() - 1;
 			Collections.swap(blockEventList, index, lastIndex);
@@ -155,7 +154,7 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	private void onProcessSyncedBlockEventsInjectAtReturn(CallbackInfo ci) {
 		isProcessingBlockEvents = false;
 		
-		if (GLOBAL.get(RANDOMIZE_BLOCK_EVENTS)) {
+		if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.clear();
 		}
 	}
@@ -199,13 +198,13 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	@Override
 	public boolean tickWorldsNormally() {
 		ServerWorldTickHandler worldTickHandler = ((MinecraftServerHelper)getServer()).getWorldTickHandler();
-		return worldTickHandler.doWorldTicks() && !(worldTickHandler.isTickingWorlds() || GLOBAL.get(SHOW_PROCESSING_ORDER) > 0);
+		return worldTickHandler.doWorldTicks() && !(worldTickHandler.isTickingWorlds() || Settings.Global.SHOW_PROCESSING_ORDER.get() > 0);
 	}
 	
 	@Override
 	public boolean updateNeighborsNormally() {
 		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
-		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || GLOBAL.get(SHOW_NEIGHBOR_UPDATES));
+		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || Settings.Global.SHOW_NEIGHBOR_UPDATES.get());
 	}
 	
 	@Override
@@ -311,7 +310,7 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	}
 	
 	private void handleTickTime() {
-		if (BUG_FIXES.get(MC172213)) {
+		if (Settings.BugFixes.MC172213.get()) {
 			if (field_25143) {
 				worldProperties.getScheduledEvents().processEvents(server, worldProperties.getTime());
 			}
@@ -333,7 +332,7 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	@Override
 	public void startProcessingBlockEvents() {
 		isProcessingBlockEvents = true;
-		if (GLOBAL.get(RANDOMIZE_BLOCK_EVENTS)) {
+		if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.ensureCapacity(syncedBlockEventQueue.size());
 			for (BlockEvent event : syncedBlockEventQueue) {
 				blockEventList.add(event);
@@ -346,14 +345,14 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 		if (isProcessingBlockEvents) {
 			if (syncedBlockEventQueue.isEmpty()) {
 				isProcessingBlockEvents = false;
-				if (GLOBAL.get(RANDOMIZE_BLOCK_EVENTS)) {
+				if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 					blockEventList.clear();
 				}
 				
 				return false;
 			} else {
 				BlockEvent blockEvent;
-				if (GLOBAL.get(RANDOMIZE_BLOCK_EVENTS)) {
+				if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 					int index = random.nextInt(syncedBlockEventQueue.size());
 					int lastIndex = blockEventList.size() - 1;
 					Collections.swap(blockEventList, index, lastIndex);

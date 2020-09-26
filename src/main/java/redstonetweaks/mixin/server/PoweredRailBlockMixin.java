@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,14 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.PoweredRailBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
-
-import redstonetweaks.setting.SettingsPack;
 
 @Mixin(PoweredRailBlock.class)
 public abstract class PoweredRailBlockMixin extends AbstractBlock {
@@ -37,8 +34,8 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 
 	@ModifyConstant(method = "isPoweredByOtherRails(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;ZI)Z", constant = @Constant(intValue = 8))
 	private int getPoweredRailLimit(int oldValue, World world, BlockPos pos, BlockState state, boolean bl, int distance) {
-		int limit = BLOCK_TO_SETTINGS_PACK.get(state.getBlock()).get(POWER_LIMIT);
-		return limit;
+		int limit = state.isOf(Blocks.ACTIVATOR_RAIL) ? redstonetweaks.settings.Settings.ActivatorRail.POWER_LIMIT.get() : redstonetweaks.settings.Settings.PoweredRail.POWER_LIMIT.get() ;
+		return limit - 1;
 	}
 
 	@Inject(method = "updateBlockState", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
@@ -73,17 +70,26 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 	}
 
 	private int getDelay(BlockState state, boolean currentlyPowered) {
-		SettingsPack settings = BLOCK_TO_SETTINGS_PACK.get(state.getBlock());
-		return currentlyPowered ? settings.get(FALLING_DELAY) : settings.get(RISING_DELAY);
+		if (state.isOf(Blocks.ACTIVATOR_RAIL)) {
+			return currentlyPowered ? redstonetweaks.settings.Settings.ActivatorRail.DELAY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.ActivatorRail.DELAY_RISING_EDGE.get();
+		} else {
+			return currentlyPowered ? redstonetweaks.settings.Settings.PoweredRail.DELAY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.PoweredRail.DELAY_RISING_EDGE.get();
+		}
 	}
 
 	private TickPriority getTickPriority(BlockState state, boolean currentlyPowered) {
-		SettingsPack settings = BLOCK_TO_SETTINGS_PACK.get(state.getBlock());
-		return currentlyPowered ? settings.get(FALLING_TICK_PRIORITY) : settings.get(RISING_TICK_PRIORITY);
+		if (state.isOf(Blocks.ACTIVATOR_RAIL)) {
+			return currentlyPowered ? redstonetweaks.settings.Settings.ActivatorRail.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.ActivatorRail.TICK_PRIORITY_RISING_EDGE.get();
+		} else {
+			return currentlyPowered ? redstonetweaks.settings.Settings.PoweredRail.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.PoweredRail.TICK_PRIORITY_RISING_EDGE.get();
+		}
 	}
 
 	private boolean isLazy(BlockState state, boolean currentlyPowered) {
-		SettingsPack settings = BLOCK_TO_SETTINGS_PACK.get(state.getBlock());
-		return currentlyPowered ? settings.get(FALLING_LAZY) : settings.get(RISING_LAZY);
+		if (state.isOf(Blocks.ACTIVATOR_RAIL)) {
+			return currentlyPowered ? redstonetweaks.settings.Settings.ActivatorRail.LAZY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.ActivatorRail.LAZY_RISING_EDGE.get();
+		} else {
+			return currentlyPowered ? redstonetweaks.settings.Settings.PoweredRail.LAZY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.PoweredRail.LAZY_RISING_EDGE.get();
+		}
 	}
 }

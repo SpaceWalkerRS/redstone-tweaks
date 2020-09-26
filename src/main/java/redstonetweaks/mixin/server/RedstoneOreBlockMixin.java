@@ -1,16 +1,14 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
@@ -48,7 +46,7 @@ public abstract class RedstoneOreBlockMixin extends AbstractBlock {
 	
 	@Inject(method = "light", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private static void onLightInjectAfterSetBlockState(BlockState state, World world, BlockPos pos, CallbackInfo ci) {
-		if (REDSTONE_ORE.get(STRONG_POWER) > 0) {
+		if (redstonetweaks.settings.Settings.RedstoneOre.POWER_STRONG.get() > 0) {
 			for (Direction direction : Direction.values()) {
 				BlockPos neighborPos = pos.offset(direction);
 				world.updateNeighborsExcept(neighborPos, state.getBlock(), direction.getOpposite());
@@ -58,7 +56,7 @@ public abstract class RedstoneOreBlockMixin extends AbstractBlock {
 	
 	@Inject(method = "randomTick", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onRandomTickInjectAfterSetBlockState(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
-		if (REDSTONE_ORE.get(STRONG_POWER) > 0) {
+		if (redstonetweaks.settings.Settings.RedstoneOre.POWER_STRONG.get() > 0) {
 			for (Direction direction : Direction.values()) {
 				BlockPos neighborPos = pos.offset(direction);
 				world.updateNeighborsExcept(neighborPos, state.getBlock(), direction.getOpposite());
@@ -73,25 +71,25 @@ public abstract class RedstoneOreBlockMixin extends AbstractBlock {
 	
 	@Override
 	public boolean emitsRedstonePower(BlockState state) {
-		return REDSTONE_ORE.get(CONNECTS_TO_WIRE);
+		return redstonetweaks.settings.Settings.RedstoneOre.CONNECTS_TO_WIRE.get();
 	}
 	
 	@Override
 	public int getWeakRedstonePower(BlockState state, BlockView view, BlockPos pos, Direction facing) {
-		return state.get(Properties.LIT) ? REDSTONE_ORE.get(WEAK_POWER) : 0;
+		return state.get(Properties.LIT) ? redstonetweaks.settings.Settings.RedstoneOre.POWER_WEAK.get() : 0;
 	}
 	
 	@Override
 	public int getStrongRedstonePower(BlockState state, BlockView view, BlockPos pos, Direction facing) {
-		return state.get(Properties.LIT) ? REDSTONE_ORE.get(STRONG_POWER) : 0;
+		return state.get(Properties.LIT) ? redstonetweaks.settings.Settings.RedstoneOre.POWER_STRONG.get() : 0;
 	}
 	
 	private void update(World world, BlockState state, BlockPos pos) {
-		int delay = REDSTONE_ORE.get(DELAY);
+		int delay = redstonetweaks.settings.Settings.RedstoneOre.DELAY.get();
 		if (delay == 0) {
 			light(state, world, pos);
 		} else {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, REDSTONE_ORE.get(TICK_PRIORITY));
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, redstonetweaks.settings.Settings.RedstoneOre.TICK_PRIORITY.get());
 		}
 	}
 }

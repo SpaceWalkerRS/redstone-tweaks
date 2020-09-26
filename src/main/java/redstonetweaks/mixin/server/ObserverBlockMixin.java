@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,6 +29,7 @@ import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.settings.Settings;
 import redstonetweaks.world.server.UnfinishedEvent.Source;
 
 @Mixin(ObserverBlock.class)
@@ -42,7 +41,7 @@ public abstract class ObserverBlockMixin implements BlockHelper {
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T block, int oldDelay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		TickSchedulerHelper.schedule(world, world.getBlockState(pos), tickScheduler, pos, block, OBSERVER.get(FALLING_DELAY), OBSERVER.get(FALLING_TICK_PRIORITY));
+		TickSchedulerHelper.schedule(world, world.getBlockState(pos), tickScheduler, pos, block, Settings.Observer.DELAY_FALLING_EDGE.get(), Settings.Observer.TICK_PRIORITY_FALLING_EDGE.get());
 	}
 	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/ObserverBlock;updateNeighbors(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
@@ -54,8 +53,8 @@ public abstract class ObserverBlockMixin implements BlockHelper {
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/ObserverBlock;scheduleTick(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)V"))
 	private void onGetStateForNeighborUpdateRedirectScheduleTick(ObserverBlock observer, WorldAccess world1, BlockPos pos1, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		if (!(OBSERVER.get(DISABLE) || world.isClient())) {
-			if (OBSERVER.get(RISING_DELAY) == 0) {
+		if (!(Settings.Observer.DISABLE.get() || world.isClient())) {
+			if (Settings.Observer.DELAY_RISING_EDGE.get() == 0) {
 				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
 			} else {
 				scheduleTick(world, pos);
@@ -65,18 +64,18 @@ public abstract class ObserverBlockMixin implements BlockHelper {
 	
 	@Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onScheduleTickRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
-		tickScheduler.schedule(pos, object, OBSERVER.get(RISING_DELAY), OBSERVER.get(RISING_TICK_PRIORITY));
+		tickScheduler.schedule(pos, object, Settings.Observer.DELAY_RISING_EDGE.get(), Settings.Observer.TICK_PRIORITY_RISING_EDGE.get());
 	}
 	
 	@Inject(method = "getStrongRedstonePower", at = @At(value = "HEAD"), cancellable = true)
 	private void onGetStrongRedstonePowerRedirectGetWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
-		cir.setReturnValue(state.get(Properties.POWERED) && state.get(Properties.FACING) == direction ? OBSERVER.get(STRONG_POWER) : 0);
+		cir.setReturnValue(state.get(Properties.POWERED) && state.get(Properties.FACING) == direction ? Settings.Observer.POWER_STRONG.get() : 0);
 		cir.cancel();
 	}
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {
-		return OBSERVER.get(WEAK_POWER);
+		return Settings.Observer.POWER_WEAK.get();
 	}
 	
 	// To fix MC-136566 (https://bugs.mojang.com/browse/MC-136566)
@@ -87,10 +86,10 @@ public abstract class ObserverBlockMixin implements BlockHelper {
 	// observers are updated, fixing MC-137127.
 	@ModifyConstant(method = "onBlockAdded", constant = @Constant(intValue = 18))
 	private int onBlockAddedFlags(int flags) {
-		if (BUG_FIXES.get(MC136566)) {
+		if (Settings.BugFixes.MC136566.get()) {
 			flags |= 1;
 		}
-		if (BUG_FIXES.get(MC137127)) {
+		if (Settings.BugFixes.MC137127.get()) {
 			flags &= ~16;
 		}
 		return flags;
@@ -100,7 +99,7 @@ public abstract class ObserverBlockMixin implements BlockHelper {
 	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
 		if (type == 0) {
 			if (state.get(Properties.POWERED)) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), OBSERVER.get(FALLING_DELAY), OBSERVER.get(FALLING_TICK_PRIORITY));
+				world.getBlockTickScheduler().schedule(pos, state.getBlock(), Settings.Observer.DELAY_FALLING_EDGE.get(), Settings.Observer.TICK_PRIORITY_FALLING_EDGE.get());
 			}
 			
 			updateNeighbors(world, pos, state);

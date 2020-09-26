@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,6 +18,8 @@ import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+
+import redstonetweaks.settings.Settings;
 
 @Mixin(PistonHandler.class)
 public class PistonHandlerMixin {
@@ -50,6 +50,6 @@ public class PistonHandlerMixin {
 	
 	@ModifyConstant(method = "tryMove", constant = @Constant(intValue = 12))
 	private int pushLimit(int oldPushLimit) {
-		return sticky ? STICKY_PISTON.get(PUSH_LIMIT) : NORMAL_PISTON.get(PUSH_LIMIT);
+		return sticky ? Settings.StickyPiston.PUSH_LIMIT.get() : Settings.NormalPiston.PUSH_LIMIT.get();
 	}
 }

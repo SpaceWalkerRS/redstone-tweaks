@@ -38,7 +38,7 @@ public class ServerPacketHandler extends PacketHandler {
 		server.getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), distance, dimension, encodePacket(packet));
 	}
 
-	public void sendPacketToPlayer(SettingPacket<?> packet, ServerPlayerEntity player) {
+	public void sendPacketToPlayer(RedstoneTweaksPacket packet, ServerPlayerEntity player) {
 		player.networkHandler.sendPacket(encodePacket(packet));
 	}
 	

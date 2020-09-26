@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.Constant;
@@ -17,6 +15,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.helper.RedstoneDiodeHelper;
 import redstonetweaks.helper.ServerTickSchedulerHelper;
+import redstonetweaks.settings.Settings;
 
 @Mixin(RepeaterBlock.class)
 public abstract class RepeaterBlockMixin implements RedstoneDiodeHelper {
@@ -25,7 +24,7 @@ public abstract class RepeaterBlockMixin implements RedstoneDiodeHelper {
 	
 	@ModifyConstant(method = "getUpdateDelayInternal", constant = @Constant(intValue = 2))
 	private int onGetUpdateDelayInternalModify2(int oldValue, BlockState state) {
-		return state.get(Properties.POWERED) ? REPEATER.get(FALLING_DELAY) : REPEATER.get(RISING_DELAY);
+		return state.get(Properties.POWERED) ? Settings.Repeater.DELAY_FALLING_EDGE.get() : Settings.Repeater.DELAY_RISING_EDGE.get();
 	}
 	
 	// To fix the chain bug without altering other behavior,

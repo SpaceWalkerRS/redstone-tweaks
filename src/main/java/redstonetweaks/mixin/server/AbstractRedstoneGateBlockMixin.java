@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.AbstractRedstoneGateBlock;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
@@ -30,14 +27,11 @@ import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.RedstoneDiodeHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.settings.Settings;
 import redstonetweaks.world.server.UnfinishedEvent.Source;
 
 @Mixin(AbstractRedstoneGateBlock.class)
-public abstract class AbstractRedstoneGateBlockMixin extends Block implements BlockHelper {
-	
-	public AbstractRedstoneGateBlockMixin(Settings settings) {
-		super(settings);
-	}
+public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract boolean hasPower(World world, BlockPos pos, BlockState state);
@@ -46,7 +40,7 @@ public abstract class AbstractRedstoneGateBlockMixin extends Block implements Bl
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/AbstractRedstoneGateBlock;hasPower(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
 	private void onScheduledTickInjectBeforeHasPower(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		boolean powered = state.get(Properties.POWERED);
-		boolean lazy = powered ? REPEATER.get(FALLING_LAZY) : REPEATER.get(RISING_LAZY);
+		boolean lazy = powered ? Settings.Repeater.LAZY_FALLING_EDGE.get() : Settings.Repeater.LAZY_RISING_EDGE.get();
 		boolean isReceivingPower = hasPower(world, pos, state);
 		boolean shouldBePowered = lazy ? !powered : isReceivingPower;
 		
@@ -68,7 +62,7 @@ public abstract class AbstractRedstoneGateBlockMixin extends Block implements Bl
 		if (state.isOf(Blocks.COMPARATOR)) {
 			return state.getWeakRedstonePower(world, pos, direction);
 		}
-		return state.get(Properties.POWERED) && state.get(Properties.HORIZONTAL_FACING) == direction ? REPEATER.get(STRONG_POWER) : 0;
+		return state.get(Properties.POWERED) && state.get(Properties.HORIZONTAL_FACING) == direction ? Settings.Repeater.POWER_STRONG.get() : 0;
 	}
 	
 	@Inject(method = "updatePowered", cancellable =  true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
@@ -84,20 +78,20 @@ public abstract class AbstractRedstoneGateBlockMixin extends Block implements Bl
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority updatePoweredRedirectPriorityHigh() {
-		return REPEATER.get(RISING_TICK_PRIORITY);
+		return Settings.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 	}
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;EXTREMELY_HIGH:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority updatePoweredRedirectPriorityExtremelyHigh(World world, BlockPos pos, BlockState state) {
-		if (BUG_FIXES.get(MC54711) && ((RedstoneDiodeHelper)this).isInputBugOccurring(world, pos, state)) {
-			return REPEATER.get(RISING_TICK_PRIORITY);
+		if (Settings.BugFixes.MC54711.get() && ((RedstoneDiodeHelper)this).isInputBugOccurring(world, pos, state)) {
+			return Settings.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 		}
-		return REPEATER.get(FACING_DIODE_TICK_PRIORITY);
+		return Settings.Repeater.TICK_PRIORITY_FACING_DIODE.get();
 	}
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;VERY_HIGH:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority updatePoweredRedirectPriorityVeryHigh() {
-		return REPEATER.get(FALLING_TICK_PRIORITY);
+		return Settings.Repeater.TICK_PRIORITY_FALLING_EDGE.get();
 	}
 	
 	@Redirect(method = "getPower", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
@@ -107,12 +101,12 @@ public abstract class AbstractRedstoneGateBlockMixin extends Block implements Bl
 	
 	@ModifyConstant(method = "getInputLevel", constant = @Constant(intValue = 15))
 	private int onGetInputLevelModifyRedstoneBlockPower(int oldPower) {
-		return COMPARATOR.get(REDSTONE_BLOCKS_POWER_SIDES) ? REDSTONE_BLOCK.get(WEAK_POWER) : 0;
+		return Settings.Comparator.REDSTONE_BLOCKS_VALID_SIDE_INPUT.get() ? Settings.RedstoneBlock.POWER_WEAK.get() : 0;
 	}
 	
 	@ModifyConstant(method = "getOutputLevel", constant = @Constant(intValue = 15))
 	private int getWeakRedstonePower(int oldValue) {
-		return REPEATER.get(WEAK_POWER);
+		return Settings.Repeater.POWER_WEAK.get();
 	}
 	
 	@Override
@@ -125,12 +119,12 @@ public abstract class AbstractRedstoneGateBlockMixin extends Block implements Bl
 	}
 	
 	private void updatePoweredOnScheduledTick(ServerWorld world, BlockPos pos, BlockState state, Random random, boolean powered) {
-		int delay = powered ? REPEATER.get(FALLING_DELAY) : REPEATER.get(RISING_DELAY);
+		int delay = powered ? Settings.Repeater.DELAY_FALLING_EDGE.get() : Settings.Repeater.DELAY_RISING_EDGE.get();
 		
 		if (delay == 0) {
 			scheduledTick(world.getBlockState(pos), world, pos, random);
 		} else { 
-			TickPriority priority = powered ? REPEATER.get(FALLING_TICK_PRIORITY) : REPEATER.get(RISING_TICK_PRIORITY);
+			TickPriority priority = powered ? Settings.Repeater.TICK_PRIORITY_FALLING_EDGE.get() : Settings.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 			world.getBlockTickScheduler().schedule(pos, state.getBlock(), state.get(Properties.DELAY) * delay, priority);
 		}
 	}

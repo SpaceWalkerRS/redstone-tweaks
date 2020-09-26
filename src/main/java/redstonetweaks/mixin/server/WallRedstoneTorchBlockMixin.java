@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
@@ -17,7 +15,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-import redstonetweaks.helper.PistonBlockHelper;
+import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.settings.Settings;
 
 @Mixin(WallRedstoneTorchBlock.class)
 public class WallRedstoneTorchBlockMixin {
@@ -30,11 +29,11 @@ public class WallRedstoneTorchBlockMixin {
 		// If the softInversion setting is enabled,
 		// return true if the torch is attached to a piston that is
 		// receiving redstone power.
-		if (REDSTONE_TORCH.get(SOFT_INVERSION)) {
+		if (Settings.RedstoneTorch.SOFT_INVERSION.get()) {
 			BlockState blockState = world.getBlockState(blockPos);
 			
 			if (blockState.getBlock() instanceof PistonBlock) {
-				if (PistonBlockHelper.isReceivingPower(world, blockPos, blockState, blockState.get(Properties.FACING))) {
+				if (PistonHelper.isReceivingPower(world, blockPos, blockState, blockState.get(Properties.FACING))) {
 					cir.setReturnValue(true);
 					cir.cancel();
 				}
@@ -44,6 +43,6 @@ public class WallRedstoneTorchBlockMixin {
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {
-		return REDSTONE_TORCH.get(WEAK_POWER);
+		return Settings.RedstoneTorch.POWER_WEAK.get();
 	}
 }

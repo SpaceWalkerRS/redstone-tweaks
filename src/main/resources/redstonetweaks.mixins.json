@@ -33,6 +33,7 @@
 	"server.DeadCoralWallFanBlockMixin",
 	"server.DetectorRailBlockMixin",
 	"server.DispenserBlockMixin",
+	"server.DragonEggBlockMixin",
 	"server.EnderChestBlockMixin",
 	"server.FallingBlockMixin",
 	"server.FarmlandBlockMixin",
@@ -94,6 +95,7 @@
   	"client.ClientPlayNetworkHandlerMixin",
   	"client.ClientWorldMixin",
   	"client.InGameHudMixin",
+  	"client.KeyboardMixin",
   	"client.MinecraftClientMixin",
     "client.WorldRendererMixin"
   ],

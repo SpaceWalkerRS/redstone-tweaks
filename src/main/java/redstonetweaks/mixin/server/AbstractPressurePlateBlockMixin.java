@@ -1,7 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import static redstonetweaks.setting.SettingsManager.*;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +15,6 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PressurePlateHelper;
-import redstonetweaks.setting.SettingsPack;
 
 @Mixin(AbstractPressurePlateBlock.class)
 public abstract class AbstractPressurePlateBlockMixin {
@@ -35,33 +32,30 @@ public abstract class AbstractPressurePlateBlockMixin {
 	
 	@Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;updatePlateState(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)V"))
 	public void onEntityCollisionRedirectUpdatePlateState(AbstractPressurePlateBlock pressurePlate, World world, BlockPos pos, BlockState state, int i) {
-		SettingsPack settings = ((PressurePlateHelper)this).getSettings(state);
-		
-		int delay = settings.get(RISING_DELAY);
+		int delay = ((PressurePlateHelper)this).delayRisingEdge(state);
 		if (delay == 0) {
 			updatePlateState(world, pos, state, i);
 		} else {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, settings.get(RISING_TICK_PRIORITY));
+			TickPriority priority = ((PressurePlateHelper)this).tickPriorityRisingEdge(state);
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
 		}
 	}
 	
 	@Redirect(method = "updatePlateState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void updatePlateStateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay, World world, BlockPos blockPos, BlockState state) {
-		SettingsPack settings = ((PressurePlateHelper)this).getSettings(state);
-		
-		int delay = settings.get(FALLING_DELAY);
-		TickPriority priority = settings.get(FALLING_TICK_PRIORITY);
+		int delay = ((PressurePlateHelper)this).delayFallingEdge(state);
+		TickPriority priority = ((PressurePlateHelper)this).tickPriorityFallingEdge(state);
 		
 		tickScheduler.schedule(pos, block, delay, priority);
 	}
 	
 	@Redirect(method = "getWeakRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;getRedstoneOutput(Lnet/minecraft/block/BlockState;)I"))
 	private int onGetWeakRedstonePowerRedirectGetRedstoneOutput(AbstractPressurePlateBlock plate, BlockState state) {
-		return ((PressurePlateHelper)this).getWeakPower(state);
+		return ((PressurePlateHelper)this).powerWeak(state);
 	}
 	
 	@Redirect(method = "getStrongRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;getRedstoneOutput(Lnet/minecraft/block/BlockState;)I"))
 	private int onGetStrongRedstonePowerRedirectGetRedstoneOutput(AbstractPressurePlateBlock plate, BlockState state) {
-		return ((PressurePlateHelper)this).getStrongPower(state);
+		return ((PressurePlateHelper)this).powerStrong(state);
 	}
 }
