@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 
+import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.settings.Settings;
 import redstonetweaks.settings.types.ISetting;
@@ -38,11 +39,13 @@ public class SettingPacket extends RedstoneTweaksPacket {
 	public void execute(MinecraftServer server) {
 		setting.setFromText(value);
 		
-		((MinecraftServerHelper)server).getSettingsManager().onSettingChanged(setting);
+		((MinecraftServerHelper)server).getSettingsManager().onSettingPacketReceived(setting);
 	}
 	
 	@Override
 	public void execute(MinecraftClient client) {
 		setting.setFromText(value);
+		
+		((MinecraftClientHelper)client).getSettingsManager().onSettingPacketReceived(setting);
 	}
 }

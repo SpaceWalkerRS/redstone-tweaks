@@ -17,6 +17,7 @@ public class DirectionalSettingGUIEntry extends SettingsListWidget.SettingEntry 
 		editButton = new ButtonWidget(0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT, new TranslatableText("EDIT"), (button) -> {
 			
 		});
+		editButton.active = buttonsActive;
 		buttons.add(editButton);
 	}
 	

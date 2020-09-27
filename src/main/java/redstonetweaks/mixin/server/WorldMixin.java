@@ -8,7 +8,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -116,6 +118,11 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 		}
 	}
 	
+	@ModifyConstant(method = "getReceivedStrongRedstonePower", constant = @Constant(intValue = 15))
+	private int onGetReceivedStrongRedstonePowerModify15(int oldValue) {
+		return Settings.Global.POWER_MAX.get();
+	}
+	
 	@Redirect(method = "getEmittedRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onGetEmittedRedstonePowerRedirectIsSolidBlock(BlockState state, BlockView world, BlockPos pos1, BlockPos pos, Direction direction) {
 		if (Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
@@ -129,6 +136,11 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 			}
 		}
 		return state.isSolidBlock(world, pos);
+	}
+	
+	@ModifyConstant(method = "getReceivedRedstonePower", constant = @Constant(intValue = 15))
+	private int onGetReceivedRedstonePowerModify15(int oldValue) {
+		return Settings.Global.POWER_MAX.get();
 	}
 	
 	@Override

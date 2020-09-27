@@ -4,7 +4,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
-
 import redstonetweaks.gui.SettingsListWidget;
 import redstonetweaks.settings.types.BooleanSetting;
 
@@ -19,6 +18,7 @@ public class BooleanSettingGUIEntry extends SettingsListWidget.SettingEntry {
 			setting.set(!setting.get());
 			onSettingChanged();
 		});
+		editButton.active = buttonsActive;
 		buttons.add(editButton);
 	}
 	

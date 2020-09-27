@@ -21,6 +21,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 
+import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.settings.Settings;
 import redstonetweaks.settings.SettingsPack;
 import redstonetweaks.settings.types.ISetting;
@@ -28,6 +29,7 @@ import redstonetweaks.settings.types.ISetting;
 public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Entry> {
 	
 	public static final int SCROLLBAR_WIDTH = 6;
+	public static final double PREV_SCROLL_AMOUNT = 0.0D;
 	
 	public int maxSettingNameLength;
 
@@ -54,6 +56,8 @@ public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Ent
 				((SettingEntry)entry).setTitleWith(maxSettingNameLength);
 			}
 		});
+		
+		this.setScrollAmount(PREV_SCROLL_AMOUNT);
 	}
 	
 	public void filter(String query) {
@@ -178,6 +182,29 @@ public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Ent
 		RenderSystem.disableBlend();
 	}
 	
+	public void tick() {
+		for (Entry entry : children()) {
+			entry.tick();
+		}
+	}
+	
+	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		boolean clicked = super.mouseClicked(mouseX, mouseY, button);
+		
+		updateTextFields(clicked ? getFocused() : null);
+		
+		return clicked;
+	}
+	
+	public void updateTextFields(Entry except) {
+		for (Entry entry : children()) {
+			if (entry != except) {
+				entry.updateTextFields();
+			}
+		}
+	}
+	
 	public class SettingsPackEntry extends Entry {
 		
 		private Text title;
@@ -221,6 +248,8 @@ public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Ent
 		protected static final int BUTTONS_WIDTH = 100;
 		protected static final int BUTTONS_HEIGHT = 20;
 		
+		protected final boolean buttonsActive;
+		
 		protected final MinecraftClient client;
 		protected final ISetting setting;
 		protected final Text title;
@@ -231,17 +260,19 @@ public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Ent
 		protected int titleWidth;
 		
 		public SettingEntry(MinecraftClient client, ISetting setting) {
+			this.buttonsActive = ((MinecraftClientHelper)client).getSettingsManager().canChangeSettings();
+			
 			this.client = client;
 			this.setting = setting;
 			this.title = new TranslatableText(setting.getName());
 			this.tooltip = new TranslatableText(setting.getDescription());
 			this.buttons = new ArrayList<>();
 			
-			this.resetButton = new ButtonWidget(0, 0, 50, 20, new TranslatableText("RESET"), (resetButton) -> {
+			this.resetButton = new ButtonWidget(0, 0, 40, 20, new TranslatableText("RESET"), (resetButton) -> {
 				reset();
 			});
-			resetButton.active = !setting.isDefault();
-			buttons.add(resetButton);
+			this.resetButton.active = !setting.isDefault() && buttonsActive;
+			this.buttons.add(resetButton);
 		}
 		
 		public void setTitleWith(int maxSettingNameLength) {
@@ -266,6 +297,15 @@ public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Ent
 			return buttons;
 		}
 		
+		@Override
+		public void updateTextFields() {
+			for (AbstractButtonWidget button : buttons) {
+				if (button instanceof RTTextFieldWidget) {
+					((RTTextFieldWidget)button).unFocus();
+				}
+			}
+		}
+		
 		public Text getTooltip() {
 			return tooltip;
 		}
@@ -276,11 +316,11 @@ public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Ent
 		}
 		
 		protected void onSettingChanged() {
-			resetButton.active = !setting.isDefault();
+			resetButton.active = !setting.isDefault() && buttonsActive;
 			updateButtonLabels();
 			
 			System.out.println("redo setting packets and gui on setting changed");
-			//((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(setting);
+			((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(setting);
 		}
 		
 		public abstract void updateButtonLabels();
@@ -288,5 +328,12 @@ public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Ent
 	
 	public static abstract class Entry extends ElementListWidget.Entry<SettingsListWidget.Entry> {
 		
+		public void tick() {
+			
+		}
+		
+		public void updateTextFields() {
+			
+		}
 	}
 }

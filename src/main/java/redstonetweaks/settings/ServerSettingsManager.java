@@ -110,7 +110,7 @@ public class ServerSettingsManager {
 		return new File(getCacheDir(), SETTINGS_PATH);
 	}
 	
-	public void onSettingChanged(ISetting setting) {
+	public void onSettingPacketReceived(ISetting setting) {
 		if (server.isDedicated() || server.isRemote()) {
 			SettingPacket packet = new SettingPacket(setting);
 			((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);

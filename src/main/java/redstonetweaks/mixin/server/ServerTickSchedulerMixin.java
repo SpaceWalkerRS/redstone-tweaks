@@ -149,6 +149,6 @@ public abstract class ServerTickSchedulerMixin<T> implements ServerTickScheduler
 		if (Settings.Global.RANDOMIZE_DELAYS.get()) {
 			delay = min + world.getRandom().nextInt(max);
 		}
-		return delay;
+		return Settings.Global.DELAY_MULTIPLIER.get() * delay;
 	}
 }

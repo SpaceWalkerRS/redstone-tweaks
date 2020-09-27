@@ -5,7 +5,6 @@ import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.world.TickPriority;
-
 import redstonetweaks.gui.SettingsListWidget;
 import redstonetweaks.settings.types.TickPrioritySetting;
 
@@ -17,6 +16,7 @@ public class TickPrioritySettingGUIEntry extends SettingsListWidget.SettingEntry
 		super(client, setting);
 		
 		editButton = new TickPrioritySliderWidget(0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT, setting);
+		editButton.active = buttonsActive;
 		buttons.add(editButton);
 	}
 	

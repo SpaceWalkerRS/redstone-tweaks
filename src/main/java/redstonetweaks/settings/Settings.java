@@ -27,7 +27,7 @@ public class Settings {
 		private static final String DESC_POWER_WEAK = "";
 		private static final String DESC_POWER_STRONG = "";
 		private static final String DESC_TICK_PRIORITY = "";
-		private static final String DESC_QC = "A list of all directions in which quasi connectivity for this block is enabled. If quasi connectivity is enabled in a direction then the block checks for power to its direct neighbor in that direction.";
+		private static final String DESC_QC = "A list of all directions in which quasi connectivity for this block is enabled. If quasi connectivity is enabled in a direction then the block checks for power to its neighbor in that direction.";
 		private static final String DESC_RANDOMIZE_QC = "When enabled, quasi connectivity works randomly in all directions where it is enabled.";
 		private static final String DESC_TICK_PRIORITY_FACING_DIODE = "";
 		private static final String DESC_TICK_PRIORITY_RISING_EDGE = "";
