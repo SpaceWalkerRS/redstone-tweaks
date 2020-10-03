@@ -6,14 +6,14 @@ import redstonetweaks.gui.RTElement;
 
 public interface IAbstractButtonWidget extends RTElement {
 	
-	public abstract void setX(int x);
+	public void setX(int x);
 	
-	public abstract void setY(int y);
+	public void setY(int y);
 	
-	public abstract void updateMessage();
+	public void updateMessage();
 	
-	public abstract void render(MatrixStack matrices, int mouseX, int mouseY, float tickDelta);
+	public void render(MatrixStack matrices, int mouseX, int mouseY, float tickDelta);
 	
-	public abstract void setActive(boolean active);
+	public void setActive(boolean active);
 	
 }

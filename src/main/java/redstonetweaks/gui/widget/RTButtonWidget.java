@@ -3,6 +3,7 @@ package redstonetweaks.gui.widget;
 import java.util.function.Supplier;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class RTButtonWidget extends ButtonWidget implements IAbstractButtonWidget {
@@ -47,6 +48,26 @@ public class RTButtonWidget extends ButtonWidget implements IAbstractButtonWidge
 	}
 	
 	@Override
+	public int getWidth() {
+		return super.getWidth();
+	}
+	
+	@Override
+	public int getHeight() {
+		return super.getHeight();
+	}
+	
+	@Override
+	public void tick() {
+		
+	}
+	
+	@Override
+	public void allowHover(boolean allowHover) {
+		this.allowHover = allowHover;
+	}
+	
+	@Override
 	public void setX(int x) {
 		this.x = x;
 	}
@@ -60,20 +81,15 @@ public class RTButtonWidget extends ButtonWidget implements IAbstractButtonWidge
 	public void updateMessage() {
 		setMessage(messageSupplier.get());
 	}
+
+	@Override
+	public void render(MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
+		super.render(matrices, mouseX, mouseY, tickDelta);
+	}
 	
 	@Override
 	public void setActive(boolean active) {
 		this.active = alwaysActive || active;
-	}
-	
-	@Override
-	public void tick() {
-		
-	}
-	
-	@Override
-	public void allowHover(boolean allowHover) {
-		this.allowHover = allowHover;
 	}
 	
 	public RTButtonWidget alwaysActive() {

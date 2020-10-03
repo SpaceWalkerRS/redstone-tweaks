@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
 public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButtonWidget {
@@ -20,11 +21,6 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 		this.setChangedListener(changedListener);
 	}
 	
-	public void unFocus() {
-		setFocused(false);
-		updateText.update(this);
-	}
-	
 	@Override
 	public boolean isHovered() {
 		return allowHover && super.isHovered();
@@ -32,12 +28,32 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 	
 	@Override
 	public int getX() {
-		return x;
+		return x - 1;
 	}
 	
 	@Override
 	public int getY() {
-		return y;
+		return y - 1;
+	}
+	
+	@Override
+	public int getWidth() {
+		return width + 2;
+	}
+	
+	@Override
+	public int getHeight() {
+		return height + 2;
+	}
+	
+	@Override
+	public void tick() {
+		super.tick();
+	}
+	
+	@Override
+	public void allowHover(boolean allowHover) {
+		this.allowHover = allowHover;
 	}
 	
 	@Override
@@ -51,13 +67,13 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 	}
 	
 	@Override
-	public int getWidth() {
-		return width + 2;
+	public void updateMessage() {
+		updateText.update(this);
 	}
 	
 	@Override
-	public void updateMessage() {
-		updateText.update(this);
+	public void render(MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
+		super.render(matrices, mouseX, mouseY, tickDelta);
 	}
 	
 	@Override
@@ -65,9 +81,9 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 		this.active = active;
 	}
 	
-	@Override
-	public void allowHover(boolean allowHover) {
-		this.allowHover = allowHover;
+	public void unFocus() {
+		setFocused(false);
+		updateText.update(this);
 	}
 	
 	public interface UpdateText {

@@ -3,6 +3,7 @@ package redstonetweaks.gui.widget;
 import java.util.function.Supplier;
 
 import net.minecraft.client.gui.widget.SliderWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class RTSliderWidget extends SliderWidget implements IAbstractButtonWidget {
@@ -50,18 +51,13 @@ public class RTSliderWidget extends SliderWidget implements IAbstractButtonWidge
 	}
 	
 	@Override
-	public void setX(int x) {
-		this.x = x;
+	public int getWidth() {
+		return super.getWidth();
 	}
 	
 	@Override
-	public void setY(int y) {
-		this.y = y;
-	}
-	
-	@Override
-	public void setActive(boolean active) {
-		this.active = active;
+	public int getHeight() {
+		return super.getHeight();
 	}
 	
 	@Override
@@ -72,6 +68,26 @@ public class RTSliderWidget extends SliderWidget implements IAbstractButtonWidge
 	@Override
 	public void allowHover(boolean allowHover) {
 		this.allowHover = allowHover;
+	}
+	
+	@Override
+	public void setX(int x) {
+		this.x = x;
+	}
+	
+	@Override
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	@Override
+	public void render(MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
+		super.render(matrices, mouseX, mouseY, tickDelta);
+	}
+	
+	@Override
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 	
 	public double getValue() {
