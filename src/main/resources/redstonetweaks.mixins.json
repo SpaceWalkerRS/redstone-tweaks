@@ -92,6 +92,7 @@
 	"server.WorldMixin"
   ],
   "client": [
+  	"client.AbstractButtonWidgetMixin",
   	"client.ClientPlayNetworkHandlerMixin",
   	"client.ClientWorldMixin",
   	"client.InGameHudMixin",

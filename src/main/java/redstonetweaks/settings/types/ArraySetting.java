@@ -61,6 +61,24 @@ public abstract class ArraySetting<T> extends Setting<T[]> {
 		}
 	}
 	
+	public void reset(int index) {
+		set(index, getDefault(index));
+	}
+	
+	public boolean isDefault(int index) {
+		if (inRange(index)) {
+			return get()[index].equals(getDefault()[index]);
+		}
+		return false;
+	}
+	
+	public T getDefault(int index) {
+		if (inRange(index)) {
+			return getDefault()[index];
+		}
+		return null;
+	}
+	
 	private boolean inRange(int index) {
 		return index >= 0 && index < get().length;
 	}

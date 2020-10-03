@@ -2,7 +2,7 @@ package redstonetweaks.settings;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import redstonetweaks.gui.RedstoneTweaksMenuScreen;
+import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.packet.SettingPacket;
 import redstonetweaks.settings.types.ISetting;
@@ -28,8 +28,8 @@ public class ClientSettingsManager {
 	
 	public void onSettingPacketReceived(ISetting setting) {
 		Screen screen = client.currentScreen;
-		if (screen instanceof RedstoneTweaksMenuScreen) {
-			((RedstoneTweaksMenuScreen)screen).settingChangedOnServer(setting);
+		if (screen instanceof RTMenuScreen) {
+			((RTMenuScreen)screen).settingChangedOnServer(setting);
 		}
 	}
 	

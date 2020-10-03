@@ -1,9 +1,9 @@
 package redstonetweaks.settings.types;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.TranslatableText;
 
-import redstonetweaks.gui.SettingsListWidget.Entry;
-import redstonetweaks.gui.setting.BooleanSettingGUIEntry;
+import redstonetweaks.gui.ButtonPanel;
+import redstonetweaks.gui.widget.RTButtonWidget;
 
 public class BooleanSetting extends Setting<Boolean> {
 	
@@ -24,7 +24,11 @@ public class BooleanSetting extends Setting<Boolean> {
 	}
 	
 	@Override
-	public Entry createGUIEntry(MinecraftClient client) {
-		return new BooleanSettingGUIEntry(client, this);
+	public void populateButtonPanel(ButtonPanel panel) {
+		panel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(getAsText()), (button) -> {
+			set(!get());
+			button.updateMessage();
+			panel.doActions();
+		}));
 	}
 }

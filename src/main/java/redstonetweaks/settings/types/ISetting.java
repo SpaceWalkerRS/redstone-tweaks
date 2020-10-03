@@ -1,8 +1,6 @@
 package redstonetweaks.settings.types;
 
-import net.minecraft.client.MinecraftClient;
-
-import redstonetweaks.gui.SettingsListWidget;
+import redstonetweaks.gui.ButtonPanel;
 
 public interface ISetting {
 	
@@ -22,6 +20,6 @@ public interface ISetting {
 	
 	public String getAsText();
 	
-	public SettingsListWidget.Entry createGUIEntry(MinecraftClient client);
+	public void populateButtonPanel(ButtonPanel panel);
 	
 }

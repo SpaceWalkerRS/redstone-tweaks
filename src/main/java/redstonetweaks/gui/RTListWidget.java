@@ -1,142 +1,130 @@
 package redstonetweaks.gui;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 
-import redstonetweaks.helper.MinecraftClientHelper;
-import redstonetweaks.settings.Settings;
-import redstonetweaks.settings.SettingsPack;
-import redstonetweaks.settings.types.ISetting;
+import redstonetweaks.util.RTMathHelper;
 
-public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Entry> {
+public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends ElementListWidget<E> implements RTElement {
 	
-	public static final int SCROLLBAR_WIDTH = 6;
-	public static final double PREV_SCROLL_AMOUNT = 0.0D;
+	protected static final int SCROLLBAR_WIDTH = 6;
+	protected static final int TEXT_COLOR = 16777215;
 	
-	public int maxSettingNameLength;
+	protected static double savedScrollAmount;
+	
+	public final RTMenuScreen screen;
+	private final int rowWidth;
+	
+	private int entryTitleWidth = 0;
+	private boolean scrolling;
 
-	public SettingsListWidget(Screen parent, MinecraftClient client) {
-		super(client, parent.width, parent.height, 70, parent.height - 5, 22);
+	public RTListWidget(RTMenuScreen screen, int x, int y, int width, int height, int entryHeight) {
+		super(screen.client, width, height, y, y + height - 5, entryHeight);
+		setLeftPos(x);
 		
-		for (SettingsPack pack : Settings.SETTINGS_PACKS) {
-			addEntry(new SettingsPackEntry(pack));
-			
-			for (ISetting setting : pack.getSettings()) {
-				addEntry(setting.createGUIEntry(client));
-				
-				int settingNameLength = client.textRenderer.getWidth(setting.getName());
-				if (settingNameLength > maxSettingNameLength) {
-					maxSettingNameLength = settingNameLength;
-				}
-			}
-			
-			addEntry(new SeparatorEntry());
-		}
-		
-		children().forEach((entry) -> {
-			if (entry instanceof SettingEntry) {
-				((SettingEntry)entry).setTitleWith(maxSettingNameLength);
-			}
-		});
-		
-		this.setScrollAmount(PREV_SCROLL_AMOUNT);
-	}
-	
-	public void filter(String query) {
-		clearEntries();
-		maxSettingNameLength = 0;
-		
-		query = query.toLowerCase();
-		
-		for (SettingsPack pack : Settings.SETTINGS_PACKS) {
-			if (pack.getName().toLowerCase().contains(query)) {
-				addEntry(new SettingsPackEntry(pack));
-				
-				for (ISetting setting : pack.getSettings()) {
-					addEntry(setting.createGUIEntry(client));
-					
-					int settingNameLength = client.textRenderer.getWidth(setting.getName());
-					if (settingNameLength > maxSettingNameLength) {
-						maxSettingNameLength = settingNameLength;
-					}
-				}
-				
-				addEntry(new SeparatorEntry());
-			} else {
-				List<Entry> entries = new ArrayList<>();
-				
-				for (ISetting setting : pack.getSettings()) {
-					if (setting.getName().toLowerCase().contains(query)) {
-						entries.add(setting.createGUIEntry(client));
-						
-						int settingNameLength = client.textRenderer.getWidth(setting.getName());
-						if (settingNameLength > maxSettingNameLength) {
-							maxSettingNameLength = settingNameLength;
-						}
-					}
-				}
-				
-				if (entries.size() > 0) {
-					addEntry(new SettingsPackEntry(pack));
-					
-					children().addAll(entries);
-					
-					addEntry(new SeparatorEntry());
-				}
-			}
-		}
-		
-		children().forEach((entry) -> {
-			if (entry instanceof SettingEntry) {
-				((SettingEntry)entry).setTitleWith(maxSettingNameLength);
-			}
-		});
-	}
-	
-	private int getMaxScroll() {
-		return Math.max(0, getMaxPosition() - (bottom - top - 4));
+		this.screen = screen;
+		this.rowWidth = width - 10;
 	}
 	
 	@Override
 	public int getRowWidth() {
-		return width;
+		return rowWidth;
 	}
 	
 	@Override
 	protected int getScrollbarPositionX() {
-		return width - 8;
+		return getX() + getWidth() - SCROLLBAR_WIDTH - 2;
+	}
+	
+	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		boolean clicked = mouseClick(mouseX, mouseY, button);
+		
+		unfocusTextFields(clicked ? getFocused() : null);
+		
+		return clicked;
 	}
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		renderList(matrices, 0, 0, mouseX, mouseY, delta);
+		renderList(matrices, mouseX, mouseY, delta);
 		
 		if (getMaxScroll() > 0) {
 			renderScrollbar(matrices);
 		}
 	}
 	
-	public void renderScrollbar(MatrixStack matrices) {
-		int left = width - SCROLLBAR_WIDTH - 2;
-		int right = width - 2;
+	@Override
+	protected void updateScrollingState(double mouseX, double mouseY, int button) {
+		scrolling = button == 0 && mouseX >= getScrollbarPositionX() && mouseX < getScrollbarPositionX() + SCROLLBAR_WIDTH;
+		super.updateScrollingState(mouseX, mouseY, button);
+	}
+	
+	@Override
+	protected int getRowTop(int index) {
+		return getY() + 4 - roundedScrollAmount() + index * itemHeight;
+	}
+	
+	@Override
+	public int getX() {
+		return left;
+	}
+	
+	@Override
+	public int getY() {
+		return top;
+	}
+	
+	@Override
+	public int getWidth() {
+		return width;
+	}
+	
+	@Override
+	public int getHeight() {
+		return height;
+	}
+	
+	@Override
+	public void allowHover(boolean allowHover) {
+		children().forEach((element) -> element.allowHover(allowHover));
+	}
+
+	public boolean mouseClick(double mouseX, double mouseY, int button) {
+		updateScrollingState(mouseX, mouseY, button);
+		if (!isMouseOver(mouseX, mouseY)) {
+			return false;
+		} else {
+			E entry = getEntryAtPos(mouseX, mouseY);
+			if (entry != null) {
+				if (entry.mouseClicked(mouseX, mouseY, button)) {
+					setFocused(entry);
+					setDragging(true);
+					return true;
+				}
+			} else if (button == 0) {
+				clickedHeader((int)(mouseX - (getX() + getWidth() / 2 - getRowWidth() / 2)), (int)(mouseY - getY()) + roundedScrollAmount() - 4);
+				return true;
+			}
+
+			return scrolling;
+		}
+	}
+	
+	private void renderScrollbar(MatrixStack matrices) {
+		int left = getScrollbarPositionX();
+		int right = left + SCROLLBAR_WIDTH;
 		
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferBuilder = tessellator.getBuffer();
@@ -182,158 +170,96 @@ public class SettingsListWidget extends ElementListWidget<SettingsListWidget.Ent
 		RenderSystem.disableBlend();
 	}
 	
+	private void renderList(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		int itemCount = getItemCount();
+
+		for (int index = 0; index < itemCount; ++index) {
+			int rowTop = getRowTop(index);
+			
+			if (rowTop >= top && rowTop <= bottom) {
+				int rowWidth = getRowWidth();
+				int rowLeft = getRowLeft();
+				
+				E entry = getEntry(index);
+				boolean hovered = isMouseOver(mouseX, mouseY) && Objects.equals(getEntryAtPos(mouseX, mouseY), entry);
+				
+				entry.render(matrices, index, rowTop, rowLeft, rowWidth, itemHeight, mouseX, mouseY, hovered, delta);
+			}
+		}
+	}
+	
+	private E getEntryAtPos(double x, double y) {
+		int halfWidth = getRowWidth() / 2;
+		int centerX = getX() + getWidth() / 2;
+		int left = centerX - halfWidth;
+		int right = centerX + halfWidth;
+		int index = (int)Math.floor((y - getY() - 4 + roundedScrollAmount()) / itemHeight);
+		return x < getScrollbarPositionX() && x >= left && x <= right && index >= 0 && index < getItemCount() ? children().get(index) : null;
+	}
+	
+	private int roundedScrollAmount() {
+		return RTMathHelper.roundToMultiple(getScrollAmount(), itemHeight);
+	}
+	
+	// This method is private in EntryListWidget.class
+	private int getMaxScroll() {
+		return Math.max(0, getMaxPosition() - (getHeight() - 4));
+	}
+	
+	public void saveScrollAmount() {
+		savedScrollAmount = getScrollAmount();
+	}
+	
 	public void tick() {
-		for (Entry entry : children()) {
+		for (E entry : children()) {
 			entry.tick();
 		}
 	}
 	
-	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		boolean clicked = super.mouseClicked(mouseX, mouseY, button);
-		
-		updateTextFields(clicked ? getFocused() : null);
-		
-		return clicked;
-	}
-	
-	public void updateTextFields(Entry except) {
-		for (Entry entry : children()) {
+	public void unfocusTextFields(Entry<E> except) {
+		for (Entry<E> entry : children()) {
 			if (entry != except) {
-				entry.updateTextFields();
+				entry.unfocusTextFields();
 			}
 		}
 	}
 	
-	public class SettingsPackEntry extends Entry {
+	public void filter(String query) {
+		filterEntries(query.toLowerCase());
 		
-		private Text title;
-		
-		public SettingsPackEntry(SettingsPack pack) {
-			title = new TranslatableText(pack.getName());
-		}
-		
-		@Override
-		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			int textX = 25;
-			int textY = y + 5;
-			client.textRenderer.draw(matrices, title, textX, textY, 16777215);
-		}
+		setScrollAmount(getScrollAmount());
+	}
+	
+	protected abstract void filterEntries(String query);
+	
+	protected int getEntryTitleWidth() {
+		return entryTitleWidth;
+	}
+	
+	protected void updateEntryTitleWidth(int width) {
+		entryTitleWidth = Math.max(entryTitleWidth, width + 15);
+	}
+	
+	protected void resetEntryTitleWidth() {
+		entryTitleWidth = 0;
+	}
+	
+	public static abstract class Entry<E extends RTListWidget.Entry<E>> extends ElementListWidget.Entry<E> {
 		
 		@Override
 		public List<? extends Element> children() {
-			return Collections.emptyList();
-		}
-	}
-	
-	public class SeparatorEntry extends Entry {
-		
-		public SeparatorEntry() {
-			
+			return getChildren();
 		}
 		
-		@Override
-		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			
+		public abstract List<? extends RTElement> getChildren();
+		
+		public void allowHover(boolean allowHover) {
+			getChildren().forEach((element) -> element.allowHover(allowHover));
 		}
 		
-		@Override
-		public List<? extends Element> children() {
-			return Collections.emptyList();
-		}
-	}
-	
-	public static abstract class SettingEntry extends Entry {
+		public abstract void tick();
 		
-		protected static final int BUTTONS_WIDTH = 100;
-		protected static final int BUTTONS_HEIGHT = 20;
+		public abstract void unfocusTextFields();
 		
-		protected final boolean buttonsActive;
-		
-		protected final MinecraftClient client;
-		protected final ISetting setting;
-		protected final Text title;
-		protected final Text tooltip;
-		protected final List<AbstractButtonWidget> buttons;
-		protected final ButtonWidget resetButton;
-		
-		protected int titleWidth;
-		
-		public SettingEntry(MinecraftClient client, ISetting setting) {
-			this.buttonsActive = ((MinecraftClientHelper)client).getSettingsManager().canChangeSettings();
-			
-			this.client = client;
-			this.setting = setting;
-			this.title = new TranslatableText(setting.getName());
-			this.tooltip = new TranslatableText(setting.getDescription());
-			this.buttons = new ArrayList<>();
-			
-			this.resetButton = new ButtonWidget(0, 0, 40, 20, new TranslatableText("RESET"), (resetButton) -> {
-				reset();
-			});
-			this.resetButton.active = !setting.isDefault() && buttonsActive;
-			this.buttons.add(resetButton);
-		}
-		
-		public void setTitleWith(int maxSettingNameLength) {
-			titleWidth = maxSettingNameLength + 25;
-		}
-		
-		@Override
-		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			client.textRenderer.draw(matrices, title, x + 5, y + (entryHeight / 2) - 3, 16777215);
-			
-			resetButton.x = x + titleWidth + BUTTONS_WIDTH + 5;
-			resetButton.y = y;
-			resetButton.render(matrices, mouseX, mouseY, tickDelta);
-			
-			renderButtons(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, hovered, tickDelta);
-		}
-		
-		public abstract void renderButtons(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta);
-
-		@Override
-		public List<? extends Element> children() {
-			return buttons;
-		}
-		
-		@Override
-		public void updateTextFields() {
-			for (AbstractButtonWidget button : buttons) {
-				if (button instanceof RTTextFieldWidget) {
-					((RTTextFieldWidget)button).unFocus();
-				}
-			}
-		}
-		
-		public Text getTooltip() {
-			return tooltip;
-		}
-		
-		public void reset() {
-			setting.reset();
-			onSettingChanged();
-		}
-		
-		protected void onSettingChanged() {
-			resetButton.active = !setting.isDefault() && buttonsActive;
-			updateButtonLabels();
-			
-			System.out.println("redo setting packets and gui on setting changed");
-			((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(setting);
-		}
-		
-		public abstract void updateButtonLabels();
-	}
-	
-	public static abstract class Entry extends ElementListWidget.Entry<SettingsListWidget.Entry> {
-		
-		public void tick() {
-			
-		}
-		
-		public void updateTextFields() {
-			
-		}
 	}
 }

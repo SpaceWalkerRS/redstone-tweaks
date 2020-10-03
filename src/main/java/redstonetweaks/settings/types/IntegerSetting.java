@@ -1,9 +1,7 @@
 package redstonetweaks.settings.types;
 
-import net.minecraft.client.MinecraftClient;
-
-import redstonetweaks.gui.SettingsListWidget.Entry;
-import redstonetweaks.gui.setting.IntegerSettingGUIEntry;
+import redstonetweaks.gui.ButtonPanel;
+import redstonetweaks.gui.widget.RTTextFieldWidget;
 
 public class IntegerSetting extends Setting<Integer> {
 	
@@ -22,19 +20,10 @@ public class IntegerSetting extends Setting<Integer> {
 	@Override
 	public void setFromText(String text) {
 		try {
-			int newValue = Integer.parseInt(text);
-			
-			if (newValue >= getMin() && newValue <= getMax()) {
-				set(newValue);
-			}
+			set(Integer.parseInt(text));
 		} catch (Exception e) {
 			
 		}
-	}
-	
-	@Override
-	public Entry createGUIEntry(MinecraftClient client) {
-		return new IntegerSettingGUIEntry(client, this);
 	}
 	
 	@Override
@@ -43,6 +32,16 @@ public class IntegerSetting extends Setting<Integer> {
 		if (newValue >= getMin() && newValue <= getMax()) {
 			super.set(newValue);
 		};
+	}
+	
+	@Override
+	public void populateButtonPanel(ButtonPanel panel) {
+		panel.addButton(new RTTextFieldWidget(panel.screen.getTextRenderer(), 0, 0, 100, 20, (textField) -> {
+			textField.setText(getAsText());
+		}, (text) -> {
+			setFromText(text);
+			panel.doActions();
+		}));
 	}
 	
 	public int getMin() {

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 
-import redstonetweaks.gui.RedstoneTweaksMenuScreen;
+import redstonetweaks.gui.RTMenuScreen;
 
 @Mixin(Keyboard.class)
 public class KeyboardMixin {
@@ -21,7 +21,7 @@ public class KeyboardMixin {
 	@Inject(method = "onKey", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/client/options/KeyBinding;onKeyPressed(Lnet/minecraft/client/util/InputUtil$Key;)V"))
 	private void onOnKeyInjectAfterOnKeyPressed(long window, int key, int scancode, int i, int j, CallbackInfo ci) {
 		if (key == 82) {
-			client.openScreen(new RedstoneTweaksMenuScreen(client));
+			client.openScreen(new RTMenuScreen(client));
 		}
 	}
 }
