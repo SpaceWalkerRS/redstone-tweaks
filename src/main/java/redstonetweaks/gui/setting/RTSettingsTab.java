@@ -18,6 +18,7 @@ public class RTSettingsTab extends RTMenuTab {
 	private RTSettingsListWidget settingsList;
 	private RTTextFieldWidget searchBox;
 	private RTButtonWidget resetButton;
+	private RTButtonWidget clearSearchBoxButton;
 	
 	public RTSettingsTab(RTMenuScreen screen) {
 		super(screen, new TranslatableText("Settings"));
@@ -40,7 +41,12 @@ public class RTSettingsTab extends RTMenuTab {
 		resetButton.setActive(((MinecraftClientHelper)screen.client).getSettingsManager().canChangeSettings());
 		addContent(resetButton);
 		
-		searchBox = new RTTextFieldWidget(screen.getTextRenderer(), 5, screen.getHeaderHeight(), screen.getWidth() - resetButton.getWidth() - 20, 20, (textField) -> {}, (query) -> {
+		clearSearchBoxButton = new RTButtonWidget(resetButton.getX() - 25, resetButton.getY(), 20, 20, () -> new TranslatableText("<"), (button) -> {
+			searchBox.setText("");
+		});
+		addContent(clearSearchBoxButton);
+		
+		searchBox = new RTTextFieldWidget(screen.getTextRenderer(), 5, resetButton.getY(), clearSearchBoxButton.getX() - 10, 20, (textField) -> {}, (query) -> {
 			settingsList.filter(query);
 			lastSearchQuery = query;
 		});
@@ -53,6 +59,7 @@ public class RTSettingsTab extends RTMenuTab {
 		settingsList.render(matrices, mouseX, mouseY, delta);
 		searchBox.render(matrices, mouseX, mouseY, delta);
 		resetButton.render(matrices, mouseX, mouseY, delta);
+		clearSearchBoxButton.render(matrices, mouseX, mouseY, delta);
 	}
 	
 	@Override

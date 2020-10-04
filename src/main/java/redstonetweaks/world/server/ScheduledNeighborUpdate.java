@@ -31,11 +31,11 @@ public class ScheduledNeighborUpdate implements Comparable<ScheduledNeighborUpda
 	
 	@Override
 	public boolean equals(Object object) {
-		if (!(object instanceof ScheduledNeighborUpdate)) {
-			return false;
-		} else {
+		if (object instanceof ScheduledNeighborUpdate) {
 			ScheduledNeighborUpdate update = (ScheduledNeighborUpdate)object;
 			return update.time == time && update.updateType == updateType && update.id == id;
+		} else {
+			return false;
 		}
 	}
 	

@@ -84,6 +84,10 @@ public class RTButtonWidget extends ButtonWidget implements IAbstractButtonWidge
 
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
+		if (!visible) {
+			System.out.println("not visible D:");
+		}
+		
 		super.render(matrices, mouseX, mouseY, tickDelta);
 	}
 	

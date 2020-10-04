@@ -32,6 +32,21 @@ public abstract class RTMenuTab extends AbstractParentElement {
 	}
 	
 	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		for (Element el : children()) {
+			if (el.mouseClicked(mouseX, mouseY, button)) {
+				setFocused(el);
+			}
+		}
+		
+		if (button == 0) {
+			setDragging(true);
+		}
+		
+		return true;
+	}
+	
+	@Override
 	public boolean isMouseOver(double mouseX, double mouseY) {
 		return mouseY >= screen.getHeaderHeight();
 	}

@@ -765,7 +765,7 @@ public class Settings {
 		public static final IntegerSetting DELAY = new IntegerSetting(ID, "delay", Common.DESC_DELAY, 0, 0, Common.MAX_DELAY);
 		public static final BooleanSetting DIRECTIONAL_UPDATE_ORDER = new BooleanSetting(ID, "directionalUpdateOrder", "", false);
 		public static final BooleanSetting INVERT_FLOW_ON_GLASS = new BooleanSetting(ID, "invertFlowOnGlass", "", false);
-		public static final BooleanSetting RANDOM_UPDATE_ORDER = new BooleanSetting(ID, "directionalUpdateOrder", "", false);
+		public static final BooleanSetting RANDOM_UPDATE_ORDER = new BooleanSetting(ID, "randomUpdateOrder", "", false);
 		public static final BooleanSetting SLABS_ALLOW_UP_CONNECTION = new BooleanSetting(ID, "slabsAllowUpConnection", "", true);
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(ID, "tickPriority", "", TickPriority.NORMAL);
 		
