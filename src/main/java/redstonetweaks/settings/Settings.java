@@ -863,6 +863,7 @@ public class Settings {
 		public static final BooleanSetting RANDOMIZE_QC = new BooleanSetting(ID, "randomizeQuasiConnectivity", Common.DESC_RANDOMIZE_QC, false);
 		public static final IntegerSetting SPEED_RISING_EDGE = new IntegerSetting(ID, "speedRisingEdge", "", 2, 0, Common.MAX_DELAY);
 		public static final IntegerSetting SPEED_FALLING_EDGE = new IntegerSetting(ID, "speedFallingEdge", "", 2, 0, Common.MAX_DELAY);
+		public static final BooleanSetting SUPER_STICKY = new BooleanSetting(ID, "superSticky", "Make the face of sticky pistons stick to blocks like slime blocks.", false);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", "", TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", "", TickPriority.NORMAL);
 		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "", 12, 0, 2048);
@@ -884,6 +885,7 @@ public class Settings {
 				RANDOMIZE_QC,
 				SPEED_RISING_EDGE,
 				SPEED_FALLING_EDGE,
+				SUPER_STICKY,
 				TICK_PRIORITY_RISING_EDGE,
 				TICK_PRIORITY_FALLING_EDGE,
 				PUSH_LIMIT
