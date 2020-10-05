@@ -297,11 +297,9 @@ public class Settings {
 		public static final String ID = "dragonEgg";
 		
 		public static final IntegerSetting DELAY = new IntegerSetting(ID, "delay", "", 5, 0, Common.MAX_DELAY);
-		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(ID, "tickPriority", "", TickPriority.NORMAL);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
-				DELAY,
-				TICK_PRIORITY
+				DELAY
 		);
 	}
 	

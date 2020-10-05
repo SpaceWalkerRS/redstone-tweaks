@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -17,11 +18,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PoweredRailBlock;
+import net.minecraft.block.enums.RailShape;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
+
+import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.settings.types.DirectionalBooleanSetting;
 
 @Mixin(PoweredRailBlock.class)
 public abstract class PoweredRailBlockMixin extends AbstractBlock {
@@ -36,6 +41,16 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 	private int getPoweredRailLimit(int oldValue, World world, BlockPos pos, BlockState state, boolean bl, int distance) {
 		int limit = state.isOf(Blocks.ACTIVATOR_RAIL) ? redstonetweaks.settings.Settings.ActivatorRail.POWER_LIMIT.get() : redstonetweaks.settings.Settings.PoweredRail.POWER_LIMIT.get() ;
 		return limit - 1;
+	}
+	
+	@Redirect(method = "isPoweredByOtherRails(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;ZILnet/minecraft/block/enums/RailShape;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
+	private boolean onisPoweredByOtherRailsRedirectGetReceivedPower(World world1, BlockPos blockPos, World world, BlockPos pos, boolean bl, int distance, RailShape shape) {
+		return isReceivingPower(world, pos, world.getBlockState(pos), false);
+	}
+	
+	@Redirect(method = "updateBlockState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
+	private boolean onUpdateBlockStateRedirectGetReceivedPower(World world1, BlockPos blockPos, BlockState state, World world, BlockPos pos, Block neighbor) {
+		return isReceivingPower(world, pos, state, false);
 	}
 
 	@Inject(method = "updateBlockState", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
@@ -54,7 +69,7 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		boolean powered = state.get(Properties.POWERED);
-		boolean shouldBePowered = isLazy(state, powered) ? !powered : isReceivingPower(world, pos, state);
+		boolean shouldBePowered = isLazy(state, powered) ? !powered : isPowered(world, pos, state, true);
 
 		if (powered != shouldBePowered) {
 			world.setBlockState(pos, state.with(Properties.POWERED, shouldBePowered), 3);
@@ -64,9 +79,21 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 			}
 		}
 	}
-
-	private boolean isReceivingPower(ServerWorld world, BlockPos pos, BlockState state) {
-		return world.isReceivingRedstonePower(pos) || isPoweredByOtherRails(world, pos, state, true, 0) || isPoweredByOtherRails(world, pos, state, false, 0);
+	
+	private boolean isPowered(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
+		return isReceivingPower(world, pos, state, onScheduledTick) || isPoweredByOtherRails(world, pos, state, true, 0) || isPoweredByOtherRails(world, pos, state, false, 0);
+	}
+	
+	private boolean isReceivingPower(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
+		return world.isReceivingRedstonePower(pos) || WorldHelper.isQCPowered(world, pos, state, onScheduledTick, getQC(state), randQC(state));
+	}
+	
+	private DirectionalBooleanSetting getQC(BlockState state) {
+		return state.isOf(Blocks.ACTIVATOR_RAIL) ? redstonetweaks.settings.Settings.ActivatorRail.QC : redstonetweaks.settings.Settings.PoweredRail.QC;
+	}
+	
+	private boolean randQC(BlockState state) {
+		return state.isOf(Blocks.ACTIVATOR_RAIL) ? redstonetweaks.settings.Settings.ActivatorRail.RANDOMIZE_QC.get() : redstonetweaks.settings.Settings.PoweredRail.RANDOMIZE_QC.get();
 	}
 
 	private int getDelay(BlockState state, boolean currentlyPowered) {

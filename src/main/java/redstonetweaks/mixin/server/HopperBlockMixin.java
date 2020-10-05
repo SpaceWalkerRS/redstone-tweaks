@@ -16,6 +16,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
+import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.settings.types.DirectionalBooleanSetting;
+
 @Mixin(HopperBlock.class)
 public abstract class HopperBlockMixin extends Block {
 	
@@ -25,40 +28,51 @@ public abstract class HopperBlockMixin extends Block {
 
 	@Shadow protected abstract void updateEnabled(World world, BlockPos pos, BlockState state);
 	
-	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/HopperBlock;updateEnabled(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
-	private void onOnBlockAddedRedirectUpdateEnabled(HopperBlock hopper, World world, BlockPos pos, BlockState state) {
-		update(world, pos, state);
+	@Redirect(method = "updateEnabled", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
+	private boolean onUpdateEnabledRedirectGetReceivedPower(World world1, BlockPos blockPos, World world, BlockPos pos, BlockState state) {
+		return isReceivingPower(world, pos, state, false);
 	}
 	
-	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/HopperBlock;updateEnabled(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
-	private void onNeighborUpdateRedirectUpdateEnabled(HopperBlock hopper, World world, BlockPos pos, BlockState state) {
-		update(world, pos, state);
+	@Redirect(method = "updateEnabled", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private boolean onUpdateEnabledRedirectSetBlockState(World world, BlockPos pos, BlockState state, int flags) {
+		// We invert the powered property because this state is the new state
+		boolean enabled = !state.get(Properties.ENABLED);
+		int delay = getDelay(enabled);
+		if (delay == 0) {
+			world.setBlockState(pos, state, flags);
+		} else {
+			TickPriority priority = getTickPriority(enabled);
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
+		}
+		return true;
 	}
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		boolean enabled = state.get(Properties.ENABLED);
 		boolean lazy = isLazy(enabled);
-		boolean isReceivingPower = world.isReceivingRedstonePower(pos);
+		boolean isReceivingPower = isReceivingPower(world, pos, state, true);
 		boolean shouldBeEnabled = lazy ? !enabled : !isReceivingPower;
 		
 		if (enabled != shouldBeEnabled) {
-			world.setBlockState(pos, state.with(Properties.ENABLED, shouldBeEnabled), 6);
+			BlockState newState = state.with(Properties.ENABLED, shouldBeEnabled);
+			world.setBlockState(pos, newState, 6);
 			if (shouldBeEnabled == isReceivingPower) {
-				world.updateNeighbor(pos, state.getBlock(), pos);
+				updateEnabled(world, pos, newState);
 			}
 		}
 	}
 	
-	private void update(World world, BlockPos pos, BlockState state) {
-		boolean enabled = state.get(Properties.ENABLED);
-		int delay = getDelay(enabled);
-		if (delay == 0) {
-			updateEnabled(world, pos, state);
-		} else if (!world.isClient()) {
-			TickPriority priority = getTickPriority(enabled);
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
-		}
+	private boolean isReceivingPower(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
+		return world.isReceivingRedstonePower(pos) || WorldHelper.isQCPowered(world, pos, state, onScheduledTick, getQC(), randQC());
+	}
+	
+	private DirectionalBooleanSetting getQC() {
+		return redstonetweaks.settings.Settings.Hopper.QC;
+	}
+	
+	private boolean randQC() {
+		return redstonetweaks.settings.Settings.Hopper.RANDOMIZE_QC.get();
 	}
 	
 	private int getDelay(boolean enabled) {

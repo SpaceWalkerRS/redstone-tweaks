@@ -1,13 +1,16 @@
-package redstonetweaks;
+package redstonetweaks.world.common;
 
 import java.util.List;
 
 public class UpdateOrder {
 	
+	private final Directionality directionality;
+	
 	private Mode mode;
 	private List<BlockUpdate> blockUpdates;
 	
-	public UpdateOrder(Mode defaultMode) {
+	public UpdateOrder(Directionality directionality, Mode defaultMode) {
+		this.directionality = directionality;
 		this.mode = defaultMode;
 	}
 	

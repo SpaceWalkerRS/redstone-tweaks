@@ -6,21 +6,33 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.RedstoneLampBlock;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
+import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.settings.Settings;
 
 @Mixin(RedstoneLampBlock.class)
 public class RedstoneLampBlockMixin {
-
+	
+	@Redirect(method = "getPlacementState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
+	private boolean onGetPlacementStateRedirectGetReceivedPower(World world, BlockPos pos, ItemPlacementContext ctx) {
+		return isReceivingPower(world, pos, world.getBlockState(pos), false);
+	}
+	
+	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
+	private boolean onNeighborUpdateRedirectGetReceivedPower(World world1, BlockPos blockPos, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
+		return isReceivingPower(world, pos, state, false);
+	}
+	
 	@Inject(method = "neighborUpdate", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private void onNeighborUpdateInjectBeforeSchedule(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
 		int delay = Settings.RedstoneLamp.DELAY_FALLING_EDGE.get();
@@ -31,7 +43,7 @@ public class RedstoneLampBlockMixin {
 		}
 		ci.cancel();
 	}
-
+	
 	@Inject(method = "neighborUpdate", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onNeighborUpdateInjectBeforeSetBlockState(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
 		int delay = Settings.RedstoneLamp.DELAY_RISING_EDGE.get();
@@ -40,11 +52,11 @@ public class RedstoneLampBlockMixin {
 			ci.cancel();
 		}
 	}
-
+	
 	@Inject(method = "scheduledTick", at = @At(value = "HEAD"), cancellable = true)
 	private void onScheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		boolean powered = state.get(Properties.LIT);
-		boolean isReceivingPower = world.isReceivingRedstonePower(pos);
+		boolean isReceivingPower = isReceivingPower(world, pos, state, true);
 		boolean shouldBePowered = isLazy(powered) ? !powered : isReceivingPower;
 
 		if (powered != shouldBePowered) {
@@ -54,6 +66,10 @@ public class RedstoneLampBlockMixin {
 			}
 		}
 		ci.cancel();
+	}
+	
+	private boolean isReceivingPower(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
+		return world.isReceivingRedstonePower(pos) || WorldHelper.isQCPowered(world, pos, state, onScheduledTick, Settings.RedstoneLamp.QC, Settings.RedstoneLamp.RANDOMIZE_QC.get());
 	}
 
 	private boolean isLazy(boolean currentlyPowered) {
