@@ -140,7 +140,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		
 		int powerReceived = getReceivedRedstonePower(world, pos);
 		
-		if (power != powerReceived) {
+		if (power != powerReceived && world.getBlockState(pos) == state) {
 			int delay = redstonetweaks.settings.Settings.RedstoneWire.DELAY.get();
 			if (delay == 0) {
 				if (blockEntity instanceof RedstoneWireBlockEntity) {
@@ -177,7 +177,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				
 				boolean isSideSolid = isSideSolid(world, sidePos, sideState, dir.getOpposite());
 				
-				if ((isSideSolid || isSolidGlass(sideState)) && !!hasSolidBottom(world, abovePos, aboveState, dir)) {
+				if ((isSideSolid || isSolidGlass(sideState)) && !hasSolidBottom(world, abovePos, aboveState, dir)) {
 					wirePower = Math.max(wirePower, getWirePower(world, sidePos.up(), dir.getOpposite()));
 				} else if (!(isSideSolid || hasSolidBottom(world, sidePos, sideState, dir.getOpposite()))) {
 					wirePower = Math.max(wirePower, getWirePower(world, sidePos.down(), dir.getOpposite()));

@@ -18,11 +18,7 @@ public class RedstoneWireBlockEntity extends BlockEntity {
 	private int power;
 	
 	public RedstoneWireBlockEntity() {
-		this(REDSTONE_WIRE);
-	}
-	
-	public RedstoneWireBlockEntity(BlockEntityType<?> type) {
-		super(type);
+		super(REDSTONE_WIRE);
 	}
 	
 	private static <T extends BlockEntity> BlockEntityType<T> create(String string, BlockEntityType.Builder<T> builder) {
