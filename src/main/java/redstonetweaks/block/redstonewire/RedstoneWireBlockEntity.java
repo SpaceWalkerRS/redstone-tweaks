@@ -1,4 +1,4 @@
-package redstonetweaks;
+package redstonetweaks.block.redstonewire;
 
 import com.mojang.datafixers.types.Type;
 

@@ -27,13 +27,12 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
+import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.PistonBlockEntityHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.piston.BlockEventHandler;
 import redstonetweaks.world.server.UnfinishedEvent.Source;
 
 @Mixin(PistonBlock.class)

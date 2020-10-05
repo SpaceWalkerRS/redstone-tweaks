@@ -38,13 +38,12 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
-
+import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.StairsHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.packet.TickBlockEntityPacket;
-import redstonetweaks.piston.BlockEventHandler;
 import redstonetweaks.settings.Settings;
 import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 

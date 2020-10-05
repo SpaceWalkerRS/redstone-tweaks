@@ -37,8 +37,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
-import redstonetweaks.RedstoneWireBlockEntity;
+import redstonetweaks.block.redstonewire.RedstoneWireBlockEntity;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;

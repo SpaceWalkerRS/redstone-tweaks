@@ -8,8 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
-
-import redstonetweaks.piston.BlockEventHandler;
+import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.settings.Settings;
 import redstonetweaks.settings.types.DirectionalBooleanSetting;
 

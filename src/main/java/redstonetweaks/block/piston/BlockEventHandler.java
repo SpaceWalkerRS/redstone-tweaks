@@ -1,4 +1,4 @@
-package redstonetweaks.piston;
+package redstonetweaks.block.piston;
 
 import java.util.Iterator;
 import java.util.List;
