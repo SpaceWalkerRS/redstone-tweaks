@@ -44,6 +44,7 @@ public class UpdateOrder {
 	}
 	
 	public enum Mode {
+		
 		DIRECTIONAL(0, "Directional"),
 		LOCATIONAL(1, "Locational"),
 		RANDOM(2, "Random");
