@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.PistonBlock;
 import net.minecraft.block.PistonExtensionBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
@@ -25,26 +26,49 @@ public class PistonExtensionBlockMixin extends Block implements BlockHelper {
 	}
 	
 	@Override
+	public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof PistonBlockEntity) {
+			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity) blockEntity;
+			if (pistonBlockEntity.isSource() && !pistonBlockEntity.isExtending()) {
+				boolean sticky = state.get(Properties.PISTON_TYPE) == PistonType.STICKY;
+				Direction facing = state.get(Properties.FACING);
+				if (!PistonHelper.ignoreUpdatesWhileRetracting(sticky) && (PistonHelper.lazyRisingEdge(sticky) || PistonHelper.isReceivingPower(world, pos, state, facing))) {
+					BlockState pushedState = pistonBlockEntity.getPushedBlock();
+					if (pushedState.getBlock() instanceof PistonBlock) {
+						pistonBlockEntity.finish();
+						if (sticky && PistonHelper.fastBlockDropping()) {
+							BlockPos frontPos = pos.offset(facing);
+							BlockState frontState = world.getBlockState(frontPos);
+							if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
+								blockEntity = world.getBlockEntity(frontPos);
+								if (blockEntity instanceof PistonBlockEntity) {
+									((PistonBlockEntity) blockEntity).finish();
+								}
+							}
+						}
+						pushedState.onSyncedBlockEvent(world, pos, type, data);
+						
+						return true;
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	@Override
 	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof PistonBlockEntity) {
-			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity) blockEntity;
 			if (pistonBlockEntity.isSource() && !pistonBlockEntity.isExtending()) {
 				boolean sticky = state.get(Properties.PISTON_TYPE) == PistonType.STICKY;
 				Direction facing = state.get(Properties.FACING);
 				if (!PistonHelper.ignoreUpdatesWhileRetracting(sticky) && PistonHelper.isReceivingPower(world, pos, state, facing)) {
-					pistonBlockEntity.finish();
-					world.setBlockState(pos, pistonBlockEntity.getPushedBlock(), 67);
-					
-					if (sticky) {
-						BlockPos frontPos = pos.offset(facing);
-						BlockState frontState = world.getBlockState(frontPos);
-						if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
-							blockEntity = world.getBlockEntity(frontPos);
-							if (blockEntity instanceof PistonBlockEntity) {
-								((PistonBlockEntity)blockEntity).finish();
-							}
-						}
+					if (!world.isClient()) {
+						world.addSyncedBlockEvent(pos, state.getBlock(), 0, facing.getId());
 					}
 				}
 			}
@@ -55,12 +79,12 @@ public class PistonExtensionBlockMixin extends Block implements BlockHelper {
 	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof PistonBlockEntity) {
-			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity) blockEntity;
 			
 			if (pistonBlockEntity.isSource()) {
 				BlockState piston = pistonBlockEntity.getPushedBlock();
-				((BlockHelper)piston.getBlock()).continueEvent(world, piston, pos, type);
-				
+				((BlockHelper) piston.getBlock()).continueEvent(world, piston, pos, type);
+
 				return true;
 			}
 		}

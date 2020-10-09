@@ -5,8 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import net.minecraft.block.entity.HopperBlockEntity;
-
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(HopperBlockEntity.class)
 public class HopperBlockEntityMixin {

@@ -21,8 +21,8 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.settings.Settings;
-import redstonetweaks.settings.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.types.DirectionalBooleanSetting;
 
 @Mixin(DispenserBlock.class)
 public abstract class DispenserBlockMixin {

@@ -20,7 +20,7 @@ import redstonetweaks.packet.TickStatusPacket;
 import redstonetweaks.packet.WorldSyncPacket;
 import redstonetweaks.packet.DoWorldTicksPacket;
 import redstonetweaks.packet.WorldTimeSyncPacket;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.world.common.WorldTickHandler;
 
 public class ServerWorldTickHandler extends WorldTickHandler {

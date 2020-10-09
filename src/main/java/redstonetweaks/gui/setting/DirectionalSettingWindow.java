@@ -1,13 +1,15 @@
 package redstonetweaks.gui.setting;
 
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTWindow;
-import redstonetweaks.settings.types.DirectionalSetting;
+import redstonetweaks.setting.types.DirectionalSetting;
+import redstonetweaks.setting.types.ISetting;
 
-public class DirectionalSettingWindow extends RTWindow {
+public class DirectionalSettingWindow extends RTWindow implements ISettingGUIElement {
 	
 	private static final int WIDTH = 230;
 	private static final int HEIGHT = 185;
@@ -28,12 +30,24 @@ public class DirectionalSettingWindow extends RTWindow {
 	
 	@Override
 	protected void initContents() {
-		list = new DirectionalSettingListWidget(screen, getX(), getY() + getHeaderHeight(), WIDTH, HEIGHT - getHeaderHeight(), setting);
+		list = new DirectionalSettingListWidget(screen, getX(), getY() + getHeaderHeight(), getWidth(), getHeight() - getHeaderHeight(), setting);
 		addChild(list);
 	}
 	
 	@Override
 	protected void renderContents(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		list.render(matrices, mouseX, mouseY, delta);
+	}
+	
+	@Override
+	public void onSettingChanged(ISetting setting) {
+		if (this.setting == setting) {
+			list.onSettingChanged();
+		}
+	}
+	
+	@Override
+	public void unfocusTextFields(Element except) {
+		
 	}
 }

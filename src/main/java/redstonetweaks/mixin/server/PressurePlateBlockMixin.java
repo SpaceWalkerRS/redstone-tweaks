@@ -9,13 +9,19 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.world.TickPriority;
 
 import redstonetweaks.helper.PressurePlateHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(PressurePlateBlock.class)
 public class PressurePlateBlockMixin implements PressurePlateHelper {
 	
 	public boolean isStone(BlockState state) {
 		return state.getMaterial() == Material.STONE;
+	}
+	
+	@Override
+	public UpdateOrder updateOrder(BlockState state) {
+		return isStone(state) ? Settings.StonePressurePlate.BLOCK_UPDATE_ORDER.get() : Settings.WoodenPressurePlate.BLOCK_UPDATE_ORDER.get();
 	}
 	
 	@Override

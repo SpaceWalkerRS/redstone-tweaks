@@ -9,7 +9,7 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 public class TickSchedulerHelper {
 	

@@ -1,4 +1,4 @@
-package redstonetweaks.settings.types;
+package redstonetweaks.setting.types;
 
 import java.util.Arrays;
 
@@ -6,8 +6,6 @@ public abstract class ArraySetting<T> extends Setting<T[]> {
 	
 	public ArraySetting(String prefix, String name, String description, T[] defaultValue) {
 		super(prefix, name, description, defaultValue);
-		
-		set(getDefault());
 	}
 	
 	@Override
@@ -19,12 +17,12 @@ public abstract class ArraySetting<T> extends Setting<T[]> {
 	public void setFromText(String text) {
 		String[] args = text.split(", ");
 		
-		try {
-			for (int i = 0; i < args.length; i++) {
+		for (int i = 0; i < args.length; i++) {
+			try {
 				set(i, textToValue(args[i]));
+			} catch (Exception e) {
+				
 			}
-		} catch (Exception e) {
-			
 		}
 	}
 	
@@ -36,7 +34,7 @@ public abstract class ArraySetting<T> extends Setting<T[]> {
 			asText += valueToText(value) + ", ";
 		}
 		
-		return asText.substring(0, asText.length() - 1);
+		return asText.substring(0, asText.length() - 2);
 	}
 	
 	@Override

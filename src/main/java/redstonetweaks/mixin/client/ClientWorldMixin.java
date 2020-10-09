@@ -22,7 +22,7 @@ import net.minecraft.world.dimension.DimensionType;
 import redstonetweaks.helper.ClientWorldHelper;
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
 import redstonetweaks.world.client.ClientUnfinishedEventScheduler;
 import redstonetweaks.world.client.ClientWorldTickHandler;

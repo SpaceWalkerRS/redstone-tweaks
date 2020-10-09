@@ -16,7 +16,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(WallRedstoneTorchBlock.class)
 public class WallRedstoneTorchBlockMixin {

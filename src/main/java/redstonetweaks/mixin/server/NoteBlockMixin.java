@@ -17,7 +17,7 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.settings.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.types.DirectionalBooleanSetting;
 
 @Mixin(NoteBlock.class)
 public abstract class NoteBlockMixin extends AbstractBlock {
@@ -53,22 +53,22 @@ public abstract class NoteBlockMixin extends AbstractBlock {
 	}
 	
 	private DirectionalBooleanSetting getQC() {
-		return redstonetweaks.settings.Settings.NoteBlock.QC;
+		return redstonetweaks.setting.Settings.NoteBlock.QC;
 	}
 	
 	private boolean randQC() {
-		return redstonetweaks.settings.Settings.NoteBlock.RANDOMIZE_QC.get();
+		return redstonetweaks.setting.Settings.NoteBlock.RANDOMIZE_QC.get();
 	}
 	
 	private int getDelay() {
-		return redstonetweaks.settings.Settings.NoteBlock.DELAY.get();
+		return redstonetweaks.setting.Settings.NoteBlock.DELAY.get();
 	}
 	
 	private boolean isLazy() {
-		return redstonetweaks.settings.Settings.NoteBlock.LAZY.get();
+		return redstonetweaks.setting.Settings.NoteBlock.LAZY.get();
 	}
 	
 	private TickPriority getTickPriority() {
-		return redstonetweaks.settings.Settings.NoteBlock.TICK_PRIORITY.get();
+		return redstonetweaks.setting.Settings.NoteBlock.TICK_PRIORITY.get();
 	}
 }

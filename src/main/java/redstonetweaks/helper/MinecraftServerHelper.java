@@ -1,7 +1,7 @@
 package redstonetweaks.helper;
 
 import redstonetweaks.packet.ServerPacketHandler;
-import redstonetweaks.settings.ServerSettingsManager;
+import redstonetweaks.setting.ServerSettingsManager;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 public interface MinecraftServerHelper {

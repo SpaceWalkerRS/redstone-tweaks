@@ -12,6 +12,7 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 
 import redstonetweaks.util.RTMathHelper;
@@ -26,11 +27,12 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	public final RTMenuScreen screen;
 	private final int rowWidth;
 	
+	protected List<Text> currentTooltip;
 	private int entryTitleWidth = 0;
 	private boolean scrolling;
 
 	public RTListWidget(RTMenuScreen screen, int x, int y, int width, int height, int entryHeight) {
-		super(screen.client, width, height, y, y + height - 5, entryHeight);
+		super(screen.client, width, height, y, y + height, entryHeight);
 		setLeftPos(x);
 		
 		this.screen = screen;
@@ -58,10 +60,15 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		renderList(matrices, mouseX, mouseY, delta);
+		currentTooltip = null;
 		
+		renderList(matrices, mouseX, mouseY, delta);
 		if (getMaxScroll() > 0) {
 			renderScrollbar(matrices);
+		}
+		
+		if (currentTooltip != null) {
+			screen.renderTooltip(matrices, currentTooltip, mouseX, mouseY);
 		}
 	}
 	
@@ -101,7 +108,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		children().forEach((element) -> element.allowHover(allowHover));
 	}
 
-	public boolean mouseClick(double mouseX, double mouseY, int button) {
+	private boolean mouseClick(double mouseX, double mouseY, int button) {
 		updateScrollingState(mouseX, mouseY, button);
 		if (!isMouseOver(mouseX, mouseY)) {
 			return false;
@@ -111,10 +118,12 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 				if (entry.mouseClicked(mouseX, mouseY, button)) {
 					setFocused(entry);
 					setDragging(true);
+					
 					return true;
 				}
 			} else if (button == 0) {
 				clickedHeader((int)(mouseX - (getX() + getWidth() / 2 - getRowWidth() / 2)), (int)(mouseY - getY()) + roundedScrollAmount() - 4);
+				
 				return true;
 			}
 
@@ -131,10 +140,10 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		
 		int maxScroll = getMaxScroll();
 		
-		int p = MathHelper.clamp(((bottom - top) * (bottom - top)) / getMaxPosition(), 32, bottom - top - 8);
-		int q = (int)getScrollAmount() * (bottom - top - p) / maxScroll + top;
-		if (q < top) {
-			q = top;
+		int length = MathHelper.clamp((getHeight() * getHeight()) / getMaxPosition(), 32, getHeight() - 8);
+		int bar_top = (int)(getScrollAmount() / maxScroll * (getHeight() - length)) + getY();
+		if (bar_top < getY()) {
+			bar_top = getY();
 		}
 		
 		RenderSystem.depthFunc(515);
@@ -147,20 +156,20 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		
 		bufferBuilder.begin(7, VertexFormats.POSITION_TEXTURE_COLOR);
 		
-		bufferBuilder.vertex(left     , bottom   , 0.0D).texture(0.0F, 1.0F).color(0, 0, 0, 200).next();
-		bufferBuilder.vertex(right    , bottom   , 0.0D).texture(1.0F, 1.0F).color(0, 0, 0, 200).next();
-		bufferBuilder.vertex(right    , top      , 0.0D).texture(1.0F, 0.0F).color(0, 0, 0, 200).next();
-		bufferBuilder.vertex(left     , top      , 0.0D).texture(0.0F, 0.0F).color(0, 0, 0, 200).next();
+		bufferBuilder.vertex(left     , getY() + getHeight(), 0.0D).texture(0.0F, 1.0F).color(0, 0, 0, 200).next();
+		bufferBuilder.vertex(right    , getY() + getHeight(), 0.0D).texture(1.0F, 1.0F).color(0, 0, 0, 200).next();
+		bufferBuilder.vertex(right    , getY()              , 0.0D).texture(1.0F, 0.0F).color(0, 0, 0, 200).next();
+		bufferBuilder.vertex(left     , getY()              , 0.0D).texture(0.0F, 0.0F).color(0, 0, 0, 200).next();
 		
-		bufferBuilder.vertex(left     , p + q    , 0.0D).texture(0.0F, 1.0F).color(128, 128, 128, 200).next();
-		bufferBuilder.vertex(right    , p + q    , 0.0D).texture(1.0F, 1.0F).color(128, 128, 128, 200).next();
-		bufferBuilder.vertex(right    , q        , 0.0D).texture(1.0F, 0.0F).color(128, 128, 128, 200).next();
-		bufferBuilder.vertex(left     , q        , 0.0D).texture(0.0F, 0.0F).color(128, 128, 128, 200).next();
+		bufferBuilder.vertex(left     , bar_top + length    , 0.0D).texture(0.0F, 1.0F).color(128, 128, 128, 200).next();
+		bufferBuilder.vertex(right    , bar_top + length    , 0.0D).texture(1.0F, 1.0F).color(128, 128, 128, 200).next();
+		bufferBuilder.vertex(right    , bar_top             , 0.0D).texture(1.0F, 0.0F).color(128, 128, 128, 200).next();
+		bufferBuilder.vertex(left     , bar_top             , 0.0D).texture(0.0F, 0.0F).color(128, 128, 128, 200).next();
 		
-		bufferBuilder.vertex(left     , p + q - 1, 0.0D).texture(0.0F, 1.0F).color(192, 192, 192, 200).next();
-		bufferBuilder.vertex(right - 1, p + q - 1, 0.0D).texture(1.0F, 1.0F).color(192, 192, 192, 200).next();
-		bufferBuilder.vertex(right - 1, q        , 0.0D).texture(1.0F, 0.0F).color(192, 192, 192, 200).next();
-		bufferBuilder.vertex(left     , q        , 0.0D).texture(0.0F, 0.0F).color(192, 192, 192, 200).next();
+		bufferBuilder.vertex(left     , bar_top + length - 1, 0.0D).texture(0.0F, 1.0F).color(192, 192, 192, 200).next();
+		bufferBuilder.vertex(right - 1, bar_top + length - 1, 0.0D).texture(1.0F, 1.0F).color(192, 192, 192, 200).next();
+		bufferBuilder.vertex(right - 1, bar_top             , 0.0D).texture(1.0F, 0.0F).color(192, 192, 192, 200).next();
+		bufferBuilder.vertex(left     , bar_top             , 0.0D).texture(0.0F, 0.0F).color(192, 192, 192, 200).next();
 		
 		tessellator.draw();
 		
@@ -176,7 +185,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		for (int index = 0; index < itemCount; ++index) {
 			int rowTop = getRowTop(index);
 			
-			if (rowTop >= top && rowTop <= bottom) {
+			if (rowTop >= getY() && rowTop <= getY() + getHeight()) {
 				int rowWidth = getRowWidth();
 				int rowLeft = getRowLeft();
 				

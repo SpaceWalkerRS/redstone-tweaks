@@ -5,21 +5,34 @@ import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
+import net.minecraft.world.TickPriority;
 
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
+import redstonetweaks.gui.widget.RTSliderWidget;
+import redstonetweaks.gui.widget.RTTextFieldWidget;
+import redstonetweaks.gui.widget.RTTexturedButtonWidget;
 import redstonetweaks.helper.MinecraftClientHelper;
-import redstonetweaks.settings.Settings;
-import redstonetweaks.settings.SettingsPack;
-import redstonetweaks.settings.types.ISetting;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.SettingsPack;
+import redstonetweaks.setting.types.BooleanSetting;
+import redstonetweaks.setting.types.BugFixSetting;
+import redstonetweaks.setting.types.DirectionalSetting;
+import redstonetweaks.setting.types.ISetting;
+import redstonetweaks.setting.types.IntegerSetting;
+import redstonetweaks.setting.types.TickPrioritySetting;
+import redstonetweaks.setting.types.UpdateOrderSetting;
 
-public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entry> {
+public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entry> implements ISettingGUIElement {
 	
 	public RTSettingsListWidget(RTMenuScreen screen, int x, int y, int width, int height) {
 		super(screen, x, y, width, height, 22);
@@ -89,27 +102,29 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		}
 	}
 	
-	public void reset() {
+	@Override
+	public void onSettingChanged(ISetting setting) {
 		for (Entry entry : children()) {
 			if (entry instanceof SettingEntry) {
-				((SettingEntry)entry).reset();
+				SettingEntry settingEntry = (SettingEntry)entry;
+				if (settingEntry.setting == setting || setting == null) {
+					settingEntry.onSettingChanged();
+				}
 			}
 		}
 	}
 	
 	public class SettingsPackEntry extends Entry {
 		
-		private Text title;
+		private final Text title;
 		
 		public SettingsPackEntry(SettingsPack pack) {
-			title = new TranslatableText(pack.getName());
+			title = new TranslatableText(pack.getName()).formatted(Formatting.UNDERLINE);
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			int textX = getX() + 25;
-			int textY = y + 5;
-			client.textRenderer.draw(matrices, title, textX, textY, TEXT_COLOR);
+			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 		}
 		
 		@Override
@@ -157,29 +172,31 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 	
 	public class SettingEntry extends Entry {
 		
-		private final ISetting setting;
+		public final ISetting setting;
 		private final Text title;
+		private final List<Text> tooltip;
 		private final List<RTElement> children;
 		private final ButtonPanel buttonPanel;
 		private final RTButtonWidget resetButton;
 		private final boolean buttonsActive;
 		
 		public SettingEntry(MinecraftClient client, RTSettingsListWidget list, ISetting setting) {
+			this.buttonsActive = ((MinecraftClientHelper)client).getSettingsManager().canChangeSettings();
+			
 			this.setting = setting;
 			this.title = new TranslatableText(setting.getName());
+			this.tooltip = createTooltip();
 			this.children = new ArrayList<>();
 			
-			this.buttonPanel = new ButtonPanel(screen);
-			this.setting.populateButtonPanel(buttonPanel);
-			this.buttonPanel.addAction(() -> onSettingChanged());
-			this.children.add(buttonPanel);
-			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
-				reset();
+				setting.reset();
+				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
 			});
 			this.children.add(resetButton);
 			
-			this.buttonsActive = ((MinecraftClientHelper)client).getSettingsManager().canChangeSettings();
+			this.buttonPanel = new ButtonPanel();
+			this.populateButtonPanel();
+			this.children.add(buttonPanel);
 		}
 		
 		// use hovered to render tooltip
@@ -187,10 +204,15 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
-			buttonPanel.render(matrices, x, y, mouseX, mouseY, tickDelta);
+			buttonPanel.setY(y);
+			buttonPanel.render(matrices, mouseX, mouseY, tickDelta);
 			
 			resetButton.setY(y);
 			resetButton.render(matrices, mouseX, mouseY, tickDelta);
+			
+			if (hovered && titleHovered(mouseX, mouseY)) {
+				currentTooltip = tooltip;
+			}
 		}
 		
 		@Override
@@ -201,10 +223,10 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		@Override
 		public void init(int entryTitleWidth) {
 			buttonPanel.setX(getX() + entryTitleWidth);
-			resetButton.setX(getX() + entryTitleWidth + buttonPanel.getWidth() + 5);
+			resetButton.setX(buttonPanel.getX() + buttonPanel.getWidth() + 5);
 			
 			buttonPanel.setActive(buttonsActive);
-			resetButton.active = buttonsActive && !setting.isDefault();
+			resetButton.setActive(buttonsActive && !setting.isDefault());
 		}
 		
 		@Override
@@ -214,20 +236,95 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		
 		@Override
 		public void unfocusTextFields() {
-			buttonPanel.unfocusTextFields();
-		}
-		
-		public void reset() {
-			setting.reset();
-			onSettingChanged();
-			buttonPanel.updateButtonLabels();
-		}
-		
-		protected void onSettingChanged() {
-			resetButton.active = buttonsActive && !setting.isDefault();
 			
-			System.out.println("redo setting packets and gui on setting changed");
-			((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(setting);
+		}
+		
+		private List<Text> createTooltip() {
+			List<Text> tooltip = new ArrayList<>();
+			for (String line : setting.getDescription().split("\n")) {
+				tooltip.add(new TranslatableText(line));
+			}
+			return tooltip;
+		}
+		
+		private void populateButtonPanel() {
+			if (setting instanceof BooleanSetting) {
+				if (setting instanceof BugFixSetting) {
+					BugFixSetting bSetting = (BugFixSetting)setting;
+					buttonPanel.addButton(new RTButtonWidget(0, 0, 78, 20, () -> new TranslatableText(bSetting.getAsText()), (button) -> {
+						bSetting.set(!bSetting.get());
+						((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(bSetting);
+					}));
+					buttonPanel.addButton(new RTTexturedButtonWidget(0, 0, 20, 20, RTTexturedButtonWidget.WIDGETS_LOCATION, 0, 106, 256, 256, 20, (button) -> {
+						saveScrollAmount();
+						
+						String url = bSetting.getBugReportURL();
+						client.openScreen(new ConfirmChatLinkScreen((confirm) -> {
+							if (confirm) {
+								Util.getOperatingSystem().open(url);
+							}
+							
+							client.openScreen(screen);
+						}, url, true));
+					}).alwaysActive());
+				} else {
+					BooleanSetting bSetting = (BooleanSetting)setting;
+					buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(bSetting.getAsText()), (button) -> {
+						bSetting.set(!bSetting.get());
+						((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(bSetting);
+					}));
+				}
+				
+			} else
+			if (setting instanceof DirectionalSetting<?>) {
+				DirectionalSetting<?> dSetting = (DirectionalSetting<?>)setting;
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
+					screen.openWindow(new DirectionalSettingWindow(screen, dSetting));
+				})).alwaysActive());
+			} else
+			if (setting instanceof IntegerSetting) {
+				IntegerSetting iSetting = (IntegerSetting)setting;
+				buttonPanel.addButton(new RTTextFieldWidget(client.textRenderer, 0, 0, 100, 20, (textField) -> {
+					textField.setText(iSetting.getAsText());
+				}, (text) -> {
+					iSetting.setFromText(text);
+					((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(iSetting);
+				}));
+			} else
+			if (setting instanceof TickPrioritySetting) {
+				TickPrioritySetting tSetting = (TickPrioritySetting)setting;
+				buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, 0.0D, () -> new TranslatableText(tSetting.getAsText()), (slider) -> {
+					TickPriority[] priorities = TickPriority.values();
+					
+					int min = priorities[0].getIndex();
+					int steps = (int)Math.round((priorities.length - 1) * slider.getValue());
+					
+					tSetting.set(TickPriority.byIndex(min + steps));
+					((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(tSetting);
+				}, (slider) -> {
+					TickPriority[] priorities = TickPriority.values();
+					double steps = tSetting.get().getIndex() - priorities[0].getIndex();
+					slider.setValue(steps / (priorities.length - 1));
+				}));
+			} else
+			if (setting instanceof UpdateOrderSetting) {
+				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
+					screen.openWindow(new UpdateOrderWindow(screen, uSetting));
+				})).alwaysActive());
+			}
+		}
+		
+		private boolean titleHovered(int mouseX, int mouseY) {
+			int width = client.textRenderer.getWidth(title);
+			int height = client.textRenderer.fontHeight;
+			
+			return mouseX >= getX() && mouseX <= getX() + width + 5 && mouseY % itemHeight >= 0 && mouseY % itemHeight <= height;
+		}
+		
+		public void onSettingChanged() {
+			buttonPanel.updateButtonLabels();
+			resetButton.setActive(buttonsActive && !setting.isDefault());
 		}
 	}
 	

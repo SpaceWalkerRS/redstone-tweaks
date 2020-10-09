@@ -14,7 +14,8 @@ import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.helper.MinecraftClientHelper;
-import redstonetweaks.settings.types.DirectionalSetting;
+import redstonetweaks.setting.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.types.DirectionalSetting;
 
 public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettingListWidget.Entry> {
 	
@@ -22,6 +23,7 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 	
 	public DirectionalSettingListWidget(RTMenuScreen screen, int x, int y, int width, int height, DirectionalSetting<?> setting) {
 		super(screen, x, y, width, height, 22);
+		
 		this.setting = setting;
 		
 		for (Direction dir : Direction.values()) {
@@ -32,6 +34,12 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 	@Override
 	protected void filterEntries(String query) {
 		
+	}
+	
+	public void onSettingChanged() {
+		for (Entry entry : children()) {
+			entry.onSettingChanged();
+		}
 	}
 	
 	public class Entry extends RTListWidget.Entry<DirectionalSettingListWidget.Entry> {
@@ -52,18 +60,18 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 			this.title = new TranslatableText(direction.getName());
 			this.children = new ArrayList<>();
 			
-			this.buttonPanel = new ButtonPanel(screen);
-			setting.populateButtonPanel(this.buttonPanel, this.direction);
-			this.buttonPanel.addAction(() -> onSettingChanged());
+			this.buttonPanel = new ButtonPanel();
+			this.populateButtonPanel();
 			this.buttonPanel.setX(getX() + TITLE_WIDTH);
 			this.buttonPanel.setActive(buttonsActive);
-			children.add(buttonPanel);
+			this.children.add(buttonPanel);
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
-				reset();
+				setting.reset();
+				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
 			});
-			this.resetButton.setX(getX() + TITLE_WIDTH + this.buttonPanel.getWidth() + 5);
-			resetButton.setActive(buttonsActive && !setting.isDefault(direction));
+			this.resetButton.setX(this.buttonPanel.getX() + this.buttonPanel.getWidth() + 5);
+			this.resetButton.setActive(buttonsActive && !setting.isDefault(direction));
 			this.children.add(resetButton);
 		}
 		
@@ -81,7 +89,8 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			client.textRenderer.drawWithShadow(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
-			buttonPanel.render(matrices, x, y, mouseX, mouseY, tickDelta);
+			buttonPanel.setY(y);
+			buttonPanel.render(matrices, mouseX, mouseY, tickDelta);
 			
 			resetButton.setY(y);
 			resetButton.render(matrices, mouseX, mouseY, tickDelta);
@@ -94,16 +103,21 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 		
 		@Override
 		public void unfocusTextFields() {
-			buttonPanel.unfocusTextFields();
+			
 		}
 		
-		private void reset() {
-			setting.reset(direction);
-			buttonPanel.updateButtonLabels();
-			onSettingChanged();
+		private void populateButtonPanel() {
+			if (setting instanceof DirectionalBooleanSetting) {
+				DirectionalBooleanSetting bSetting = (DirectionalBooleanSetting)setting;
+				buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(bSetting.valueToText(bSetting.get(direction))), (button) -> {
+					bSetting.set(direction, !bSetting.get(direction));
+					((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(bSetting);
+				}));
+			}
 		}
 		
 		private void onSettingChanged() {
+			buttonPanel.updateButtonLabels();
 			resetButton.setActive(buttonsActive && !setting.isDefault(direction));
 		}
 	}

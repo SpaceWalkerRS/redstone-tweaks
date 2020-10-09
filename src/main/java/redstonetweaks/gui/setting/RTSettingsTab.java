@@ -1,15 +1,19 @@
 package redstonetweaks.gui.setting;
 
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTMenuTab;
+import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.types.ISetting;
 
-public class RTSettingsTab extends RTMenuTab {
+public class RTSettingsTab extends RTMenuTab implements ISettingGUIElement {
 	
 	private static final int HEADER_HEIGHT = 25;
 	
@@ -32,11 +36,12 @@ public class RTSettingsTab extends RTMenuTab {
 	
 	@Override
 	protected void initContents() {
-		settingsList = new RTSettingsListWidget(screen, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - HEADER_HEIGHT);
+		settingsList = new RTSettingsListWidget(screen, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - HEADER_HEIGHT - 5);
 		addContent(settingsList);
 		
 		resetButton = new RTButtonWidget(screen.getWidth() - 50, screen.getHeaderHeight(), 40, 20, () -> new TranslatableText("RESET"), (button) -> {
-			settingsList.reset();
+			Settings.reset();
+			((MinecraftClientHelper)screen.client).getSettingsManager().onSettingsReset();
 		});
 		resetButton.setActive(((MinecraftClientHelper)screen.client).getSettingsManager().canChangeSettings());
 		addContent(resetButton);
@@ -65,5 +70,23 @@ public class RTSettingsTab extends RTMenuTab {
 	@Override
 	public void onTabClosed() {
 		settingsList.saveScrollAmount();
+	}
+	
+	@Override
+	public void onSettingChanged(ISetting setting) {
+		settingsList.onSettingChanged(setting);
+		
+		for (RTWindow window : windows) {
+			if (window instanceof ISettingGUIElement) {
+				((ISettingGUIElement) window).onSettingChanged(setting);
+			}
+		}
+	}
+	
+	@Override
+	public void unfocusTextFields(Element except) {
+		if (searchBox != except) {
+			searchBox.unFocus();
+		}
 	}
 }

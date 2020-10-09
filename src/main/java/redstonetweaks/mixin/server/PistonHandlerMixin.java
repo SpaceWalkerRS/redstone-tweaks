@@ -24,7 +24,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(PistonHandler.class)
 public abstract class PistonHandlerMixin {
@@ -37,10 +37,10 @@ public abstract class PistonHandlerMixin {
 	private boolean sticky;
 	
 	private boolean onTryMoveIsBlockSticky0IsStickyPiston;
-	private Direction onCanMoveAdjacentBlockFacing;
 	
 	@Shadow private static native boolean isBlockSticky(Block block);
 	@Shadow private static native boolean isAdjacentBlockStuck(Block block, Block block2);
+	@Shadow protected abstract boolean tryMove(BlockPos pos, Direction dir);
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(World world, BlockPos pos, Direction dir, boolean retracted, CallbackInfo ci) {
@@ -84,19 +84,22 @@ public abstract class PistonHandlerMixin {
 		return sticky ? Settings.StickyPiston.PUSH_LIMIT.get() : Settings.NormalPiston.PUSH_LIMIT.get();
 	}
 	
-	@Inject(method = "canMoveAdjacentBlock", at = @At(value = "HEAD"))
+	@Inject(method = "canMoveAdjacentBlock", cancellable = true, at = @At(value = "HEAD"))
 	private void onCanMoveAdjacentBlockInjectAtHead(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
 		BlockState state = world.getBlockState(pos);
 		if (Settings.StickyPiston.SUPER_STICKY.get() && state.isOf(Blocks.STICKY_PISTON)) {
-			onCanMoveAdjacentBlockFacing = state.get(Properties.FACING);
-		} else {
-			onCanMoveAdjacentBlockFacing = null;
+			Direction facing = state.get(Properties.FACING);
+			if (facing.getAxis() != motionDirection.getAxis()) {
+				BlockPos neighborPos = pos.offset(facing);
+				BlockState neighborState = world.getBlockState(neighborPos);
+				if (isAdjacentBlockStuck(neighborState.getBlock(), state.getBlock()) && !tryMove(neighborPos, facing)) {
+					cir.setReturnValue(false);
+					cir.cancel();
+				}
+			}
+			cir.setReturnValue(true);
+			cir.cancel();
 		}
-	}
-	
-	@Redirect(method = "canMoveAdjacentBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Direction;values()[Lnet/minecraft/util/math/Direction;"))
-	private Direction[] onCanMoveAdjacentBlockRedirectValues() {
-		return onCanMoveAdjacentBlockFacing == null ? Direction.values() : new Direction[] {onCanMoveAdjacentBlockFacing};
 	}
 	
 	// Check if the block is sticky in the given direction

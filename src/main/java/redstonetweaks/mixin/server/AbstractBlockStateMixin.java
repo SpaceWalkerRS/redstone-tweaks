@@ -16,7 +16,7 @@ import net.minecraft.world.WorldAccess;
 import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 
 @Mixin(AbstractBlockState.class)

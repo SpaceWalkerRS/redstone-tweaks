@@ -17,7 +17,7 @@ import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.packet.NeighborUpdateSchedulerPacket;
 import redstonetweaks.packet.NeighborUpdateVisualizerPacket;
 import redstonetweaks.packet.RedstoneTweaksPacket;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.world.common.NeighborUpdateScheduler;
 
 public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {

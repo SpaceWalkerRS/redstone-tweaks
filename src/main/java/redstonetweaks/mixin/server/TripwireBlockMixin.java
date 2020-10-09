@@ -7,8 +7,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.block.TripwireBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickScheduler;
-
-import redstonetweaks.settings.Settings;;
+import redstonetweaks.setting.Settings;;
 
 @Mixin(TripwireBlock.class)
 public class TripwireBlockMixin {

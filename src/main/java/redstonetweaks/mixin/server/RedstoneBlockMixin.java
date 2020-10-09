@@ -21,30 +21,26 @@ public abstract class RedstoneBlockMixin extends AbstractBlock {
 
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {
-		return redstonetweaks.settings.Settings.RedstoneBlock.POWER_WEAK.get();
+		return redstonetweaks.setting.Settings.RedstoneBlock.POWER_WEAK.get();
 	}
 	
 	@Override
 	public int getStrongRedstonePower(BlockState state, BlockView view, BlockPos pos, Direction facing) {
-		return redstonetweaks.settings.Settings.RedstoneBlock.POWER_STRONG.get();
+		return redstonetweaks.setting.Settings.RedstoneBlock.POWER_STRONG.get();
 	}
 	
 	@Override
 	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		if (redstonetweaks.settings.Settings.RedstoneBlock.POWER_STRONG.get() > 0) {
-			for (Direction direction : Direction.values()) {
-				world.updateNeighborsExcept(pos.offset(direction), (RedstoneBlock)(Object)this, direction.getOpposite());
-			}
+		if (redstonetweaks.setting.Settings.RedstoneBlock.POWER_STRONG.get() > 0) {
+			redstonetweaks.setting.Settings.RedstoneBlock.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
 		}
 	}
 	
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
 		if (!state.isOf(newState.getBlock())) {
-			if (redstonetweaks.settings.Settings.RedstoneBlock.POWER_STRONG.get() > 0) {
-				for (Direction direction : Direction.values()) {
-					world.updateNeighborsExcept(pos.offset(direction), (RedstoneBlock)(Object)this, direction.getOpposite());
-				}
+			if (redstonetweaks.setting.Settings.RedstoneBlock.POWER_STRONG.get() > 0) {
+				redstonetweaks.setting.Settings.RedstoneBlock.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
 			}
 		}
 	}

@@ -15,5 +15,7 @@ public interface IAbstractButtonWidget extends RTElement {
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float tickDelta);
 	
 	public void setActive(boolean active);
+
+	public void setVisible(boolean visible);
 	
 }

@@ -1,4 +1,4 @@
-package redstonetweaks.settings;
+package redstonetweaks.setting;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,10 +14,12 @@ import net.minecraft.util.WorldSavePath;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.packet.ResetSettingPacket;
+import redstonetweaks.packet.ResetSettingsPacket;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.SettingPacket;
 import redstonetweaks.packet.SettingsPacket;
-import redstonetweaks.settings.types.ISetting;
+import redstonetweaks.setting.types.ISetting;
 
 public class ServerSettingsManager {
 	
@@ -55,11 +57,15 @@ public class ServerSettingsManager {
 				}
 				
 				while ((line = br.readLine()) != null) {
-					String[] args = line.split(" = ", 2);
-					
-					ISetting setting = Settings.getSettingFromId(args[0]);
-					if (setting != null) {
-						setting.setFromText(args[1]);
+					try {
+						String[] args = line.split(" = ", 2);
+						
+						ISetting setting = Settings.getSettingFromId(args[0]);
+						if (setting != null) {
+							setting.setFromText(args[1]);
+						}
+					} catch (Exception e) {
+						
 					}
 				}
 			} catch (IOException e) {
@@ -110,13 +116,29 @@ public class ServerSettingsManager {
 		return new File(getCacheDir(), SETTINGS_PATH);
 	}
 	
+	// Setting changes occur on a client
+	// The server then notifies all clients of the change
 	public void onSettingPacketReceived(ISetting setting) {
 		if (server.isDedicated() || server.isRemote()) {
 			SettingPacket packet = new SettingPacket(setting);
 			((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
 		}
 	}
-
+	
+	public void onResetSettingPacketReceived(ISetting setting) {
+		if (server.isDedicated() || server.isRemote()) {
+			ResetSettingPacket packet = new ResetSettingPacket(setting);
+			((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+		}
+	}
+	
+	public void onResetSettingsPacketReceived() {
+		if (server.isDedicated() || server.isRemote()) {
+			ResetSettingsPacket packet = new ResetSettingsPacket();
+			((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+		}
+	}
+	
 	public void onPlayerJoined(UUID playerUUID) {
 		ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerUUID);
 		if (player != null) {

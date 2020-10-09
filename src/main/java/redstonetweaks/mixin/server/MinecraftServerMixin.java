@@ -15,7 +15,7 @@ import net.minecraft.server.world.ServerWorld;
 
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.packet.ServerPacketHandler;
-import redstonetweaks.settings.ServerSettingsManager;
+import redstonetweaks.setting.ServerSettingsManager;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 @Mixin(MinecraftServer.class)

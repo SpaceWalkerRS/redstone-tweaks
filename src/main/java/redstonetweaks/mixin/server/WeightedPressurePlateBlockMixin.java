@@ -21,6 +21,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 
 import redstonetweaks.helper.PressurePlateHelper;
+import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(WeightedPressurePlateBlock.class)
 public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePlateBlock implements PressurePlateHelper {
@@ -33,12 +34,12 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 	
 	@Redirect(method = "getRedstoneOutput", at = @At(value = "FIELD", target = "Lnet/minecraft/block/WeightedPressurePlateBlock;weight:I"))
 	private int getPlateWeight(WeightedPressurePlateBlock pressurePlate) {
-		return pressurePlate == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.WEIGHT.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.WEIGHT.get();
+		return pressurePlate == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? redstonetweaks.setting.Settings.LightWeightedPressurePlate.WEIGHT.get() : redstonetweaks.setting.Settings.HeavyWeightedPressurePlate.WEIGHT.get();
 	}
 	
 	@ModifyConstant(method = "getTickRate", constant = @Constant(intValue = 10))
 	private int getWeightedPressurePlateDelay(int oldDelay) {
-		return (Block)(Object)this == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.DELAY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.DELAY_FALLING_EDGE.get();
+		return (Block)(Object)this == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? redstonetweaks.setting.Settings.LightWeightedPressurePlate.DELAY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.HeavyWeightedPressurePlate.DELAY_FALLING_EDGE.get();
 	}
 	
 	// We need to override this function because when the blocks
@@ -47,6 +48,11 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context) {
 		return state.get(Properties.POWER) > 0 ? PRESSED_SHAPE : DEFAULT_SHAPE;
+	}
+	
+	@Override
+	public UpdateOrder updateOrder(BlockState state) {
+		return isLight(state) ? redstonetweaks.setting.Settings.LightWeightedPressurePlate.BLOCK_UPDATE_ORDER.get() : redstonetweaks.setting.Settings.HeavyWeightedPressurePlate.BLOCK_UPDATE_ORDER.get();
 	}
 	
 	@Override
@@ -61,22 +67,22 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 	
 	@Override
 	public int delayRisingEdge(BlockState state) {
-		return isLight(state) ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.DELAY_RISING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.DELAY_RISING_EDGE.get();
+		return isLight(state) ? redstonetweaks.setting.Settings.LightWeightedPressurePlate.DELAY_RISING_EDGE.get() : redstonetweaks.setting.Settings.HeavyWeightedPressurePlate.DELAY_RISING_EDGE.get();
 	}
 	
 	@Override
 	public int delayFallingEdge(BlockState state) {
-		return isLight(state) ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.DELAY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.DELAY_FALLING_EDGE.get();
+		return isLight(state) ? redstonetweaks.setting.Settings.LightWeightedPressurePlate.DELAY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.HeavyWeightedPressurePlate.DELAY_FALLING_EDGE.get();
 	}
 	
 	@Override
 	public TickPriority tickPriorityRisingEdge(BlockState state) {
-		return isLight(state) ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.TICK_PRIORITY_RISING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.TICK_PRIORITY_RISING_EDGE.get();
+		return isLight(state) ? redstonetweaks.setting.Settings.LightWeightedPressurePlate.TICK_PRIORITY_RISING_EDGE.get() : redstonetweaks.setting.Settings.HeavyWeightedPressurePlate.TICK_PRIORITY_RISING_EDGE.get();
 	}
 	
 	@Override
 	public TickPriority tickPriorityFallingEdge(BlockState state) {
-		return isLight(state) ? redstonetweaks.settings.Settings.LightWeightedPressurePlate.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.HeavyWeightedPressurePlate.TICK_PRIORITY_FALLING_EDGE.get();
+		return isLight(state) ? redstonetweaks.setting.Settings.LightWeightedPressurePlate.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.HeavyWeightedPressurePlate.TICK_PRIORITY_FALLING_EDGE.get();
 	}
 	
 	private boolean isLight(BlockState state) {

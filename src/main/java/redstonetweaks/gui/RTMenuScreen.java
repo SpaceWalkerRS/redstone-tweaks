@@ -14,7 +14,7 @@ import redstonetweaks.gui.hotkeys.RTHotkeysTab;
 import redstonetweaks.gui.setting.RTSettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.settings.types.ISetting;
+import redstonetweaks.setting.types.ISetting;
 
 public class RTMenuScreen extends Screen {
 	
@@ -178,9 +178,9 @@ public class RTMenuScreen extends Screen {
 		selectedTab.closeWindow(window);
 	}
 	
-	public void settingChangedOnServer(ISetting setting) {
+	public void onSettingChanged(ISetting setting) {
 		if (selectedTab instanceof RTSettingsTab) {
-			
+			((RTSettingsTab)selectedTab).onSettingChanged(setting);
 		}
 	}
 }

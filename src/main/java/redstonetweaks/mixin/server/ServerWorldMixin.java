@@ -20,6 +20,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Npc;
 import net.minecraft.entity.boss.dragon.EnderDragonFight;
@@ -51,7 +52,7 @@ import net.minecraft.world.timer.Timer;
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;
 import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
 import redstonetweaks.world.server.ServerWorldTickHandler;
@@ -108,6 +109,17 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	private <T> void onTickTimeRedirectProcessEvents(Timer<T> timer, T server, long time) {
 		if (!Settings.BugFixes.MC172213.get()) {
 			timer.processEvents(server, time);
+		}
+	}
+	
+	@Inject(method = "addSyncedBlockEvent", cancellable = true, at = @At(value = "HEAD"))
+	private void onAddSyncedBlockEventInjectAtHead(BlockPos pos, Block block, int type, int data, CallbackInfo ci) {
+		if (Settings.Global.INSTANT_BLOCK_EVENTS.get()) {
+			if (block.onSyncedBlockEvent(getBlockState(pos), (World)(Object)this, pos, type, data)) {
+				server.getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, getRegistryKey(), new BlockEventS2CPacket(pos, block, type, data));
+			}
+			
+			ci.cancel();
 		}
 	}
 	

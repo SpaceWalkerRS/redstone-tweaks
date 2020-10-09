@@ -9,8 +9,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.block.DetectorRailBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickScheduler;
-
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(DetectorRailBlock.class)
 public class DetectorRailBlockMixin {

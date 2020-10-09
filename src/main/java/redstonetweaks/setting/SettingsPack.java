@@ -1,8 +1,8 @@
-package redstonetweaks.settings;
+package redstonetweaks.setting;
 
 import java.util.List;
 
-import redstonetweaks.settings.types.ISetting;
+import redstonetweaks.setting.types.ISetting;
 
 public class SettingsPack {
 	

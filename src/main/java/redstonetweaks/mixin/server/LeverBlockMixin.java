@@ -8,11 +8,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeverBlock;
+import net.minecraft.block.WallMountedBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -26,7 +27,7 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
 @Mixin(LeverBlock.class)
-public abstract class LeverBlockMixin extends Block {
+public abstract class LeverBlockMixin extends WallMountedBlock {
 	
 	public LeverBlockMixin(net.minecraft.block.AbstractBlock.Settings settings) {
 		super(settings);
@@ -59,12 +60,19 @@ public abstract class LeverBlockMixin extends Block {
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {
-		return redstonetweaks.settings.Settings.Lever.POWER_WEAK.get();
+		return redstonetweaks.setting.Settings.Lever.POWER_WEAK.get();
 	}
 	
 	@ModifyConstant(method = "getStrongRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetStrongRedstonePower(int oldValue) {
-		return redstonetweaks.settings.Settings.Lever.POWER_STRONG.get();
+		return redstonetweaks.setting.Settings.Lever.POWER_STRONG.get();
+	}
+	
+	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
+	private void onUpdateNeighborsInjectAtHead(BlockState state, World world, BlockPos pos, CallbackInfo ci) {
+		redstonetweaks.setting.Settings.Lever.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock(), getDirection(state).getOpposite());
+		
+		ci.cancel();
 	}
 	
 	@Override
@@ -75,10 +83,10 @@ public abstract class LeverBlockMixin extends Block {
 	}
 	
 	private int getDelay(boolean powered) {
-		return powered ? redstonetweaks.settings.Settings.Lever.DELAY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.Lever.DELAY_RISING_EDGE.get();
+		return powered ? redstonetweaks.setting.Settings.Lever.DELAY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.Lever.DELAY_RISING_EDGE.get();
 	}
 	
 	private TickPriority getTickPriority(boolean powered) {
-		return powered ? redstonetweaks.settings.Settings.Lever.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.settings.Settings.Lever.TICK_PRIORITY_RISING_EDGE.get();
+		return powered ? redstonetweaks.setting.Settings.Lever.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.Lever.TICK_PRIORITY_RISING_EDGE.get();
 	}
 }

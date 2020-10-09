@@ -38,13 +38,14 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
+
 import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.StairsHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.packet.TickBlockEntityPacket;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 
 @Mixin(World.class)
@@ -78,6 +79,13 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 		if (world.isClient() || !(iteratingTickingBlockEntities || ((ServerWorldHelper)world).isProcessingBlockEvents()) || !world.getBlockState(pos).isOf(Blocks.PISTON_HEAD)) {
 			world.syncWorldEvent(eventId, pos, data);
 		}
+	}
+	
+	@Inject(method = "updateNeighborsAlways", cancellable = true, at = @At(value = "HEAD"))
+	private void onUpdateNeighborsAlwaysInjectAtHead(BlockPos pos, Block block, CallbackInfo ci) {
+		Settings.Global.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates((World)(Object)this, pos, block);
+		
+		ci.cancel();
 	}
 	
 	@Redirect(method = "updateNeighbor", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;neighborUpdate(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;Z)V"))

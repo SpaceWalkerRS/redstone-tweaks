@@ -27,7 +27,8 @@ import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.RedstoneDiodeHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.world.common.UpdateOrder;
 import redstonetweaks.world.server.UnfinishedEvent.Source;
 
 @Mixin(AbstractRedstoneGateBlock.class)
@@ -102,6 +103,14 @@ public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {
 	@ModifyConstant(method = "getInputLevel", constant = @Constant(intValue = 15))
 	private int onGetInputLevelModifyRedstoneBlockPower(int oldPower) {
 		return Settings.Comparator.REDSTONE_BLOCKS_VALID_SIDE_INPUT.get() ? Settings.RedstoneBlock.POWER_WEAK.get() : 0;
+	}
+	
+	@Inject(method = "updateTarget", cancellable = true, at = @At(value = "HEAD"))
+	private void onUpdateTargetInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
+		UpdateOrder updateOrder = state.isOf(Blocks.COMPARATOR) ? Settings.Comparator.BLOCK_UPDATE_ORDER.get() : Settings.Repeater.BLOCK_UPDATE_ORDER.get();
+		updateOrder.dispatchBlockUpdates(world, pos, state.getBlock(), state.get(Properties.HORIZONTAL_FACING).getOpposite());
+		
+		ci.cancel();
 	}
 	
 	@ModifyConstant(method = "getOutputLevel", constant = @Constant(intValue = 15))

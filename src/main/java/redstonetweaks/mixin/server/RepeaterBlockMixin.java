@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.helper.RedstoneDiodeHelper;
 import redstonetweaks.helper.ServerTickSchedulerHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(RepeaterBlock.class)
 public abstract class RepeaterBlockMixin implements RedstoneDiodeHelper {

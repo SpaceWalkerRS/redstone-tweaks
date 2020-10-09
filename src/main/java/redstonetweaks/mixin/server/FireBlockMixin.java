@@ -13,8 +13,7 @@ import net.minecraft.block.FireBlock;
 import net.minecraft.server.world.ServerTickScheduler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(FireBlock.class)
 public class FireBlockMixin {

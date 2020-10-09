@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.Block;
@@ -26,13 +27,28 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(RedstoneTorchBlock.class)
 public abstract class RedstoneTorchBlockMixin {
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract boolean shouldUnpower(World world, BlockPos pos, BlockState state);
+	
+	@Inject(method = "onBlockAdded", cancellable = true, at = @At(value = "HEAD"))
+	private void onOnBlockAddedInjectAtHead(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo ci) {
+		Settings.RedstoneTorch.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, (RedstoneTorchBlock)(Object)this);
+		
+		ci.cancel();
+	}
+	
+	@Inject(method = "onStateReplaced", cancellable = true, at = @At(value = "HEAD"))
+	private void onOnStateReplacedInjectAtHead(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved, CallbackInfo ci) {
+		if (!moved) {
+			Settings.RedstoneTorch.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, (RedstoneTorchBlock)(Object)this);
+		}
+		ci.cancel();
+	}
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {

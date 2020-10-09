@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.minecraft.client.gui.AbstractParentElement;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public abstract class RTMenuTab extends AbstractParentElement {
+public abstract class RTMenuTab extends RTAbstractParentElement {
 	
 	public final RTMenuScreen screen;
 	private final Text title;
 	private final List<RTElement> contents;
-	private final List<RTWindow> windows;
+	protected final List<RTWindow> windows;
 	private final List<RTWindow> closedWindows;
 	
 	public RTMenuTab(RTMenuScreen screen, Text title) {
@@ -29,21 +28,6 @@ public abstract class RTMenuTab extends AbstractParentElement {
 	@Override
 	public List<? extends Element> children() {
 		return windows.isEmpty() ? contents : windows;
-	}
-	
-	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		for (Element el : children()) {
-			if (el.mouseClicked(mouseX, mouseY, button)) {
-				setFocused(el);
-			}
-		}
-		
-		if (button == 0) {
-			setDragging(true);
-		}
-		
-		return true;
 	}
 	
 	@Override

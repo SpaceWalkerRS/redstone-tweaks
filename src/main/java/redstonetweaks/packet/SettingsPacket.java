@@ -3,14 +3,14 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
-import redstonetweaks.settings.SettingsPack;
-import redstonetweaks.settings.Settings;
-import redstonetweaks.settings.types.ISetting;
+import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.SettingsPack;
+import redstonetweaks.setting.types.ISetting;
 
 public class SettingsPacket extends RedstoneTweaksPacket {
 	
-	public int size;
+	public int count;
 	public ISetting[] settings;
 	public String[] values;
 	
@@ -19,7 +19,7 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 	}
 	
 	public SettingsPacket(int count) {
-		size = count;
+		this.count = count;
 		settings = new ISetting[count];
 		values = new String[count];
 		
@@ -37,9 +37,9 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		buffer.writeInt(size);
+		buffer.writeInt(count);
 		
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < count; i++) {
 			buffer.writeString(settings[i].getId());
 			buffer.writeString(values[i]);
 		}
@@ -47,11 +47,11 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		size = buffer.readInt();
-		settings = new ISetting[size];
-		values = new String[size];
+		count = buffer.readInt();
+		settings = new ISetting[count];
+		values = new String[count];
 		
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < count; i++) {
 			settings[i] = Settings.getSettingFromId(buffer.readString());
 			values[i] = buffer.readString();
 		}
@@ -64,8 +64,9 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < count; i++) {
 			settings[i].setFromText(values[i]);
 		}
+		((MinecraftClientHelper)client).getSettingsManager().onSettingsPacketReceived();
 	}
 }

@@ -1,7 +1,4 @@
-package redstonetweaks.settings.types;
-
-import redstonetweaks.gui.ButtonPanel;
-import redstonetweaks.gui.widget.RTTextFieldWidget;
+package redstonetweaks.setting.types;
 
 public class IntegerSetting extends Setting<Integer> {
 	
@@ -28,20 +25,9 @@ public class IntegerSetting extends Setting<Integer> {
 	
 	@Override
 	public void set(Integer newValue) {
-		setPrev();
 		if (newValue >= getMin() && newValue <= getMax()) {
 			super.set(newValue);
 		};
-	}
-	
-	@Override
-	public void populateButtonPanel(ButtonPanel panel) {
-		panel.addButton(new RTTextFieldWidget(panel.screen.getTextRenderer(), 0, 0, 100, 20, (textField) -> {
-			textField.setText(getAsText());
-		}, (text) -> {
-			setFromText(text);
-			panel.doActions();
-		}));
 	}
 	
 	public int getMin() {

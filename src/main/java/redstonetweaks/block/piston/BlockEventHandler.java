@@ -27,7 +27,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonBlockEntityHelper;
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 public class BlockEventHandler {
 	
@@ -194,7 +194,7 @@ public class BlockEventHandler {
 		
 		boolean stillRetracting = false;
 		if (!(droppedBlock && Settings.StickyPiston.DO_BLOCK_DROPPING.get())) {
-			if (blockState.isAir() || !PistonBlock.isMovable(blockState, world, blockPos, moveDirection, false, facing) || blockState.getPistonBehavior() != PistonBehavior.NORMAL && !blockState.isOf(Blocks.PISTON) && !blockState.isOf(Blocks.STICKY_PISTON)) {
+			if (blockState.isAir() || !PistonBlock.isMovable(blockState, world, blockPos, moveDirection, false, facing) || (Settings.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER) ? PistonBehavior.NORMAL : state.getPistonBehavior()) != PistonBehavior.NORMAL && !blockState.isOf(Blocks.PISTON) && !blockState.isOf(Blocks.STICKY_PISTON)) {
 				world.removeBlock(headPos, false);
 			} else {
 				retractionProgress++;

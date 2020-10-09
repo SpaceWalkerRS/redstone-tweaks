@@ -8,7 +8,7 @@ import net.minecraft.fluid.WaterFluid;
 import net.minecraft.world.TickPriority;
 
 import redstonetweaks.helper.FluidHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(WaterFluid.class)
 public class WaterFluidMixin implements FluidHelper {

@@ -90,6 +90,11 @@ public class RTSliderWidget extends SliderWidget implements IAbstractButtonWidge
 		this.active = active;
 	}
 	
+	@Override
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+	
 	public double getValue() {
 		return value;
 	}

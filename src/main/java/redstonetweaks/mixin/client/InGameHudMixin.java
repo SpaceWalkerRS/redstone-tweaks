@@ -13,7 +13,7 @@ import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
 
 import redstonetweaks.helper.MinecraftClientHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin {

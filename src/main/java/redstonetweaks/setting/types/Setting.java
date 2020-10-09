@@ -1,4 +1,4 @@
-package redstonetweaks.settings.types;
+package redstonetweaks.setting.types;
 
 public abstract class Setting<T> implements ISetting {
 	
@@ -7,7 +7,6 @@ public abstract class Setting<T> implements ISetting {
 	private final String description;
 	
 	private final T defaultValue;
-	protected T prevValue;
 	private T value;
 	
 	public Setting(String prefix, String name, String description, T defaultValue) {
@@ -15,7 +14,8 @@ public abstract class Setting<T> implements ISetting {
 		this.name = name;
 		this.description = description;
 		this.defaultValue = defaultValue;
-		this.prevValue = defaultValue;
+		
+		set(getDefault());
 	}
 	
 	@Override
@@ -44,11 +44,6 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	@Override
-	public boolean hasChanged() {
-		return !get().equals(prevValue);
-	}
-	
-	@Override
 	public String getAsText() {
 		return get().toString();
 	}
@@ -63,9 +58,5 @@ public abstract class Setting<T> implements ISetting {
 	
 	public T getDefault() {
 		return defaultValue;
-	}
-	
-	protected void setPrev() {
-		prevValue = get();
 	}
 }

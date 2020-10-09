@@ -1,5 +1,6 @@
 package redstonetweaks.helper;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -9,8 +10,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
 import redstonetweaks.block.piston.BlockEventHandler;
-import redstonetweaks.settings.Settings;
-import redstonetweaks.settings.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.types.DirectionalBooleanSetting;
+import redstonetweaks.util.RelativePos;
 
 public interface WorldHelper {
 	
@@ -55,5 +57,9 @@ public interface WorldHelper {
 		}
 		
 		return false;
+	}
+	
+	public static void updateNeighborsExcept(World world, BlockPos notifierPos, Block sourceBlock, RelativePos except) {
+		Settings.Global.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdatesExcept(world, notifierPos, sourceBlock, except);
 	}
 }

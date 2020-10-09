@@ -1,5 +1,6 @@
 package redstonetweaks.gui.hotkeys;
 
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -10,6 +11,11 @@ public class RTHotkeysTab extends RTMenuTab {
 	
 	public RTHotkeysTab(RTMenuScreen screen) {
 		super(screen, new TranslatableText("Hotkeys"));
+	}
+	
+	@Override
+	public void unfocusTextFields(Element except) {
+		
 	}
 	
 	@Override

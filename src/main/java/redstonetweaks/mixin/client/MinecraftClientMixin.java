@@ -13,7 +13,7 @@ import net.minecraft.client.world.ClientWorld;
 
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.packet.ClientPacketHandler;
-import redstonetweaks.settings.ClientSettingsManager;
+import redstonetweaks.setting.ClientSettingsManager;
 import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.client.NeighborUpdateVisualizer;
 import redstonetweaks.world.client.TickInfoLabelRenderer;

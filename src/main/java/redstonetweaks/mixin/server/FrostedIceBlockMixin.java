@@ -15,7 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(FrostedIceBlock.class)
 public abstract class FrostedIceBlockMixin {

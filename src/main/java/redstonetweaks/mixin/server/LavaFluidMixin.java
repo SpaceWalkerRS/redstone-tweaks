@@ -8,7 +8,7 @@ import net.minecraft.fluid.LavaFluid;
 import net.minecraft.world.TickPriority;
 
 import redstonetweaks.helper.FluidHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(LavaFluid.class)
 public class LavaFluidMixin implements FluidHelper {

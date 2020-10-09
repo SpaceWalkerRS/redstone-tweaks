@@ -29,7 +29,7 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 
 import redstonetweaks.helper.ServerTickSchedulerHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 
 @Mixin(ServerTickScheduler.class)
 public abstract class ServerTickSchedulerMixin<T> implements ServerTickSchedulerHelper, TickScheduler<T> {

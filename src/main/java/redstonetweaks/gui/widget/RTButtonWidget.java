@@ -28,6 +28,11 @@ public class RTButtonWidget extends ButtonWidget implements IAbstractButtonWidge
 	}
 	
 	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		return super.mouseClicked(mouseX, mouseY, button);
+	}
+	
+	@Override
 	public void onPress() {
 		onPress.onPress(this);
 	}
@@ -84,16 +89,17 @@ public class RTButtonWidget extends ButtonWidget implements IAbstractButtonWidge
 
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
-		if (!visible) {
-			System.out.println("not visible D:");
-		}
-		
 		super.render(matrices, mouseX, mouseY, tickDelta);
 	}
 	
 	@Override
 	public void setActive(boolean active) {
 		this.active = alwaysActive || active;
+	}
+	
+	@Override
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 	
 	public RTButtonWidget alwaysActive() {

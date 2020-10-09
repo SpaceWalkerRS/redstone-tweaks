@@ -6,8 +6,8 @@ import net.minecraft.server.MinecraftServer;
 
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.helper.MinecraftServerHelper;
-import redstonetweaks.settings.Settings;
-import redstonetweaks.settings.types.ISetting;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.types.ISetting;
 
 public class SettingPacket extends RedstoneTweaksPacket {
 	
@@ -31,8 +31,8 @@ public class SettingPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		setting = Settings.getSettingFromId(buffer.readString());
-		value = buffer.readString();
+		setting = Settings.getSettingFromId(buffer.readString(MAX_STRING_LENGTH));
+		value = buffer.readString(MAX_STRING_LENGTH);
 	}
 	
 	@Override

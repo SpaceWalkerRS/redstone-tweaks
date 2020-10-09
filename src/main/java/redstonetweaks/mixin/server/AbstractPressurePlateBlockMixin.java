@@ -4,8 +4,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.AbstractPressurePlateBlock;
 import net.minecraft.block.BlockState;
@@ -13,7 +15,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
-
 import redstonetweaks.helper.PressurePlateHelper;
 
 @Mixin(AbstractPressurePlateBlock.class)
@@ -47,6 +48,14 @@ public abstract class AbstractPressurePlateBlockMixin {
 		TickPriority priority = ((PressurePlateHelper)this).tickPriorityFallingEdge(state);
 		
 		tickScheduler.schedule(pos, block, delay, priority);
+	}
+	
+	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
+	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, CallbackInfo ci) {
+		BlockState state = world.getBlockState(pos);
+		((PressurePlateHelper)this).updateOrder(state).dispatchBlockUpdates(world, pos, state.getBlock());
+		
+		ci.cancel();
 	}
 	
 	@Redirect(method = "getWeakRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;getRedstoneOutput(Lnet/minecraft/block/BlockState;)I"))

@@ -2,8 +2,11 @@ package redstonetweaks.helper;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.world.TickPriority;
+import redstonetweaks.world.common.UpdateOrder;
 
 public interface PressurePlateHelper {
+	
+	public UpdateOrder updateOrder(BlockState state);
 	
 	public int delayRisingEdge(BlockState state);
 	

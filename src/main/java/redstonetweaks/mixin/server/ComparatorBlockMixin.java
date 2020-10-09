@@ -29,8 +29,8 @@ import net.minecraft.world.WorldView;
 
 import redstonetweaks.helper.RedstoneDiodeHelper;
 import redstonetweaks.helper.ServerTickSchedulerHelper;
-import redstonetweaks.settings.Settings.Comparator;
-import redstonetweaks.settings.Settings.BugFixes;
+import redstonetweaks.setting.Settings.BugFixes;
+import redstonetweaks.setting.Settings.Comparator;
 
 @Mixin(ComparatorBlock.class)
 public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock implements RedstoneDiodeHelper {
@@ -73,7 +73,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	
 	@ModifyConstant(method = "getPower", constant = @Constant(intValue = 15))
 	private int onGetPowerModify15(int oldValue) {
-		return redstonetweaks.settings.Settings.Global.POWER_MAX.get();
+		return redstonetweaks.setting.Settings.Global.POWER_MAX.get();
 	}
 	
 	@Inject(method = "updatePowered", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))

@@ -12,18 +12,32 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 	private final UpdateText updateText;
 	
 	private boolean allowHover = true;
+	private boolean deaf = false;
 	
 	public RTTextFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, UpdateText updateText, Consumer<String> changedListener) {
 		super(textRenderer, x + 1, y + 1, width - 2, height - 2, new TranslatableText(""));
 		this.updateText = updateText;
 		
-		this.updateMessage();
-		this.setChangedListener(changedListener);
+		this.updateText();
+		this.setChangedListener((text) -> {
+			if (!deaf) {
+				changedListener.accept(text);
+			}
+		});
 	}
 	
 	@Override
 	public boolean isHovered() {
 		return allowHover && super.isHovered();
+	}
+	
+	@Override
+	public void setSelected(boolean selected) {
+		if (isFocused() && !selected) {
+			updateText();
+		}
+		
+		super.setSelected(selected);
 	}
 	
 	@Override
@@ -68,7 +82,11 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 	
 	@Override
 	public void updateMessage() {
-		updateText.update(this);
+		if (!isFocused()) {
+			deaf = true;
+			updateText();
+			deaf = false;
+		}
 	}
 	
 	@Override
@@ -78,11 +96,24 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 	
 	@Override
 	public void setActive(boolean active) {
-		this.active = active;
+		setEditable(active);
+	}
+	
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
 	}
 	
 	public void unFocus() {
-		setFocused(false);
+		if (isFocused()) {
+			setFocused(false);
+			deaf = true;
+			updateText();
+			deaf = false;
+		}
+	}
+	
+	private void updateText() {
 		updateText.update(this);
 	}
 	

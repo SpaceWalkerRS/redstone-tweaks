@@ -29,7 +29,7 @@ import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.settings.Settings;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.world.server.UnfinishedEvent.Source;
 
 @Mixin(ObserverBlock.class)
@@ -40,7 +40,7 @@ public abstract class ObserverBlockMixin implements BlockHelper {
 	@Shadow protected abstract void updateNeighbors(World world, BlockPos pos, BlockState state);
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T block, int oldDelay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
+	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos blockPos, T block, int delay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		TickSchedulerHelper.schedule(world, world.getBlockState(pos), tickScheduler, pos, block, Settings.Observer.DELAY_FALLING_EDGE.get(), Settings.Observer.TICK_PRIORITY_FALLING_EDGE.get());
 	}
 	
@@ -51,20 +51,30 @@ public abstract class ObserverBlockMixin implements BlockHelper {
 		}
 	}
 	
-	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/ObserverBlock;scheduleTick(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)V"))
-	private void onGetStateForNeighborUpdateRedirectScheduleTick(ObserverBlock observer, WorldAccess world1, BlockPos pos1, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		if (!(Settings.Observer.DISABLE.get() || world.isClient())) {
+	@Inject(method = "getStateForNeighborUpdate", cancellable = true , at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/ObserverBlock;scheduleTick(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)V"))
+	private void onGetStateForNeighborUpdateInjectBeforeScheduleTick(BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom, CallbackInfoReturnable<BlockState> cir) {
+		if (!Settings.Observer.DISABLE.get() && !world.isClient()) {
 			if (Settings.Observer.DELAY_RISING_EDGE.get() == 0) {
 				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
+				state = world.getBlockState(pos);
 			} else {
 				scheduleTick(world, pos);
 			}
 		}
+		cir.setReturnValue(state);
+		cir.cancel();
 	}
 	
 	@Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onScheduleTickRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
 		tickScheduler.schedule(pos, object, Settings.Observer.DELAY_RISING_EDGE.get(), Settings.Observer.TICK_PRIORITY_RISING_EDGE.get());
+	}
+	
+	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
+	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
+		Settings.Observer.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock(), state.get(Properties.FACING).getOpposite());
+		
+		ci.cancel();
 	}
 	
 	@Inject(method = "getStrongRedstonePower", at = @At(value = "HEAD"), cancellable = true)

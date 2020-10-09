@@ -21,6 +21,7 @@ import net.minecraft.block.PistonBlock;
 import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
@@ -105,7 +106,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@ModifyArg(method = "onSyncedBlockEvent", index = 2, at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	public int onOnSyncedBlockEventOnSetBlockState0ModifyFlags(int oldFlags) {
-		return redstonetweaks.settings.Settings.Global.DOUBLE_RETRACTION.get() ? oldFlags & ~2 | 16 : oldFlags;
+		return redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get() ? oldFlags & ~2 | 16 : oldFlags;
 	}
 	
 	// If the piston is powered but unable to extend and
@@ -120,7 +121,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Inject(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Lnet/minecraft/block/PistonBlock;move(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;Z)Z"))
 	private void onOnSyncedBlockEventInjectBeforeMove0(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
-		if (redstonetweaks.settings.Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
+		if (redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
 			PistonHelper.getDoubleRetractionState(world, pos.offset(state.get(Properties.FACING)));
 		}
 	}
@@ -137,9 +138,17 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 		return speed > 0 ? oldPitch * (2.0f / speed) : Float.POSITIVE_INFINITY;
 	}
 	
+	@Inject(method = "onSyncedBlockEvent", cancellable = true, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/block/entity/PistonBlockEntity;finish()V"))
+	private void onOnSyncedBlockEventInjectAfterFinish0(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
+		if (!(world.getBlockState(pos).getBlock() instanceof PistonBlock)) {
+			cir.setReturnValue(false);
+			cir.cancel();
+		}
+	}
+	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
 	private BlockState onOnSyncedBlockEventGetBlockState(World world, BlockPos pos) {
-		if (redstonetweaks.settings.Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
+		if (redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
 			return PistonHelper.getDoubleRetractionState(world, pos);
 		}
 		return world.getBlockState(pos);
@@ -148,7 +157,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/PistonBlockEntity;isExtending()Z"))
 	private boolean onOnSyncedBlockEventRedirectIsExtending(PistonBlockEntity pistonBlockEntity) {
 		if (pistonBlockEntity.isExtending()) {
-			if (redstonetweaks.settings.Settings.StickyPiston.DO_BLOCK_DROPPING.get() && !redstonetweaks.settings.Settings.StickyPiston.FAST_BLOCK_DROPPING.get()) {
+			if (redstonetweaks.setting.Settings.StickyPiston.DO_BLOCK_DROPPING.get() && !redstonetweaks.setting.Settings.StickyPiston.FAST_BLOCK_DROPPING.get()) {
 				return false;
 			}
 			pistonBlockEntity.finish();
@@ -156,9 +165,14 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 		return false;
 	}
 	
+	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
+	private PistonBehavior onOnSyncedBlockEventRedirectGetPistonBehavior(BlockState state) {
+		return redstonetweaks.setting.Settings.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER) ? PistonBehavior.NORMAL : state.getPistonBehavior();
+	}
+	
 	@Inject(method = "onSyncedBlockEvent", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"))
 	private void onOnSyncedBlockEventInjectAfterRemoveBlock(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir, Direction facing, BlockEntity blockEntity, BlockState blockState, BlockPos blockPos, BlockState blockState2, boolean droppedBlock) {
-		if (!redstonetweaks.settings.Settings.StickyPiston.DO_BLOCK_DROPPING.get()) {
+		if (!redstonetweaks.setting.Settings.StickyPiston.DO_BLOCK_DROPPING.get()) {
 			move(world, pos, facing, false);
 		}
 	}
@@ -170,6 +184,11 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 		return pistonBlockEntity;
 	}
 	
+	@Redirect(method = "isMovable", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isAir()Z"))
+	private static boolean onIsMovableRedirectIsAir(BlockState state) {
+		return state.isAir() || (redstonetweaks.setting.Settings.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER));
+	}
+	
 	@Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonExtensionBlock;createBlockEntityPiston(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;ZZ)Lnet/minecraft/block/entity/BlockEntity;"))
 	private BlockEntity onMoveRedirectCreateBlockEntityPiston(BlockState pushedBlock, Direction dir, boolean extending, boolean source) {
 		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlock, dir, extending, source);
@@ -179,7 +198,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 2, target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
 	private Block onMoveRedirectGetBlock(BlockState state) {
-		if (redstonetweaks.settings.Settings.BugFixes.MC120986.get()) {
+		if (redstonetweaks.setting.Settings.BugFixes.MC120986.get()) {
 			movedBlockState = state;
 		}
 		return state.getBlock();
@@ -189,7 +208,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	private void onMoveRedirectUpdateNeighborsAlways1(World world, BlockPos pos, Block block) {
 		world.updateNeighborsAlways(pos, block);
 		
-		if (redstonetweaks.settings.Settings.BugFixes.MC120986.get()) {
+		if (redstonetweaks.setting.Settings.BugFixes.MC120986.get()) {
 			if (movedBlockState.hasComparatorOutput()) {
 				world.updateComparators(pos, block);
 			}
@@ -266,13 +285,13 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, PistonHelper.tickPriorityRisingEdge(sticky));
 				}
 			}
-			if (redstonetweaks.settings.Settings.RedstoneTorch.SOFT_INVERSION.get() && !onScheduledTick) {
+			if (redstonetweaks.setting.Settings.RedstoneTorch.SOFT_INVERSION.get() && !onScheduledTick) {
 				updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
 			}
 		} else if (!shouldExtend) {
 			if (isExtended && !(PistonHelper.ignoreUpdatesWhileExtending(sticky) && isExtending(world, pos, state, facing))) {
 				if (activationDelay == 0 || onScheduledTick) {
-					if (redstonetweaks.settings.Settings.Global.DOUBLE_RETRACTION.get()) {
+					if (redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get()) {
 						world.setBlockState(pos, state.with(Properties.EXTENDED, false), 16);
 					}
 					world.addSyncedBlockEvent(pos, state.getBlock(), 1, facing.getId());
@@ -280,7 +299,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 					world.getBlockTickScheduler().schedule(pos, state.getBlock(), activationDelay, PistonHelper.tickPriorityFallingEdge(sticky));
 				}
 			}
-			if (redstonetweaks.settings.Settings.RedstoneTorch.SOFT_INVERSION.get()) {
+			if (redstonetweaks.setting.Settings.RedstoneTorch.SOFT_INVERSION.get()) {
 				updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
 			}
 		}
@@ -293,7 +312,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	// a moving block that is extending and facing the same direction
 	// as the piston, then we can conclude that the piston is extending.
 	private boolean isExtending(World world, BlockPos pos, BlockState state, Direction facing) {
-		if (!(state.get(Properties.EXTENDED) || redstonetweaks.settings.Settings.Global.DOUBLE_RETRACTION.get())) {
+		if (!(state.get(Properties.EXTENDED) || redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get())) {
 			return false;
 		}
 		BlockPos frontPos = pos.offset(facing);

@@ -10,9 +10,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
-
-import redstonetweaks.settings.Settings;
-import redstonetweaks.settings.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.types.DirectionalBooleanSetting;
 
 public class PistonHelper {
 	
@@ -67,6 +66,14 @@ public class PistonHelper {
 			return true;
 		}
 		return WorldHelper.isQCPowered(world, pos, state, onBlockEvent, getQC(state), randQC(state));
+	}
+	
+	public static boolean doBlockDropping() {
+		return Settings.StickyPiston.DO_BLOCK_DROPPING.get();
+	}
+	
+	public static boolean fastBlockDropping() {
+		return doBlockDropping() && Settings.StickyPiston.FAST_BLOCK_DROPPING.get();
 	}
 	
 	public static DirectionalBooleanSetting getQC(BlockState state) {

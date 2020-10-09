@@ -26,7 +26,7 @@ public class WorldSyncPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		worldName = buffer.readString();
+		worldName = buffer.readString(MAX_STRING_LENGTH);
 	}
 
 	@Override
@@ -39,5 +39,4 @@ public class WorldSyncPacket extends RedstoneTweaksPacket {
 		((MinecraftClientHelper)client).getWorldTickHandler().onWorldSyncPacketReceived(this);
 		((MinecraftClientHelper)client).getTickInfoLabelRenderer().onWorldSyncPacketReceived(this);
 	}
-
 }
