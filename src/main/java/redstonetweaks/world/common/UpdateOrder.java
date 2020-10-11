@@ -143,8 +143,12 @@ public class UpdateOrder {
 	}
 	
 	public void insert(int index, BlockUpdate.Mode mode, RelativePos notifier, RelativePos update) {
+		insert(index, new BlockUpdate(mode, notifier, update));
+	}
+	
+	public void insert(int index, BlockUpdate update) {
 		try {
-			blockUpdates.add(index, new BlockUpdate(mode, notifier, update));
+			blockUpdates.add(index, update);
 		} catch (Exception e) {
 			
 		}

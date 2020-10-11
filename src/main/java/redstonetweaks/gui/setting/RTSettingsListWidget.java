@@ -236,7 +236,7 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		
 		@Override
 		public void unfocusTextFields() {
-			
+			buttonPanel.unfocusTextFields(null);
 		}
 		
 		private List<Text> createTooltip() {

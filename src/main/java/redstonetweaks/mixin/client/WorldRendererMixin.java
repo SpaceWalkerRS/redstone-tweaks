@@ -1,6 +1,5 @@
 package redstonetweaks.mixin.client;
 
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,8 +24,8 @@ public class WorldRendererMixin {
 	
 	@Shadow @Final private MinecraftClient client;
 	
-	@Inject(method = "render", at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/render/WorldRenderer;transparencyShader:Lnet/minecraft/client/gl/ShaderEffect;", opcode = Opcodes.GETFIELD, shift = Shift.BEFORE))
-	private void onRenderInjectBeforeTransparencyShader(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo ci) {
+	@Inject(method = "render", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/client/particle/ParticleManager;renderParticles(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;F)V"))
+	private void onRenderInjectBeforeRenderParticles(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo ci) {
 		if (Settings.Global.SHOW_NEIGHBOR_UPDATES.get()) {
 			((MinecraftClientHelper)client).getNeighborUpdateVisualizer().draw(matrices);
 		}

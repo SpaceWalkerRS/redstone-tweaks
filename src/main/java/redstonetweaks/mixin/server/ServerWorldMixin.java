@@ -115,7 +115,7 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	@Inject(method = "addSyncedBlockEvent", cancellable = true, at = @At(value = "HEAD"))
 	private void onAddSyncedBlockEventInjectAtHead(BlockPos pos, Block block, int type, int data, CallbackInfo ci) {
 		if (Settings.Global.INSTANT_BLOCK_EVENTS.get()) {
-			if (block.onSyncedBlockEvent(getBlockState(pos), (World)(Object)this, pos, type, data)) {
+			if (processBlockEvent(new BlockEvent(pos, block, type, data))) {
 				server.getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, getRegistryKey(), new BlockEventS2CPacket(pos, block, type, data));
 			}
 			

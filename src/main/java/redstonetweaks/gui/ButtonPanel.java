@@ -35,9 +35,7 @@ public class ButtonPanel extends RTAbstractParentElement implements RTElement {
 	
 	@Override
 	public boolean isMouseOver(double mouseX, double mouseY) {
-		boolean bl = mouseX >= getX() && mouseX <= getX() + getWidth() && mouseY >= getY() && mouseY <= getY() + 20;
-		System.out.println(bl + " - " + mouseX + "-" + mouseY + " - " + getX() + "-" + getY());
-		return bl;
+		return mouseX >= getX() && mouseX <= getX() + getWidth() && mouseY >= getY() && mouseY <= getY() + 20;
 	}
 	
 	@Override

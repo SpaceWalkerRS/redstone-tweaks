@@ -930,7 +930,7 @@ public class Settings {
 		public static final BooleanSetting RANDOMIZE_QC = new BooleanSetting(ID, "randomizeQuasiConnectivity", Common.DESC_RANDOMIZE_QC, false);
 		public static final IntegerSetting SPEED_RISING_EDGE = new IntegerSetting(ID, "speedRisingEdge", "The duration of the extension in ticks.", 2, 0, Common.MAX_DELAY);
 		public static final IntegerSetting SPEED_FALLING_EDGE = new IntegerSetting(ID, "speedFallingEdge", "The duration of the retraction in ticks.", 2, 0, Common.MAX_DELAY);
-		public static final BooleanSetting SUPER_STICKY = new BooleanSetting(ID, "superSticky", "Make the face of sticky pistons stick to blocks like slime blocks when moved.", false);
+		public static final BooleanSetting SUPER_STICKY = new BooleanSetting(ID, "superSticky", "Make the face of sticky pistons stick to blocks when moved.", false);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
 		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);

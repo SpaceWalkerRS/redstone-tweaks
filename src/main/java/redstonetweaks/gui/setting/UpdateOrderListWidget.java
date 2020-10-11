@@ -3,6 +3,7 @@ package redstonetweaks.gui.setting;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -93,7 +94,11 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 			this.children.add(buttonPanel1);
 			
 			this.buttonPanel2.addButton(new RTButtonWidget(0, 0, 20, 20, () -> new TranslatableText("+"), (button) -> {
-				setting.get().insert(index + 1, RelativePos.SELF, RelativePos.WEST);
+				if (Screen.hasShiftDown()) {
+					setting.get().insert(index, update.copy());
+				} else {
+					setting.get().insert(index + 1, RelativePos.SELF, RelativePos.WEST);
+				}
 				updateCountChanged = true;
 				
 				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);

@@ -141,7 +141,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	@Inject(method = "onSyncedBlockEvent", cancellable = true, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/block/entity/PistonBlockEntity;finish()V"))
 	private void onOnSyncedBlockEventInjectAfterFinish0(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
 		if (!(world.getBlockState(pos).getBlock() instanceof PistonBlock)) {
-			cir.setReturnValue(false);
+			cir.setReturnValue(true);
 			cir.cancel();
 		}
 	}
