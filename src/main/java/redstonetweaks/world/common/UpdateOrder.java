@@ -62,7 +62,8 @@ public class UpdateOrder {
 				
 				if (otherUpdate.getMode() != update.getMode() 
 					|| otherUpdate.getNotifierPos() != update.getNotifierPos() 
-					|| otherUpdate.getUpdatePos() != update.getUpdatePos())
+					|| !(otherUpdate.getUpdatePos() == update.getUpdatePos()
+						|| otherUpdate.getMode() == BlockUpdate.Mode.NEIGHBORS))
 				{
 					return false;
 				}

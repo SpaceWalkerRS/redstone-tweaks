@@ -46,6 +46,7 @@
 	"server.GrassPathBlockMixin",
 	"server.HopperBlockEntityMixin",
 	"server.HopperBlockMixin",
+	"server.IntegratedServerMixin",
 	"server.LavaFluidMixin",
 	"server.LadderBlockMixin",
 	"server.LanternBlockMixin",
