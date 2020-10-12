@@ -1,31 +1,19 @@
 package redstonetweaks.block.redstonewire;
 
-import com.mojang.datafixers.types.Type;
-
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.Util;
-import net.minecraft.util.registry.Registry;
+
+import redstonetweaks.RedstoneTweaks;
 
 public class RedstoneWireBlockEntity extends BlockEntity {
-	
-	private static final BlockEntityType<RedstoneWireBlockEntity> REDSTONE_WIRE = create("redstone_wire", BlockEntityType.Builder.create(RedstoneWireBlockEntity::new, Blocks.REDSTONE_WIRE));
 	
 	private int power;
 	
 	public RedstoneWireBlockEntity() {
-		super(REDSTONE_WIRE);
+		super(RedstoneTweaks.REDSTONE_WIRE);
 	}
 	
-	private static <T extends BlockEntity> BlockEntityType<T> create(String string, BlockEntityType.Builder<T> builder) {
-		Type<?> type = Util.getChoiceType(TypeReferences.BLOCK_ENTITY, string);
-		return Registry.register(Registry.BLOCK_ENTITY_TYPE, string, builder.build(type));
-	}
-
 	public CompoundTag toTag(CompoundTag tag) {
 		super.toTag(tag);
 		tag.putInt("Power", power);
