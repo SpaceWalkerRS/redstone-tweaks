@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
+
 import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.DirectionalBooleanSetting;
@@ -16,7 +17,9 @@ import redstonetweaks.util.RelativePos;
 
 public interface WorldHelper {
 	
-	public BlockEventHandler getPistonBlockEventHandler();
+	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler);
+	
+	public BlockEventHandler getBlockEventHandler(long id);
 	
 	public void startTickingBlockEntities(boolean startIterating);
 	

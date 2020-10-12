@@ -79,16 +79,19 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	@Inject(method = "onSyncedBlockEvent", at = @At(value = "HEAD"), cancellable = true)
 	private void onOnSyncedBlockEventInjectAtHead(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
 		if (!((WorldHelper)world).updateNeighborsNormally()) {
-			BlockEventHandler blockEventHandler = ((WorldHelper)world).getPistonBlockEventHandler();
-			blockEventHandler.newBlockEvent(state, pos, type, data, sticky);
+			BlockEventHandler blockEventHandler = new BlockEventHandler(world, pos, state, type, data, sticky);
+			boolean startedBlockEvent = false;
 			
-			boolean startedBlockEvent = blockEventHandler.startBlockEvent();
-			if (startedBlockEvent) {
-				if (!world.isClient()) {
-					BlockState blockState = world.getBlockState(pos);
-					((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, 0, 64.0D);
+			if (((WorldHelper)world).addBlockEventHandler(blockEventHandler)) {
+				startedBlockEvent = blockEventHandler.startBlockEvent();
+				if (startedBlockEvent) {
+					if (!world.isClient()) {
+						BlockState blockState = world.getBlockState(pos);
+						((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, (int)blockEventHandler.id, 64.0D);
+					}
 				}
 			}
+			
 			cir.setReturnValue(startedBlockEvent);
 			cir.cancel();
 		}
@@ -232,8 +235,9 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Override
 	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
-		BlockEventHandler blockEventHandler = ((WorldHelper)world).getPistonBlockEventHandler();
-		if (blockEventHandler.tryContinueBlockEvent()) {
+		BlockEventHandler blockEventHandler = ((WorldHelper)world).getBlockEventHandler(type);
+		
+		if (blockEventHandler != null && blockEventHandler.tryContinueBlockEvent()) {
 			if (!world.isClient()) {
 				BlockState blockState = world.getBlockState(pos);
 				((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, 0, 64.0D);

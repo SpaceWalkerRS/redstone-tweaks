@@ -31,17 +31,19 @@ import redstonetweaks.setting.Settings;
 
 public class BlockEventHandler {
 	
-	private final World world;
+	private static long idCounter = 0;
 	
-	private BlockState state;
-	private BlockPos pos;
-	private int type;
-	private boolean extend;
-	private int data;
-	private Direction facing;
-	private Direction moveDirection;
-	private BlockPos headPos;
-	private boolean sticky;
+	public final long id;
+	private final World world;
+	private final BlockState state;
+	private final BlockPos pos;
+	private final int type;
+	private final boolean extend;
+	private final int data;
+	private final Direction facing;
+	private final Direction moveDirection;
+	private final BlockPos headPos;
+	private final boolean sticky;
 	
 	private int retractionProgress;
 	
@@ -59,13 +61,11 @@ public class BlockEventHandler {
     private boolean isIterating;
     private int moveProgress;
 	
-	public BlockEventHandler(World world) {
+	public BlockEventHandler(World world, BlockPos pos, BlockState state, int type, int data, boolean sticky) {
+		this.id = idCounter++;
 		this.world = world;
-	}
-	
-	public void newBlockEvent(BlockState state, BlockPos pos, int type, int data, boolean sticky) {
-		this.state = state;
 		this.pos = pos;
+		this.state = state;
 		this.type = type;
 		this.extend = type == 0;
 		this.data = data;

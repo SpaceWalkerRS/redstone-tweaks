@@ -1,7 +1,9 @@
 package redstonetweaks.mixin.server;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.spongepowered.asm.mixin.Final;
@@ -58,7 +60,7 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	@Shadow protected boolean iteratingTickingBlockEntities;
 	
 	private Iterator<BlockEntity> blockEntitiesIterator;
-	private BlockEventHandler pistonBlockEventHandler;
+	private Map<Long, BlockEventHandler> blockEventHandlers;
 	
 	@Shadow public abstract Profiler getProfiler();
 	@Shadow public abstract WorldChunk getWorldChunk(BlockPos pos);
@@ -69,7 +71,7 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(MutableWorldProperties properties, RegistryKey<World> registryKey, final DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l, CallbackInfo ci) {
-		pistonBlockEventHandler = new BlockEventHandler((World)(Object)this);
+		blockEventHandlers = new HashMap<>();
 	}
 	
 	// Don't display breaking particles if the block that is broken is a piston head
@@ -151,8 +153,13 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	}
 	
 	@Override
-	public BlockEventHandler getPistonBlockEventHandler() {
-		return pistonBlockEventHandler;
+	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler) {
+		return blockEventHandlers.putIfAbsent(blockEventHandler.id, blockEventHandler) == null;
+	}
+	
+	@Override
+	public BlockEventHandler getBlockEventHandler(long id) {
+		return blockEventHandlers.get(id);
 	}
 	
 	@Override
