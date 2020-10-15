@@ -106,6 +106,11 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 			
 		}
 		
+		@Override
+		protected boolean hasFocusedTextField() {
+			return buttonPanel.focusedIsTextField();
+		}
+		
 		private void populateButtonPanel() {
 			if (setting instanceof DirectionalBooleanSetting) {
 				DirectionalBooleanSetting bSetting = (DirectionalBooleanSetting)setting;

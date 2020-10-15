@@ -14,6 +14,8 @@ import redstonetweaks.gui.hotkeys.RTHotkeysTab;
 import redstonetweaks.gui.setting.RTSettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
+import redstonetweaks.gui.widget.RTTextFieldWidget;
+import redstonetweaks.hotkeys.RTKeyBinding;
 import redstonetweaks.setting.types.ISetting;
 
 public class RTMenuScreen extends Screen {
@@ -51,6 +53,14 @@ public class RTMenuScreen extends Screen {
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (selectedTab instanceof RTHotkeysTab && selectedTab.keyPressed(keyCode, scanCode, modifiers)) {
+			return true;
+		}
+		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 	
 	@Override
@@ -130,15 +140,15 @@ public class RTMenuScreen extends Screen {
 		int tabIndex = tabs.size();
 		
 		int buttonWidth = client.textRenderer.getWidth(tab.getTitle()) + 10;
-		int buttonX = 4;
+		int buttonX = 5;
 		int buttonY = TITLE_MARGIN + TITLE_HEIGHT;
 		if (tabIndex > 0) {
 			IAbstractButtonWidget prevButton = tabButtons.get(tabButtons.size() - 1);
 			buttonX += prevButton.getX() + prevButton.getWidth();
 			buttonY = prevButton.getY();
 			
-			if (buttonX + buttonWidth > width - 4) {
-				buttonX = 4;
+			if (buttonX + buttonWidth > width - 5) {
+				buttonX = 5;
 				buttonY += 22;
 				
 				headerHeight += 22;
@@ -178,9 +188,22 @@ public class RTMenuScreen extends Screen {
 		selectedTab.closeWindow(window);
 	}
 	
+	public boolean focusedIsTextField() {
+		if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
+			return true;
+		}
+		return selectedTab.focusedIsTextField();
+	}
+	
 	public void onSettingChanged(ISetting setting) {
 		if (selectedTab instanceof RTSettingsTab) {
 			((RTSettingsTab)selectedTab).onSettingChanged(setting);
+		}
+	}
+	
+	public void onHotkeyChanged(RTKeyBinding keyBinding) {
+		if (selectedTab instanceof RTHotkeysTab) {
+			((RTHotkeysTab)selectedTab).onHotkeyChanged(keyBinding);
 		}
 	}
 }

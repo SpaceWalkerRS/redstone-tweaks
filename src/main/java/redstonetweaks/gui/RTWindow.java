@@ -12,6 +12,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 import redstonetweaks.gui.widget.RTButtonWidget;
+import redstonetweaks.gui.widget.RTTextFieldWidget;
 
 public abstract class RTWindow extends RTAbstractParentElement implements RTElement {
 	
@@ -156,4 +157,14 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	public void close() {
 		screen.closeWindow(this);
 	}
+	
+	public boolean focusedIsTextField() {
+		if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
+			return true;
+		}
+		return hasFocusedTextField();
+	}
+	
+	protected abstract boolean hasFocusedTextField();
+	
 }

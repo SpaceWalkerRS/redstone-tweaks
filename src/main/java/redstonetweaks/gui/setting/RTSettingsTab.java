@@ -89,4 +89,9 @@ public class RTSettingsTab extends RTMenuTab implements ISettingGUIElement {
 			searchBox.unFocus();
 		}
 	}
+	
+	@Override
+	protected boolean hasFocusedTextField() {
+		return settingsList.focusedIsTextField();
+	}
 }

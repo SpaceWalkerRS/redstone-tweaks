@@ -50,4 +50,9 @@ public class DirectionalSettingWindow extends RTWindow implements ISettingGUIEle
 	public void unfocusTextFields(Element except) {
 		
 	}
+	
+	@Override
+	protected boolean hasFocusedTextField() {
+		return list.focusedIsTextField();
+	}
 }

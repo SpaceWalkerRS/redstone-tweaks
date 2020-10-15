@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
 
 import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.hotkeys.HotKeyManager;
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.setting.ClientSettingsManager;
 import redstonetweaks.world.client.ClientWorldTickHandler;
@@ -36,6 +37,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 		packetHandler = new ClientPacketHandler((MinecraftClient)(Object)this);
 		worldHandler = new ClientWorldTickHandler((MinecraftClient)(Object)this);
 		tickInfoLabelRenderer = new TickInfoLabelRenderer((MinecraftClient)(Object)this);
+		HotKeyManager.loadHotkeys();
 	}
 	
 	@Inject(method = "joinWorld", at = @At(value = "RETURN"))
@@ -47,6 +49,11 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 	private void onDisconnect(Screen screen, CallbackInfo ci) {
 		worldHandler.setCurrentWorld(null);
 		settingsManager.onDisconnect();
+	}
+	
+	@Inject(method = "stop", at = @At(value = "HEAD"))
+	private void onStopInjectAtHead(CallbackInfo ci) {
+		HotKeyManager.saveHotkeys();
 	}
 	
 	@Override

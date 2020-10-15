@@ -1,5 +1,7 @@
 package redstonetweaks.mixin.server;
 
+import java.util.List;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,6 +26,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.setting.Settings;
 
 @Mixin(PistonHandler.class)
@@ -33,6 +36,7 @@ public abstract class PistonHandlerMixin {
 	@Shadow @Final private boolean retracted;
 	@Shadow @Final private BlockPos posTo;
 	@Shadow @Final private Direction motionDirection;
+	@Shadow @Final private List<BlockPos> movedBlocks;
 	
 	private boolean sticky;
 	
@@ -99,6 +103,13 @@ public abstract class PistonHandlerMixin {
 			}
 			cir.setReturnValue(true);
 			cir.cancel();
+		}
+	}
+	
+	@Inject(method = "getMovedBlocks", at = @At(value = "HEAD"))
+	private void onGetMovedBlocksInjectAtHeadt(CallbackInfoReturnable<List<BlockPos>> cir) {
+		if (!world.isClient()) {
+			movedBlocks.forEach((pos) -> PistonHelper.getDoubleRetractionState(world, pos));
 		}
 	}
 	

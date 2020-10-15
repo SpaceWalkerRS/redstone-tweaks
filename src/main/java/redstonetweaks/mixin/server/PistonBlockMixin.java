@@ -87,7 +87,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 				if (startedBlockEvent) {
 					if (!world.isClient()) {
 						BlockState blockState = world.getBlockState(pos);
-						((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, (int)blockEventHandler.id, 64.0D);
+						((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, 0, 64.0D);
 					}
 				}
 			}
@@ -101,7 +101,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	// the value of bl is is inferred from the current value
 	// of the EXTENDED property.
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;shouldExtend(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;)Z"))
-	private boolean onOnBlockActionRedirectShouldExtend(PistonBlock piston, World world1, BlockPos pos1, Direction direction, BlockState state, World world, BlockPos pos, int type, int data) {
+	private boolean onOnSyncedBlockEventRedirectShouldExtend(PistonBlock piston, World world1, BlockPos pos1, Direction direction, BlockState state, World world, BlockPos pos, int type, int data) {
 		boolean extended = type != 0;
 		boolean lazy = extended ? PistonHelper.lazyFallingEdge(sticky) : PistonHelper.lazyRisingEdge(sticky);
 		return lazy ? !extended : PistonHelper.isReceivingPower(world, pos, state, direction, true);
@@ -119,13 +119,6 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	private void onOnSyncedBlockEventInjectAtReturn1(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Float> cir) {
 		if (PistonHelper.updateSelfWhilePowered(sticky)) {
 			world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, PistonHelper.tickPriorityRisingEdge(sticky));
-		}
-	}
-	
-	@Inject(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Lnet/minecraft/block/PistonBlock;move(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;Z)Z"))
-	private void onOnSyncedBlockEventInjectBeforeMove0(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
-		if (redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
-			PistonHelper.getDoubleRetractionState(world, pos.offset(state.get(Properties.FACING)));
 		}
 	}
 	
@@ -152,7 +145,11 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
 	private BlockState onOnSyncedBlockEventGetBlockState(World world, BlockPos pos) {
 		if (redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
-			return PistonHelper.getDoubleRetractionState(world, pos);
+			BlockState state = world.getBlockState(pos);
+			
+			if (state.getBlock() instanceof PistonBlock && state.get(Properties.EXTENDED)) {
+				world.updateNeighbor(pos, state.getBlock(), pos);
+			}
 		}
 		return world.getBlockState(pos);
 	}
@@ -235,12 +232,16 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Override
 	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
-		BlockEventHandler blockEventHandler = ((WorldHelper)world).getBlockEventHandler(type);
+		BlockEventHandler blockEventHandler = ((WorldHelper)world).getBlockEventHandler(pos);
 		
-		if (blockEventHandler != null && blockEventHandler.tryContinueBlockEvent()) {
-			if (!world.isClient()) {
-				BlockState blockState = world.getBlockState(pos);
-				((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, 0, 64.0D);
+		if (blockEventHandler != null) {
+			if (blockEventHandler.tryContinueBlockEvent()) {
+				if (!world.isClient()) {
+					BlockState blockState = world.getBlockState(pos);
+					((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, 0, 64.0D);
+				}
+			} else {
+				((WorldHelper)world).removeBlockEventHandler(pos);
 			}
 		}
 		

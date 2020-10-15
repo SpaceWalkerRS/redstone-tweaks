@@ -7,6 +7,7 @@ import java.util.List;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import redstonetweaks.gui.widget.RTTextFieldWidget;
 
 public abstract class RTMenuTab extends RTAbstractParentElement {
 	
@@ -114,5 +115,23 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	}
 	
 	public abstract void onTabClosed();
+	
+	public boolean focusedIsTextField() {
+		if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
+			return true;
+		}
+		if (windows.isEmpty()) {
+			return hasFocusedTextField();
+		} else {
+			for (RTWindow window : windows) {
+				if (window.hasFocusedTextField()) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	
+	protected abstract boolean hasFocusedTextField();
 	
 }

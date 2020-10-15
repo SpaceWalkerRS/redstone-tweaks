@@ -19,7 +19,9 @@ public interface WorldHelper {
 	
 	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler);
 	
-	public BlockEventHandler getBlockEventHandler(long id);
+	public void removeBlockEventHandler(BlockPos pos);
+	
+	public BlockEventHandler getBlockEventHandler(BlockPos pos);
 	
 	public void startTickingBlockEntities(boolean startIterating);
 	

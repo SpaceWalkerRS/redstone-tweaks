@@ -173,7 +173,8 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				
 				if ((isSideSolid || isSolidGlass(sideState)) && !hasSolidBottom(world, abovePos, aboveState, dir)) {
 					wirePower = Math.max(wirePower, getWirePower(world, sidePos.up(), dir.getOpposite()));
-				} else if (!(isSideSolid || hasSolidBottom(world, sidePos, sideState, dir.getOpposite()))) {
+				}
+				if (!(isSideSolid || isSolidGlass(world.getBlockState(pos.down())) || hasSolidBottom(world, sidePos, sideState, dir.getOpposite()))) {
 					wirePower = Math.max(wirePower, getWirePower(world, sidePos.down(), dir.getOpposite()));
 				}
 			}

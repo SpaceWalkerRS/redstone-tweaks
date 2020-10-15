@@ -60,7 +60,7 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	@Shadow protected boolean iteratingTickingBlockEntities;
 	
 	private Iterator<BlockEntity> blockEntitiesIterator;
-	private Map<Long, BlockEventHandler> blockEventHandlers;
+	private Map<BlockPos, BlockEventHandler> blockEventHandlers;
 	
 	@Shadow public abstract Profiler getProfiler();
 	@Shadow public abstract WorldChunk getWorldChunk(BlockPos pos);
@@ -154,12 +154,17 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	
 	@Override
 	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler) {
-		return blockEventHandlers.putIfAbsent(blockEventHandler.id, blockEventHandler) == null;
+		return blockEventHandlers.putIfAbsent(blockEventHandler.getPos(), blockEventHandler) == null;
 	}
 	
 	@Override
-	public BlockEventHandler getBlockEventHandler(long id) {
-		return blockEventHandlers.get(id);
+	public void removeBlockEventHandler(BlockPos pos) {
+		blockEventHandlers.remove(pos);
+	}
+	
+	@Override
+	public BlockEventHandler getBlockEventHandler(BlockPos pos) {
+		return blockEventHandlers.get(pos);
 	}
 	
 	@Override

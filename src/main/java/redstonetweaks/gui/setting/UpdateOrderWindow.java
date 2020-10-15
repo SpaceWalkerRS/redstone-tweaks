@@ -148,4 +148,9 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 	public void unfocusTextFields(Element except) {
 		
 	}
+	
+	@Override
+	protected boolean hasFocusedTextField() {
+		return offsetButtons.focusedIsTextField();
+	}
 }

@@ -16,6 +16,7 @@ import redstonetweaks.helper.ServerTickSchedulerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.packet.TaskSyncPacket;
+import redstonetweaks.packet.TickPausePacket;
 import redstonetweaks.packet.TickStatusPacket;
 import redstonetweaks.packet.WorldSyncPacket;
 import redstonetweaks.packet.DoWorldTicksPacket;
@@ -377,5 +378,20 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private void syncCurrentTask() {
 		TaskSyncPacket packet = new TaskSyncPacket(currentTask);
 		((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+	}
+	
+	public void onTickPausePacketReceived(TickPausePacket packet) {
+		if (packet.event == TickPausePacket.PAUSE) {
+			if (doWorldTicks()) {
+				pause();
+			} else {
+				resume();
+			}
+		} else
+		if (packet.event == TickPausePacket.ADVANCE) {
+			if (!doWorldTicks()) {
+				advance(1);
+			}
+		}
 	}
 }

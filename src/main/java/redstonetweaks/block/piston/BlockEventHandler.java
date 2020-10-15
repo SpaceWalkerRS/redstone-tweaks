@@ -31,9 +31,6 @@ import redstonetweaks.setting.Settings;
 
 public class BlockEventHandler {
 	
-	private static long idCounter = 0;
-	
-	public final long id;
 	private final World world;
 	private final BlockState state;
 	private final BlockPos pos;
@@ -62,7 +59,6 @@ public class BlockEventHandler {
     private int moveProgress;
 	
 	public BlockEventHandler(World world, BlockPos pos, BlockState state, int type, int data, boolean sticky) {
-		this.id = idCounter++;
 		this.world = world;
 		this.pos = pos;
 		this.state = state;
@@ -75,6 +71,10 @@ public class BlockEventHandler {
 		this.sticky = sticky;
 	}
 	
+	public BlockPos getPos() {
+		return pos;
+	}
+	
 	public boolean startBlockEvent() {
 		if (!world.isClient()) {
 			boolean extended = type != 0;
@@ -84,6 +84,7 @@ public class BlockEventHandler {
 			if (shouldExtend && (type == 1 || type == 2)) {
 				int flags = Settings.Global.DOUBLE_RETRACTION.get() ? 16 : 2;
 				world.setBlockState(pos, state.with(Properties.EXTENDED, true), flags);
+				
 				return false;
 			}
 			
@@ -97,8 +98,6 @@ public class BlockEventHandler {
 		}
 		
 		if (type == 0) {
-			PistonHelper.getDoubleRetractionState(world, headPos);
-			
 			if (!startMove()) {
 				return false;
 			}
@@ -143,8 +142,13 @@ public class BlockEventHandler {
 				world.updateNeighbors(pos, blockState.getBlock());
 				blockState.updateNeighbors(world, pos, 2);
 				
-				if (Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
-					PistonHelper.getDoubleRetractionState(world, pos.offset(facing, 2));
+				if (redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
+					BlockPos frontPos = pos.offset(facing, 2);
+					BlockState frontState = world.getBlockState(frontPos);
+					
+					if (frontState.getBlock() instanceof PistonBlock && frontState.get(Properties.EXTENDED)) {
+						world.updateNeighbor(frontPos, frontState.getBlock(), frontPos);
+					}
 				}
 				
 				retractionProgress++;
@@ -189,12 +193,12 @@ public class BlockEventHandler {
 	}
 	
 	private boolean finishRetraction(boolean droppedBlock) {
-		BlockPos blockPos = pos.offset(facing, 2);
-		BlockState blockState = world.getBlockState(blockPos);;
+		BlockPos frontPos = pos.offset(facing, 2);
+		BlockState frontState = world.getBlockState(frontPos);;
 		
 		boolean stillRetracting = false;
 		if (!(droppedBlock && Settings.StickyPiston.DO_BLOCK_DROPPING.get())) {
-			if (blockState.isAir() || !PistonBlock.isMovable(blockState, world, blockPos, moveDirection, false, facing) || (Settings.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER) ? PistonBehavior.NORMAL : state.getPistonBehavior()) != PistonBehavior.NORMAL && !blockState.isOf(Blocks.PISTON) && !blockState.isOf(Blocks.STICKY_PISTON)) {
+			if (frontState.isAir() || !PistonBlock.isMovable(frontState, world, frontPos, moveDirection, false, facing) || (Settings.Barrier.IS_MOVABLE.get() && frontState.isOf(Blocks.BARRIER) ? PistonBehavior.NORMAL : frontState.getPistonBehavior()) != PistonBehavior.NORMAL && !frontState.isOf(Blocks.PISTON) && !frontState.isOf(Blocks.STICKY_PISTON)) {
 				world.removeBlock(headPos, false);
 			} else {
 				retractionProgress++;

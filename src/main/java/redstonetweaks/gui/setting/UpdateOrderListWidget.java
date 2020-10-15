@@ -138,5 +138,10 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 			buttonPanel2.setY(y);
 			buttonPanel2.render(matrices, mouseX, mouseY, tickDelta);
 		}
+		
+		@Override
+		protected boolean hasFocusedTextField() {
+			return false;
+		}
 	}
 }

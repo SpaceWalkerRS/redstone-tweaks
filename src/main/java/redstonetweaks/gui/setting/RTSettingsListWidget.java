@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -34,6 +33,8 @@ import redstonetweaks.setting.types.UpdateOrderSetting;
 
 public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entry> implements ISettingGUIElement {
 	
+	private static double savedScrollAmount;
+	
 	public RTSettingsListWidget(RTMenuScreen screen, int x, int y, int width, int height) {
 		super(screen, x, y, width, height, 22);
 		
@@ -41,7 +42,7 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 			addEntry(new SettingsPackEntry(pack));
 			
 			for (ISetting setting : pack.getSettings()) {
-				addEntry(new SettingEntry(client, this, setting));
+				addEntry(new SettingEntry(setting));
 				
 				updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
 			}
@@ -70,7 +71,7 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 				addEntry(new SettingsPackEntry(pack));
 				
 				for (ISetting setting : pack.getSettings()) {
-					addEntry(new SettingEntry(client, this, setting));
+					addEntry(new SettingEntry(setting));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
 				}
@@ -81,7 +82,7 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 				
 				for (ISetting setting : pack.getSettings()) {
 					if (setting.getName().toLowerCase().contains(query)) {
-						filteredEntries.add(new SettingEntry(client, this, setting));
+						filteredEntries.add(new SettingEntry(setting));
 						
 						updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
 					}
@@ -114,6 +115,10 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		}
 	}
 	
+	public void saveScrollAmount() {
+		savedScrollAmount = getScrollAmount();
+	}
+	
 	public class SettingsPackEntry extends Entry {
 		
 		private final Text title;
@@ -140,6 +145,11 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		@Override
 		public void unfocusTextFields() {
 			
+		}
+		
+		@Override
+		protected boolean hasFocusedTextField() {
+			return false;
 		}
 	}
 	
@@ -168,6 +178,11 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		public void unfocusTextFields() {
 			
 		}
+		
+		@Override
+		protected boolean hasFocusedTextField() {
+			return false;
+		}
 	}
 	
 	public class SettingEntry extends Entry {
@@ -180,7 +195,7 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		private final RTButtonWidget resetButton;
 		private final boolean buttonsActive;
 		
-		public SettingEntry(MinecraftClient client, RTSettingsListWidget list, ISetting setting) {
+		public SettingEntry(ISetting setting) {
 			this.buttonsActive = ((MinecraftClientHelper)client).getSettingsManager().canChangeSettings();
 			
 			this.setting = setting;
@@ -190,7 +205,7 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
 				setting.reset();
-				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+				((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(setting);
 			});
 			this.children.add(resetButton);
 			
@@ -237,6 +252,11 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		@Override
 		public void unfocusTextFields() {
 			buttonPanel.unfocusTextFields(null);
+		}
+		
+		@Override
+		protected boolean hasFocusedTextField() {
+			return buttonPanel.focusedIsTextField();
 		}
 		
 		private List<Text> createTooltip() {

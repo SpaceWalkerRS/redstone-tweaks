@@ -60,7 +60,8 @@ public abstract class PacketHandler {
 		TICK_STATUS(11, TickStatusPacket.class),
 		TICK_BLOCK_ENTITY(12, TickBlockEntityPacket.class),
 		PLAYER_JOINED_SERVER(13, PlayerJoinedServerPacket.class),
-		DO_WORLD_TICKS(14, DoWorldTicksPacket.class);
+		DO_WORLD_TICKS(14, DoWorldTicksPacket.class),
+		TICK_PAUSE(15, TickPausePacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends RedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;

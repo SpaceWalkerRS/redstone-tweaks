@@ -14,15 +14,13 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
-
+import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.util.RTMathHelper;
 
 public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends ElementListWidget<E> implements RTElement {
 	
 	protected static final int SCROLLBAR_WIDTH = 6;
 	protected static final int TEXT_COLOR = 16777215;
-	
-	protected static double savedScrollAmount;
 	
 	public final RTMenuScreen screen;
 	private final int rowWidth;
@@ -106,6 +104,16 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	@Override
 	public void allowHover(boolean allowHover) {
 		children().forEach((element) -> element.allowHover(allowHover));
+	}
+	
+	public boolean focusedIsTextField() {
+		E focused = getFocused();
+		
+		if (focused == null) {
+			return false;
+		} else {
+			return focused.focusedIsTextField();
+		}
 	}
 
 	private boolean mouseClick(double mouseX, double mouseY, int button) {
@@ -215,10 +223,6 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		return Math.max(0, getMaxPosition() - (getHeight() - 4));
 	}
 	
-	public void saveScrollAmount() {
-		savedScrollAmount = getScrollAmount();
-	}
-	
 	public void tick() {
 		for (E entry : children()) {
 			entry.tick();
@@ -270,5 +274,13 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		
 		public abstract void unfocusTextFields();
 		
+		public boolean focusedIsTextField() {
+			if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
+				return true;
+			}
+			return hasFocusedTextField();
+		}
+		
+		protected abstract boolean hasFocusedTextField();
 	}
 }

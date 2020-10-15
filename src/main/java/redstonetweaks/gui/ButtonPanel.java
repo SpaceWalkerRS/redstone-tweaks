@@ -135,4 +135,8 @@ public class ButtonPanel extends RTAbstractParentElement implements RTElement {
 	public void setVisible(boolean visible) {
 		buttons.forEach((button) -> button.setVisible(visible));
 	}
+	
+	public boolean focusedIsTextField() {
+		return getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive();
+	}
 }

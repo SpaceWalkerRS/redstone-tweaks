@@ -15,22 +15,13 @@ import redstonetweaks.setting.types.DirectionalBooleanSetting;
 
 public class PistonHelper {
 	
-	// When the doubleRetraction setting is enabled this method is called
-	// from onSyncedBlockEvent to get the state of the block in front of the piston head
-	// To make doubleRetraction act like it did in 1.8, we need to update this block,
-	// but to prevent changing other behavior we only update the block if it is an extended piston.
+	// When the doubleRetraction setting is enabled this method is called from getMovedBlocks
+	// in PistonHandler.class to get all the moved block states. If the block state is
+	// a retracted piston a block change packet is sent to the client.
 	public static BlockState getDoubleRetractionState(World world, BlockPos pos) {
 		BlockState state = world.getBlockState(pos);
 		
-		if (state.getBlock() instanceof PistonBlock) {
-			if (state.get(Properties.EXTENDED)) {
-				world.updateNeighbor(pos, state.getBlock(), pos);
-				
-				state = world.getBlockState(pos);
-			}
-			
-			// We need to send a block change packet regardless of if the piston is extended at this point
-			// It may have depowered earlier in the tick
+		if (state.getBlock() instanceof PistonBlock && !state.get(Properties.EXTENDED)) {
 			BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
 			((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
 		}
