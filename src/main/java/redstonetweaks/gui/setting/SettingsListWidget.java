@@ -31,11 +31,11 @@ import redstonetweaks.setting.types.IntegerSetting;
 import redstonetweaks.setting.types.TickPrioritySetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 
-public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entry> implements ISettingGUIElement {
+public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> implements ISettingGUIElement {
 	
 	private static double savedScrollAmount;
 	
-	public RTSettingsListWidget(RTMenuScreen screen, int x, int y, int width, int height) {
+	public SettingsListWidget(RTMenuScreen screen, int x, int y, int width, int height) {
 		super(screen, x, y, width, height, 22);
 		
 		for (SettingsPack pack : Settings.SETTINGS_PACKS) {
@@ -348,7 +348,7 @@ public class RTSettingsListWidget extends RTListWidget<RTSettingsListWidget.Entr
 		}
 	}
 	
-	public static abstract class Entry extends RTListWidget.Entry<RTSettingsListWidget.Entry> {
+	public static abstract class Entry extends RTListWidget.Entry<SettingsListWidget.Entry> {
 		
 		public void init(int entryTitleWidth) {
 			

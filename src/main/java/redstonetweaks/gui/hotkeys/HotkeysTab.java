@@ -12,7 +12,7 @@ import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.hotkeys.HotKeyManager;
 import redstonetweaks.hotkeys.RTKeyBinding;
 
-public class RTHotkeysTab extends RTMenuTab {
+public class HotkeysTab extends RTMenuTab {
 	
 	private static final int HEADER_HEIGHT = 25;
 	
@@ -21,7 +21,7 @@ public class RTHotkeysTab extends RTMenuTab {
 	
 	public RTKeyBinding focusedKeyBinding;
 	
-	public RTHotkeysTab(RTMenuScreen screen) {
+	public HotkeysTab(RTMenuScreen screen) {
 		super(screen, new TranslatableText("Hotkeys"));
 	}
 	

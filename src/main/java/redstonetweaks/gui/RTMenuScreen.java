@@ -10,8 +10,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
-import redstonetweaks.gui.hotkeys.RTHotkeysTab;
-import redstonetweaks.gui.setting.RTSettingsTab;
+import redstonetweaks.gui.hotkeys.HotkeysTab;
+import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
@@ -57,7 +57,7 @@ public class RTMenuScreen extends Screen {
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (selectedTab instanceof RTHotkeysTab && selectedTab.keyPressed(keyCode, scanCode, modifiers)) {
+		if (selectedTab instanceof HotkeysTab && selectedTab.keyPressed(keyCode, scanCode, modifiers)) {
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
@@ -132,8 +132,8 @@ public class RTMenuScreen extends Screen {
 	}
 	
 	private void createTabs() {
-		addTab(new RTSettingsTab(this));
-		addTab(new RTHotkeysTab(this));
+		addTab(new SettingsTab(this));
+		addTab(new HotkeysTab(this));
 	}
 	
 	private void addTab(RTMenuTab tab) {
@@ -196,14 +196,14 @@ public class RTMenuScreen extends Screen {
 	}
 	
 	public void onSettingChanged(ISetting setting) {
-		if (selectedTab instanceof RTSettingsTab) {
-			((RTSettingsTab)selectedTab).onSettingChanged(setting);
+		if (selectedTab instanceof SettingsTab) {
+			((SettingsTab)selectedTab).onSettingChanged(setting);
 		}
 	}
 	
 	public void onHotkeyChanged(RTKeyBinding keyBinding) {
-		if (selectedTab instanceof RTHotkeysTab) {
-			((RTHotkeysTab)selectedTab).onHotkeyChanged(keyBinding);
+		if (selectedTab instanceof HotkeysTab) {
+			((HotkeysTab)selectedTab).onHotkeyChanged(keyBinding);
 		}
 	}
 }

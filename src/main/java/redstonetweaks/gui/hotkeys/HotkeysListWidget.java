@@ -18,9 +18,9 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 	
 	private static double savedScrollAmount;
 	
-	private final RTHotkeysTab parent;
+	private final HotkeysTab parent;
 	
-	public HotkeysListWidget(RTHotkeysTab parent, int x, int y, int width, int height) {
+	public HotkeysListWidget(HotkeysTab parent, int x, int y, int width, int height) {
 		super(parent.screen, x, y, width, height, 22);
 		
 		this.parent = parent;

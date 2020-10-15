@@ -13,18 +13,18 @@ import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 
-public class RTSettingsTab extends RTMenuTab implements ISettingGUIElement {
+public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 	
 	private static final int HEADER_HEIGHT = 25;
 	
 	private static String lastSearchQuery;
 	
-	private RTSettingsListWidget settingsList;
+	private SettingsListWidget settingsList;
 	private RTTextFieldWidget searchBox;
 	private RTButtonWidget resetButton;
 	private RTButtonWidget clearSearchBoxButton;
 	
-	public RTSettingsTab(RTMenuScreen screen) {
+	public SettingsTab(RTMenuScreen screen) {
 		super(screen, new TranslatableText("Settings"));
 	}
 	
@@ -36,7 +36,7 @@ public class RTSettingsTab extends RTMenuTab implements ISettingGUIElement {
 	
 	@Override
 	protected void initContents() {
-		settingsList = new RTSettingsListWidget(screen, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - HEADER_HEIGHT - 5);
+		settingsList = new SettingsListWidget(screen, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - HEADER_HEIGHT - 5);
 		addContent(settingsList);
 		
 		resetButton = new RTButtonWidget(screen.getWidth() - 50, screen.getHeaderHeight(), 40, 20, () -> new TranslatableText("RESET"), (button) -> {
