@@ -37,6 +37,10 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 		return pressurePlate == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? redstonetweaks.setting.Settings.LightWeightedPressurePlate.WEIGHT.get() : redstonetweaks.setting.Settings.HeavyWeightedPressurePlate.WEIGHT.get();
 	}
 	
+	@ModifyConstant(method = "getRedstoneOutput", constant = @Constant(floatValue = 15.0F))
+	private float onGetRedstoneOutputModify15(float oldDelay) {
+		return redstonetweaks.setting.Settings.Global.POWER_MAX.get();
+	}
 	@ModifyConstant(method = "getTickRate", constant = @Constant(intValue = 10))
 	private int getWeightedPressurePlateDelay(int oldDelay) {
 		return (Block)(Object)this == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? redstonetweaks.setting.Settings.LightWeightedPressurePlate.DELAY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.HeavyWeightedPressurePlate.DELAY_FALLING_EDGE.get();

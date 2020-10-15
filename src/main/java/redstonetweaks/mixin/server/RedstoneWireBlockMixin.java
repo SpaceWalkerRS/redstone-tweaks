@@ -123,31 +123,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Inject(method = "update", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
-		int power;
-		
-		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof RedstoneWireBlockEntity) {
-			power = ((RedstoneWireBlockEntity)blockEntity).getPower();
-		} else {
-			power = state.get(Properties.POWER);
-		}
-		
-		int powerReceived = getReceivedRedstonePower(world, pos);
-		
-		if (power != powerReceived && world.getBlockState(pos) == state) {
-			int delay = redstonetweaks.setting.Settings.RedstoneWire.DELAY.get();
-			if (delay == 0) {
-				if (blockEntity instanceof RedstoneWireBlockEntity) {
-					((RedstoneWireBlockEntity)blockEntity).setPower(powerReceived);
-				}
-				world.setBlockState(pos, state.with(Properties.POWER, Math.min(15, powerReceived)), 2);
-				
-				updateNeighborsOnStateChange(world, pos, state);
-			} else {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, redstonetweaks.setting.Settings.RedstoneWire.TICK_PRIORITY.get());
-			}
-		}
-		
+		updatePowered(world, pos, state, false);
 		ci.cancel();
 	}
 	
@@ -219,12 +195,39 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		update(world, pos, state);
+		updatePowered(world, pos, state, true);
 	}
 	
 	@Override
 	public BlockEntity createBlockEntity(BlockView world) {
 		return new RedstoneWireBlockEntity();
+	}
+	
+	private void updatePowered(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
+		int power;
+		
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof RedstoneWireBlockEntity) {
+			power = ((RedstoneWireBlockEntity)blockEntity).getPower();
+		} else {
+			power = state.get(Properties.POWER);
+		}
+		
+		int powerReceived = getReceivedRedstonePower(world, pos);
+		
+		if (power != powerReceived && world.getBlockState(pos) == state) {
+			int delay = redstonetweaks.setting.Settings.RedstoneWire.DELAY.get();
+			if (onScheduledTick || delay == 0) {
+				if (blockEntity instanceof RedstoneWireBlockEntity) {
+					((RedstoneWireBlockEntity)blockEntity).setPower(powerReceived);
+				}
+				world.setBlockState(pos, state.with(Properties.POWER, Math.min(15, powerReceived)), 2);
+				
+				updateNeighborsOnStateChange(world, pos, state);
+			} else {
+				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, redstonetweaks.setting.Settings.RedstoneWire.TICK_PRIORITY.get());
+			}
+		}
 	}
 	
 	private void updateNeighborsOnStateChange(World world, BlockPos pos, BlockState state) {

@@ -125,6 +125,10 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		setCurrentTask(Task.NONE);
 		
 		for (ServerWorld world : server.getWorlds()) {
+			if (world.getTime() % 20 == 0) {
+				server.getPlayerManager().sendToDimension(new WorldTimeUpdateS2CPacket(world.getTime(), world.getTimeOfDay(), world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)), world.getRegistryKey());
+			}
+			
 			((ServerWorldHelper)world).getNeighborUpdateScheduler().resetTickTime();
 		}
 		
