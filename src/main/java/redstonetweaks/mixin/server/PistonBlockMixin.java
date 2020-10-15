@@ -109,7 +109,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@ModifyArg(method = "onSyncedBlockEvent", index = 2, at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	public int onOnSyncedBlockEventOnSetBlockState0ModifyFlags(int oldFlags) {
-		return redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get() ? oldFlags & ~2 | 16 : oldFlags;
+		return redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get() ? oldFlags | 16 : oldFlags;
 	}
 	
 	// If the piston is powered but unable to extend and
