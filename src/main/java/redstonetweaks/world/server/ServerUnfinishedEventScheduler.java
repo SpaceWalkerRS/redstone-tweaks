@@ -4,7 +4,9 @@ import net.minecraft.server.world.ServerWorld;
 
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
+import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.UnfinishedEventPacket;
+import redstonetweaks.world.common.UnfinishedEvent;
 import redstonetweaks.world.common.UnfinishedEventScheduler;
 
 public class ServerUnfinishedEventScheduler extends UnfinishedEventScheduler {
@@ -27,15 +29,12 @@ public class ServerUnfinishedEventScheduler extends UnfinishedEventScheduler {
 	
 	private void syncClientNeighborUpdateScheduler(UnfinishedEvent event) {
 		UnfinishedEventPacket packet = new UnfinishedEventPacket(event);
-		if (event.viewDistance < 0) {
-			((MinecraftServerHelper)world.getServer()).getPacketHandler().sendPacketToDimension(packet, world.getRegistryKey());
-		} else {
-			((MinecraftServerHelper)world.getServer()).getPacketHandler().sendPacketToAround(packet, world.getRegistryKey(), event.pos, event.viewDistance);
-		}
-	}
-
-	@Override
-	public void onUnfinishedEventPacketReceived(UnfinishedEventPacket unfinishedEventPacket) {
+		ServerPacketHandler packetHandler = ((MinecraftServerHelper)world.getServer()).getPacketHandler();
 		
+		if (event.viewDistance < 0) {
+			packetHandler.sendPacketToDimension(packet, world.getRegistryKey());
+		} else {
+			packetHandler.sendPacketToAround(packet, world.getRegistryKey(), event.pos, event.viewDistance);
+		}
 	}
 }

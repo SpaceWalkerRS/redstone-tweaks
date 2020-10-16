@@ -2,7 +2,6 @@ package redstonetweaks.world.client;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.world.World;
 
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.packet.TaskSyncPacket;
@@ -21,24 +20,6 @@ public class ClientWorldTickHandler extends WorldTickHandler {
 		this.client = client;
 		
 		this.currentTask = Task.NONE;
-	}
-	
-	@Override
-	protected void setStatus(Status newStatus) {
-		status = newStatus;
-	}
-	
-	@Override
-	public void setCurrentWorld(World world) {
-		currentWorld = world;
-		if (currentWorld != null) {
-			profiler = currentWorld.getProfiler();
-		}
-	}
-	
-	@Override
-	protected void setCurrentTask(Task task) {
-		currentTask = task;
 	}
 	
 	public void onDoWorldTicksPacketReceived(DoWorldTicksPacket packet) {

@@ -29,7 +29,7 @@ import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.world.common.UpdateOrder;
-import redstonetweaks.world.server.UnfinishedEvent.Source;
+import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 @Mixin(AbstractRedstoneGateBlock.class)
 public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {

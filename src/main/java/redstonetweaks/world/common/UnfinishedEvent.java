@@ -1,4 +1,4 @@
-package redstonetweaks.world.server;
+package redstonetweaks.world.common;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -8,23 +8,21 @@ public class UnfinishedEvent {
 	
 	public final Source source;
 	public final BlockPos pos;
-	public final BlockState state;
 	public final Block block;
 	public final int type;
 	
 	public final double viewDistance;
 	
+	public UnfinishedEvent(Source source, BlockPos pos, BlockState state, int type) {
+		this(source, pos, state, type, -1);
+	}
+	
 	public UnfinishedEvent(Source source, BlockPos pos, BlockState state, int type, double viewDistance) {
 		this.source = source;
 		this.pos = pos;
-		this.state = state;
 		this.block = state.getBlock();
 		this.type = type;
 		this.viewDistance = viewDistance;
-	}
-	
-	public UnfinishedEvent(Source source, BlockPos pos, BlockState state, int type) {
-		this(source, pos, state, type, -1);
 	}
 	
 	public enum Source {
@@ -38,7 +36,7 @@ public class UnfinishedEvent {
 		Source(int index) {
 			this.index = index;
 		}
-
+		
 		public static Source fromIndex(int index) {
 			switch (index) {
 			case 1:
@@ -51,7 +49,7 @@ public class UnfinishedEvent {
 				return INVALID;
 			}
 		}
-
+		
 		public int getIndex() {
 			return index;
 		}

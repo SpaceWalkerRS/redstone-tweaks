@@ -6,14 +6,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.BlockHelper;
-import redstonetweaks.packet.UnfinishedEventPacket;
-import redstonetweaks.world.server.UnfinishedEvent;
-import redstonetweaks.world.server.UnfinishedEvent.Source;
+import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 public abstract class UnfinishedEventScheduler {
 	
 	protected final World world;
-	
 	protected final ObjectLinkedOpenHashSet<UnfinishedEvent> unfinishedEvents;
 	
 	public UnfinishedEventScheduler(World world) {
@@ -52,6 +49,4 @@ public abstract class UnfinishedEventScheduler {
 	public boolean hasScheduledEvents() {
 		return !unfinishedEvents.isEmpty();
 	}
-
-	public abstract void onUnfinishedEventPacketReceived(UnfinishedEventPacket unfinishedEventPacket);
 }

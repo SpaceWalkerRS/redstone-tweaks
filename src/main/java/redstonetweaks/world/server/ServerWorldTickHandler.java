@@ -8,7 +8,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
 
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerChunkManagerHelper;
@@ -121,8 +120,8 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private void startTick() {
 		syncClientWorldTime();
 		
-		setCurrentWorld(server.getWorlds().iterator().next());
-		setCurrentTask(Task.NONE);
+		initCurrentWorld();
+		clearCurrentTask();
 		
 		for (ServerWorld world : server.getWorlds()) {
 			if (world.getTime() % 20 == 0) {
@@ -142,7 +141,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			}
 		}
 		
-		setCurrentTask(Task.NONE);
+		clearCurrentTask();
 		updateStatus();
 		shouldUpdateStatus = true;
 		
@@ -205,48 +204,39 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		}
 	}
 	
-	@Override
-	protected void setStatus(Status newStatus) {
-		status = newStatus;
-		syncStatus();
-	}
-	
 	private void updateStatus() {
 		setStatus(status.next());
+		syncStatus();
 	}
 	
 	private void nextWorld() {
 		Iterator<ServerWorld> worlds = server.getWorlds().iterator();
 		while (worlds.hasNext()) {
-			if (worlds.next().equals(currentWorld)) {
+			if (worlds.next() == currentWorld) {
 				setCurrentWorld(worlds.hasNext() ? worlds.next() : null);
+				syncCurrentWorld();
 				break;
 			}
 		}
 	}
 	
-	@Override
-	public void setCurrentWorld(World world) {
-		currentWorld = world;
-		if (currentWorld != null) {
-			profiler = currentWorld.getProfiler();
-		}
-		
+	private void initCurrentWorld() {
+		setCurrentWorld(server.getWorlds().iterator().next());
 		syncCurrentWorld();
-	}
-	
-	@Override
-	protected void setCurrentTask(Task task) {
-		currentTask = task;
-		syncCurrentTask();
 	}
 	
 	private void nextTask() {
 		setCurrentTask(currentTask.next());
+		syncCurrentTask();
+	}
+	
+	private void clearCurrentTask() {
+		setCurrentTask(Task.NONE);
+		syncCurrentTask();
 	}
 	
 	public long getWorldTime() {
-		return server.getWorlds().iterator().next().getTime();
+		return server.getOverworld().getTime();
 	}
 	
 	private void tickWorldBorder() {

@@ -24,11 +24,20 @@ public abstract class WorldTickHandler {
 		return doWorldTicks;
 	}
 	
-	protected abstract void setStatus(Status newStatus);
+	protected void setStatus(Status newStatus) {
+		status = newStatus;
+	}
 	
-	public abstract void setCurrentWorld(World world);
+	public void setCurrentWorld(World world) {
+		currentWorld = world;
+		if (currentWorld != null) {
+			profiler = currentWorld.getProfiler();
+		}
+	}
 	
-	protected abstract void setCurrentTask(Task task);
+	protected void setCurrentTask(Task task) {
+		currentTask = task;
+	}
 	
 	public boolean isTickingWorlds() {
 		return status != Status.IDLE;
@@ -40,13 +49,13 @@ public abstract class WorldTickHandler {
 		TICKING_WORLDS(2),
 		END_TICK(3);
 		
-		public static final Status[] STATUS;
+		public static final Status[] STATUSES;
 		
 		static {
-			STATUS = new Status[values().length];
+			STATUSES = new Status[values().length];
 			
 			for (Status status : values()) {
-				STATUS[status.index] = status;
+				STATUSES[status.index] = status;
 			}
 		}
 		
@@ -57,8 +66,8 @@ public abstract class WorldTickHandler {
 		}
 		
 		public static Status fromIndex(int index) {
-			if (index > 0 && index < STATUS.length) {
-				return STATUS[index];
+			if (index > 0 && index < STATUSES.length) {
+				return STATUSES[index];
 			} else {
 				return IDLE;
 			}
@@ -70,7 +79,7 @@ public abstract class WorldTickHandler {
 		
 		public Status next() {
 			int nextIndex = index + 1;
-			if (nextIndex >= STATUS.length) {
+			if (nextIndex >= STATUSES.length) {
 				nextIndex = 0;
 			}
 			return fromIndex(nextIndex);

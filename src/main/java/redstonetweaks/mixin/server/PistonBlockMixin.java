@@ -34,7 +34,7 @@ import redstonetweaks.helper.PistonBlockEntityHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.world.server.UnfinishedEvent.Source;
+import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 @Mixin(PistonBlock.class)
 public abstract class PistonBlockMixin extends Block implements BlockHelper {

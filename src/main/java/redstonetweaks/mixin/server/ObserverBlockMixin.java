@@ -30,7 +30,7 @@ import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.setting.Settings;
-import redstonetweaks.world.server.UnfinishedEvent.Source;
+import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 @Mixin(ObserverBlock.class)
 public abstract class ObserverBlockMixin implements BlockHelper {

@@ -8,8 +8,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 import redstonetweaks.helper.ClientWorldHelper;
-import redstonetweaks.world.server.UnfinishedEvent;
-import redstonetweaks.world.server.UnfinishedEvent.Source;
+import redstonetweaks.world.common.UnfinishedEvent;
+import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 public class UnfinishedEventPacket extends RedstoneTweaksPacket {
 	

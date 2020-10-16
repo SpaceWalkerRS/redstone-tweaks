@@ -37,7 +37,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	@Inject(method = "getProgress", at = @At(value = "RETURN"), cancellable = true)
 	private void onGetProgressInjectAtReturn(float tickDelta, CallbackInfoReturnable<Float> cir) {
 		if (!((WorldHelper)world).tickWorldsNormally()) {
-			cir.setReturnValue(lastProgress);
+			cir.setReturnValue(lastProgress + 0.2F / getPistonSpeed());
 			cir.cancel();
 		}
 	}

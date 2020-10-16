@@ -3,8 +3,8 @@ package redstonetweaks.world.client;
 import net.minecraft.client.world.ClientWorld;
 
 import redstonetweaks.packet.UnfinishedEventPacket;
+import redstonetweaks.world.common.UnfinishedEvent;
 import redstonetweaks.world.common.UnfinishedEventScheduler;
-import redstonetweaks.world.server.UnfinishedEvent;
 
 public class ClientUnfinishedEventScheduler extends UnfinishedEventScheduler {
 	
