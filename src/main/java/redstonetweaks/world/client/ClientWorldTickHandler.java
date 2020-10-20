@@ -22,6 +22,12 @@ public class ClientWorldTickHandler extends WorldTickHandler {
 		this.currentTask = Task.NONE;
 	}
 	
+	public void onDisconnect() {
+		setStatus(Status.IDLE);
+		setCurrentTask(Task.NONE);
+		setCurrentWorld(null);
+	}
+	
 	public void onDoWorldTicksPacketReceived(DoWorldTicksPacket packet) {
 		doWorldTicks = packet.doWorldTicks;
 	}

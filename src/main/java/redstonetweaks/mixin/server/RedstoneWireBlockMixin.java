@@ -173,15 +173,23 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "RETURN"))
 	private void onGetWeakRedstonePowerInjectAtReturn(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
-		if (redstonetweaks.setting.Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
-			int power = cir.getReturnValueI();
-			if (power > 0) {
+		int power = cir.getReturnValueI();
+		
+		if (power > 0) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			if (blockEntity instanceof RedstoneWireBlockEntity) {
+				power = ((RedstoneWireBlockEntity)blockEntity).getPower();
+			}
+			
+			if (redstonetweaks.setting.Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
 				BlockState belowState = world.getBlockState(pos.down());
-				if (belowState.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
-					cir.setReturnValue(belowState.get(Properties.HORIZONTAL_FACING) == direction ? power : 0);
-					cir.cancel();
+				if (belowState.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA) && belowState.get(Properties.HORIZONTAL_FACING) == direction) {
+					power = 0;
 				}
 			}
+			
+			cir.setReturnValue(power);
+			cir.cancel();
 		}
 	}
 	
@@ -204,13 +212,25 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	}
 	
 	private void updatePowered(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
+		int blockStatePower = state.get(Properties.POWER);
 		int power;
 		
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof RedstoneWireBlockEntity) {
 			power = ((RedstoneWireBlockEntity)blockEntity).getPower();
+			
+			// If the world was loaded in vanilla there will not be
+			// any block entity data, but there might still be
+			// powered redstone wires. In that case a new block entity
+			// is created and given a default power value of 0.
+			// In the case where the block entity power is 0 but
+			// the power level in the block state is not, we set
+			// the block entity power level to the block state power level
+			if (power == 0 && blockStatePower > 0) {
+				power = blockStatePower;
+			}
 		} else {
-			power = state.get(Properties.POWER);
+			power = blockStatePower;
 		}
 		
 		int powerReceived = getReceivedRedstonePower(world, pos);

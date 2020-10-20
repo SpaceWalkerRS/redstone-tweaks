@@ -82,6 +82,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			}
 			
 			world.tick(shouldKeepTicking);
+			((ServerWorldHelper)world).flushBlockEntityUpdates();;
 		}
 		if (Settings.BugFixes.MC172213.get()) {
 			for (ServerWorld world : server.getWorlds()) {
@@ -346,6 +347,8 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		for (ServerWorld world : server.getWorlds()) {
 			ServerChunkManager chunkManager = world.getChunkManager();
 			((ServerChunkManagerHelper)chunkManager).broadcastChunkData();
+			
+			((ServerWorldHelper)world).flushBlockEntityUpdates();
 		}
 	}
 	

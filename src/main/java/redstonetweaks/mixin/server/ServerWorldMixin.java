@@ -2,8 +2,10 @@ package redstonetweaks.mixin.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
@@ -21,12 +23,14 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Npc;
 import net.minecraft.entity.boss.dragon.EnderDragonFight;
 import net.minecraft.entity.boss.dragon.EnderDragonPart;
 import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
 import net.minecraft.server.MinecraftServer;
@@ -48,7 +52,7 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.timer.Timer;
-
+import redstonetweaks.helper.BlockEntityHelper;
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
@@ -76,7 +80,8 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	private ServerNeighborUpdateScheduler serverNeighborUpdateScheduler;
 	private ServerUnfinishedEventScheduler unfinishedEventScheduler;
 	private boolean isProcessingBlockEvents = false;
-	private ArrayList<BlockEvent> blockEventList = new ArrayList<>();
+	private ArrayList<BlockEvent> blockEventList;
+	private Set<BlockPos> pendingBlockEntityUpdates;
 	
 	protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryKey, DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l) {
 		super(properties, registryKey, dimensionType, supplier, bl, bl2, l);
@@ -98,6 +103,8 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	private void onInitInjectAtReturn(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> registryKey, DimensionType dimensionType, WorldGenerationProgressListener worldGenerationProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<Spawner> list, boolean bl2, CallbackInfo ci) {
 		serverNeighborUpdateScheduler = new ServerNeighborUpdateScheduler((ServerWorld)(Object)this);
 		unfinishedEventScheduler = new ServerUnfinishedEventScheduler((ServerWorld)(Object)this);
+		blockEventList = new ArrayList<>();
+		pendingBlockEntityUpdates = new HashSet<>();
 	}
 	
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickTime()V"))
@@ -169,6 +176,24 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 		if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.clear();
 		}
+	}
+	
+	@Override
+	public void markForBlockEntityUpdate(BlockPos pos) {
+		this.pendingBlockEntityUpdates.add(pos);
+	}
+	
+	@Override
+	public void flushBlockEntityUpdates() {
+		for (BlockPos pos : pendingBlockEntityUpdates) {
+			BlockEntity blockEntity = getBlockEntity(pos);
+			if (blockEntity instanceof BlockEntityHelper) {
+				BlockEntityUpdateS2CPacket packet = new BlockEntityUpdateS2CPacket(pos, ((BlockEntityHelper)blockEntity).getId(), blockEntity.toTag(blockEntity.toInitialChunkDataTag()));
+				getServer().getPlayerManager().sendToDimension(packet, getRegistryKey());
+			}
+		}
+		
+		pendingBlockEntityUpdates.clear();
 	}
 	
 	@Override

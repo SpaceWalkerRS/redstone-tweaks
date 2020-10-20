@@ -27,7 +27,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 	private ClientSettingsManager settingsManager;
 	private NeighborUpdateVisualizer neighborUpdateVisualizer;
 	private ClientPacketHandler packetHandler;
-	private ClientWorldTickHandler worldHandler;
+	private ClientWorldTickHandler worldTickHandler;
 	private TickInfoLabelRenderer tickInfoLabelRenderer;
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
@@ -35,19 +35,19 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 		settingsManager = new ClientSettingsManager((MinecraftClient)(Object)this);
 		neighborUpdateVisualizer = new NeighborUpdateVisualizer((MinecraftClient)(Object)this);
 		packetHandler = new ClientPacketHandler((MinecraftClient)(Object)this);
-		worldHandler = new ClientWorldTickHandler((MinecraftClient)(Object)this);
+		worldTickHandler = new ClientWorldTickHandler((MinecraftClient)(Object)this);
 		tickInfoLabelRenderer = new TickInfoLabelRenderer((MinecraftClient)(Object)this);
 		HotKeyManager.loadHotkeys();
 	}
 	
 	@Inject(method = "joinWorld", at = @At(value = "RETURN"))
 	private void onJoinWorldInjectAtReturn(CallbackInfo ci) {
-		worldHandler.setCurrentWorld(world);
+		worldTickHandler.setCurrentWorld(world);
 	}
 	
 	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "RETURN"))
 	private void onDisconnect(Screen screen, CallbackInfo ci) {
-		worldHandler.setCurrentWorld(null);
+		worldTickHandler.onDisconnect();;
 		settingsManager.onDisconnect();
 	}
 	
@@ -73,7 +73,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 
 	@Override
 	public ClientWorldTickHandler getWorldTickHandler() {
-		return worldHandler;
+		return worldTickHandler;
 	}
 	
 	@Override

@@ -11,17 +11,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.AbstractRedstoneGateBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 
 import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.RedstoneDiodeHelper;
@@ -95,9 +99,18 @@ public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {
 		return Settings.Repeater.TICK_PRIORITY_FALLING_EDGE.get();
 	}
 	
-	@Redirect(method = "getPower", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-	private BlockState onGetPowerRedirectGetBlockState(World world1, BlockPos backPos, World world, BlockPos pos, BlockState state) {
-		return WorldHelper.getStateForPower(world, backPos, state.get(Properties.HORIZONTAL_FACING).getOpposite());
+	@Inject(method = "getPower", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
+	private void onGetPowerInjectBeforeGetBlockState(World world, BlockPos pos, BlockState state, CallbackInfoReturnable<Integer> cir, Direction facing, BlockPos behindPos, int power) {
+		BlockState behindState = WorldHelper.getStateForPower(world, behindPos, facing.getOpposite());
+		
+		cir.setReturnValue(Math.max(power, behindState.isOf(Blocks.REDSTONE_WIRE) ? behindState.getWeakRedstonePower(world, behindPos, facing) : 0));
+		cir.cancel();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Redirect(method = "getInputLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;get(Lnet/minecraft/state/property/Property;)Ljava/lang/Comparable;"))
+	private <T extends Comparable<T>> T onGetInputLevelRedirectGetProperty(BlockState state, Property<T> property, WorldView world, BlockPos pos, Direction dir) {
+		return (T)(Integer)state.getWeakRedstonePower(world, pos, dir);
 	}
 	
 	@ModifyConstant(method = "getInputLevel", constant = @Constant(intValue = 15))
