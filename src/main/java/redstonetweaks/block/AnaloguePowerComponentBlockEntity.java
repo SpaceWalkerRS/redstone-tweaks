@@ -1,4 +1,4 @@
-package redstonetweaks.block.redstonewire;
+package redstonetweaks.block;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -8,16 +8,16 @@ import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.helper.BlockEntityHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 
-public class RedstoneWireBlockEntity extends BlockEntity implements BlockEntityHelper {
+public class AnaloguePowerComponentBlockEntity extends BlockEntity implements BlockEntityHelper {
 	
 	// 1-14 are used by vanilla block entities
 	// In case they add more, just make the number sufficiently large
-	private static final int ID = 1001;
+	private static final int ID = 101;
 	
 	private int power;
 	
-	public RedstoneWireBlockEntity() {
-		super(RedstoneTweaks.REDSTONE_WIRE);
+	public AnaloguePowerComponentBlockEntity() {
+		super(RedstoneTweaks.REDSTONE_POWER);
 	}
 	
 	@Override

@@ -11,6 +11,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.gui.hotkeys.HotkeysTab;
+import redstonetweaks.gui.info.InfoTab;
 import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
@@ -134,6 +135,7 @@ public class RTMenuScreen extends Screen {
 	private void createTabs() {
 		addTab(new SettingsTab(this));
 		addTab(new HotkeysTab(this));
+		addTab(new InfoTab(this));
 	}
 	
 	private void addTab(RTMenuTab tab) {

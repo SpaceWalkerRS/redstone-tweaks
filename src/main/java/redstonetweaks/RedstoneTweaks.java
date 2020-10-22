@@ -4,25 +4,20 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.util.registry.Registry;
-import redstonetweaks.block.redstonewire.RedstoneWireBlockEntity;
+import redstonetweaks.block.AnaloguePowerComponentBlockEntity;
 
 public class RedstoneTweaks implements ModInitializer {
 	
 	public static final RedstoneTweaksVersion MOD_VERSION = new RedstoneTweaksVersion(0, 8, 2);
+	public static final RedstoneTweaksVersion PACKET_PROTOCOL = new RedstoneTweaksVersion(1, 0, 0);
 	public static final RedstoneTweaksVersion SETTINGS_VERSION = new RedstoneTweaksVersion(1, 1, 0);
 	
-	public static BlockEntityType<RedstoneWireBlockEntity> REDSTONE_WIRE;
+	public static RedstoneTweaksVersion SERVER_VERSION = null;
 	
-	private static RedstoneTweaks instance;
+	public static BlockEntityType<AnaloguePowerComponentBlockEntity> REDSTONE_POWER;
 	
 	@Override
 	public void onInitialize() {
-		instance = this;
-		
-		REDSTONE_WIRE = Registry.register(Registry.BLOCK_ENTITY_TYPE, "redstonetweaks", BlockEntityType.Builder.create(RedstoneWireBlockEntity::new, Blocks.REDSTONE_WIRE).build(null));
-	}
-	
-	public static RedstoneTweaks getInstance() {
-		return instance;
+		REDSTONE_POWER = Registry.register(Registry.BLOCK_ENTITY_TYPE, "redstonetweaks", BlockEntityType.Builder.create(AnaloguePowerComponentBlockEntity::new, Blocks.REDSTONE_WIRE, Blocks.TARGET).build(null));
 	}
 }

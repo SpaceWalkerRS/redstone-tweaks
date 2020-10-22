@@ -92,16 +92,18 @@ public abstract class PistonHandlerMixin {
 	private void onCanMoveAdjacentBlockInjectAtHead(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
 		BlockState state = world.getBlockState(pos);
 		if (Settings.StickyPiston.SUPER_STICKY.get() && state.isOf(Blocks.STICKY_PISTON)) {
+			boolean canMove = true;
+			
 			Direction facing = state.get(Properties.FACING);
 			if (facing.getAxis() != motionDirection.getAxis()) {
 				BlockPos neighborPos = pos.offset(facing);
 				BlockState neighborState = world.getBlockState(neighborPos);
 				if (isAdjacentBlockStuck(neighborState.getBlock(), state.getBlock()) && !tryMove(neighborPos, facing)) {
-					cir.setReturnValue(false);
-					cir.cancel();
+					canMove = false;
 				}
 			}
-			cir.setReturnValue(true);
+			
+			cir.setReturnValue(canMove);
 			cir.cancel();
 		}
 	}

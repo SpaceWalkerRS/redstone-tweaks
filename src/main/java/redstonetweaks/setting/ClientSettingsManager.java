@@ -1,7 +1,7 @@
 package redstonetweaks.setting;
 
 import net.minecraft.client.MinecraftClient;
-
+import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.packet.ResetSettingPacket;
@@ -18,7 +18,7 @@ public class ClientSettingsManager {
 	}
 	
 	public boolean canChangeSettings() {
-		return client.player.hasPermissionLevel(2);
+		return RedstoneTweaks.SERVER_VERSION != null && client.player.hasPermissionLevel(2);
 	}
 	
 	public void onSettingChanged(ISetting setting) {

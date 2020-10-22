@@ -17,9 +17,9 @@ public abstract class PacketHandler {
 	public Packet<?> encodePacket(RedstoneTweaksPacket packet) {
 		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 		
-		buffer.writeByte(RedstoneTweaks.MOD_VERSION.major);
-		buffer.writeByte(RedstoneTweaks.MOD_VERSION.minor);
-		buffer.writeByte(RedstoneTweaks.MOD_VERSION.patch);
+		buffer.writeByte(RedstoneTweaks.PACKET_PROTOCOL.major);
+		buffer.writeByte(RedstoneTweaks.PACKET_PROTOCOL.minor);
+		buffer.writeByte(RedstoneTweaks.PACKET_PROTOCOL.patch);
 		
 		PacketType packetType = PacketType.fromPacket(packet);
 		if (packetType == PacketType.INVALID) {
@@ -61,7 +61,8 @@ public abstract class PacketHandler {
 		TICK_BLOCK_ENTITY(12, TickBlockEntityPacket.class),
 		PLAYER_JOINED_SERVER(13, PlayerJoinedServerPacket.class),
 		DO_WORLD_TICKS(14, DoWorldTicksPacket.class),
-		TICK_PAUSE(15, TickPausePacket.class);
+		TICK_PAUSE(15, TickPausePacket.class),
+		SERVER_INFO(16, ServerInfoPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends RedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;

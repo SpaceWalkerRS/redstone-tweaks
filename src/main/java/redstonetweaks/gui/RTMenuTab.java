@@ -11,6 +11,8 @@ import redstonetweaks.gui.widget.RTTextFieldWidget;
 
 public abstract class RTMenuTab extends RTAbstractParentElement {
 	
+	protected static final int TEXT_COLOR = 16777215;
+	
 	public final RTMenuScreen screen;
 	private final Text title;
 	private final List<RTElement> contents;

@@ -6,7 +6,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
+import net.minecraft.server.network.ServerPlayerEntity;
+import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.helper.MinecraftServerHelper;
 
 public class PlayerJoinedServerPacket extends RedstoneTweaksPacket {
@@ -34,11 +35,16 @@ public class PlayerJoinedServerPacket extends RedstoneTweaksPacket {
 	@Override
 	public void execute(MinecraftServer server) {
 		((MinecraftServerHelper)server).getSettingsManager().onPlayerJoined(playerUUID);
+		
+		ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerUUID);
+		if (player != null) {
+			ServerInfoPacket packet = new ServerInfoPacket(RedstoneTweaks.MOD_VERSION);
+			((MinecraftServerHelper)server).getPacketHandler().sendPacketToPlayer(packet, player);
+		}
 	}
 
 	@Override
 	public void execute(MinecraftClient client) {
 		
 	}
-
 }

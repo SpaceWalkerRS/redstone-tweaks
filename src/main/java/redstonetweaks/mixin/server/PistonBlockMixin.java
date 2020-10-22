@@ -186,7 +186,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Redirect(method = "isMovable", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isAir()Z"))
 	private static boolean onIsMovableRedirectIsAir(BlockState state) {
-		return state.isAir() || (redstonetweaks.setting.Settings.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER));
+		return state.isAir() || state.isOf(Blocks.TARGET) || (redstonetweaks.setting.Settings.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER));
 	}
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonExtensionBlock;createBlockEntityPiston(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;ZZ)Lnet/minecraft/block/entity/BlockEntity;"))

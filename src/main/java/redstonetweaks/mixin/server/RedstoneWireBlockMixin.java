@@ -31,8 +31,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
-import redstonetweaks.block.redstonewire.RedstoneWireBlockEntity;
+import redstonetweaks.block.AnaloguePowerComponentBlockEntity;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
@@ -177,8 +176,8 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		
 		if (power > 0) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
-			if (blockEntity instanceof RedstoneWireBlockEntity) {
-				power = ((RedstoneWireBlockEntity)blockEntity).getPower();
+			if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
+				power = ((AnaloguePowerComponentBlockEntity)blockEntity).getPower();
 			}
 			
 			if (redstonetweaks.setting.Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
@@ -208,7 +207,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Override
 	public BlockEntity createBlockEntity(BlockView world) {
-		return new RedstoneWireBlockEntity();
+		return new AnaloguePowerComponentBlockEntity();
 	}
 	
 	private void updatePowered(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
@@ -216,8 +215,8 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		int power;
 		
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof RedstoneWireBlockEntity) {
-			power = ((RedstoneWireBlockEntity)blockEntity).getPower();
+		if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
+			power = ((AnaloguePowerComponentBlockEntity)blockEntity).getPower();
 			
 			// If the world was loaded in vanilla there will not be
 			// any block entity data, but there might still be
@@ -238,8 +237,8 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		if (power != powerReceived && world.getBlockState(pos) == state) {
 			int delay = redstonetweaks.setting.Settings.RedstoneWire.DELAY.get();
 			if (onScheduledTick || delay == 0) {
-				if (blockEntity instanceof RedstoneWireBlockEntity) {
-					((RedstoneWireBlockEntity)blockEntity).setPower(powerReceived);
+				if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
+					((AnaloguePowerComponentBlockEntity)blockEntity).setPower(powerReceived);
 				}
 				world.setBlockState(pos, state.with(Properties.POWER, Math.min(15, powerReceived)), 2);
 				
@@ -274,8 +273,8 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 			}
 			
 			BlockEntity blockEntity = world.getBlockEntity(pos);
-			if (blockEntity instanceof RedstoneWireBlockEntity) {
-				return ((RedstoneWireBlockEntity)blockEntity).getPower();
+			if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
+				return ((AnaloguePowerComponentBlockEntity)blockEntity).getPower();
 			}
 			return state.get(Properties.POWER);
 		}

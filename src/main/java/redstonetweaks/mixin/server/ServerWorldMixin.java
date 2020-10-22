@@ -52,6 +52,7 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.timer.Timer;
+
 import redstonetweaks.helper.BlockEntityHelper;
 import redstonetweaks.helper.MinecraftServerHelper;
 import redstonetweaks.helper.ServerWorldHelper;
@@ -484,7 +485,7 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 				profiler.pop();
 			}
 		}
-
+		
 		profiler.pop();
 	}
 }

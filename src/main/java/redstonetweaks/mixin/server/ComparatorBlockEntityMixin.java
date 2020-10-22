@@ -17,7 +17,7 @@ public abstract class ComparatorBlockEntityMixin extends BlockEntity implements 
 	
 	// 1-14 are used by vanilla block entities
 	// In case they add more, just make the number sufficiently large
-	private static final int ID = 1002;
+	private static final int ID = 102;
 	
 	public ComparatorBlockEntityMixin(BlockEntityType<?> type) {
 		super(type);

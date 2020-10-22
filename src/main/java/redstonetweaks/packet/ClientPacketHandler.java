@@ -26,13 +26,11 @@ public class ClientPacketHandler extends PacketHandler {
 
 	@Override
 	public void onPacketReceived(PacketByteBuf buffer) {
-		RedstoneTweaksVersion serverVersion = new RedstoneTweaksVersion(buffer.readByte(), buffer.readByte(), buffer.readByte());
-		if (RedstoneTweaks.MOD_VERSION.equals(serverVersion)) {
+		RedstoneTweaksVersion serverProtocol = new RedstoneTweaksVersion(buffer.readByte(), buffer.readByte(), buffer.readByte());
+		if (RedstoneTweaks.PACKET_PROTOCOL.equals(serverProtocol)) {
 			try {
 				decodePacket(buffer).execute(client);
-			} catch (InstantiationException e) {
-				
-			} catch (IllegalAccessException e) {
+			} catch (Exception e) {
 				
 			}
 		}

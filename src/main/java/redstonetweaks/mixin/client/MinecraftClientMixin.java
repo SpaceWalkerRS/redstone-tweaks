@@ -10,7 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
-
+import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.hotkeys.HotKeyManager;
 import redstonetweaks.packet.ClientPacketHandler;
@@ -47,7 +47,8 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 	
 	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "RETURN"))
 	private void onDisconnect(Screen screen, CallbackInfo ci) {
-		worldTickHandler.onDisconnect();;
+		RedstoneTweaks.SERVER_VERSION = null;
+		worldTickHandler.onDisconnect();
 		settingsManager.onDisconnect();
 	}
 	
