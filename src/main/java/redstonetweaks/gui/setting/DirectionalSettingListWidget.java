@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Direction;
 
 import redstonetweaks.gui.ButtonPanel;
@@ -114,7 +115,10 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 		private void populateButtonPanel() {
 			if (setting instanceof DirectionalBooleanSetting) {
 				DirectionalBooleanSetting bSetting = (DirectionalBooleanSetting)setting;
-				buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(bSetting.valueToText(bSetting.get(direction))), (button) -> {
+				buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> {
+					Formatting formatting = bSetting.get(direction) ? Formatting.GREEN : Formatting.RED;
+					return new TranslatableText(bSetting.valueToText(bSetting.get(direction))).formatted(formatting);
+				}, (button) -> {
 					bSetting.set(direction, !bSetting.get(direction));
 					((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(bSetting);
 				}));

@@ -15,9 +15,14 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 	private boolean deaf = false;
 	
 	public RTTextFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, UpdateText updateText, Consumer<String> changedListener) {
+		this(textRenderer, 32, x, y, width, height, updateText, changedListener);
+	}
+	
+	public RTTextFieldWidget(TextRenderer textRenderer, int maxLength, int x, int y, int width, int height, UpdateText updateText, Consumer<String> changedListener) {
 		super(textRenderer, x + 1, y + 1, width - 2, height - 2, new TranslatableText(""));
 		this.updateText = updateText;
 		
+		this.setMaxLength(maxLength);
 		this.updateText();
 		this.setChangedListener((text) -> {
 			if (!deaf) {

@@ -11,7 +11,11 @@ public class IntegerSetting extends Setting<Integer> {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		
-		super.set(getDefault());
+		// we need to initialize the value here
+		// because the min/max values are not yet
+		// initialized when the super class tries
+		// to initialize the value.
+		set(getDefault());
 	}
 	
 	@Override

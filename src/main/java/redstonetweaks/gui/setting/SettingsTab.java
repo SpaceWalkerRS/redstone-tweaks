@@ -51,7 +51,7 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 		});
 		addContent(clearSearchBoxButton);
 		
-		searchBox = new RTTextFieldWidget(screen.getTextRenderer(), 5, resetButton.getY(), clearSearchBoxButton.getX() - 10, 20, (textField) -> {}, (query) -> {
+		searchBox = new RTTextFieldWidget(screen.getTextRenderer(), 256, 5, resetButton.getY(), clearSearchBoxButton.getX() - 10, 20, (textField) -> {}, (query) -> {
 			settingsList.filter(query);
 			lastSearchQuery = query;
 		});

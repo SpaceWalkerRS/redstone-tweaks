@@ -271,7 +271,10 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 			if (setting instanceof BooleanSetting) {
 				if (setting instanceof BugFixSetting) {
 					BugFixSetting bSetting = (BugFixSetting)setting;
-					buttonPanel.addButton(new RTButtonWidget(0, 0, 78, 20, () -> new TranslatableText(bSetting.getAsText()), (button) -> {
+					buttonPanel.addButton(new RTButtonWidget(0, 0, 78, 20, () -> {
+						Formatting formatting = bSetting.get() ? Formatting.GREEN : Formatting.RED;
+						return new TranslatableText(bSetting.getAsText()).formatted(formatting);
+					}, (button) -> {
 						bSetting.set(!bSetting.get());
 						((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(bSetting);
 					}));
@@ -289,7 +292,10 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 					}).alwaysActive());
 				} else {
 					BooleanSetting bSetting = (BooleanSetting)setting;
-					buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(bSetting.getAsText()), (button) -> {
+					buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> {
+						Formatting formatting = bSetting.get() ? Formatting.GREEN : Formatting.RED;
+						return new TranslatableText(bSetting.getAsText()).formatted(formatting);
+					}, (button) -> {
 						bSetting.set(!bSetting.get());
 						((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(bSetting);
 					}));

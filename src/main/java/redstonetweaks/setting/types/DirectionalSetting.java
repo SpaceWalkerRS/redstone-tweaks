@@ -17,7 +17,7 @@ public abstract class DirectionalSetting<T> extends ArraySetting<T> {
 	}
 	
 	public void reset(Direction dir) {
-		set(dir, getDefault(dir));
+		reset(dir.getId());
 	}
 	
 	public boolean isDefault(Direction dir) {
