@@ -4,11 +4,11 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 
 import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.packet.DoWorldTicksPacket;
 import redstonetweaks.packet.TaskSyncPacket;
 import redstonetweaks.packet.TickBlockEntityPacket;
 import redstonetweaks.packet.TickStatusPacket;
 import redstonetweaks.packet.WorldSyncPacket;
-import redstonetweaks.packet.DoWorldTicksPacket;
 import redstonetweaks.world.common.WorldTickHandler;
 
 public class ClientWorldTickHandler extends WorldTickHandler {
@@ -17,6 +17,7 @@ public class ClientWorldTickHandler extends WorldTickHandler {
 	
 	public ClientWorldTickHandler(MinecraftClient client) {
 		super();
+		
 		this.client = client;
 		
 		this.currentTask = Task.NONE;

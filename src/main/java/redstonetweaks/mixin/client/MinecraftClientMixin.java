@@ -37,6 +37,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientHelper {
 		packetHandler = new ClientPacketHandler((MinecraftClient)(Object)this);
 		worldTickHandler = new ClientWorldTickHandler((MinecraftClient)(Object)this);
 		tickInfoLabelRenderer = new TickInfoLabelRenderer((MinecraftClient)(Object)this);
+		
 		HotKeyManager.loadHotkeys();
 	}
 	

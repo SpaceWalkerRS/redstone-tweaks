@@ -2,12 +2,14 @@ package redstonetweaks.gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.gui.hotkeys.HotkeysTab;
@@ -15,7 +17,7 @@ import redstonetweaks.gui.info.InfoTab;
 import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.gui.widget.RTTextFieldWidget;
+import redstonetweaks.hotkeys.HotKeyManager;
 import redstonetweaks.hotkeys.RTKeyBinding;
 import redstonetweaks.setting.types.ISetting;
 
@@ -29,8 +31,6 @@ public class RTMenuScreen extends Screen {
 	private final List<IAbstractButtonWidget> tabButtons;
 	
 	private int selectedTabIndex;
-	private RTMenuTab selectedTab;
-	private boolean switchedTabs;
 	private int headerHeight;
 	
 	public RTMenuScreen(MinecraftClient client) {
@@ -42,10 +42,24 @@ public class RTMenuScreen extends Screen {
 	}
 	
 	@Override
+	public Optional<Element> hoveredElement(double mouseX, double mouseY) {
+		RTMenuTab selectedTab = getSelectedTab();
+		if (selectedTab.isMouseOver(mouseX, mouseY)) {
+			return Optional.of(selectedTab);
+		}
+		return super.hoveredElement(mouseX, mouseY);
+	}
+	
+	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		for (Element el : children()) {
-			if (el.mouseClicked(mouseX, mouseY, button)) {
-				setFocused(el);
+		RTMenuTab selectedTab = getSelectedTab();
+		if (selectedTab.mouseClicked(mouseX, mouseY, button)) {
+			setFocused(selectedTab);
+		} else {
+			for (IAbstractButtonWidget tabButton : tabButtons) {
+				if (tabButton.mouseClicked(mouseX, mouseY, button)) {
+					setFocused(tabButton);
+				}
 			}
 		}
 		
@@ -58,10 +72,14 @@ public class RTMenuScreen extends Screen {
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (selectedTab instanceof HotkeysTab && selectedTab.keyPressed(keyCode, scanCode, modifiers)) {
+		if (getSelectedTab().keyPressed(keyCode, scanCode, modifiers)) {
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		if (keyCode == 256 || (HotKeyManager.TOGGLE_MENU.matchesKey(keyCode, scanCode) && !focusedIsTextField())) {
+			onClose();
+			return true;
+		}
+		return false;
 	}
 	
 	@Override
@@ -72,15 +90,21 @@ public class RTMenuScreen extends Screen {
 		for (IAbstractButtonWidget tabButton : tabButtons) {
 			tabButton.render(matrices, mouseX, mouseY, delta);
 		}
-		selectedTab.render(matrices, mouseX, mouseY, delta);
+		getSelectedTab().render(matrices, mouseX, mouseY, delta);
 	}
 	
 	@Override
 	public void onClose() {
+		RTMenuTab selectedTab = getSelectedTab();
 		if (!selectedTab.closeTopWindow()) {
 			selectedTab.onTabClosed();
 			super.onClose();
 		}
+	}
+	
+	@Override
+	public List<? extends Element> children() {
+		return tabButtons;
 	}
 	
 	@Override
@@ -90,27 +114,21 @@ public class RTMenuScreen extends Screen {
 		
 		headerHeight = TITLE_MARGIN + TITLE_HEIGHT + 30;
 		createTabs();
+		createTabButtons();
 		
-		children.addAll(tabButtons);
-		openTab(tabs.get(0));
-		tabButtons.get(0).setActive(false);
+		selectedTabIndex = 0;
+		getSelectedTab().init();
+		tabButtons.get(selectedTabIndex).setActive(false);
 	}
 	
 	@Override
 	public void tick() {
-		if (switchedTabs) {
-			closeSelectedTab();
-			openTab(tabs.get(selectedTabIndex));
-			
-			switchedTabs = false;
-		}
-		
-		selectedTab.tick();
+		getSelectedTab().tick();
 	}
 	
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
-		selectedTab.onTabClosed();
+		getSelectedTab().onTabClosed();
 		super.resize(client, width, height);
 	}
 	
@@ -131,77 +149,68 @@ public class RTMenuScreen extends Screen {
 	}
 	
 	private void createTabs() {
-		addTab(new SettingsTab(this));
-		addTab(new HotkeysTab(this));
-		addTab(new InfoTab(this));
+		tabs.add(new SettingsTab(this));
+		tabs.add(new HotkeysTab(this));
+		tabs.add(new InfoTab(this));
 	}
 	
-	private void addTab(RTMenuTab tab) {
-		int tabIndex = tabs.size();
-		
-		int buttonWidth = client.textRenderer.getWidth(tab.getTitle()) + 10;
+	private void createTabButtons() {
 		int buttonX = 5;
 		int buttonY = TITLE_MARGIN + TITLE_HEIGHT;
-		if (tabIndex > 0) {
-			IAbstractButtonWidget prevButton = tabButtons.get(tabButtons.size() - 1);
-			buttonX += prevButton.getX() + prevButton.getWidth();
-			buttonY = prevButton.getY();
+		
+		for (int index = 0; index < tabs.size(); index++) {
+			int tabIndex = index;
 			
-			if (buttonX + buttonWidth > width - 5) {
+			Text text = tabs.get(tabIndex).getTitle();
+			int buttonWidth = client.textRenderer.getWidth(text) + 10;
+			
+			tabButtons.add(new RTButtonWidget(buttonX, buttonY, buttonWidth, 20, () -> text, (button) -> {
+				switchTab(tabIndex);
+			}));
+			
+			buttonX += buttonWidth + 5;
+			if (buttonX > getWidth() - 5) {
 				buttonX = 5;
 				buttonY += 22;
 				
 				headerHeight += 22;
 			}
 		}
-		
-		tabs.add(tab);
-		tabButtons.add(new RTButtonWidget(buttonX, buttonY, buttonWidth, 20, () -> tab.getTitle(), (button) -> {
-			switchTab(tabIndex);
-		}));
 	}
 	
-	private void switchTab(int index) {
+	private RTMenuTab getSelectedTab() {
+		return tabs.get(selectedTabIndex);
+	}
+	
+	private void switchTab(int newIndex) {
 		tabButtons.get(selectedTabIndex).setActive(true);
-		tabButtons.get(index).setActive(false);
+		tabButtons.get(newIndex).setActive(false);
 		
-		selectedTabIndex = index;
-		switchedTabs = true;
-	}
-	
-	private void openTab(RTMenuTab tab) {
-		selectedTab = tab;
-		children.add(tab);
-		tab.init();
-	}
-	
-	private void closeSelectedTab() {
-		selectedTab.onTabClosed();
-		children.remove(selectedTab);
+		selectedTabIndex = newIndex;
+		getSelectedTab().init();
 	}
 	
 	public void openWindow(RTWindow window) {
-		selectedTab.openWindow(window);
+		getSelectedTab().openWindow(window);
 	}
 	
 	public void closeWindow(RTWindow window) {
-		selectedTab.closeWindow(window);
+		getSelectedTab().closeWindow(window);
 	}
 	
 	public boolean focusedIsTextField() {
-		if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
-			return true;
-		}
-		return selectedTab.focusedIsTextField();
+		return getSelectedTab().focusedIsTextField();
 	}
 	
 	public void onSettingChanged(ISetting setting) {
+		RTMenuTab selectedTab = getSelectedTab();
 		if (selectedTab instanceof SettingsTab) {
 			((SettingsTab)selectedTab).onSettingChanged(setting);
 		}
 	}
 	
 	public void onHotkeyChanged(RTKeyBinding keyBinding) {
+		RTMenuTab selectedTab = getSelectedTab();
 		if (selectedTab instanceof HotkeysTab) {
 			((HotkeysTab)selectedTab).onHotkeyChanged(keyBinding);
 		}

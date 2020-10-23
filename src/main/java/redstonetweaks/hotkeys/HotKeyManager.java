@@ -31,10 +31,16 @@ public class HotKeyManager {
 	private static final Map<String, RTKeyBinding> NAME_TO_BINDING = new HashMap<>();
 	private static final Map<Key, RTKeyBinding> KEY_TO_BINDING = new HashMap<>();
 	
-	private static void register(RTKeyBinding keyBinding) {
+	public static final RTKeyBinding TOGGLE_MENU;
+	public static final RTKeyBinding PAUSE_WORLD_TICKING;
+	public static final RTKeyBinding ADVANCE_WORLD_TICKING;
+	
+	public static RTKeyBinding register(RTKeyBinding keyBinding) {
 		KEYS.add(keyBinding);
 		NAME_TO_BINDING.put(keyBinding.getName(), keyBinding);
 		KEY_TO_BINDING.put(keyBinding.getKey(), keyBinding);
+		
+		return keyBinding;
 	}
 	
 	public static RTKeyBinding getKeyBinding(Key key) {
@@ -68,11 +74,62 @@ public class HotKeyManager {
 	}
 	
 	public static boolean onKey(int keyCode, int scanCode, int event) {
-		RTKeyBinding key = KEY_TO_BINDING.get(InputUtil.fromKeyCode(keyCode, scanCode));
-		if (key == null) {
+		RTKeyBinding keyBinding = getKeyBinding(InputUtil.fromKeyCode(keyCode, scanCode));
+		
+		if (keyBinding == null) {
 			return false;
 		}
-		return key.onKey(event);
+		
+		switch (event) {
+		case GLFW.GLFW_RELEASE:
+			keyBinding.onKeyRelease();
+			return keyRelease(keyBinding);
+		case GLFW.GLFW_PRESS:
+			keyBinding.onKeyPress();
+			return keyPress(keyBinding);
+		case GLFW.GLFW_REPEAT:
+			keyBinding.onKeyRepeat();
+			return keyRepeat(keyBinding);
+		}
+		
+		return false;
+	}
+	
+	private static boolean keyPress(RTKeyBinding keyBinding) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (keyBinding == TOGGLE_MENU) {
+			if (client.currentScreen == null) {
+				client.openScreen(new RTMenuScreen(client));
+				
+				return true;
+			}
+		} else
+		if (keyBinding == PAUSE_WORLD_TICKING) {
+			if (client.currentScreen == null) {
+				TickPausePacket packet = new TickPausePacket(TickPausePacket.PAUSE);
+				((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
+				
+				return true;
+			}
+		} else
+		if (keyBinding == ADVANCE_WORLD_TICKING) {
+			if (client.currentScreen == null) {
+				TickPausePacket packet = new TickPausePacket(TickPausePacket.ADVANCE);
+				((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
+				
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private static boolean keyRepeat(RTKeyBinding keyBinding) {
+		return false;
+	}
+	
+	private static boolean keyRelease(RTKeyBinding keyBinding) {
+		return false;
 	}
 	
 	private static void onKeyBindingChanged(RTKeyBinding keyBinding) {
@@ -152,54 +209,8 @@ public class HotKeyManager {
 	}
 	
 	static {
-		register(new RTKeyBinding("Open Menu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_R, (key, event) -> {
-			if (event == GLFW.GLFW_PRESS) {
-				MinecraftClient client = MinecraftClient.getInstance();
-				Screen screen = client.currentScreen;
-				
-				if (screen == null) {
-					client.openScreen(new RTMenuScreen(client));
-					return true;
-				} else
-				if (screen instanceof RTMenuScreen) {
-					if (!((RTMenuScreen)screen).focusedIsTextField()) {
-						screen.onClose();
-						return true;
-					}
-				}
-			}
-			
-			return false;
-		}).alwaysBound());
-		register(new RTKeyBinding("Pause World Ticking", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_P, (key, event) -> {
-			if (event == GLFW.GLFW_PRESS) {
-				MinecraftClient client = MinecraftClient.getInstance();
-				Screen screen = client.currentScreen;
-				
-				if (screen == null) {
-					TickPausePacket packet = new TickPausePacket(TickPausePacket.PAUSE);
-					((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
-					
-					return true;
-				}
-			}
-			
-			return false;
-		}));
-		register(new RTKeyBinding("Advance World Ticking", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_O, (key, event) -> {
-			if (event == GLFW.GLFW_PRESS) {
-				MinecraftClient client = MinecraftClient.getInstance();
-				Screen screen = client.currentScreen;
-				
-				if (screen == null) {
-					TickPausePacket packet = new TickPausePacket(TickPausePacket.ADVANCE);
-					((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
-					
-					return true;
-				}
-			}
-			
-			return false;
-		}));
+		TOGGLE_MENU = register(new RTKeyBinding("Open Menu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_R).alwaysBound());
+		PAUSE_WORLD_TICKING = register(new RTKeyBinding("Pause World Ticking", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_P));
+		ADVANCE_WORLD_TICKING = register(new RTKeyBinding("Advance World Ticking", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_O));
 	}
 }
