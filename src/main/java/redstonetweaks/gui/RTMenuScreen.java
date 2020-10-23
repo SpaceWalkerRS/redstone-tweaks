@@ -73,8 +73,6 @@ public class RTMenuScreen extends Screen {
 			tabButton.render(matrices, mouseX, mouseY, delta);
 		}
 		selectedTab.render(matrices, mouseX, mouseY, delta);
-		
-		super.render(matrices, mouseX, mouseY, delta);
 	}
 	
 	@Override
