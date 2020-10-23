@@ -45,18 +45,18 @@ public class BlockEventHandler {
 	private int retractionProgress;
 	
 	private Map<BlockPos, BlockState> movedBlocks;
-    private List<BlockPos> movedBlocksPos;
-    private List<BlockState> movedBlockStates;
-    private List<BlockPos> brokenBlocksPos;
-    private BlockState[] affectedBlockStates;
+	private List<BlockPos> movedBlocksPos;
+	private List<BlockState> movedBlockStates;
+	private List<BlockPos> brokenBlocksPos;
+	private BlockState[] affectedBlockStates;
 	@SuppressWarnings("rawtypes")
 	private Iterator leftOverBlocks;
-    
-    private int affectedBlocksIndex;
-    private int index;
-    
-    private boolean isIterating;
-    private int moveProgress;
+	
+	private int affectedBlocksIndex;
+	private int index;
+	
+	private boolean isIterating;
+	private int moveProgress;
 	
 	public BlockEventHandler(World world, BlockPos pos, BlockState state, int type, int data, boolean sticky) {
 		this.world = world;
