@@ -38,7 +38,7 @@ public class RedstoneTweaksVersion {
 				
 				if (major >= 0 && minor >= 0 && patch >= 0)
 			        return new RedstoneTweaksVersion(major, minor, patch);
-			} catch (NumberFormatException ignore) {
+			} catch (NumberFormatException e) {
 				
 		    }
 		}

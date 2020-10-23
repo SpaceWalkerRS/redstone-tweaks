@@ -8,10 +8,6 @@ import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
 
 public interface ServerWorldHelper  {
 	
-	public void markForBlockEntityUpdate(BlockPos pos);
-	
-	public void flushBlockEntityUpdates();
-	
 	public void tickTimeAccess();
 	
 	public boolean hasBlockEvent(BlockPos pos);

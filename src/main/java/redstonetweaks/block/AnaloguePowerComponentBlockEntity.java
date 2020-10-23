@@ -3,16 +3,12 @@ package redstonetweaks.block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.helper.BlockEntityHelper;
-import redstonetweaks.helper.ServerWorldHelper;
 
-public class AnaloguePowerComponentBlockEntity extends BlockEntity implements BlockEntityHelper {
-	
-	// 1-14 are used by vanilla block entities
-	// In case they add more, just make the number sufficiently large
-	private static final int ID = 101;
+public class AnaloguePowerComponentBlockEntity extends BlockEntity {
 	
 	private int power;
 	
@@ -34,8 +30,8 @@ public class AnaloguePowerComponentBlockEntity extends BlockEntity implements Bl
 	}
 	
 	@Override
-	public int getId() {
-		return ID;
+	public BlockEntityUpdateS2CPacket toUpdatePacket() {
+		return new BlockEntityUpdateS2CPacket(pos, BlockEntityHelper.getId(getType()), toTag(new CompoundTag()));
 	}
 	
 	public int getPower() {
@@ -44,9 +40,5 @@ public class AnaloguePowerComponentBlockEntity extends BlockEntity implements Bl
 	
 	public void setPower(int newPower) {
 		power = newPower;
-		
-		if (!world.isClient()) {
-			((ServerWorldHelper)world).markForBlockEntityUpdate(pos);
-		}
 	}
 }

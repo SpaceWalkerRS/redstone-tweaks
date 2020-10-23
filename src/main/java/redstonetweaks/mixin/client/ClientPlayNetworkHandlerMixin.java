@@ -46,10 +46,8 @@ public class ClientPlayNetworkHandlerMixin {
 	
 	@Inject(method = "onBlockEntityUpdate", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/network/packet/s2c/play/BlockEntityUpdateS2CPacket;getBlockEntityType()I"))
 	private void onOnBlockEntityUpdateInjectAfterGetType(BlockEntityUpdateS2CPacket packet, CallbackInfo ci, BlockPos pos, BlockEntity blockEntity) {
-		if (blockEntity instanceof BlockEntityHelper) {
-			if (((BlockEntityHelper)blockEntity).getId() == packet.getBlockEntityType()) {
-				blockEntity.fromTag(client.world.getBlockState(pos), packet.getCompoundTag());
-			}
+		if (BlockEntityHelper.getId(blockEntity.getType()) == packet.getBlockEntityType()) {
+			blockEntity.fromTag(client.world.getBlockState(pos), packet.getCompoundTag());
 			
 			ci.cancel();
 		}

@@ -170,6 +170,13 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		((ServerWorldHelper)world).getNeighborUpdateScheduler().clearCurrentSourcePos();
 	}
 	
+	@Inject(method = "onBlockAdded", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/RedstoneWireBlock;update(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
+	private void onOnBlockAddedInjectBeforeUpdate(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo ci) {
+		if (world.getBlockEntity(pos) == null) {
+			world.setBlockEntity(pos, createBlockEntity(world));
+		}
+	}
+	
 	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "RETURN"))
 	private void onGetWeakRedstonePowerInjectAtReturn(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
 		int power = cir.getReturnValueI();

@@ -19,6 +19,7 @@
 	"server.ChestBlockMixin",
 	"server.ChorusFlowerBlockMixin",
 	"server.ChorusPlantBlockMixin",
+	"server.ChunkDataS2CPacketMixin",
 	"server.CommandBlockMixin",
 	"server.CommandManagerMixin",
 	"server.ComparatorBlockMixin",

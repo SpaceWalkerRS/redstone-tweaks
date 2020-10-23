@@ -8,7 +8,7 @@ import redstonetweaks.block.AnaloguePowerComponentBlockEntity;
 
 public class RedstoneTweaks implements ModInitializer {
 	
-	public static final RedstoneTweaksVersion MOD_VERSION = new RedstoneTweaksVersion(0, 8, 2);
+	public static final RedstoneTweaksVersion MOD_VERSION = new RedstoneTweaksVersion(0, 8, 3);
 	public static final RedstoneTweaksVersion PACKET_PROTOCOL = new RedstoneTweaksVersion(1, 0, 0);
 	public static final RedstoneTweaksVersion SETTINGS_VERSION = new RedstoneTweaksVersion(1, 1, 0);
 	
