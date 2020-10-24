@@ -61,9 +61,8 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			if (interval > 0 || isTickingWorlds()) {
 				if (interval == 0 || server.getTicks() % interval == 0) {
 					tickStepByStep(shouldKeepTicking);
-				} else {
-					broadcastChunkData();
 				}
+				broadcastChunkData();
 			} else {
 				tickWorldsNormally(shouldKeepTicking);
 			}

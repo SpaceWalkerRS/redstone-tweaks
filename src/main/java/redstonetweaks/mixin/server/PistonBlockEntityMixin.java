@@ -14,7 +14,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.nbt.CompoundTag;
-
+import net.minecraft.util.math.MathHelper;
 import redstonetweaks.helper.PistonBlockEntityHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.WorldHelper;
@@ -37,7 +37,9 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	@Inject(method = "getProgress", at = @At(value = "RETURN"), cancellable = true)
 	private void onGetProgressInjectAtReturn(float tickDelta, CallbackInfoReturnable<Float> cir) {
 		if (!((WorldHelper)world).tickWorldsNormally()) {
-			cir.setReturnValue(lastProgress + 0.2F / getPistonSpeed());
+			int pistonSpeed = getPistonSpeed();
+			
+			cir.setReturnValue(MathHelper.clamp(lastProgress + 0.2F / pistonSpeed, 0, pistonSpeed));
 			cir.cancel();
 		}
 	}
