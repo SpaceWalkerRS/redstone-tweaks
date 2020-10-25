@@ -13,7 +13,7 @@ group = project.maven_group
 dependencies {
 	//to change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:1.16.3"
-    mappings "net.fabricmc:yarn:1.16.3+build.26:v2"
+    mappings "net.fabricmc:yarn:1.16.3+build.47:v2"
     modImplementation "net.fabricmc:fabric-loader:0.10.0+build.208"
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
