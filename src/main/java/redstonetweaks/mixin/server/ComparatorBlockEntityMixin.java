@@ -1,6 +1,9 @@
 package redstonetweaks.mixin.server;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -15,6 +18,12 @@ public abstract class ComparatorBlockEntityMixin extends BlockEntity {
 	
 	public ComparatorBlockEntityMixin(BlockEntityType<?> type) {
 		super(type);
+	}
+	
+	@Inject(method = "setOutputSignal", at = @At(value = "RETURN"))
+	private void onSetOutputSignalInjectAtHead(int newPower, CallbackInfo ci) {
+		BlockEntityUpdateS2CPacket packet = new BlockEntityUpdateS2CPacket(pos, BlockEntityHelper.getId(getType()), toTag(new CompoundTag()));
+		world.getServer().getPlayerManager().sendToAround(null, getPos().getX(), getPos().getY(), getPos().getZ(), 64.0D, world.getRegistryKey(), packet);
 	}
 	
 	@Override
