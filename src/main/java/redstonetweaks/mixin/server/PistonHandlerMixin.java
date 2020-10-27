@@ -92,11 +92,13 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 			PistonHelper.getDoubleRetractionState(world, pos);
 			
 			// Create list of block entities that are about to be moved
-			BlockEntity blockEntity = world.getBlockEntity(pos);
-			movedBlockEntities.add(blockEntity);
-			
-			if (blockEntity != null) {
-				world.removeBlockEntity(pos);
+			if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
+				BlockEntity blockEntity = world.getBlockEntity(pos);
+				movedBlockEntities.add(blockEntity);
+				
+				if (blockEntity != null) {
+					world.removeBlockEntity(pos);
+				}
 			}
 		}
 	}
