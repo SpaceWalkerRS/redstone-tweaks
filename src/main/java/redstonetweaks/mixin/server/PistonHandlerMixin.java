@@ -72,7 +72,7 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 			}
 		}
 		
-		if (PistonHelper.mergeSlabs(sticky))
+		if (Settings.Global.MERGE_SLABS.get())
 			splitSlabTypes = Maps.newHashMap();
 	}
 	
@@ -96,7 +96,7 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
 	private void onTryMoveInjectAfterGetState0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState) {
-		if (PistonHelper.mergeSlabs(sticky)) {
+		if (Settings.Global.MERGE_SLABS.get()) {
 			// Note: The direction is incorrect in the calculatePush method.
 			Direction fixedDir = (pos != posTo || retracted) ? dir : dir.getOpposite();
 			
@@ -109,7 +109,7 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
 	private void onTryMoveBeforeListAdd0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState, Block block, int i, int j, int l) {
-		if (PistonHelper.mergeSlabs(sticky) && l != 0) {
+		if (Settings.Global.MERGE_SLABS.get() && l != 0) {
 			Direction direction = motionDirection.getOpposite();
 			BlockPos blockPos = pos.offset(direction, l);
 			BlockState state = world.getBlockState(blockPos);
@@ -123,7 +123,7 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
 	private void onTryMoveInjectBeforeGetPistonBehavior(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int l) {
-		if (PistonHelper.mergeSlabs(sticky) && SlabHelper.isSlab(frontState)) {
+		if (Settings.Global.MERGE_SLABS.get() && SlabHelper.isSlab(frontState)) {
 			SlabType frontType = frontState.get(SlabBlock.TYPE);
 
 			if (frontType != SlabType.DOUBLE) {
@@ -149,7 +149,7 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 2, shift = Shift.BEFORE, target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
 	private void onTryMoveBeforeListAdd2(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState, Block block, int i, int j, int l) {
-		if (PistonHelper.mergeSlabs(sticky)) {
+		if (Settings.Global.MERGE_SLABS.get()) {
 			BlockPos blockPos = pos.offset(motionDirection, l);
 			BlockState state = world.getBlockState(blockPos);
 			

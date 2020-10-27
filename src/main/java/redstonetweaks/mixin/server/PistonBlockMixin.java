@@ -272,7 +272,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 
 	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Ljava/util/Map;remove(Ljava/lang/Object;)Ljava/lang/Object;"))
 	private void onMoveInjectAfterOffset(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos blockPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> remainingStates, List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> list3, BlockState blockStates[], Direction direction, int j, int listIndex, BlockPos frontPos, BlockState movedState) {
-		if (PistonHelper.mergeSlabs(sticky)) {
+		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
 			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler).getSplitSlabTypes();
 			PistonHelper.tryMergeMovedSlab(world, movedState, frontPos, listIndex, splitSlabTypes, movedPositions, movedStates, remainingStates);
 		}
@@ -280,7 +280,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 		
 	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lcom/google/common/collect/Maps;newHashMap()Ljava/util/HashMap;"))
 	private void onMoveInjectBeforeNewHashMap(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos armPos, PistonHandler pistonHandler) {
-		if (PistonHelper.mergeSlabs(sticky)) {
+		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
 			// Capture the piston handler for use in the
 			// redirect following methods.
 			this.pistonHandler.set(pistonHandler);
@@ -289,7 +289,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 4, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private boolean onMoveRedirectSetBlockState4(World world, BlockPos pos, BlockState newState, int flags) {
-		if (PistonHelper.mergeSlabs(sticky)) {
+		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
 			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler.get()).getSplitSlabTypes();
 			return world.setBlockState(pos, PistonHelper.getAdjustedSlabState(newState, world, pos, splitSlabTypes), flags);
 		}
@@ -298,7 +298,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 
 	@Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;updateNeighbors(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;I)V"))
 	private void onMoveRedirectUpdateNeighbors(BlockState state, WorldAccess world, BlockPos pos, int flags) {
-		if (PistonHelper.mergeSlabs(sticky)) {
+		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
 			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler.get()).getSplitSlabTypes();
 			PistonHelper.getAdjustedSlabState(state, world, pos, splitSlabTypes).updateNeighbors(world, pos, flags);
 		} else {
@@ -308,7 +308,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/block/BlockState;prepare(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;I)V"))
 	private void onMoveRedirectPrepare1(BlockState state, WorldAccess world, BlockPos pos, int flags) {
-		if (PistonHelper.mergeSlabs(sticky)) {
+		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
 			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler.get()).getSplitSlabTypes();
 			PistonHelper.getAdjustedSlabState(state, world, pos, splitSlabTypes).prepare(world, pos, flags);
 		} else {
@@ -318,7 +318,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Inject(method = "move", at = @At(value = "RETURN", ordinal = 1))
 	private void onMoveInjectAtReturn1(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir) {
-		if (PistonHelper.mergeSlabs(sticky)) {
+		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
 			// Make sure we release the handler memory
 			pistonHandler.set(null);
 		}

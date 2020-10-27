@@ -269,7 +269,7 @@ public class BlockEventHandler {
 				blockState = world.getBlockState(blockPos);
 				blockPos = blockPos.offset(moveDirection);
 				// Merge slabs feature start
-				if (PistonHelper.mergeSlabs(sticky))
+				if (Settings.Global.MERGE_SLABS.get())
 					PistonHelper.tryMergeMovedSlab(world, blockState, blockPos, index, splitSlabTypes, movedBlocksPos, movedBlockStates, movedBlocks);
 				// Merge slabs feature end
 				movedBlocks.remove(blockPos);
@@ -306,7 +306,7 @@ public class BlockEventHandler {
 				blockPos = (BlockPos)leftOverBlocks.next();
 				// Merge slabs feature start
 				BlockState newState;
-				if (PistonHelper.mergeSlabs(sticky)) {
+				if (Settings.Global.MERGE_SLABS.get()) {
 					newState = PistonHelper.getAdjustedSlabState(Blocks.AIR.getDefaultState(), world, blockPos, splitSlabTypes);
 				} else {
 					newState = Blocks.AIR.getDefaultState();
@@ -331,7 +331,7 @@ public class BlockEventHandler {
 				blockState.prepare(world, blockPos, 2);
 				// Merge slabs feature start
 				BlockState newState;
-				if (PistonHelper.mergeSlabs(sticky)) {
+				if (Settings.Global.MERGE_SLABS.get()) {
 					newState = PistonHelper.getAdjustedSlabState(Blocks.AIR.getDefaultState(), world, blockPos, splitSlabTypes);
 				} else {
 					newState = Blocks.AIR.getDefaultState();

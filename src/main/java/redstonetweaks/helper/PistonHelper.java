@@ -160,10 +160,6 @@ public class PistonHelper {
 		return sticky ? Settings.StickyPiston.UPDATE_SELF_WHILE_POWERED.get() : Settings.NormalPiston.UPDATE_SELF_WHILE_POWERED.get();
 	}
 	
-	public static boolean mergeSlabs(boolean sticky) {
-		return sticky ? Settings.StickyPiston.MERGE_SLABS.get() : Settings.NormalPiston.MERGE_SLABS.get();
-	}
-	
 	public static void tryMergeMovedSlab(World world, BlockState movedState, BlockPos frontPos, int listIndex, Map<BlockPos, SlabType> splitSlabTypes, List<BlockPos> movedPositions, List<BlockState> movedStates, Map<BlockPos, BlockState> remainingStates) {
 		if (SlabHelper.isSlab(movedState)) {
 			SlabType type = movedState.get(SlabBlock.TYPE);

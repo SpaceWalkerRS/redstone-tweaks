@@ -60,6 +60,7 @@ public class Settings {
 		public static final BooleanSetting DO_COMPARATOR_UPDATES = new BooleanSetting(ID, "doComparatorUpdates", "Allow worlds to dispatch comparator updates.", true);
 		public static final BooleanSetting DOUBLE_RETRACTION = new BooleanSetting(ID, "doubleRetraction", "A re-implementation of behavior that was present in 1.3-1.8, known as \"Jeb retraction\" or\n\"instant double retraction\". It creates a very narrow window where unpowered pistons can be moved.", false);
 		public static final BooleanSetting INSTANT_BLOCK_EVENTS = new BooleanSetting(ID, "instantBlockEvents", "Execute block events at the moment they are scheduled.", false);
+		public static final BooleanSetting MERGE_SLABS = new BooleanSetting(ID, "mergeSlabs", "?? FILL ME IN ??", false);
 		public static final BooleanSetting MOVABLE_BLOCK_ENTITIES = new BooleanSetting(ID, "movableBlockEntities", "Allow blocks with block entities to be moved by pistons.", false);
 		public static final IntegerSetting POWER_MAX = new IntegerSetting(ID, "maxPower", "The maximum power output of analogue components like redstone wire, comparators, weighted pressure\nplates, etc.", 15, 0, Common.MAX_POWER);
 		public static final BooleanSetting RANDOMIZE_BLOCK_EVENTS = new BooleanSetting(ID, "randomizeBlockEvents", "Randomize the order in which block events are processed.", false);
@@ -76,6 +77,7 @@ public class Settings {
 				DO_COMPARATOR_UPDATES,
 				DOUBLE_RETRACTION,
 				INSTANT_BLOCK_EVENTS,
+				MERGE_SLABS,
 				MOVABLE_BLOCK_ENTITIES,
 				POWER_MAX,
 				RANDOMIZE_BLOCK_EVENTS,
@@ -607,7 +609,6 @@ public class Settings {
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
 		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
-		public static final BooleanSetting MERGE_SLABS = new BooleanSetting(ID, "mergeSlabs", "?? FILL ME IN ??", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				CONNECTS_TO_WIRE,
@@ -626,8 +627,7 @@ public class Settings {
 				SPEED_FALLING_EDGE,
 				TICK_PRIORITY_RISING_EDGE,
 				TICK_PRIORITY_FALLING_EDGE,
-				PUSH_LIMIT,
-				MERGE_SLABS
+				PUSH_LIMIT
 		);
 	}
 	
@@ -938,7 +938,6 @@ public class Settings {
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
 		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
-		public static final BooleanSetting MERGE_SLABS = new BooleanSetting(ID, "mergeSlabs", "?? FILL ME IN ??", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				CONNECTS_TO_WIRE,
@@ -960,8 +959,7 @@ public class Settings {
 				SUPER_STICKY,
 				TICK_PRIORITY_RISING_EDGE,
 				TICK_PRIORITY_FALLING_EDGE,
-				PUSH_LIMIT,
-				MERGE_SLABS
+				PUSH_LIMIT
 		);
 	}
 	
