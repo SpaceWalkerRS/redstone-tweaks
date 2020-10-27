@@ -158,7 +158,7 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	}
 	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
-	private void onTryMoveInjectBeforeGetPistonBehavior(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int l) {
+	private void onTryMoveInjectBeforeGetPistonBehavior(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int j, int l) {
 		if (Settings.Global.MERGE_SLABS.get() && SlabHelper.isSlab(frontState)) {
 			SlabType frontType = frontState.get(SlabBlock.TYPE);
 
@@ -271,8 +271,7 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 			
 			cir.setReturnValue(canMove);
 			cir.cancel();
-		} else
-		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (state.isOf(Blocks.CHEST) || state.isOf(Blocks.TRAPPED_CHEST))) {
+		} else if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (state.isOf(Blocks.CHEST) || state.isOf(Blocks.TRAPPED_CHEST))) {
 			boolean canMove = true;
 			
 			if (motionDirection.getAxis().isHorizontal()) {
