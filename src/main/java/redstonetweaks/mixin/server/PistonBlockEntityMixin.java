@@ -16,6 +16,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.MathHelper;
+
 import redstonetweaks.helper.PistonBlockEntityHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.WorldHelper;
@@ -36,7 +37,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 		super(type);
 	}
 	
-	@Inject(method = "getProgress", at = @At(value = "RETURN"), cancellable = true)
+	@Inject(method = "getProgress", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetProgressInjectAtReturn(float tickDelta, CallbackInfoReturnable<Float> cir) {
 		if (!((WorldHelper)world).tickWorldsNormally()) {
 			int pistonSpeed = getPistonSpeed();
@@ -48,12 +49,12 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	
 	@Inject(method = "finish", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onFinishInjectAfterSetBlockState(CallbackInfo ci) {
-		setPushedBlockEntity();
+		placePushedBlockEntity();
 	}
 	
 	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.AFTER, ordinal = 1, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onTickInjectAfterSetBlockState(CallbackInfo ci) {
-		setPushedBlockEntity();
+		placePushedBlockEntity();
 	}
 	
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5f))
@@ -78,20 +79,25 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	}
 	
 	@Override
+	public void setIsMovedByStickyPiston(boolean isMovedByStickyPiston) {
+		this.isMovedByStickyPiston = isMovedByStickyPiston;
+	}
+	
+	@Override
 	public void setPushedBlockEntity(BlockEntity pushedBlockEntity) {
 		this.pushedBlockEntity = pushedBlockEntity;
 	}
 	
 	@Override
-	public void setIsMovedByStickyPiston(boolean isMovedByStickyPiston) {
-		this.isMovedByStickyPiston = isMovedByStickyPiston;
+	public BlockEntity getPushedBlockEntity() {
+		return pushedBlockEntity;
 	}
 	
 	private int getPistonSpeed() {
 		return extending ? PistonHelper.speedRisingEdge(isMovedByStickyPiston) : PistonHelper.speedFallingEdge(isMovedByStickyPiston);
 	}
 	
-	private void setPushedBlockEntity() {
+	private void placePushedBlockEntity() {
 		if (pushedBlockEntity != null) {
 			pushedBlockEntity.cancelRemoval();
 			
@@ -100,7 +106,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 			world.removeBlockEntity(pos);
 			world.setBlockEntity(pos, pushedBlockEntity);
 			
-			world.updateComparators(pos, pushedBlock.getBlock());
+			pushedBlockEntity.markDirty();
 		}
 	}
 }

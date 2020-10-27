@@ -20,11 +20,12 @@ public class BlockEntityHelper {
 		}
 	};
 	
-	public static final int getId(BlockEntityType<? extends BlockEntity> blockEntityType) {
-		return IDS.get(blockEntityType);
+	public static int getId(BlockEntityType<? extends BlockEntity> blockEntityType) {
+		Integer id = IDS.get(blockEntityType);
+		return id == null ? -1 : id;
 	}
 	
-	public static final boolean hasId(BlockEntityType<? extends BlockEntity> blockEntityType) {
+	public static boolean hasId(BlockEntityType<? extends BlockEntity> blockEntityType) {
 		return IDS.containsKey(blockEntityType);
 	}
 }

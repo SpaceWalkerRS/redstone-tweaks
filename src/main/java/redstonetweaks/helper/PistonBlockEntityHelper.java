@@ -10,4 +10,6 @@ public interface PistonBlockEntityHelper {
 	
 	public void setPushedBlockEntity(BlockEntity pushedBlockEntity);
 	
+	public BlockEntity getPushedBlockEntity();
+	
 }

@@ -48,6 +48,7 @@ public class BlockEventHandler {
 	private Map<BlockPos, BlockState> movedBlocks;
 	private List<BlockPos> movedBlocksPos;
 	private List<BlockState> movedBlockStates;
+	private List<BlockEntity> movedBlockEntities;
 	private List<BlockPos> brokenBlocksPos;
 	private Map<BlockPos, SlabType> splitSlabTypes;
 	private BlockState[] affectedBlockStates;
@@ -225,6 +226,7 @@ public class BlockEventHandler {
 			movedBlocks = Maps.newHashMap();
 			movedBlocksPos = pistonHandler.getMovedBlocks();
 			movedBlockStates = Lists.newArrayList();
+			movedBlockEntities = ((PistonHandlerHelper)pistonHandler).getMovedBlockEntities();
 			splitSlabTypes = ((PistonHandlerHelper)pistonHandler).getSplitSlabTypes();
 			
 			for (BlockPos movedBlockPos : movedBlocksPos) {
@@ -274,9 +276,15 @@ public class BlockEventHandler {
 				// Merge slabs feature end
 				movedBlocks.remove(blockPos);
 				world.setBlockState(blockPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing), 68);
-				PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(movedBlockStates.get(index), facing, extend, false);
-				((PistonBlockEntityHelper) pistonBlockEntity).setIsMovedByStickyPiston(sticky);
+				
+				BlockState movedBlockState = movedBlockStates.get(index);
+				BlockEntity movedBlockEntity = null;
+				if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
+					movedBlockEntity = movedBlockEntities.get(index);
+				}
+				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(movedBlockState, movedBlockEntity, facing, extend, false, sticky);
 				world.setBlockEntity(blockPos, pistonBlockEntity);
+				
 				affectedBlockStates[affectedBlocksIndex++] = blockState;
 				index--;
 			} else {

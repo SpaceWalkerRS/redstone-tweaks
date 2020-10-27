@@ -1,6 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -56,8 +55,6 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Shadow public static native boolean isMovable(BlockState state, World world, BlockPos pos, Direction motionDir, boolean canBreak, Direction pistonDir);
 	@Shadow protected abstract boolean move(World world, BlockPos pos, Direction dir, boolean retract);
-	
-	private List<BlockEntity> movedBlockEntities = new ArrayList<>();
 	
 	@Redirect(method = "onPlaced", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;tryMove(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
 	private void onPlacedRedirectTryMove(PistonBlock piston, World world, BlockPos pos, BlockState state) {
@@ -212,35 +209,19 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 		return false;
 	}
 	
-	@Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/piston/PistonHandler;getMovedBlocks()Ljava/util/List;"))
-	private List<BlockPos> onMoveRedirectGetMovedBlocks(PistonHandler pistonHandler, World world, BlockPos pistonPos, Direction pistonDir, boolean extend) {
-		List<BlockPos> movedBlocksPos = pistonHandler.getMovedBlocks();
-		movedBlockEntities.clear();
-		
-		if (redstonetweaks.setting.Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
-			for (BlockPos pos : movedBlocksPos) {
-				BlockEntity blockEntity = world.getBlockEntity(pos);
-				movedBlockEntities.add(blockEntity);
-				
-				if (blockEntity != null) {
-					world.removeBlockEntity(pos);
-				}
-			}
-		}
-		
-		return movedBlocksPos;
-	}
-	
 	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 0, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))
 	private void onMoveInjectBeforeSetBlockEntity(World world, BlockPos pos, Direction pistonDir, boolean extend, CallbackInfoReturnable<Boolean> cir,
 			BlockPos headPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> movedBlockStatesMap,
 			List<BlockPos> movedBlocksPos, List<BlockState> movedBlockStates, List<BlockPos> brokenBlocksPos,
 			BlockState[] affectedBlockStates, Direction motionDirection, int j, int l, BlockPos blockPos4) 
 	{
-		BlockState pushedBlockState = movedBlockStates.get(l);
-		BlockEntity pushedBlockEntity = redstonetweaks.setting.Settings.Global.MOVABLE_BLOCK_ENTITIES.get() ? movedBlockEntities.get(l) : null;
+		BlockState movedBlockState = movedBlockStates.get(l);
+		BlockEntity movedBlockEntity = null;
+		if (redstonetweaks.setting.Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
+			movedBlockEntity = ((PistonHandlerHelper)pistonHandler).getMovedBlockEntities().get(l);
+		}
 		
-		world.setBlockEntity(blockPos4, PistonHelper.createPistonBlockEntity(pushedBlockState, pushedBlockEntity, pistonDir, extend, false, sticky));
+		world.setBlockEntity(blockPos4, PistonHelper.createPistonBlockEntity(movedBlockState, movedBlockEntity, pistonDir, extend, false, sticky));
 	}
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))

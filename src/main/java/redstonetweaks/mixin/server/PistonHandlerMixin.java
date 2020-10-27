@@ -1,5 +1,6 @@
 package redstonetweaks.mixin.server;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,12 +26,14 @@ import net.minecraft.block.PistonBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
+import net.minecraft.block.enums.ChestType;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+
 import redstonetweaks.helper.PistonHandlerHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
@@ -46,9 +49,10 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	@Shadow @Final private List<BlockPos> movedBlocks;
 
 	private boolean sticky;
+	private List<BlockEntity> movedBlockEntities;
 	private Map<BlockPos, SlabType> splitSlabTypes;
 	
-	private boolean onTryMoveIsBlockSticky0IsStickyPiston;
+	private boolean onTryMoveIsBlockSticky0;
 	
 	@Shadow private static boolean isBlockSticky(Block block) { return false; }
 	@Shadow private static boolean isAdjacentBlockStuck(Block block, Block block2) { return false; }
@@ -59,7 +63,8 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 		BlockState state = world.getBlockState(pos);
 		if (state.getBlock() instanceof PistonBlock) {
 			sticky = state.isOf(Blocks.STICKY_PISTON);
-		} else if (state.isOf(Blocks.MOVING_PISTON)) {
+		} else
+		if (state.isOf(Blocks.MOVING_PISTON)) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			if (blockEntity instanceof PistonBlockEntity) {
 				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
@@ -72,8 +77,33 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 			}
 		}
 		
-		if (Settings.Global.MERGE_SLABS.get())
+		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
+			movedBlockEntities = new ArrayList<>();
+		}
+		if (Settings.Global.MERGE_SLABS.get()) {
 			splitSlabTypes = Maps.newHashMap();
+		}
+	}
+	
+	@Inject(method = "getMovedBlocks", at = @At(value = "HEAD"))
+	private void onGetMovedBlocksInjectAtHead(CallbackInfoReturnable<List<BlockPos>> cir) {
+		for (BlockPos pos : movedBlocks) {
+			// Notify clients of any pistons that are about to be "double retracted"
+			PistonHelper.getDoubleRetractionState(world, pos);
+			
+			// Create list of block entities that are about to be moved
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			movedBlockEntities.add(blockEntity);
+			
+			if (blockEntity != null) {
+				world.removeBlockEntity(pos);
+			}
+		}
+	}
+	
+	@Override
+	public List<BlockEntity> getMovedBlockEntities() {
+		return movedBlockEntities;
 	}
 	
 	@Inject(method = "isBlockSticky", cancellable = true, at = @At(value = "HEAD"))
@@ -81,19 +111,23 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 		if (Settings.StickyPiston.SUPER_STICKY.get() && block == Blocks.STICKY_PISTON) {
 			cir.setReturnValue(true);
 			cir.cancel();
+		} else
+		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (block == Blocks.CHEST || block == Blocks.TRAPPED_CHEST)) {
+			cir.setReturnValue(true);
+			cir.cancel();
 		}
 	}
 	
 	@Inject(method = "tryMove", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Lnet/minecraft/block/piston/PistonHandler;isBlockSticky(Lnet/minecraft/block/Block;)Z"))
 	private void onTryMoveInjectBeforeIsBlockSticky0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState state) {
-		onTryMoveIsBlockSticky0IsStickyPiston = isSticky(state, motionDirection.getOpposite());
+		onTryMoveIsBlockSticky0 = isSticky(state, motionDirection.getOpposite());
 	}
 	
 	@Redirect(method = "tryMove", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/block/piston/PistonHandler;isBlockSticky(Lnet/minecraft/block/Block;)Z"))
 	private boolean onTryMoveRedirectIsBlockSticky0(Block block) {
-		return onTryMoveIsBlockSticky0IsStickyPiston;
+		return onTryMoveIsBlockSticky0;
 	}
-
+	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
 	private void onTryMoveInjectAfterGetState0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState) {
 		if (Settings.Global.MERGE_SLABS.get()) {
@@ -106,7 +140,7 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 			}
 		}
 	}
-
+	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
 	private void onTryMoveBeforeListAdd0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState, Block block, int i, int j, int l) {
 		if (Settings.Global.MERGE_SLABS.get() && l != 0) {
@@ -235,13 +269,39 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 			
 			cir.setReturnValue(canMove);
 			cir.cancel();
-		}
-	}
-	
-	@Inject(method = "getMovedBlocks", at = @At(value = "HEAD"))
-	private void onGetMovedBlocksInjectAtHeadt(CallbackInfoReturnable<List<BlockPos>> cir) {
-		if (!world.isClient()) {
-			movedBlocks.forEach((pos) -> PistonHelper.getDoubleRetractionState(world, pos));
+		} else
+		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (state.isOf(Blocks.CHEST) || state.isOf(Blocks.TRAPPED_CHEST))) {
+			boolean canMove = true;
+			
+			if (motionDirection.getAxis().isHorizontal()) {
+				ChestType chestType = state.get(Properties.CHEST_TYPE);
+				
+				if (chestType != ChestType.SINGLE) {
+					Direction facing = state.get(Properties.HORIZONTAL_FACING);
+					Direction direction;
+					if (chestType == ChestType.LEFT) {
+						direction = facing.rotateYClockwise();
+					} else {
+						direction = facing.rotateYCounterclockwise();
+					}
+					
+					BlockPos neighborPos = pos.offset(direction);
+					BlockState neighborState = world.getBlockState(neighborPos);
+					
+					if (neighborState.isOf(state.getBlock())) {
+						ChestType neighborChestType = neighborState.get(Properties.CHEST_TYPE);
+						
+						if (neighborChestType != ChestType.SINGLE && neighborChestType != chestType) {
+							if (neighborState.get(Properties.HORIZONTAL_FACING) == facing) {
+								canMove = tryMove(neighborPos, direction);
+							}
+						}
+					}
+				}
+			}
+			
+			cir.setReturnValue(canMove);
+			cir.cancel();
 		}
 	}
 	
@@ -253,9 +313,28 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 		if (Settings.StickyPiston.SUPER_STICKY.get()) {
 			return state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.FACING) == direction;
 		}
+		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
+			if (state.isOf(Blocks.CHEST) || state.isOf(Blocks.TRAPPED_CHEST)) {
+				if (direction.getAxis().isVertical()) {
+					return false;
+				}
+				ChestType chestType = state.get(Properties.CHEST_TYPE);
+				if (chestType == ChestType.SINGLE) {
+					return false;
+				}
+				
+				Direction facing = state.get(Properties.HORIZONTAL_FACING);
+				if (chestType == ChestType.LEFT && direction == facing.rotateYClockwise()) {
+					return true;
+				}
+				if (chestType == ChestType.RIGHT && direction == facing.rotateYCounterclockwise()) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}
-
+	
 	@Override
 	public Map<BlockPos, SlabType> getSplitSlabTypes() {
 		return splitSlabTypes;
