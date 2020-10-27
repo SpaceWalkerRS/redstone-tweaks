@@ -89,7 +89,9 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	private void onGetMovedBlocksInjectAtHead(CallbackInfoReturnable<List<BlockPos>> cir) {
 		for (BlockPos pos : movedBlocks) {
 			// Notify clients of any pistons that are about to be "double retracted"
-			PistonHelper.getDoubleRetractionState(world, pos);
+			if (Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
+				PistonHelper.getDoubleRetractionState(world, pos);
+			}
 			
 			// Create list of block entities that are about to be moved
 			if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
