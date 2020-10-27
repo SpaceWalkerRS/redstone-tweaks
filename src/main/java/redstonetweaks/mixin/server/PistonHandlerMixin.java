@@ -52,10 +52,6 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	private List<BlockEntity> movedBlockEntities;
 	private Map<BlockPos, SlabType> splitSlabTypes;
 	
-	private boolean onTryMoveIsBlockSticky0;
-	
-	@Shadow private static boolean isBlockSticky(Block block) { return false; }
-	@Shadow private static boolean isAdjacentBlockStuck(Block block, Block block2) { return false; }
 	@Shadow protected abstract boolean tryMove(BlockPos pos, Direction dir);
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
@@ -112,24 +108,8 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	
 	@Inject(method = "isBlockSticky", cancellable = true, at = @At(value = "HEAD"))
 	private static void onIsBlockStickyInjectAtHead(Block block, CallbackInfoReturnable<Boolean> cir) {
-		if (Settings.StickyPiston.SUPER_STICKY.get() && block == Blocks.STICKY_PISTON) {
-			cir.setReturnValue(true);
-			cir.cancel();
-		} else
-		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (block == Blocks.CHEST || block == Blocks.TRAPPED_CHEST)) {
-			cir.setReturnValue(true);
-			cir.cancel();
-		}
-	}
-	
-	@Inject(method = "tryMove", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Lnet/minecraft/block/piston/PistonHandler;isBlockSticky(Lnet/minecraft/block/Block;)Z"))
-	private void onTryMoveInjectBeforeIsBlockSticky0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState state) {
-		onTryMoveIsBlockSticky0 = isSticky(state, motionDirection.getOpposite());
-	}
-	
-	@Redirect(method = "tryMove", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/block/piston/PistonHandler;isBlockSticky(Lnet/minecraft/block/Block;)Z"))
-	private boolean onTryMoveRedirectIsBlockSticky0(Block block) {
-		return onTryMoveIsBlockSticky0;
+		cir.setReturnValue(isPotentiallySticky(block));
+		cir.cancel();
 	}
 	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
@@ -143,6 +123,25 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 				cir.cancel();
 			}
 		}
+	}
+
+	@Redirect(method = "tryMove", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/block/piston/PistonHandler;isBlockSticky(Lnet/minecraft/block/Block;)Z"))
+	private boolean onTryMoveRedirectIsBlockSticky0(Block block) {
+		return true;
+	}
+	
+	private boolean onTryMoveIsAdjacentBlockStuck;
+	
+	@Inject(method = "tryMove", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
+	private void onTryMoveInjectBeforeIsAdjacentBlockStuck(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState, Block block, int i, BlockPos blockPos) {
+		BlockPos prevBlockPos = blockPos.offset(motionDirection);
+		BlockState pullingState = world.getBlockState(prevBlockPos);
+		onTryMoveIsAdjacentBlockStuck = isAdjacentBlockStuck(pullingState, blockState, motionDirection.getOpposite());
+	}
+
+	@Redirect(method = "tryMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
+	private boolean onTryMoveRedirectIsAdjacentBlockStuck(Block block1, Block block2) {
+		return onTryMoveIsAdjacentBlockStuck;
 	}
 	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
@@ -255,85 +254,63 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	private int pushLimit(int oldPushLimit) {
 		return sticky ? Settings.StickyPiston.PUSH_LIMIT.get() : Settings.NormalPiston.PUSH_LIMIT.get();
 	}
-	
-	@Inject(method = "canMoveAdjacentBlock", cancellable = true, at = @At(value = "HEAD"))
-	private void onCanMoveAdjacentBlockInjectAtHead(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		BlockState state = world.getBlockState(pos);
-		if (Settings.StickyPiston.SUPER_STICKY.get() && state.isOf(Blocks.STICKY_PISTON)) {
-			boolean canMove = true;
-			
-			Direction facing = state.get(Properties.FACING);
-			if (facing.getAxis() != motionDirection.getAxis()) {
-				BlockPos neighborPos = pos.offset(facing);
-				BlockState neighborState = world.getBlockState(neighborPos);
-				if (isAdjacentBlockStuck(neighborState.getBlock(), state.getBlock()) && !tryMove(neighborPos, facing)) {
-					canMove = false;
-				}
-			}
-			
-			cir.setReturnValue(canMove);
-			cir.cancel();
-		} else if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (state.isOf(Blocks.CHEST) || state.isOf(Blocks.TRAPPED_CHEST))) {
-			boolean canMove = true;
-			
-			if (motionDirection.getAxis().isHorizontal()) {
-				ChestType chestType = state.get(Properties.CHEST_TYPE);
-				
-				if (chestType != ChestType.SINGLE) {
-					Direction facing = state.get(Properties.HORIZONTAL_FACING);
-					Direction direction;
-					if (chestType == ChestType.LEFT) {
-						direction = facing.rotateYClockwise();
-					} else {
-						direction = facing.rotateYCounterclockwise();
-					}
-					
-					BlockPos neighborPos = pos.offset(direction);
-					BlockState neighborState = world.getBlockState(neighborPos);
-					
-					if (neighborState.isOf(state.getBlock())) {
-						ChestType neighborChestType = neighborState.get(Properties.CHEST_TYPE);
-						
-						if (neighborChestType != ChestType.SINGLE && neighborChestType != chestType) {
-							if (neighborState.get(Properties.HORIZONTAL_FACING) == facing) {
-								canMove = tryMove(neighborPos, direction);
-							}
-						}
-					}
-				}
-			}
-			
-			cir.setReturnValue(canMove);
+
+	@Inject(method = "canMoveAdjacentBlock", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
+	private void onCanMoveAdjacentBlockInjectBeforeIsAdjacentBlockStuck(BlockPos pos, CallbackInfoReturnable<Boolean> cir, BlockState pullingState, Direction[] directions, int len, int i, Direction dir, BlockPos adjacentPos, BlockState adjacentState) {
+		if (isAdjacentBlockStuck(pullingState, adjacentState, dir) && !tryMove(adjacentPos, dir)) {
+			cir.setReturnValue(false);
 			cir.cancel();
 		}
 	}
+
+	@Redirect(method = "canMoveAdjacentBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
+	private boolean onCanMoveAdjacentBlockRedirectIsAdjacentBlockStuck(Block block1, Block block2) {
+		// This will be replaced by the injection above.
+		return false;
+	}
 	
-	// Check if the block is sticky in the given direction
-	private static boolean isSticky(BlockState state, Direction direction) {
-		if (state.isOf(Blocks.SLIME_BLOCK) || state.isOf(Blocks.HONEY_BLOCK)) {
+	private static boolean isAdjacentBlockStuck(BlockState pullingState, BlockState adjacentState, Direction dir) {
+		// Default vanilla implementation. Slime and honey does not stick.
+		if (pullingState.isOf(Blocks.SLIME_BLOCK) && !adjacentState.isOf(Blocks.HONEY_BLOCK)) {
 			return true;
 		}
-		if (Settings.StickyPiston.SUPER_STICKY.get()) {
-			return state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.FACING) == direction;
+		if (pullingState.isOf(Blocks.HONEY_BLOCK) && !adjacentState.isOf(Blocks.SLIME_BLOCK)) {
+			return true;
 		}
-		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
-			if (state.isOf(Blocks.CHEST) || state.isOf(Blocks.TRAPPED_CHEST)) {
-				if (direction.getAxis().isVertical()) {
-					return false;
-				}
-				ChestType chestType = state.get(Properties.CHEST_TYPE);
-				if (chestType == ChestType.SINGLE) {
-					return false;
-				}
-				
-				Direction facing = state.get(Properties.HORIZONTAL_FACING);
-				if (chestType == ChestType.LEFT && direction == facing.rotateYClockwise()) {
-					return true;
-				}
-				if (chestType == ChestType.RIGHT && direction == facing.rotateYCounterclockwise()) {
-					return true;
-				}
+		if (Settings.StickyPiston.SUPER_STICKY.get() && pullingState.isOf(Blocks.STICKY_PISTON)) {
+			return dir == pullingState.get(Properties.FACING);
+		}
+		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (pullingState.isOf(Blocks.CHEST) || pullingState.isOf(Blocks.TRAPPED_CHEST))) {
+			ChestType chestType = pullingState.get(Properties.CHEST_TYPE);
+			
+			if (chestType == ChestType.SINGLE) {
+				return false;
 			}
+			
+			if (adjacentState.isOf(pullingState.getBlock()) && adjacentState.get(Properties.CHEST_TYPE) == chestType.getOpposite()) {
+				Direction facing = pullingState.get(Properties.HORIZONTAL_FACING);
+
+				if (chestType == ChestType.LEFT) {
+					return (dir == facing.rotateYClockwise());
+				}
+				return (dir == facing.rotateYCounterclockwise());
+			}
+			
+			return false;
+		}
+	
+		return false;
+	}
+	
+	private static boolean isPotentiallySticky(Block block) {
+		if (block == Blocks.SLIME_BLOCK || block == Blocks.HONEY_BLOCK) {
+			return true;
+		}
+		if (Settings.StickyPiston.SUPER_STICKY.get() && block == Blocks.STICKY_PISTON) {
+			return true;
+		}
+		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (block == Blocks.CHEST || block == Blocks.TRAPPED_CHEST)) {
+			return true;
 		}
 		return false;
 	}
