@@ -270,6 +270,13 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	}
 	
 	private static boolean isAdjacentBlockStuck(BlockState pullingState, BlockState adjacentState, Direction dir) {
+		if (Settings.Global.MERGE_SLABS.get() && SlabHelper.isSlab(adjacentState) && dir.getAxis().isVertical()) {
+			SlabType type = adjacentState.get(SlabBlock.TYPE);
+			
+			if (type != SlabType.DOUBLE && type == SlabHelper.getTypeFromDirection(dir))
+				return false;
+		}
+		
 		// Default vanilla implementation. Slime and honey does not stick.
 		if (pullingState.isOf(Blocks.SLIME_BLOCK) && !adjacentState.isOf(Blocks.HONEY_BLOCK)) {
 			return true;
