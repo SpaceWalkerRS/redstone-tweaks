@@ -607,6 +607,7 @@ public class Settings {
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
 		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
+		public static final BooleanSetting MERGE_SLABS = new BooleanSetting(ID, "mergeSlabs", "?? FILL ME IN ??", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				CONNECTS_TO_WIRE,
@@ -625,7 +626,8 @@ public class Settings {
 				SPEED_FALLING_EDGE,
 				TICK_PRIORITY_RISING_EDGE,
 				TICK_PRIORITY_FALLING_EDGE,
-				PUSH_LIMIT
+				PUSH_LIMIT,
+				MERGE_SLABS
 		);
 	}
 	
@@ -936,6 +938,7 @@ public class Settings {
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
 		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
+		public static final BooleanSetting MERGE_SLABS = new BooleanSetting(ID, "mergeSlabs", "?? FILL ME IN ??", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				CONNECTS_TO_WIRE,
@@ -957,7 +960,8 @@ public class Settings {
 				SUPER_STICKY,
 				TICK_PRIORITY_RISING_EDGE,
 				TICK_PRIORITY_FALLING_EDGE,
-				PUSH_LIMIT
+				PUSH_LIMIT,
+				MERGE_SLABS
 		);
 	}
 	

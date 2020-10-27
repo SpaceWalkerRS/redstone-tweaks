@@ -1,6 +1,7 @@
 package redstonetweaks.mixin.server;
 
 import java.util.List;
+import java.util.Map;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,35 +16,42 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import com.google.common.collect.Maps;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import redstonetweaks.helper.PistonHandlerHelper;
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.setting.Settings;
 
 @Mixin(PistonHandler.class)
-public abstract class PistonHandlerMixin {
+public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	
 	@Shadow @Final private World world;
 	@Shadow @Final private boolean retracted;
 	@Shadow @Final private BlockPos posTo;
 	@Shadow @Final private Direction motionDirection;
 	@Shadow @Final private List<BlockPos> movedBlocks;
-	
+
 	private boolean sticky;
+	private Map<BlockPos, SlabType> splitSlabTypes;
 	
 	private boolean onTryMoveIsBlockSticky0IsStickyPiston;
 	
-	@Shadow private static native boolean isBlockSticky(Block block);
-	@Shadow private static native boolean isAdjacentBlockStuck(Block block, Block block2);
+	@Shadow private static boolean isBlockSticky(Block block) { return false; }
+	@Shadow private static boolean isAdjacentBlockStuck(Block block, Block block2) { return false; }
 	@Shadow protected abstract boolean tryMove(BlockPos pos, Direction dir);
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
@@ -63,6 +71,9 @@ public abstract class PistonHandlerMixin {
 				}
 			}
 		}
+		
+		if (PistonHelper.mergeSlabs(sticky))
+			splitSlabTypes = Maps.newHashMap();
 	}
 	
 	@Inject(method = "isBlockSticky", cancellable = true, at = @At(value = "HEAD"))
@@ -81,6 +92,125 @@ public abstract class PistonHandlerMixin {
 	@Redirect(method = "tryMove", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/block/piston/PistonHandler;isBlockSticky(Lnet/minecraft/block/Block;)Z"))
 	private boolean onTryMoveRedirectIsBlockSticky0(Block block) {
 		return onTryMoveIsBlockSticky0IsStickyPiston;
+	}
+
+	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
+	private void onTryMoveInjectAfterGetState0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState) {
+		if (PistonHelper.mergeSlabs(sticky)) {
+			// Note: The direction is incorrect in the calculatePush method.
+			Direction fixedDir = (pos != posTo || retracted) ? dir : dir.getOpposite();
+			
+			if (!tryAddSplitSlab(pos, fixedDir, blockState, (pos == posTo && retracted))) {
+				cir.setReturnValue(false);
+				cir.cancel();
+			}
+		}
+	}
+
+	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+	private void onTryMoveBeforeListAdd0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState, Block block, int i, int j, int l) {
+		if (PistonHelper.mergeSlabs(sticky) && l != 0) {
+			Direction direction = motionDirection.getOpposite();
+			BlockPos blockPos = pos.offset(direction, l);
+			BlockState state = world.getBlockState(blockPos);
+			
+			if (!tryAddSplitSlab(blockPos, direction, state, false)) {
+				cir.setReturnValue(false);
+				cir.cancel();
+			}
+		}
+	}
+	
+	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
+	private void onTryMoveInjectBeforeGetPistonBehavior(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int l) {
+		if (PistonHelper.mergeSlabs(sticky) && SlabHelper.isSlab(frontState)) {
+			SlabType frontType = frontState.get(SlabBlock.TYPE);
+
+			if (frontType != SlabType.DOUBLE) {
+				// Check the state right behind the front block.
+				BlockPos pushedPos = pos.offset(motionDirection, l - 1);
+				BlockState pushedState = world.getBlockState(pushedPos);
+			
+				if (pushedState.isOf(frontState.getBlock())) {
+					// Make sure that we also merge if the pushed slab is split.
+					SlabType pushedType = splitSlabTypes.getOrDefault(pushedPos, pushedState.get(SlabBlock.TYPE));
+					
+					if (pushedType == SlabHelper.getOppositeType(frontType)) {
+						// Make sure that we can actually merge the slabs from the pushing direction.
+						if (motionDirection.getAxis().isHorizontal() || frontType == SlabHelper.getTypeFromDirection(motionDirection)) {
+							cir.setReturnValue(true);
+							cir.cancel();
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 2, shift = Shift.BEFORE, target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+	private void onTryMoveBeforeListAdd2(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState, Block block, int i, int j, int l) {
+		if (PistonHelper.mergeSlabs(sticky)) {
+			BlockPos blockPos = pos.offset(motionDirection, l);
+			BlockState state = world.getBlockState(blockPos);
+			
+			if (!tryAddSplitSlab(blockPos, motionDirection, state, true)) {
+				cir.setReturnValue(false);
+				cir.cancel();
+			}
+		}
+	}
+	
+	private boolean tryAddSplitSlab(BlockPos pos, Direction dir, BlockState blockState, boolean pushing) {
+		if (SlabHelper.isSlab(blockState) && blockState.get(SlabBlock.TYPE) == SlabType.DOUBLE) {
+			SlabType type = SlabType.DOUBLE;
+			
+			if (pushing) {
+				if (motionDirection.getAxis().isVertical()) {
+					type = SlabType.DOUBLE;
+				} else {
+					BlockPos pushingPos = pos.offset(dir.getOpposite());
+					BlockState pushingState = world.getBlockState(pushingPos);
+					
+					if (pushingState.isOf(blockState.getBlock())) {
+						type = pushingState.get(SlabBlock.TYPE);
+						
+						if (type == SlabType.DOUBLE) {
+							// Note: Default case should never be caught..
+							type = splitSlabTypes.getOrDefault(pushingPos, SlabType.DOUBLE);
+						}
+					}
+				}
+			} else if (dir.getAxis().isVertical()) {
+				type = SlabHelper.getTypeFromDirection(dir.getOpposite());
+			}
+
+			SlabType currentType = splitSlabTypes.get(pos);
+			
+			if (currentType != null && currentType != type) {
+				// The slab is moved from multiple directions.
+				if (currentType != SlabType.DOUBLE) {
+					splitSlabTypes.put(pos, SlabType.DOUBLE);
+					return ensureSplitSlabsArePushed(pos, currentType);
+				}
+			} else {
+				splitSlabTypes.put(pos, type);
+			}
+		}
+		
+		return true;
+	}
+	
+	private boolean ensureSplitSlabsArePushed(BlockPos pos, SlabType oldType) {
+		BlockPos frontPos = pos.offset(motionDirection);
+		BlockState frontState = world.getBlockState(frontPos);
+		
+		if (splitSlabTypes.get(frontPos) == oldType) {
+			tryAddSplitSlab(frontPos, motionDirection, frontState, true);
+		} else if (SlabHelper.isSlab(frontState) && !movedBlocks.contains(frontPos)) {
+			return tryMove(frontPos, motionDirection);
+		}
+		
+		return true;
 	}
 	
 	@ModifyConstant(method = "tryMove", constant = @Constant(intValue = 12))
@@ -124,5 +254,10 @@ public abstract class PistonHandlerMixin {
 			return state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.FACING) == direction;
 		}
 		return false;
+	}
+
+	@Override
+	public Map<BlockPos, SlabType> getSplitSlabTypes() {
+		return splitSlabTypes;
 	}
 }

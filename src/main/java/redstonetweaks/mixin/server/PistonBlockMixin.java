@@ -24,6 +24,7 @@ import net.minecraft.block.PistonBlock;
 import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.server.world.ServerWorld;
@@ -32,9 +33,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
+import net.minecraft.world.WorldAccess;
 import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.PistonBlockEntityHelper;
+import redstonetweaks.helper.PistonHandlerHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.WorldHelper;
@@ -44,6 +47,8 @@ import redstonetweaks.world.common.UnfinishedEvent.Source;
 public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Shadow @Final private boolean sticky;
+	
+	private ThreadLocal<PistonHandler> pistonHandler = new ThreadLocal<PistonHandler>();
 	
 	protected PistonBlockMixin(Settings settings) {
 		super(settings);
@@ -262,6 +267,60 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 		if (PistonHelper.suppressHeadUpdatesOnExtension(sticky)) {
 			cir.setReturnValue(true);
 			cir.cancel();
+		}
+	}
+
+	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Ljava/util/Map;remove(Ljava/lang/Object;)Ljava/lang/Object;"))
+	private void onMoveInjectAfterOffset(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos blockPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> remainingStates, List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> list3, BlockState blockStates[], Direction direction, int j, int listIndex, BlockPos frontPos, BlockState movedState) {
+		if (PistonHelper.mergeSlabs(sticky)) {
+			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler).getSplitSlabTypes();
+			PistonHelper.tryMergeMovedSlab(world, movedState, frontPos, listIndex, splitSlabTypes, movedPositions, movedStates, remainingStates);
+		}
+	}
+		
+	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lcom/google/common/collect/Maps;newHashMap()Ljava/util/HashMap;"))
+	private void onMoveInjectBeforeNewHashMap(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos armPos, PistonHandler pistonHandler) {
+		if (PistonHelper.mergeSlabs(sticky)) {
+			// Capture the piston handler for use in the
+			// redirect following methods.
+			this.pistonHandler.set(pistonHandler);
+		}
+	}
+
+	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 4, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private boolean onMoveRedirectSetBlockState4(World world, BlockPos pos, BlockState newState, int flags) {
+		if (PistonHelper.mergeSlabs(sticky)) {
+			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler.get()).getSplitSlabTypes();
+			return world.setBlockState(pos, PistonHelper.getAdjustedSlabState(newState, world, pos, splitSlabTypes), flags);
+		}
+		return world.setBlockState(pos, newState, flags);
+	}
+
+	@Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;updateNeighbors(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;I)V"))
+	private void onMoveRedirectUpdateNeighbors(BlockState state, WorldAccess world, BlockPos pos, int flags) {
+		if (PistonHelper.mergeSlabs(sticky)) {
+			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler.get()).getSplitSlabTypes();
+			PistonHelper.getAdjustedSlabState(state, world, pos, splitSlabTypes).updateNeighbors(world, pos, flags);
+		} else {
+			state.updateNeighbors(world, pos, flags);
+		}
+	}
+
+	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/block/BlockState;prepare(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;I)V"))
+	private void onMoveRedirectPrepare1(BlockState state, WorldAccess world, BlockPos pos, int flags) {
+		if (PistonHelper.mergeSlabs(sticky)) {
+			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler.get()).getSplitSlabTypes();
+			PistonHelper.getAdjustedSlabState(state, world, pos, splitSlabTypes).prepare(world, pos, flags);
+		} else {
+			state.prepare(world, pos, flags);
+		}
+	}
+	
+	@Inject(method = "move", at = @At(value = "RETURN", ordinal = 1))
+	private void onMoveInjectAtReturn1(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir) {
+		if (PistonHelper.mergeSlabs(sticky)) {
+			// Make sure we release the handler memory
+			pistonHandler.set(null);
 		}
 	}
 	

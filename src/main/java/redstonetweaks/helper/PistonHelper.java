@@ -2,13 +2,16 @@ package redstonetweaks.helper;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
@@ -16,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.DirectionalBooleanSetting;
@@ -154,5 +158,59 @@ public class PistonHelper {
 	
 	public static boolean updateSelfWhilePowered(boolean sticky) {
 		return sticky ? Settings.StickyPiston.UPDATE_SELF_WHILE_POWERED.get() : Settings.NormalPiston.UPDATE_SELF_WHILE_POWERED.get();
+	}
+	
+	public static boolean mergeSlabs(boolean sticky) {
+		return sticky ? Settings.StickyPiston.MERGE_SLABS.get() : Settings.NormalPiston.MERGE_SLABS.get();
+	}
+	
+	public static void tryMergeMovedSlab(World world, BlockState movedState, BlockPos frontPos, int listIndex, Map<BlockPos, SlabType> splitSlabTypes, List<BlockPos> movedPositions, List<BlockState> movedStates, Map<BlockPos, BlockState> remainingStates) {
+		if (SlabHelper.isSlab(movedState)) {
+			SlabType type = movedState.get(SlabBlock.TYPE);
+			
+			// Check if we should split the slab
+			if (type == SlabType.DOUBLE) {
+				// Test if we should pull the slab apart
+				type = splitSlabTypes.get(movedPositions.get(listIndex));
+				
+				if (type != null) {
+					movedState = movedState.with(SlabBlock.TYPE, type);
+					movedStates.set(listIndex, movedState);
+				}
+			}
+			
+			// Merge the slab with other slabs.
+			if (type != SlabType.DOUBLE) {
+				BlockState frontState = world.getBlockState(frontPos);
+				
+				if (frontState.isOf(movedState.getBlock())) {
+					SlabType frontType = frontState.get(SlabBlock.TYPE);
+					
+					if (frontType == SlabType.DOUBLE) {
+						if (splitSlabTypes.get(frontPos) == type) {
+							// Merge with the double slab (the double slab has split).
+							movedStates.set(listIndex, movedState.with(SlabBlock.TYPE, SlabType.DOUBLE));
+						}
+					} else {
+						// Test if we can merge the two slabs (make sure it is not part of moving blocks).
+						if (frontType == SlabHelper.getOppositeType(type) && !remainingStates.containsKey(frontPos))
+							movedStates.set(listIndex, movedState.with(SlabBlock.TYPE, SlabType.DOUBLE));
+					}
+				}
+			}
+		}
+	}
+	
+	public static BlockState getAdjustedSlabState(BlockState fallbackState, WorldAccess world, BlockPos pos, Map<BlockPos, SlabType> splitSlabTypes) {
+		BlockState oldBlockState = world.getBlockState(pos);
+		if (SlabHelper.isSlab(oldBlockState) && oldBlockState.get(SlabBlock.TYPE) == SlabType.DOUBLE) {
+			// Check if we have split the slab, and one of the two
+			// halves should stay behind.
+			SlabType splitType = splitSlabTypes.get(pos);
+			if (splitType != null && splitType != SlabType.DOUBLE)
+				return oldBlockState.with(SlabBlock.TYPE, SlabHelper.getOppositeType(splitType));
+		}
+
+		return fallbackState;
 	}
 }

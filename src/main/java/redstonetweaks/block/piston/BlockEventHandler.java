@@ -16,6 +16,7 @@ import net.minecraft.block.PistonHeadBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.PistonType;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.sound.SoundCategory;
@@ -24,8 +25,8 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
 import redstonetweaks.helper.PistonBlockEntityHelper;
+import redstonetweaks.helper.PistonHandlerHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.setting.Settings;
 
@@ -48,6 +49,7 @@ public class BlockEventHandler {
 	private List<BlockPos> movedBlocksPos;
 	private List<BlockState> movedBlockStates;
 	private List<BlockPos> brokenBlocksPos;
+	private Map<BlockPos, SlabType> splitSlabTypes;
 	private BlockState[] affectedBlockStates;
 	@SuppressWarnings("rawtypes")
 	private Iterator leftOverBlocks;
@@ -223,6 +225,7 @@ public class BlockEventHandler {
 			movedBlocks = Maps.newHashMap();
 			movedBlocksPos = pistonHandler.getMovedBlocks();
 			movedBlockStates = Lists.newArrayList();
+			splitSlabTypes = ((PistonHandlerHelper)pistonHandler).getSplitSlabTypes();
 			
 			for (BlockPos movedBlockPos : movedBlocksPos) {
 				BlockState movedBlockState = world.getBlockState(movedBlockPos);
@@ -265,6 +268,10 @@ public class BlockEventHandler {
 				blockPos = movedBlocksPos.get(index);
 				blockState = world.getBlockState(blockPos);
 				blockPos = blockPos.offset(moveDirection);
+				// Merge slabs feature start
+				if (PistonHelper.mergeSlabs(sticky))
+					PistonHelper.tryMergeMovedSlab(world, blockState, blockPos, index, splitSlabTypes, movedBlocksPos, movedBlockStates, movedBlocks);
+				// Merge slabs feature end
 				movedBlocks.remove(blockPos);
 				world.setBlockState(blockPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing), 68);
 				PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(movedBlockStates.get(index), facing, extend, false);
@@ -297,7 +304,15 @@ public class BlockEventHandler {
 			}
 			if (leftOverBlocks.hasNext()) {
 				blockPos = (BlockPos)leftOverBlocks.next();
-				world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), 82);
+				// Merge slabs feature start
+				BlockState newState;
+				if (PistonHelper.mergeSlabs(sticky)) {
+					newState = PistonHelper.getAdjustedSlabState(Blocks.AIR.getDefaultState(), world, blockPos, splitSlabTypes);
+				} else {
+					newState = Blocks.AIR.getDefaultState();
+				}
+				world.setBlockState(blockPos, newState, 82);
+				// Merge slabs feature end
 			} else {
 				isIterating = false;
 				moveProgress++;
@@ -311,11 +326,19 @@ public class BlockEventHandler {
 			if (leftOverBlocks.hasNext()) {
 				@SuppressWarnings("unchecked")
 				Entry<BlockPos, BlockState> entry = (Entry<BlockPos, BlockState>)leftOverBlocks.next();
-	            blockPos = entry.getKey();
-	            blockState = entry.getValue();
-	            blockState.prepare(world, blockPos, 2);
-	            Blocks.AIR.getDefaultState().updateNeighbors(world, blockPos, 2);
-	            Blocks.AIR.getDefaultState().prepare(world, blockPos, 2);
+				blockPos = entry.getKey();
+				blockState = entry.getValue();
+				blockState.prepare(world, blockPos, 2);
+				// Merge slabs feature start
+				BlockState newState;
+				if (PistonHelper.mergeSlabs(sticky)) {
+					newState = PistonHelper.getAdjustedSlabState(Blocks.AIR.getDefaultState(), world, blockPos, splitSlabTypes);
+				} else {
+					newState = Blocks.AIR.getDefaultState();
+				}
+				newState.updateNeighbors(world, blockPos, 2);
+				newState.prepare(world, blockPos, 2);
+				// Merge slabs feature end
 			} else {
 				isIterating = false;
 				moveProgress++;
@@ -330,8 +353,8 @@ public class BlockEventHandler {
 			if (index >= 0) {
 				blockPos = brokenBlocksPos.get(index);
 				blockState = affectedBlockStates[affectedBlocksIndex++];
-	            blockState.prepare(world, blockPos, 2);
-	            world.updateNeighborsAlways(blockPos, blockState.getBlock());
+				blockState.prepare(world, blockPos, 2);
+				world.updateNeighborsAlways(blockPos, blockState.getBlock());
 				index--;
 			} else {
 				isIterating = false;
