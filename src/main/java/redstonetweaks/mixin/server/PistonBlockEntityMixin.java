@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -28,6 +29,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	@Shadow private BlockState pushedBlock;
 	@Shadow private boolean source;
 	
+	private BlockEntity pushedBlockEntity;
 	private boolean isMovedByStickyPiston;
 	
 	public PistonBlockEntityMixin(BlockEntityType<?> type) {
@@ -42,6 +44,16 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 			cir.setReturnValue(MathHelper.clamp(lastProgress + 0.2F / pistonSpeed, 0, pistonSpeed));
 			cir.cancel();
 		}
+	}
+	
+	@Inject(method = "finish", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private void onFinishInjectAfterSetBlockState(CallbackInfo ci) {
+		setPushedBlockEntity();
+	}
+	
+	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.AFTER, ordinal = 1, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private void onTickInjectAfterSetBlockState(CallbackInfo ci) {
+		setPushedBlockEntity();
 	}
 	
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5f))
@@ -66,11 +78,29 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	}
 	
 	@Override
-	public void setIsMovedByStickyPiston(boolean newValue) {
-		isMovedByStickyPiston = newValue;
+	public void setPushedBlockEntity(BlockEntity pushedBlockEntity) {
+		this.pushedBlockEntity = pushedBlockEntity;
+	}
+	
+	@Override
+	public void setIsMovedByStickyPiston(boolean isMovedByStickyPiston) {
+		this.isMovedByStickyPiston = isMovedByStickyPiston;
 	}
 	
 	private int getPistonSpeed() {
 		return extending ? PistonHelper.speedRisingEdge(isMovedByStickyPiston) : PistonHelper.speedFallingEdge(isMovedByStickyPiston);
+	}
+	
+	private void setPushedBlockEntity() {
+		if (pushedBlockEntity != null) {
+			pushedBlockEntity.cancelRemoval();
+			
+			// We need to remove the current block entity that
+			// the block will have created itself upon being placed.
+			world.removeBlockEntity(pos);
+			world.setBlockEntity(pos, pushedBlockEntity);
+			
+			world.updateComparators(pos, pushedBlock.getBlock());
+		}
 	}
 }

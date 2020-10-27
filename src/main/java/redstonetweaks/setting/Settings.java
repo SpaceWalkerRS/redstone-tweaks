@@ -60,6 +60,7 @@ public class Settings {
 		public static final BooleanSetting DO_COMPARATOR_UPDATES = new BooleanSetting(ID, "doComparatorUpdates", "Allow worlds to dispatch comparator updates.", true);
 		public static final BooleanSetting DOUBLE_RETRACTION = new BooleanSetting(ID, "doubleRetraction", "A re-implementation of behavior that was present in 1.3-1.8, known as \"Jeb retraction\" or\n\"instant double retraction\". It creates a very narrow window where unpowered pistons can be moved.", false);
 		public static final BooleanSetting INSTANT_BLOCK_EVENTS = new BooleanSetting(ID, "instantBlockEvents", "Execute block events at the moment they are scheduled.", false);
+		public static final BooleanSetting MOVABLE_BLOCK_ENTITIES = new BooleanSetting(ID, "movableBlockEntities", "Allow blocks with block entities to be moved by pistons.", false);
 		public static final IntegerSetting POWER_MAX = new IntegerSetting(ID, "maxPower", "The maximum power output of analogue components like redstone wire, comparators, weighted pressure\nplates, etc.", 15, 0, Common.MAX_POWER);
 		public static final BooleanSetting RANDOMIZE_BLOCK_EVENTS = new BooleanSetting(ID, "randomizeBlockEvents", "Randomize the order in which block events are processed.", false);
 		public static final BooleanSetting RANDOMIZE_DELAYS = new BooleanSetting(ID, "randomizeDelays", "Randomize the delays of all block and fluid ticks that are scheduled.", false);
@@ -75,6 +76,7 @@ public class Settings {
 				DO_COMPARATOR_UPDATES,
 				DOUBLE_RETRACTION,
 				INSTANT_BLOCK_EVENTS,
+				MOVABLE_BLOCK_ENTITIES,
 				POWER_MAX,
 				RANDOMIZE_BLOCK_EVENTS,
 				RANDOMIZE_DELAYS,

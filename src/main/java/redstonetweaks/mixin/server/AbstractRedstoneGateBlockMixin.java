@@ -54,12 +54,14 @@ public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {
 			
 			if (shouldBePowered != isReceivingPower) {
 				if (((WorldHelper)world).updateNeighborsNormally()) {
-					updatePoweredOnScheduledTick(world, pos, state, random, !powered);
+					scheduleTickOnScheduledTick(world, pos, state, random, !powered);
 				} else {
 					((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
 				}
 			}
 		}
+		
+		ci.cancel();
 	}
 	
 	@Redirect(method = "getStrongRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getWeakRedstonePower(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;)I"))
@@ -134,13 +136,13 @@ public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {
 	@Override
 	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
 		if (type == 0) {
-			updatePoweredOnScheduledTick((ServerWorld)world, pos, state, world.getRandom(), state.get(Properties.POWERED));
+			scheduleTickOnScheduledTick((ServerWorld)world, pos, state, world.getRandom(), state.get(Properties.POWERED));
 		}
 		
 		return false;
 	}
 	
-	private void updatePoweredOnScheduledTick(ServerWorld world, BlockPos pos, BlockState state, Random random, boolean powered) {
+	private void scheduleTickOnScheduledTick(ServerWorld world, BlockPos pos, BlockState state, Random random, boolean powered) {
 		int delay = powered ? Settings.Repeater.DELAY_FALLING_EDGE.get() : Settings.Repeater.DELAY_RISING_EDGE.get();
 		
 		if (delay == 0) {

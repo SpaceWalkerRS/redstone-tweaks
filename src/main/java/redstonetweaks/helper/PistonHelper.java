@@ -1,8 +1,14 @@
 package redstonetweaks.helper;
 
+import java.util.Arrays;
+import java.util.List;
+
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
@@ -10,10 +16,20 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
+
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.DirectionalBooleanSetting;
 
 public class PistonHelper {
+	
+	private static final List<Block> IMMOVABLE_BLOCK_ENTITIES = Arrays.asList(
+		Blocks.MOVING_PISTON,
+		Blocks.BEACON,
+		Blocks.ENCHANTING_TABLE,
+		Blocks.ENDER_CHEST,
+		Blocks.END_GATEWAY,
+		Blocks.END_PORTAL
+	);
 	
 	// When the doubleRetraction setting is enabled this method is called from getMovedBlocks
 	// in PistonHandler.class to get all the moved block states. If the block state is
@@ -27,6 +43,15 @@ public class PistonHelper {
 		}
 		
 		return state;
+	}
+	
+	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
+		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlockState, pistonDir, extending, isSource);
+		
+		((PistonBlockEntityHelper)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
+		((PistonBlockEntityHelper)pistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
+		
+		return pistonBlockEntity;
 	}
 	
 	public static boolean isSticky(BlockState state) {
@@ -57,6 +82,10 @@ public class PistonHelper {
 			return true;
 		}
 		return WorldHelper.isQCPowered(world, pos, state, onBlockEvent, getQC(state), randQC(state));
+	}
+	
+	public static boolean canMoveBlockEntityOf(Block block) {
+		return block.hasBlockEntity() && !IMMOVABLE_BLOCK_ENTITIES.contains(block);
 	}
 	
 	public static boolean doBlockDropping() {
