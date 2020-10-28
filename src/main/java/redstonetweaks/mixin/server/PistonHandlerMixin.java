@@ -112,6 +112,11 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 		cir.cancel();
 	}
 	
+	@Redirect(method = "calculatePush", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;isMovable(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;ZLnet/minecraft/util/math/Direction;)Z"))
+	private boolean onCalculatePushInjectAtHead(BlockState blockState, World world, BlockPos blockPos, Direction direction, boolean canBreak, Direction pistonDir) {
+		return PistonBlock.isMovable(blockState, world, blockPos, direction, canBreak, pistonDir) && (retracted || !SlabHelper.isSlab(blockState) || PistonHelper.canSlabStickTo(blockState, direction));
+	}
+	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
 	private void onTryMoveInjectAfterGetState0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState) {
 		if (Settings.Global.MERGE_SLABS.get()) {
@@ -270,12 +275,8 @@ public abstract class PistonHandlerMixin implements PistonHandlerHelper {
 	}
 	
 	private static boolean isAdjacentBlockStuck(BlockState pullingState, BlockState adjacentState, Direction dir) {
-		if (Settings.Global.MERGE_SLABS.get() && SlabHelper.isSlab(adjacentState) && dir.getAxis().isVertical()) {
-			SlabType type = adjacentState.get(SlabBlock.TYPE);
-			
-			if (type != SlabType.DOUBLE && type == SlabHelper.getTypeFromDirection(dir))
-				return false;
-		}
+		if (SlabHelper.isSlab(adjacentState) && !PistonHelper.canSlabStickTo(adjacentState, dir.getOpposite()))
+			return false;
 		
 		// Default vanilla implementation. Slime and honey does not stick.
 		if (pullingState.isOf(Blocks.SLIME_BLOCK) && !adjacentState.isOf(Blocks.HONEY_BLOCK)) {

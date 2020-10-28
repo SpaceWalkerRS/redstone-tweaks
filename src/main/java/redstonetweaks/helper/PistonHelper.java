@@ -209,4 +209,15 @@ public class PistonHelper {
 
 		return fallbackState;
 	}
+	
+	public static boolean canSlabStickTo(BlockState state, Direction dir) {
+		if (Settings.Global.MERGE_SLABS.get() && dir.getAxis().isVertical()) {
+			SlabType type = state.get(SlabBlock.TYPE);
+			
+			if (type != SlabType.DOUBLE && type != SlabHelper.getTypeFromDirection(dir))
+				return false;
+		}
+		
+		return true;
+	}
 }
