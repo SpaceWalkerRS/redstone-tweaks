@@ -53,7 +53,7 @@ public abstract class DispenserBlockMixin {
 
 	@Inject(method = "scheduledTick", at = @At(value = "HEAD"), cancellable = true)
 	private void onScheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
-		if (!isLazy(state) && !world.isReceivingRedstonePower(pos) && !WorldHelper.isQCPowered(world, pos, state, true, getQC(state), randQC(state))) {
+		if (!isLazy(state) && !WorldHelper.isPowered(world, pos, state, true, getQC(state), randQC(state))) {
 			ci.cancel();
 		}
 	}

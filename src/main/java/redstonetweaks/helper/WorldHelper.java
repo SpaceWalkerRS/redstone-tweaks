@@ -12,6 +12,10 @@ import redstonetweaks.util.RelativePos;
 
 public class WorldHelper {
 	
+	public static boolean isPowered(World world, BlockPos pos, BlockState state, boolean forceCheckQC, DirectionalBooleanSetting qc, boolean randQC) {
+		return world.isReceivingRedstonePower(pos) || isQCPowered(world, pos, state, forceCheckQC, qc, randQC);
+	}
+	
 	public static boolean isQCPowered(World world, BlockPos pos, BlockState state, boolean forceCheck, DirectionalBooleanSetting qc, boolean randQC) {
 		for (Direction dir : Direction.values()) {
 			if (qc.get(dir)) {

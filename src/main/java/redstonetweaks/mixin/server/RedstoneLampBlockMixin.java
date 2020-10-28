@@ -26,12 +26,12 @@ public class RedstoneLampBlockMixin {
 	
 	@Redirect(method = "getPlacementState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onGetPlacementStateRedirectGetReceivedPower(World world, BlockPos pos, ItemPlacementContext ctx) {
-		return isReceivingPower(world, pos, world.getBlockState(pos), false);
+		return WorldHelper.isPowered(world, pos, world.getBlockState(pos), false, Settings.RedstoneLamp.QC, Settings.RedstoneLamp.RANDOMIZE_QC.get());
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onNeighborUpdateRedirectGetReceivedPower(World world1, BlockPos blockPos, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-		return isReceivingPower(world, pos, state, false);
+		return WorldHelper.isPowered(world, pos, state, false, Settings.RedstoneLamp.QC, Settings.RedstoneLamp.RANDOMIZE_QC.get());
 	}
 	
 	@Inject(method = "neighborUpdate", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
@@ -57,7 +57,7 @@ public class RedstoneLampBlockMixin {
 	@Inject(method = "scheduledTick", at = @At(value = "HEAD"), cancellable = true)
 	private void onScheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		boolean powered = state.get(Properties.LIT);
-		boolean isReceivingPower = isReceivingPower(world, pos, state, true);
+		boolean isReceivingPower = WorldHelper.isPowered(world, pos, state, true, Settings.RedstoneLamp.QC, Settings.RedstoneLamp.RANDOMIZE_QC.get());
 		boolean shouldBePowered = isLazy(powered) ? !powered : isReceivingPower;
 
 		if (powered != shouldBePowered) {
@@ -67,10 +67,6 @@ public class RedstoneLampBlockMixin {
 			}
 		}
 		ci.cancel();
-	}
-	
-	private boolean isReceivingPower(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
-		return world.isReceivingRedstonePower(pos) || WorldHelper.isQCPowered(world, pos, state, onScheduledTick, Settings.RedstoneLamp.QC, Settings.RedstoneLamp.RANDOMIZE_QC.get());
 	}
 
 	private boolean isLazy(boolean currentlyPowered) {

@@ -30,7 +30,7 @@ public abstract class NoteBlockMixin extends AbstractBlock {
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onNeighborUpdateRedirectGetReceivedPower(World world1, BlockPos blockPos, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-		return world.isReceivingRedstonePower(pos) || WorldHelper.isQCPowered(world, pos, state, false, getQC(), randQC());
+		return WorldHelper.isPowered(world, pos, state, false, getQC(), randQC());
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/NoteBlock;playNote(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
@@ -47,7 +47,7 @@ public abstract class NoteBlockMixin extends AbstractBlock {
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		if (isLazy() || world.isReceivingRedstonePower(pos) || WorldHelper.isQCPowered(world, pos, state, true, getQC(), randQC())) {
+		if (isLazy() || WorldHelper.isPowered(world, pos, state, true, getQC(), randQC())) {
 			playNote(world, pos);
 		}
 	}

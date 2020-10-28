@@ -45,12 +45,13 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 	
 	@Redirect(method = "isPoweredByOtherRails(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;ZILnet/minecraft/block/enums/RailShape;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onisPoweredByOtherRailsRedirectGetReceivedPower(World world1, BlockPos blockPos, World world, BlockPos pos, boolean bl, int distance, RailShape shape) {
-		return isReceivingPower(world, pos, world.getBlockState(pos), false);
+		BlockState state = world.getBlockState(pos);
+		return WorldHelper.isPowered(world, pos, state, false, getQC(state), randQC(state));
 	}
 	
 	@Redirect(method = "updateBlockState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onUpdateBlockStateRedirectGetReceivedPower(World world1, BlockPos blockPos, BlockState state, World world, BlockPos pos, Block neighbor) {
-		return isReceivingPower(world, pos, state, false);
+		return WorldHelper.isPowered(world, pos, state, false, getQC(state), randQC(state));
 	}
 
 	@Inject(method = "updateBlockState", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
@@ -81,11 +82,7 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 	}
 	
 	private boolean isPowered(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
-		return isReceivingPower(world, pos, state, onScheduledTick) || isPoweredByOtherRails(world, pos, state, true, 0) || isPoweredByOtherRails(world, pos, state, false, 0);
-	}
-	
-	private boolean isReceivingPower(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
-		return world.isReceivingRedstonePower(pos) || WorldHelper.isQCPowered(world, pos, state, onScheduledTick, getQC(state), randQC(state));
+		return WorldHelper.isPowered(world, pos, state, onScheduledTick, getQC(state), randQC(state)) || isPoweredByOtherRails(world, pos, state, true, 0) || isPoweredByOtherRails(world, pos, state, false, 0);
 	}
 	
 	private DirectionalBooleanSetting getQC(BlockState state) {

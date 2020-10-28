@@ -33,12 +33,12 @@ public abstract class TntBlockMixin extends AbstractBlock {
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onOnBlockAddedRedirectGetReceivedPower(World world1, BlockPos blockPos, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		return isReceivingPower(world, pos, state, false);
+		return WorldHelper.isPowered(world, pos, state, false, getQC(), randQC());
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onNeighborUpdateRedirectGetReceivedPower(World world1, BlockPos blockPos, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-		return isReceivingPower(world, pos, state, false);
+		return WorldHelper.isPowered(world, pos, state, false, getQC(), randQC());
 	}
 
 	@Inject(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/TntBlock;primeTnt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V", shift = Shift.BEFORE), cancellable = true)
@@ -74,14 +74,10 @@ public abstract class TntBlockMixin extends AbstractBlock {
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		if (redstonetweaks.setting.Settings.TNT.LAZY.get() || isReceivingPower(world, pos, state, true)) {
+		if (redstonetweaks.setting.Settings.TNT.LAZY.get() || WorldHelper.isPowered(world, pos, state, true, getQC(), randQC())) {
 			primeTnt(world, pos);
 			world.removeBlock(pos, false);
 		}
-	}
-	
-	private boolean isReceivingPower(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
-		return world.isReceivingRedstonePower(pos) || WorldHelper.isQCPowered(world, pos, state, onScheduledTick, getQC(), randQC());
 	}
 	
 	private DirectionalBooleanSetting getQC() {
