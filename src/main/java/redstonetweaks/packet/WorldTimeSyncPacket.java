@@ -3,8 +3,7 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 
 public class WorldTimeSyncPacket extends RedstoneTweaksPacket {
 	
@@ -35,7 +34,7 @@ public class WorldTimeSyncPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((MinecraftClientHelper)client).getTickInfoLabelRenderer().onWorldTimeSyncPacketReceived(this);
+		((RTIMinecraftClient)client).getTickInfoLabelRenderer().onWorldTimeSyncPacketReceived(this);
 	}
 
 }

@@ -33,8 +33,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import redstonetweaks.block.AnaloguePowerComponentBlockEntity;
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.helper.ServerWorldHelper;
-import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.helper.RedstoneWireHelper;
+import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 
 @Mixin(RedstoneWireBlock.class)
@@ -76,16 +77,16 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Redirect(method = "prepare", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
 	private BlockState onPrepareRedirectGetStateForNeighborUpdate(BlockState state, Direction direction, BlockState blockState, WorldAccess world, BlockPos mutable, BlockPos notifierPos) {
-		return redstonetweaks.setting.Settings.Global.DO_SHAPE_UPDATES.get() && ((WorldHelper)world).updateNeighborsNormally() ? state.getStateForNeighborUpdate(direction, blockState, world, mutable, notifierPos) : state;
+		return redstonetweaks.setting.Settings.Global.DO_SHAPE_UPDATES.get() && ((RTIWorld)world).updateNeighborsNormally() ? state.getStateForNeighborUpdate(direction, blockState, world, mutable, notifierPos) : state;
 	}
 	
 	@Inject(method = "prepare", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
 	private void onPrepareInjectAfterGetStateForNeighborUpdate(BlockState state, WorldAccess world, BlockPos blockPos, int flags, int depth, CallbackInfo ci, BlockPos.Mutable mutable, Iterator<Direction> horizontalDirections, Direction direction) {
-		if (redstonetweaks.setting.Settings.Global.DO_SHAPE_UPDATES.get() && !((WorldHelper)world).updateNeighborsNormally()) {
+		if (redstonetweaks.setting.Settings.Global.DO_SHAPE_UPDATES.get() && !((RTIWorld)world).updateNeighborsNormally()) {
 			if (!world.isClient()) {
 				BlockPos pos = mutable.toImmutable();
 				BlockPos notifierPos = pos.offset(direction.getOpposite());
-				((ServerWorldHelper)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, direction.getOpposite(), flags, depth, UpdateType.STATE_UPDATE);
+				((RTIServerWorld)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, direction.getOpposite(), flags, depth, UpdateType.STATE_UPDATE);
 			}
 		}
 	}
@@ -137,7 +138,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		if (power < maxPower) {
 			for (Direction dir : Direction.Type.HORIZONTAL) {
 				BlockPos sidePos = pos.offset(dir);
-				BlockState sideState = WorldHelper.getStateForPower(world, sidePos, dir.getOpposite());
+				BlockState sideState = world.getBlockState(sidePos);
 				
 				wirePower = Math.max(wirePower, getWirePower(world, sidePos, sideState, dir.getOpposite()));
 				
@@ -162,12 +163,12 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Inject(method = "updateNeighbors", at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, CallbackInfo ci) {
-		((ServerWorldHelper)world).getNeighborUpdateScheduler().setCurrentSourcePos(pos);
+		((RTIServerWorld)world).getNeighborUpdateScheduler().setCurrentSourcePos(pos);
 	}
 	
 	@Inject(method = "updateNeighbors", at = @At(value = "RETURN"))
 	private void onUpdateNeighborsInjectAtReturn(World world, BlockPos pos, CallbackInfo ci) {
-		((ServerWorldHelper)world).getNeighborUpdateScheduler().clearCurrentSourcePos();
+		((RTIServerWorld)world).getNeighborUpdateScheduler().clearCurrentSourcePos();
 	}
 	
 	@Inject(method = "onBlockAdded", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/RedstoneWireBlock;update(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
@@ -257,11 +258,11 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	}
 	
 	private void updateNeighborsOnStateChange(World world, BlockPos pos, BlockState state) {
-		((ServerWorldHelper)world).getNeighborUpdateScheduler().setCurrentSourcePos(pos);
+		((RTIServerWorld)world).getNeighborUpdateScheduler().setCurrentSourcePos(pos);
 		
 		redstonetweaks.setting.Settings.RedstoneWire.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
 		
-		((ServerWorldHelper)world).getNeighborUpdateScheduler().clearCurrentSourcePos();
+		((RTIServerWorld)world).getNeighborUpdateScheduler().clearCurrentSourcePos();
 	}
 	
 	private int getWirePower(World world, BlockPos pos, Direction dir) {
@@ -269,16 +270,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	}
 	
 	private int getWirePower(World world, BlockPos pos, BlockState state, Direction dir) {
-		if (state.isOf(Blocks.REDSTONE_WIRE)) {
-			if (redstonetweaks.setting.Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
-				BlockState downState = world.getBlockState(pos.down());
-				if (downState.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
-					if (downState.get(Properties.HORIZONTAL_FACING).getOpposite() != dir) {
-						return 0;
-					}
-				}
-			}
-			
+		if (state.isOf(Blocks.REDSTONE_WIRE) && RedstoneWireHelper.emitsPowerTo(world, pos, dir)) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
 				return ((AnaloguePowerComponentBlockEntity)blockEntity).getPower();

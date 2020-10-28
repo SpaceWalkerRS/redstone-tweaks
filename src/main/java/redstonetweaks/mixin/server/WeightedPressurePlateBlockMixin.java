@@ -19,12 +19,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
-
-import redstonetweaks.helper.PressurePlateHelper;
+import redstonetweaks.interfaces.RTIPressurePlate;
 import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(WeightedPressurePlateBlock.class)
-public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePlateBlock implements PressurePlateHelper {
+public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePlateBlock implements RTIPressurePlate {
 	
 	@Shadow @Final private int weight;
 	

@@ -15,11 +15,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.interfaces.RTIBlock;
 
 @Mixin(PistonExtensionBlock.class)
-public class PistonExtensionBlockMixin extends Block implements BlockHelper {
+public class PistonExtensionBlockMixin extends Block implements RTIBlock {
 	
 	public PistonExtensionBlockMixin(Settings settings) {
 		super(settings);
@@ -82,8 +82,8 @@ public class PistonExtensionBlockMixin extends Block implements BlockHelper {
 			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity) blockEntity;
 			
 			if (pistonBlockEntity.isSource()) {
-				BlockState piston = pistonBlockEntity.getPushedBlock();
-				((BlockHelper) piston.getBlock()).continueEvent(world, piston, pos, type);
+				BlockState pistonState = pistonBlockEntity.getPushedBlock();
+				((RTIBlock)pistonState.getBlock()).continueEvent(world, pistonState, pos, type);
 
 				return true;
 			}

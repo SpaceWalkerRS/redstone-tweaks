@@ -16,13 +16,12 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.MathHelper;
-
-import redstonetweaks.helper.PistonBlockEntityHelper;
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.interfaces.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.RTIWorld;
 
 @Mixin(PistonBlockEntity.class)
-public abstract class PistonBlockEntityMixin extends BlockEntity implements PistonBlockEntityHelper {
+public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIPistonBlockEntity {
 	
 	@Shadow private boolean extending;
 	@Shadow private float lastProgress;
@@ -39,7 +38,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	
 	@Inject(method = "getProgress", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetProgressInjectAtReturn(float tickDelta, CallbackInfoReturnable<Float> cir) {
-		if (!((WorldHelper)world).tickWorldsNormally()) {
+		if (!((RTIWorld)world).tickWorldsNormally()) {
 			int pistonSpeed = getPistonSpeed();
 			
 			cir.setReturnValue(MathHelper.clamp(lastProgress + 0.2F / pistonSpeed, 0, pistonSpeed));
@@ -99,7 +98,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	
 	private void placePushedBlockEntity() {
 		if (pushedBlockEntity != null) {
-			((WorldHelper)world).addMovedBlockEntity(pos, pushedBlockEntity);
+			((RTIWorld)world).addMovedBlockEntity(pos, pushedBlockEntity);
 		}
 	}
 }

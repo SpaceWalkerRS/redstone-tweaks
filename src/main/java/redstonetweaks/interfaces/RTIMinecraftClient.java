@@ -1,4 +1,4 @@
-package redstonetweaks.helper;
+package redstonetweaks.interfaces;
 
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.setting.ClientSettingsManager;
@@ -6,7 +6,7 @@ import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.client.NeighborUpdateVisualizer;
 import redstonetweaks.world.client.TickInfoLabelRenderer;
 
-public interface MinecraftClientHelper {
+public interface RTIMinecraftClient {
 	
 	public ClientSettingsManager getSettingsManager();
 	

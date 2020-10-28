@@ -14,7 +14,7 @@ import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.types.DirectionalBooleanSetting;
 import redstonetweaks.setting.types.DirectionalSetting;
 
@@ -55,7 +55,7 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 		private final boolean buttonsActive;
 		
 		public Entry(Direction direction) {
-			this.buttonsActive = ((MinecraftClientHelper)client).getSettingsManager().canChangeSettings();
+			this.buttonsActive = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
 			
 			this.direction = direction;
 			this.title = new TranslatableText(direction.getName());
@@ -69,7 +69,7 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
 				setting.reset();
-				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			});
 			this.resetButton.setX(this.buttonPanel.getX() + this.buttonPanel.getWidth() + 5);
 			this.resetButton.setActive(buttonsActive && !setting.isDefault(direction));
@@ -120,7 +120,7 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 					return new TranslatableText(bSetting.valueToText(bSetting.get(direction))).formatted(formatting);
 				}, (button) -> {
 					bSetting.set(direction, !bSetting.get(direction));
-					((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(bSetting);
+					((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(bSetting);
 				}));
 			}
 		}

@@ -1,8 +1,8 @@
-package redstonetweaks.helper;
+package redstonetweaks.interfaces;
 
 import net.minecraft.util.math.BlockPos;
 
-public interface ServerTickSchedulerHelper {
+public interface RTIServerTickScheduler {
 	
 	public boolean hasScheduledTickAtTime(BlockPos pos, Object object, int delay);
 	

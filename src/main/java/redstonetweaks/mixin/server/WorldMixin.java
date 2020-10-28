@@ -44,16 +44,16 @@ import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
 
 import redstonetweaks.block.piston.BlockEventHandler;
-import redstonetweaks.helper.MinecraftServerHelper;
-import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.StairsHelper;
-import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.packet.TickBlockEntityPacket;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 
 @Mixin(World.class)
-public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView {
+public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Shadow @Final protected List<BlockEntity> unloadedBlockEntities;
 	@Shadow @Final public List<BlockEntity> tickingBlockEntities;
@@ -86,7 +86,7 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	// and it's broken during block events or the ticking of block entities
 	@Redirect(method = "breakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;syncWorldEvent(ILnet/minecraft/util/math/BlockPos;I)V"))
 	private void onBreakBlockRedirectSyncWorldEvent(World world, int eventId, BlockPos pos, int data) {
-		if (world.isClient() || !(iteratingTickingBlockEntities || ((ServerWorldHelper)world).isProcessingBlockEvents()) || !world.getBlockState(pos).isOf(Blocks.PISTON_HEAD)) {
+		if (world.isClient() || !(iteratingTickingBlockEntities || ((RTIServerWorld)world).isProcessingBlockEvents()) || !world.getBlockState(pos).isOf(Blocks.PISTON_HEAD)) {
 			world.syncWorldEvent(eventId, pos, data);
 		}
 	}
@@ -105,7 +105,7 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
 			} else {
 				if (!world.isClient()) {
-					((ServerWorldHelper)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, null, UpdateType.BLOCK_UPDATE);
+					((RTIServerWorld)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, null, UpdateType.BLOCK_UPDATE);
 				}
 			}
 		}
@@ -118,7 +118,7 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
 			} else {
 				if (!world.isClient) {
-					((ServerWorldHelper)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, null, UpdateType.COMPARATOR_UPDATE);
+					((RTIServerWorld)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, null, UpdateType.COMPARATOR_UPDATE);
 				}
 			}
 		}
@@ -331,6 +331,6 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	
 	private void syncClientBlockEntityTickingQueue(BlockEntity blockEntity) {
 		TickBlockEntityPacket packet = new TickBlockEntityPacket(blockEntity.getPos());
-		((MinecraftServerHelper)getServer()).getPacketHandler().sendPacketToDimension(packet, getRegistryKey());
+		((RTIMinecraftServer)getServer()).getPacketHandler().sendPacketToDimension(packet, getRegistryKey());
 	}
 }

@@ -11,11 +11,9 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import redstonetweaks.setting.Settings;
 
-public interface BlockHelper {
+public class BlockHelper {
 	
 	public static final Direction[] FACINGS = AbstractBlockHelper.FACINGS;
-	
-	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type);
 	
 	public static BlockState postProcessState(World world, BlockState state, BlockPos pos) {
 		BlockState blockState = state;

@@ -26,14 +26,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
-
-import redstonetweaks.helper.RedstoneDiodeHelper;
-import redstonetweaks.helper.ServerTickSchedulerHelper;
+import redstonetweaks.interfaces.RTIRedstoneDiode;
+import redstonetweaks.interfaces.RTIServerTickScheduler;
 import redstonetweaks.setting.Settings.BugFixes;
 import redstonetweaks.setting.Settings.Comparator;
 
 @Mixin(ComparatorBlock.class)
-public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock implements RedstoneDiodeHelper {
+public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock implements RTIRedstoneDiode {
 	
 	protected ComparatorBlockMixin(Settings settings) {
 		super(settings);
@@ -89,7 +88,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority onUpdatePoweredRedirectPriorityHigh(World world, BlockPos pos, BlockState state) {
-		if (BugFixes.MC54711.get() && ((RedstoneDiodeHelper)this).isInputBugOccurring(world, pos, state)) {
+		if (BugFixes.MC54711.get() && ((RTIRedstoneDiode)this).isInputBugOccurring(world, pos, state)) {
 			return Comparator.TICK_PRIORITY.get();
 		} else {
 			return Comparator.TICK_PRIORITY_FACING_DIODE.get();
@@ -124,6 +123,6 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 		if (state.get(Properties.POWERED) == frontState.get(Properties.POWERED)) {
 			return false;
 		}
-		return ((ServerTickSchedulerHelper)world.getBlockTickScheduler()).hasScheduledTickAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
+		return ((RTIServerTickScheduler)world.getBlockTickScheduler()).hasScheduledTickAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
 	}
 }

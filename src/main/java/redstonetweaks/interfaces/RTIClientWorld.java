@@ -1,9 +1,9 @@
-package redstonetweaks.helper;
+package redstonetweaks.interfaces;
 
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
 import redstonetweaks.world.client.ClientUnfinishedEventScheduler;
 
-public interface ClientWorldHelper {
+public interface RTIClientWorld {
 	
 	public ClientNeighborUpdateScheduler getNeighborUpdateScheduler();
 	

@@ -8,7 +8,7 @@ import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 import redstonetweaks.util.RelativePos;
@@ -31,7 +31,7 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 		super(screen, new TranslatableText("Update Order"), (screen.getWidth() - WIDTH) / 2, (screen.getHeight() - HEIGHT) / 2, WIDTH, HEIGHT);
 		
 		this.setting = setting;
-		this.buttonsActive = ((MinecraftClientHelper)screen.client).getSettingsManager().canChangeSettings();
+		this.buttonsActive = ((RTIMinecraftClient)screen.client).getSettingsManager().canChangeSettings();
 	}
 	
 	@Override
@@ -42,7 +42,7 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 			boolean locationalOrder = setting.get().getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL;
 			offsetButtons.setVisible(locationalOrder);
 			
-			((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+			((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 		});
 		notifierOrderButton.setActive(buttonsActive);
 		addChild(notifierOrderButton);
@@ -57,7 +57,7 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 				int newOffset = Integer.parseInt(text);
 				setting.get().setOffsetX(newOffset);
 				
-				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			} catch (Exception e) {
 				
 			}
@@ -70,7 +70,7 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 				if (Math.abs(newOffset) < 256) {
 					setting.get().setOffsetY(newOffset);
 					
-					((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+					((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 				}
 			} catch (Exception e) {
 				
@@ -83,7 +83,7 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 				int newOffset = Integer.parseInt(text);
 				setting.get().setOffsetZ(newOffset);
 				
-				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			} catch (Exception e) {
 				
 			}
@@ -100,7 +100,7 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 			setting.get().add(RelativePos.SELF, RelativePos.WEST);
 			button.visible = false;
 			
-			((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+			((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 		});
 		addUpdateButton.visible = false;
 		addChild(addUpdateButton);

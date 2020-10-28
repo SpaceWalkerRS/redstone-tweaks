@@ -12,14 +12,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
-
-import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.setting.ServerSettingsManager;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin implements MinecraftServerHelper {
+public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	
 	@Shadow private int ticks;
 	

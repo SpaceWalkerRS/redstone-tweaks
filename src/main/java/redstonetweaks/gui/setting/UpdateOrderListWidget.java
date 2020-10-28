@@ -12,7 +12,7 @@ import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 import redstonetweaks.util.RelativePos;
 import redstonetweaks.world.common.BlockUpdate;
@@ -61,7 +61,7 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 		private final boolean buttonsActive;
 		
 		public Entry(int index) {
-			this.buttonsActive = ((MinecraftClientHelper)client).getSettingsManager().canChangeSettings();
+			this.buttonsActive = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
 			
 			this.update = setting.get().getBlockUpdates().get(index);
 			this.children = new ArrayList<>();
@@ -73,19 +73,19 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				update.setMode(update.getMode().next());
 				updateCountChanged = true;
 				
-				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			});
 			this.buttonPanel1.addButton(modeButton);
 			this.buttonPanel1.addButton(new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText(update.getNotifierPos().getName()), (button) -> {
 				update.setNotifierPos(update.getNotifierPos().next(setting.get().getDirectionality()));
 				
-				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			}));
 			if (update.getMode() != BlockUpdate.Mode.NEIGHBORS) {
 				this.buttonPanel1.addButton(new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText(update.getUpdatePos().getName()), (button) -> {
 					update.setUpdatePos(update.getUpdatePos().next(setting.get().getDirectionality()));
 					
-					((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+					((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 				}));
 			}
 			this.buttonPanel1.setX(getX() + 30);
@@ -101,13 +101,13 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				}
 				updateCountChanged = true;
 				
-				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			}));
 			this.buttonPanel2.addButton(new RTButtonWidget(0, 0, 20, 20, () -> new TranslatableText("-"), (button) -> {
 				setting.get().remove(index);
 				updateCountChanged = true;
 				
-				((MinecraftClientHelper)screen.client).getSettingsManager().onSettingChanged(setting);
+				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			}));
 			this.buttonPanel2.setX(getX() + getWidth() - 60);
 			this.buttonPanel2.setActive(buttonsActive);

@@ -11,12 +11,11 @@ import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import net.minecraft.world.chunk.WorldChunk;
-
-import redstonetweaks.helper.ServerChunkManagerHelper;
-import redstonetweaks.helper.ThreadedAnvilChunkStorageHelper;
+import redstonetweaks.interfaces.RTIServerChunkManager;
+import redstonetweaks.interfaces.RTIThreadedAnvilChunkStorage;
 
 @Mixin(ServerChunkManager.class)
-public class ServerChunkManagerMixin implements ServerChunkManagerHelper {
+public class ServerChunkManagerMixin implements RTIServerChunkManager {
 	
 	@Shadow @Final public ServerWorld world;
 	@Shadow @Final public ThreadedAnvilChunkStorage threadedAnvilChunkStorage;
@@ -29,7 +28,7 @@ public class ServerChunkManagerMixin implements ServerChunkManagerHelper {
 		if (!world.isDebugWorld()) {
 			world.getProfiler().push("pollingChunks");
 			
-			((ThreadedAnvilChunkStorageHelper)threadedAnvilChunkStorage).getEntryIterator().forEach((chunkHolder) -> {
+			((RTIThreadedAnvilChunkStorage)threadedAnvilChunkStorage).getEntryIterator().forEach((chunkHolder) -> {
 				Optional<WorldChunk> optional = (chunkHolder.getTickingFuture().getNow(ChunkHolder.UNLOADED_WORLD_CHUNK)).left();
 				if (optional.isPresent()) {
 					world.getProfiler().push("broadcast");

@@ -7,13 +7,12 @@ import net.minecraft.block.Material;
 import net.minecraft.block.PressurePlateBlock;
 import net.minecraft.state.property.Properties;
 import net.minecraft.world.TickPriority;
-
-import redstonetweaks.helper.PressurePlateHelper;
+import redstonetweaks.interfaces.RTIPressurePlate;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(PressurePlateBlock.class)
-public class PressurePlateBlockMixin implements PressurePlateHelper {
+public class PressurePlateBlockMixin implements RTIPressurePlate {
 	
 	public boolean isStone(BlockState state) {
 		return state.getMaterial() == Material.STONE;

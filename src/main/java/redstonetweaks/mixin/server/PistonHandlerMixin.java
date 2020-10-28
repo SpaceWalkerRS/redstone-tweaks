@@ -33,14 +33,13 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
-import redstonetweaks.helper.PistonHandlerHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
+import redstonetweaks.interfaces.RTIPistonHandler;
 import redstonetweaks.setting.Settings;
 
 @Mixin(PistonHandler.class)
-public abstract class PistonHandlerMixin implements PistonHandlerHelper {
+public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	@Shadow @Final private World world;
 	@Shadow @Final private boolean retracted;

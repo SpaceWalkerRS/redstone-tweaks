@@ -6,8 +6,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-
-import redstonetweaks.helper.ClientWorldHelper;
+import redstonetweaks.interfaces.RTIClientWorld;
 import redstonetweaks.world.common.UnfinishedEvent;
 import redstonetweaks.world.common.UnfinishedEvent.Source;
 
@@ -52,7 +51,7 @@ public class UnfinishedEventPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((ClientWorldHelper)client.world).getUnfinishedEventScheduler().onUnfinishedEventPacketReceived(this);
+		((RTIClientWorld)client.world).getUnfinishedEventScheduler().onUnfinishedEventPacketReceived(this);
 	}
 
 }

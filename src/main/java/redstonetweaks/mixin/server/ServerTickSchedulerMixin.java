@@ -27,12 +27,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ScheduledTick;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
-
-import redstonetweaks.helper.ServerTickSchedulerHelper;
+import redstonetweaks.interfaces.RTIServerTickScheduler;
 import redstonetweaks.setting.Settings;
 
 @Mixin(ServerTickScheduler.class)
-public abstract class ServerTickSchedulerMixin<T> implements ServerTickSchedulerHelper, TickScheduler<T> {
+public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickScheduler, TickScheduler<T> {
 	
 	@Shadow ServerWorld world;
 	@Shadow Predicate<T> invalidObjPredicate;

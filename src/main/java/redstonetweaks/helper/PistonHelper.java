@@ -20,7 +20,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
+import redstonetweaks.interfaces.RTIPistonBlockEntity;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.DirectionalBooleanSetting;
 
@@ -52,8 +52,8 @@ public class PistonHelper {
 	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
 		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlockState, pistonDir, extending, isSource);
 		
-		((PistonBlockEntityHelper)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
-		((PistonBlockEntityHelper)pistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
+		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
+		((RTIPistonBlockEntity)pistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
 		
 		return pistonBlockEntity;
 	}

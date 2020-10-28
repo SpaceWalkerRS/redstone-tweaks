@@ -1,8 +1,8 @@
-package redstonetweaks.helper;
+package redstonetweaks.interfaces;
 
 import net.minecraft.block.entity.BlockEntity;
 
-public interface PistonBlockEntityHelper {
+public interface RTIPistonBlockEntity {
 	
 	public boolean isMovedByStickyPiston();
 	

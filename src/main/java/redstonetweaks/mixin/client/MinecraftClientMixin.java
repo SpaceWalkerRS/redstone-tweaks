@@ -11,8 +11,8 @@ import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
 import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.helper.MinecraftClientHelper;
 import redstonetweaks.hotkeys.HotKeyManager;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.setting.ClientSettingsManager;
 import redstonetweaks.world.client.ClientWorldTickHandler;
@@ -20,7 +20,7 @@ import redstonetweaks.world.client.NeighborUpdateVisualizer;
 import redstonetweaks.world.client.TickInfoLabelRenderer;
 
 @Mixin(MinecraftClient.class)
-public abstract class MinecraftClientMixin implements MinecraftClientHelper {
+public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Shadow public ClientWorld world;
 	

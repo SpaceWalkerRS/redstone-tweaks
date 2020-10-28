@@ -18,7 +18,7 @@ import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import net.minecraft.util.math.BlockPos;
 
 import redstonetweaks.helper.BlockEntityHelper;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.PacketHandler;
 import redstonetweaks.packet.PlayerJoinedServerPacket;
 
@@ -30,7 +30,7 @@ public class ClientPlayNetworkHandlerMixin {
 	@Inject(method = "onGameJoin", at = @At(value = "RETURN"))
 	private void onOnGameJoin(GameJoinS2CPacket gameJoinPacket, CallbackInfo ci) {
 		PlayerJoinedServerPacket packet = new PlayerJoinedServerPacket(client.player);
-		((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 	}
 	
 	@Inject(method = "onCustomPayload", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/network/packet/s2c/play/CustomPayloadS2CPacket;getChannel()Lnet/minecraft/util/Identifier;"))
@@ -38,7 +38,7 @@ public class ClientPlayNetworkHandlerMixin {
 		if (PacketHandler.PACKET_IDENTIFIER.equals(packet.getChannel())) {
 			PacketByteBuf buffer = packet.getData();
 			
-			((MinecraftClientHelper)client).getPacketHandler().onPacketReceived(buffer);
+			((RTIMinecraftClient)client).getPacketHandler().onPacketReceived(buffer);
 			
 			ci.cancel();
 		}

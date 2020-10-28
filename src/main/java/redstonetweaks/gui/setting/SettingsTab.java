@@ -9,7 +9,7 @@ import redstonetweaks.gui.RTMenuTab;
 import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 
@@ -41,9 +41,9 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 		
 		resetButton = new RTButtonWidget(screen.getWidth() - 50, screen.getHeaderHeight(), 40, 20, () -> new TranslatableText("RESET"), (button) -> {
 			Settings.reset();
-			((MinecraftClientHelper)screen.client).getSettingsManager().onSettingsReset();
+			((RTIMinecraftClient)screen.client).getSettingsManager().onSettingsReset();
 		});
-		resetButton.setActive(((MinecraftClientHelper)screen.client).getSettingsManager().canChangeSettings());
+		resetButton.setActive(((RTIMinecraftClient)screen.client).getSettingsManager().canChangeSettings());
 		addContent(resetButton);
 		
 		clearSearchBoxButton = new RTButtonWidget(resetButton.getX() - 25, resetButton.getY(), 20, 20, () -> new TranslatableText("<"), (button) -> {

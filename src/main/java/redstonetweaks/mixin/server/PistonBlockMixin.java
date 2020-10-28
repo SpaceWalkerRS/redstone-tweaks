@@ -32,19 +32,19 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
 import net.minecraft.world.WorldAccess;
+
 import redstonetweaks.block.piston.BlockEventHandler;
-import redstonetweaks.helper.BlockHelper;
-import redstonetweaks.helper.PistonBlockEntityHelper;
-import redstonetweaks.helper.PistonHandlerHelper;
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.helper.ServerWorldHelper;
-import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.interfaces.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.RTIPistonHandler;
+import redstonetweaks.interfaces.RTIBlock;
+import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 @Mixin(PistonBlock.class)
-public abstract class PistonBlockMixin extends Block implements BlockHelper {
+public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Shadow @Final private boolean sticky;
 	
@@ -83,16 +83,16 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Inject(method = "onSyncedBlockEvent", at = @At(value = "HEAD"), cancellable = true)
 	private void onOnSyncedBlockEventInjectAtHead(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
-		if (!((WorldHelper)world).updateNeighborsNormally()) {
+		if (!((RTIWorld)world).updateNeighborsNormally()) {
 			BlockEventHandler blockEventHandler = new BlockEventHandler(world, pos, state, type, data, sticky);
 			boolean startedBlockEvent = false;
 			
-			if (((WorldHelper)world).addBlockEventHandler(blockEventHandler)) {
+			if (((RTIWorld)world).addBlockEventHandler(blockEventHandler)) {
 				startedBlockEvent = blockEventHandler.startBlockEvent();
 				if (startedBlockEvent) {
 					if (!world.isClient()) {
 						BlockState blockState = world.getBlockState(pos);
-						((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, 0, 64.0D);
+						((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, 0, 64.0D);
 					}
 				}
 			}
@@ -185,7 +185,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonExtensionBlock;createBlockEntityPiston(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;ZZ)Lnet/minecraft/block/entity/BlockEntity;"))
 	private BlockEntity onOnSyncedBlockEventRedirectCreateBlockEntityPiston(BlockState pushedBlock, Direction dir, boolean extending, boolean source) {
 		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlock, dir, extending, source);
-		((PistonBlockEntityHelper)pistonBlockEntity).setIsMovedByStickyPiston(sticky);
+		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(sticky);
 		return pistonBlockEntity;
 	}
 	
@@ -217,7 +217,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 		BlockState movedBlockState = movedBlockStates.get(l);
 		BlockEntity movedBlockEntity = null;
 		if (redstonetweaks.setting.Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
-			movedBlockEntity = ((PistonHandlerHelper)pistonHandler).getMovedBlockEntities().get(l);
+			movedBlockEntity = ((RTIPistonHandler)pistonHandler).getMovedBlockEntities().get(l);
 		}
 		
 		world.setBlockEntity(blockPos4, PistonHelper.createPistonBlockEntity(movedBlockState, movedBlockEntity, pistonDir, extend, false, sticky));
@@ -253,7 +253,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Ljava/util/Map;remove(Ljava/lang/Object;)Ljava/lang/Object;"))
 	private void onMoveInjectAfterOffset(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos blockPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> remainingStates, List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> list3, BlockState blockStates[], Direction direction, int j, int listIndex, BlockPos frontPos, BlockState movedState) {
 		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
-			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler).getSplitSlabTypes();
+			Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
 			PistonHelper.tryMergeMovedSlab(world, movedState, frontPos, listIndex, splitSlabTypes, movedPositions, movedStates, remainingStates);
 		}
 	}
@@ -261,7 +261,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 4, shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onMoveInjectBeforeSetBlockState4(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos blockPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> remainingStates, List<BlockPos> list, List<BlockState> list2, List<BlockPos> list3, BlockState[] affectedStates, BlockState blockState6, Iterator<BlockPos> var25, BlockPos blockPos5) {
 		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
-			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler).getSplitSlabTypes();
+			Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
 			world.setBlockState(blockPos5, PistonHelper.getAdjustedSlabState(blockState6, world, blockPos5, splitSlabTypes), 82);
 		} else {
 			world.setBlockState(blockPos5, blockState6, 82);
@@ -277,7 +277,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;updateNeighbors(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;I)V"))
 	private void onMoveInjectBeforeUpdateNeighbors(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos blockPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> remainingStates, List<BlockPos> list, List<BlockState> list2, List<BlockPos> list3, BlockState[] affectedStates, BlockState blockState6, Iterator<BlockPos> var25, Map.Entry<BlockPos, BlockState> entry) {
 		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
-			Map<BlockPos, SlabType> splitSlabTypes = ((PistonHandlerHelper)pistonHandler).getSplitSlabTypes();
+			Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
 			BlockState adjustedState = PistonHelper.getAdjustedSlabState(blockState6, world, entry.getKey(), splitSlabTypes);
 			
 			adjustedState.updateNeighbors(world, entry.getKey(), 2);
@@ -305,16 +305,16 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 	
 	@Override
 	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
-		BlockEventHandler blockEventHandler = ((WorldHelper)world).getBlockEventHandler(pos);
+		BlockEventHandler blockEventHandler = ((RTIWorld)world).getBlockEventHandler(pos);
 		
 		if (blockEventHandler != null) {
 			if (blockEventHandler.tryContinueBlockEvent()) {
 				if (!world.isClient()) {
 					BlockState blockState = world.getBlockState(pos);
-					((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, 0, 64.0D);
+					((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, blockState, pos, 0, 64.0D);
 				}
 			} else {
-				((WorldHelper)world).removeBlockEventHandler(pos);
+				((RTIWorld)world).removeBlockEventHandler(pos);
 			}
 		}
 		
@@ -352,7 +352,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 			if ((new PistonHandler(world, pos, facing, true)).calculatePush()) {
 				if (activationDelay == 0 || onScheduledTick) {
 					world.addSyncedBlockEvent(pos, state.getBlock(), 0, facing.getId());
-				} else if (!((ServerWorldHelper)world).hasBlockEvent(pos)) {
+				} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
 					world.getBlockTickScheduler().schedule(pos, state.getBlock(), activationDelay, PistonHelper.tickPriorityRisingEdge(sticky));
 				}
 			} else {
@@ -373,7 +373,7 @@ public abstract class PistonBlockMixin extends Block implements BlockHelper {
 						world.setBlockState(pos, state.with(Properties.EXTENDED, false), 16);
 					}
 					world.addSyncedBlockEvent(pos, state.getBlock(), 1, facing.getId());
-				} else if (!((ServerWorldHelper)world).hasBlockEvent(pos)) {
+				} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
 					world.getBlockTickScheduler().schedule(pos, state.getBlock(), activationDelay, PistonHelper.tickPriorityFallingEdge(sticky));
 				}
 			}

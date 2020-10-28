@@ -3,9 +3,8 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
-import redstonetweaks.helper.MinecraftClientHelper;
-import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 
@@ -39,13 +38,13 @@ public class SettingPacket extends RedstoneTweaksPacket {
 	public void execute(MinecraftServer server) {
 		setting.setFromText(value);
 		
-		((MinecraftServerHelper)server).getSettingsManager().onSettingPacketReceived(setting);
+		((RTIMinecraftServer)server).getSettingsManager().onSettingPacketReceived(setting);
 	}
 	
 	@Override
 	public void execute(MinecraftClient client) {
 		setting.setFromText(value);
 		
-		((MinecraftClientHelper)client).getSettingsManager().onSettingPacketReceived(setting);
+		((RTIMinecraftClient)client).getSettingsManager().onSettingPacketReceived(setting);
 	}
 }

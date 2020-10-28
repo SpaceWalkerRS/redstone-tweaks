@@ -19,7 +19,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.InputUtil.Key;
 
 import redstonetweaks.gui.RTMenuScreen;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.TickPausePacket;
 
 public class HotKeyManager {
@@ -107,7 +107,7 @@ public class HotKeyManager {
 		if (keyBinding == PAUSE_WORLD_TICKING) {
 			if (client.currentScreen == null) {
 				TickPausePacket packet = new TickPausePacket(TickPausePacket.PAUSE);
-				((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
+				((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 				
 				return true;
 			}
@@ -115,7 +115,7 @@ public class HotKeyManager {
 		if (keyBinding == ADVANCE_WORLD_TICKING) {
 			if (client.currentScreen == null) {
 				TickPausePacket packet = new TickPausePacket(TickPausePacket.ADVANCE);
-				((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
+				((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 				
 				return true;
 			}

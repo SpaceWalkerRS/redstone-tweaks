@@ -20,7 +20,7 @@ import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.gui.widget.RTTexturedButtonWidget;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
@@ -196,7 +196,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		private final boolean buttonsActive;
 		
 		public SettingEntry(ISetting setting) {
-			this.buttonsActive = ((MinecraftClientHelper)client).getSettingsManager().canChangeSettings();
+			this.buttonsActive = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
 			
 			this.setting = setting;
 			this.title = new TranslatableText(setting.getName());
@@ -205,7 +205,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
 				setting.reset();
-				((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(setting);
+				((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(setting);
 			});
 			this.children.add(resetButton);
 			
@@ -276,7 +276,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 						return new TranslatableText(bSetting.getAsText()).formatted(formatting);
 					}, (button) -> {
 						bSetting.set(!bSetting.get());
-						((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(bSetting);
+						((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(bSetting);
 					}));
 					buttonPanel.addButton(new RTTexturedButtonWidget(0, 0, 20, 20, RTTexturedButtonWidget.WIDGETS_LOCATION, 0, 106, 256, 256, 20, (button) -> {
 						saveScrollAmount();
@@ -297,7 +297,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 						return new TranslatableText(bSetting.getAsText()).formatted(formatting);
 					}, (button) -> {
 						bSetting.set(!bSetting.get());
-						((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(bSetting);
+						((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(bSetting);
 					}));
 				}
 				
@@ -314,7 +314,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 					textField.setText(iSetting.getAsText());
 				}, (text) -> {
 					iSetting.setFromText(text);
-					((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(iSetting);
+					((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(iSetting);
 				}));
 			} else
 			if (setting instanceof TickPrioritySetting) {
@@ -326,7 +326,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 					int steps = (int)Math.round((priorities.length - 1) * slider.getValue());
 					
 					tSetting.set(TickPriority.byIndex(min + steps));
-					((MinecraftClientHelper)client).getSettingsManager().onSettingChanged(tSetting);
+					((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(tSetting);
 				}, (slider) -> {
 					TickPriority[] priorities = TickPriority.values();
 					double steps = tSetting.get().getIndex() - priorities[0].getIndex();

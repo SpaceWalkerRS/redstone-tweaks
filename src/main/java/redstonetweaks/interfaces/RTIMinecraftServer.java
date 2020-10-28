@@ -1,10 +1,10 @@
-package redstonetweaks.helper;
+package redstonetweaks.interfaces;
 
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.setting.ServerSettingsManager;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
-public interface MinecraftServerHelper {
+public interface RTIMinecraftServer {
 	
 	public ServerSettingsManager getSettingsManager();
 	

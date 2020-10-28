@@ -7,8 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
-
-import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 public class TickCommand {
@@ -34,7 +33,7 @@ public class TickCommand {
 	}
 	
 	private static int pause(ServerCommandSource source) {
-		ServerWorldTickHandler worldTickHandler = ((MinecraftServerHelper)source.getMinecraftServer()).getWorldTickHandler();
+		ServerWorldTickHandler worldTickHandler = ((RTIMinecraftServer)source.getMinecraftServer()).getWorldTickHandler();
 		
 		if (worldTickHandler.doWorldTicks()) {
 			worldTickHandler.pause();
@@ -47,7 +46,7 @@ public class TickCommand {
 	}
 	
 	private static int resume(ServerCommandSource source) {
-		ServerWorldTickHandler worldTickHandler = ((MinecraftServerHelper)source.getMinecraftServer()).getWorldTickHandler();
+		ServerWorldTickHandler worldTickHandler = ((RTIMinecraftServer)source.getMinecraftServer()).getWorldTickHandler();
 		
 		if (worldTickHandler.doWorldTicks()) {
 			source.sendFeedback(new TranslatableText("World ticking is not paused"), false);
@@ -59,7 +58,7 @@ public class TickCommand {
 	}
 	
 	private static int advance(ServerCommandSource source, int count) {
-		ServerWorldTickHandler worldTickHandler = ((MinecraftServerHelper)source.getMinecraftServer()).getWorldTickHandler();
+		ServerWorldTickHandler worldTickHandler = ((RTIMinecraftServer)source.getMinecraftServer()).getWorldTickHandler();
 		
 		if (worldTickHandler.doWorldTicks()) {
 			source.sendFeedback(new TranslatableText("Cannot advance as world ticking is not paused"), false);

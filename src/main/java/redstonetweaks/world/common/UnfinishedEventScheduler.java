@@ -5,7 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import redstonetweaks.helper.BlockHelper;
+import redstonetweaks.interfaces.RTIBlock;
 import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 public abstract class UnfinishedEventScheduler {
@@ -24,7 +24,7 @@ public abstract class UnfinishedEventScheduler {
 		switch (event.source) {
 		case BLOCK:
 			if (state.isOf(event.block)) {
-				return ((BlockHelper)event.block).continueEvent(world, state, event.pos, event.type);
+				return ((RTIBlock)event.block).continueEvent(world, state, event.pos, event.type);
 			}
 			break;
 		case BLOCK_ENTITY:

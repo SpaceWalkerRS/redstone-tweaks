@@ -1,10 +1,10 @@
-package redstonetweaks.helper;
+package redstonetweaks.interfaces;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.world.TickPriority;
 import redstonetweaks.world.common.UpdateOrder;
 
-public interface PressurePlateHelper {
+public interface RTIPressurePlate {
 	
 	public UpdateOrder updateOrder(BlockState state);
 	

@@ -15,9 +15,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
-import redstonetweaks.helper.FluidHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.interfaces.RTIFluid;
 
 @Mixin(FluidBlock.class)
 public class FluidBlockMixin {
@@ -26,16 +25,16 @@ public class FluidBlockMixin {
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, ((FluidHelper)this.fluid).getTickPriority());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, ((RTIFluid)this.fluid).getTickPriority());
 	}
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, ((FluidHelper)this.fluid).getTickPriority());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, ((RTIFluid)this.fluid).getTickPriority());
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, ((FluidHelper)this.fluid).getTickPriority());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, ((RTIFluid)this.fluid).getTickPriority());
 	}
 }

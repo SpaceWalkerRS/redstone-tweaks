@@ -3,7 +3,7 @@ package redstonetweaks.setting;
 import net.minecraft.client.MinecraftClient;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.gui.RTMenuScreen;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.ResetSettingPacket;
 import redstonetweaks.packet.ResetSettingsPacket;
 import redstonetweaks.packet.SettingPacket;
@@ -24,7 +24,7 @@ public class ClientSettingsManager {
 	public void onSettingChanged(ISetting setting) {
 		if (!client.isInSingleplayer() || client.getServer().isRemote()) {
 			SettingPacket packet = new SettingPacket(setting);
-			((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 		}
 		notifyMenuScreenOfSettingChange(setting);
 	}
@@ -32,7 +32,7 @@ public class ClientSettingsManager {
 	public void onSettingReset(ISetting setting) {
 		if (!client.isInSingleplayer() || client.getServer().isRemote()) {
 			ResetSettingPacket packet = new ResetSettingPacket(setting);
-			((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 		}
 		notifyMenuScreenOfSettingChange(setting);
 	}
@@ -40,7 +40,7 @@ public class ClientSettingsManager {
 	public void onSettingsReset() {
 		if (!client.isInSingleplayer() || client.getServer().isRemote()) {
 			ResetSettingsPacket packet = new ResetSettingsPacket();
-			((MinecraftClientHelper)client).getPacketHandler().sendPacket(packet);
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 		}
 		notifyMenuScreenOfSettingChange(null);
 	}

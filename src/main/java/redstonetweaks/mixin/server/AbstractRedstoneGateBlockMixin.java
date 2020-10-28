@@ -11,10 +11,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.AbstractRedstoneGateBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
@@ -26,17 +25,17 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
-
-import redstonetweaks.helper.BlockHelper;
-import redstonetweaks.helper.RedstoneDiodeHelper;
-import redstonetweaks.helper.ServerWorldHelper;
-import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.helper.RedstoneWireHelper;
+import redstonetweaks.interfaces.RTIBlock;
+import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.interfaces.RTIServerWorld;
+import redstonetweaks.interfaces.RTIRedstoneDiode;
 import redstonetweaks.setting.Settings;
-import redstonetweaks.world.common.UpdateOrder;
 import redstonetweaks.world.common.UnfinishedEvent.Source;
+import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(AbstractRedstoneGateBlock.class)
-public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {
+public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract boolean hasPower(World world, BlockPos pos, BlockState state);
@@ -53,10 +52,10 @@ public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {
 			world.setBlockState(pos, state.with(Properties.POWERED, shouldBePowered), 2);
 			
 			if (shouldBePowered != isReceivingPower) {
-				if (((WorldHelper)world).updateNeighborsNormally()) {
+				if (((RTIWorld)world).updateNeighborsNormally()) {
 					scheduleTickOnScheduledTick(world, pos, state, random, !powered);
 				} else {
-					((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
+					((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
 				}
 			}
 		}
@@ -90,7 +89,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;EXTREMELY_HIGH:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority updatePoweredRedirectPriorityExtremelyHigh(World world, BlockPos pos, BlockState state) {
-		if (Settings.BugFixes.MC54711.get() && ((RedstoneDiodeHelper)this).isInputBugOccurring(world, pos, state)) {
+		if (Settings.BugFixes.MC54711.get() && ((RTIRedstoneDiode)this).isInputBugOccurring(world, pos, state)) {
 			return Settings.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 		}
 		return Settings.Repeater.TICK_PRIORITY_FACING_DIODE.get();
@@ -101,12 +100,9 @@ public abstract class AbstractRedstoneGateBlockMixin implements BlockHelper {
 		return Settings.Repeater.TICK_PRIORITY_FALLING_EDGE.get();
 	}
 	
-	@Inject(method = "getPower", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-	private void onGetPowerInjectBeforeGetBlockState(World world, BlockPos pos, BlockState state, CallbackInfoReturnable<Integer> cir, Direction facing, BlockPos behindPos, int power) {
-		BlockState behindState = WorldHelper.getStateForPower(world, behindPos, facing.getOpposite());
-		
-		cir.setReturnValue(Math.max(power, behindState.isOf(Blocks.REDSTONE_WIRE) ? behindState.getWeakRedstonePower(world, behindPos, facing) : 0));
-		cir.cancel();
+	@Redirect(method = "getPower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isOf(Lnet/minecraft/block/Block;)Z"))
+	private boolean onGetPowerRedirectIsOf(BlockState behindState, Block block, World world, BlockPos pos, BlockState state) {
+		return behindState.isOf(block) && RedstoneWireHelper.emitsPowerTo(world, pos, state.get(Properties.HORIZONTAL_FACING).getOpposite());
 	}
 	
 	@SuppressWarnings("unchecked")

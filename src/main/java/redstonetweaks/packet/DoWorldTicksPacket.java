@@ -3,7 +3,7 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 
 public class DoWorldTicksPacket extends RedstoneTweaksPacket {
 	
@@ -34,6 +34,6 @@ public class DoWorldTicksPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		((MinecraftClientHelper)client).getWorldTickHandler().onDoWorldTicksPacketReceived(this);
+		((RTIMinecraftClient)client).getWorldTickHandler().onDoWorldTicksPacketReceived(this);
 	}
 }

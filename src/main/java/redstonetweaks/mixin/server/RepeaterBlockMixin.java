@@ -12,13 +12,12 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
-import redstonetweaks.helper.RedstoneDiodeHelper;
-import redstonetweaks.helper.ServerTickSchedulerHelper;
+import redstonetweaks.interfaces.RTIRedstoneDiode;
+import redstonetweaks.interfaces.RTIServerTickScheduler;
 import redstonetweaks.setting.Settings;
 
 @Mixin(RepeaterBlock.class)
-public abstract class RepeaterBlockMixin implements RedstoneDiodeHelper {
+public abstract class RepeaterBlockMixin implements RTIRedstoneDiode {
 	
 	@Shadow protected abstract int getUpdateDelayInternal(BlockState state);
 	
@@ -46,7 +45,7 @@ public abstract class RepeaterBlockMixin implements RedstoneDiodeHelper {
 			return false;
 		}
 		if (frontState.get(Properties.POWERED)) {
-			return ((ServerTickSchedulerHelper)world.getBlockTickScheduler()).hasScheduledTickAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
+			return ((RTIServerTickScheduler)world.getBlockTickScheduler()).hasScheduledTickAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
 		} else {
 			return world.getBlockTickScheduler().isTicking(frontPos, frontState.getBlock());
 		}

@@ -8,12 +8,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameRules;
-
-import redstonetweaks.helper.MinecraftServerHelper;
-import redstonetweaks.helper.ServerChunkManagerHelper;
-import redstonetweaks.helper.ServerTickSchedulerHelper;
-import redstonetweaks.helper.ServerWorldHelper;
-import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.interfaces.RTIServerWorld;
+import redstonetweaks.interfaces.RTIServerTickScheduler;
+import redstonetweaks.interfaces.RTIServerChunkManager;
 import redstonetweaks.packet.TaskSyncPacket;
 import redstonetweaks.packet.TickPausePacket;
 import redstonetweaks.packet.TickStatusPacket;
@@ -85,7 +84,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		}
 		if (Settings.BugFixes.MC172213.get()) {
 			for (ServerWorld world : server.getWorlds()) {
-				((ServerWorldHelper)world).tickTimeAccess();
+				((RTIServerWorld)world).tickTimeAccess();
 			}
 		}
 		
@@ -128,7 +127,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 				server.getPlayerManager().sendToDimension(new WorldTimeUpdateS2CPacket(world.getTime(), world.getTimeOfDay(), world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)), world.getRegistryKey());
 			}
 			
-			((ServerWorldHelper)world).getNeighborUpdateScheduler().resetTickTime();
+			((RTIServerWorld)world).getNeighborUpdateScheduler().resetTickTime();
 		}
 		
 		shouldUpdateStatus = true;
@@ -137,7 +136,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private void endTick() {
 		if (Settings.BugFixes.MC172213.get()) {
 			for (ServerWorld world : server.getWorlds()) {
-				((ServerWorldHelper)world).tickTimeAccess();
+				((RTIServerWorld)world).tickTimeAccess();
 			}
 		}
 		
@@ -149,8 +148,8 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	}
 	
 	private void tickWorld(BooleanSupplier shouldKeepTicking) {
-		ServerNeighborUpdateScheduler neighborUpdateScheduler = ((ServerWorldHelper)currentWorld).getNeighborUpdateScheduler();
-		ServerUnfinishedEventScheduler unfinishedEventScheduler = ((ServerWorldHelper)currentWorld).getUnfinishedEventScheduler();
+		ServerNeighborUpdateScheduler neighborUpdateScheduler = ((RTIServerWorld)currentWorld).getNeighborUpdateScheduler();
+		ServerUnfinishedEventScheduler unfinishedEventScheduler = ((RTIServerWorld)currentWorld).getUnfinishedEventScheduler();
 		
 		boolean hasNeighborUpdates = neighborUpdateScheduler.hasScheduledNeighborUpdates();
 		boolean hasScheduledEvents = unfinishedEventScheduler.hasScheduledEvents();
@@ -250,13 +249,13 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private void processWeather() {
 		profiler.push("weather");
 		
-		((ServerWorldHelper)currentWorld).processWeather();
+		((RTIServerWorld)currentWorld).processWeather();
 		
 		profiler.pop();
 	}
 	
 	private void processTime() {
-		((ServerWorldHelper)currentWorld).processTime();
+		((RTIServerWorld)currentWorld).processTime();
 	}
 	
 	private void tickChunkSource(BooleanSupplier shouldKeepTicking) {
@@ -274,9 +273,9 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			if (shouldSwitchTask) {
 				shouldSwitchTask = false;
 				
-				((ServerTickSchedulerHelper)currentWorld.getBlockTickScheduler()).startTicking();
+				((RTIServerTickScheduler)currentWorld.getBlockTickScheduler()).startTicking();
 			}
-			shouldSwitchTask = !((ServerTickSchedulerHelper)currentWorld.getBlockTickScheduler()).tryContinueTicking();
+			shouldSwitchTask = !((RTIServerTickScheduler)currentWorld.getBlockTickScheduler()).tryContinueTicking();
 		}
 		
 		profiler.pop();
@@ -289,9 +288,9 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			if (shouldSwitchTask) {
 				shouldSwitchTask = false;
 				
-				((ServerTickSchedulerHelper)currentWorld.getFluidTickScheduler()).startTicking();
+				((RTIServerTickScheduler)currentWorld.getFluidTickScheduler()).startTicking();
 			}
-			shouldSwitchTask = !((ServerTickSchedulerHelper)currentWorld.getFluidTickScheduler()).tryContinueTicking();
+			shouldSwitchTask = !((RTIServerTickScheduler)currentWorld.getFluidTickScheduler()).tryContinueTicking();
 		}
 		
 		profiler.pop();
@@ -300,7 +299,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private void tickRaidManager() {
 		profiler.push("raid");
 		
-		((ServerWorldHelper)currentWorld).tickRaidManager();
+		((RTIServerWorld)currentWorld).tickRaidManager();
 		
 		profiler.pop();
 	}
@@ -311,9 +310,9 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		if (shouldSwitchTask) {
 			shouldSwitchTask = false;
 			
-			((ServerWorldHelper)currentWorld).startProcessingBlockEvents();
+			((RTIServerWorld)currentWorld).startProcessingBlockEvents();
 		}
-		shouldSwitchTask = !((ServerWorldHelper)currentWorld).tryContinueProcessingBlockEvents();
+		shouldSwitchTask = !((RTIServerWorld)currentWorld).tryContinueProcessingBlockEvents();
 		
 		profiler.pop();
 	}
@@ -321,7 +320,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private void tickEntities() {
 		profiler.push("entities");
 		
-		((ServerWorldHelper)currentWorld).tickEntities(profiler);
+		((RTIServerWorld)currentWorld).tickEntities(profiler);
 		
 		profiler.pop();
 	}
@@ -330,9 +329,9 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		if (shouldSwitchTask) {
 			shouldSwitchTask = false;
 			
-			((WorldHelper)currentWorld).startTickingBlockEntities(true);
+			((RTIWorld)currentWorld).startTickingBlockEntities(true);
 		}
-		shouldSwitchTask = !((WorldHelper)currentWorld).tryContinueTickingBlockEntities();
+		shouldSwitchTask = !((RTIWorld)currentWorld).tryContinueTickingBlockEntities();
 	}
 	
 	private void switchWorld() {
@@ -345,33 +344,33 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private void broadcastChunkData() {
 		for (ServerWorld world : server.getWorlds()) {
 			ServerChunkManager chunkManager = world.getChunkManager();
-			((ServerChunkManagerHelper)chunkManager).broadcastChunkData();
+			((RTIServerChunkManager)chunkManager).broadcastChunkData();
 		}
 	}
 	
 	private void syncPause() {
 		DoWorldTicksPacket packet = new DoWorldTicksPacket(doWorldTicks());
-		((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	
 	private void syncStatus() {
 		TickStatusPacket packet = new TickStatusPacket(status);
-		((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	
 	private void syncCurrentWorld() {
 		WorldSyncPacket packet = new WorldSyncPacket(currentWorld);
-		((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	
 	private void syncClientWorldTime() {
 		WorldTimeSyncPacket packet = new WorldTimeSyncPacket(getWorldTime());
-		((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	
 	private void syncCurrentTask() {
 		TaskSyncPacket packet = new TaskSyncPacket(currentTask);
-		((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	
 	public void onTickPausePacketReceived(TickPausePacket packet) {

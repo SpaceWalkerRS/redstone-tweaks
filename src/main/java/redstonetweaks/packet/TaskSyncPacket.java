@@ -3,8 +3,7 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.world.common.WorldTickHandler.Task;
 
 public class TaskSyncPacket extends RedstoneTweaksPacket {
@@ -36,8 +35,8 @@ public class TaskSyncPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((MinecraftClientHelper)client).getWorldTickHandler().onTaskSyncPacketReceived(this);
-		((MinecraftClientHelper)client).getTickInfoLabelRenderer().onTaskSyncPacketReceived(this);
+		((RTIMinecraftClient)client).getWorldTickHandler().onTaskSyncPacketReceived(this);
+		((RTIMinecraftClient)client).getTickInfoLabelRenderer().onTaskSyncPacketReceived(this);
 	}
 
 }

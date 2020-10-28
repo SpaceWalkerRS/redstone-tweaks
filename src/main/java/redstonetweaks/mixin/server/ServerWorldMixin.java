@@ -48,17 +48,16 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.timer.Timer;
-
-import redstonetweaks.helper.MinecraftServerHelper;
-import redstonetweaks.helper.ServerWorldHelper;
-import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;
 import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 @Mixin(ServerWorld.class)
-public abstract class ServerWorldMixin extends World implements WorldHelper, ServerWorldHelper  {
+public abstract class ServerWorldMixin extends World implements RTIWorld, RTIServerWorld  {
 
 	@Shadow @Final private MinecraftServer server;
 	@Shadow @Final private boolean field_25143;
@@ -210,7 +209,7 @@ public abstract class ServerWorldMixin extends World implements WorldHelper, Ser
 	
 	@Override
 	public boolean tickWorldsNormally() {
-		ServerWorldTickHandler worldTickHandler = ((MinecraftServerHelper)getServer()).getWorldTickHandler();
+		ServerWorldTickHandler worldTickHandler = ((RTIMinecraftServer)getServer()).getWorldTickHandler();
 		return worldTickHandler.doWorldTicks() && !(worldTickHandler.isTickingWorlds() || Settings.Global.SHOW_PROCESSING_ORDER.get() > 0);
 	}
 	

@@ -11,9 +11,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
-
-import redstonetweaks.helper.CustomPayloadC2SPacketHelper;
-import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.RTICustomPayloadC2SPacket;
 import redstonetweaks.packet.PacketHandler;
 
 @Mixin(ServerPlayNetworkHandler.class)
@@ -23,12 +22,12 @@ public class ServerPlayNetworkHandlerMixin {
 	
 	@Inject(method = "onCustomPayload", cancellable = true, at = @At(value = "HEAD"))
 	private void onCustomPayload(CustomPayloadC2SPacket minecraftPacket, CallbackInfo ci) {
-		CustomPayloadC2SPacketHelper packet = (CustomPayloadC2SPacketHelper)minecraftPacket;
+		RTICustomPayloadC2SPacket packet = (RTICustomPayloadC2SPacket)minecraftPacket;
 		
 		if (PacketHandler.PACKET_IDENTIFIER.equals(packet.getChannel())) {
 			PacketByteBuf buffer = packet.getData();
 			
-			((MinecraftServerHelper)server).getPacketHandler().onPacketReceived(buffer);
+			((RTIMinecraftServer)server).getPacketHandler().onPacketReceived(buffer);
 			
 			ci.cancel();
 		}

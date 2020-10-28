@@ -13,7 +13,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.packet.ResetSettingPacket;
 import redstonetweaks.packet.ResetSettingsPacket;
 import redstonetweaks.packet.ServerPacketHandler;
@@ -121,21 +121,21 @@ public class ServerSettingsManager {
 	public void onSettingPacketReceived(ISetting setting) {
 		if (server.isDedicated() || server.isRemote()) {
 			SettingPacket packet = new SettingPacket(setting);
-			((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 		}
 	}
 	
 	public void onResetSettingPacketReceived(ISetting setting) {
 		if (server.isDedicated() || server.isRemote()) {
 			ResetSettingPacket packet = new ResetSettingPacket(setting);
-			((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 		}
 	}
 	
 	public void onResetSettingsPacketReceived() {
 		if (server.isDedicated() || server.isRemote()) {
 			ResetSettingsPacket packet = new ResetSettingsPacket();
-			((MinecraftServerHelper)server).getPacketHandler().sendPacket(packet);
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 		}
 	}
 	
@@ -147,7 +147,7 @@ public class ServerSettingsManager {
 	}
 	
 	private void updateSettingsOfPlayer(ServerPlayerEntity player) {
-		ServerPacketHandler packetHandler = ((MinecraftServerHelper)server).getPacketHandler();
+		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
 		SettingsPacket packet = new SettingsPacket(Settings.settingCount);
 		
 		if (player == null) {

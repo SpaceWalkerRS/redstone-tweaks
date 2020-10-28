@@ -1,4 +1,4 @@
-package redstonetweaks.helper;
+package redstonetweaks.interfaces;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.profiler.Profiler;
@@ -6,7 +6,7 @@ import net.minecraft.util.profiler.Profiler;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;
 import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
 
-public interface ServerWorldHelper  {
+public interface RTIServerWorld  {
 	
 	public void tickTimeAccess();
 	

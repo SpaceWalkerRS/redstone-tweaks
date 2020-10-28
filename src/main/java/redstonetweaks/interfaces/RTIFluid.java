@@ -1,8 +1,8 @@
-package redstonetweaks.helper;
+package redstonetweaks.interfaces;
 
 import net.minecraft.world.TickPriority;
 
-public interface FluidHelper {
+public interface RTIFluid {
 	
 	public TickPriority getTickPriority();
 	

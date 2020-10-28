@@ -3,7 +3,7 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.ISetting;
@@ -67,6 +67,6 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 		for (int i = 0; i < count; i++) {
 			settings[i].setFromText(values[i]);
 		}
-		((MinecraftClientHelper)client).getSettingsManager().onSettingsPacketReceived();
+		((RTIMinecraftClient)client).getSettingsManager().onSettingsPacketReceived();
 	}
 }

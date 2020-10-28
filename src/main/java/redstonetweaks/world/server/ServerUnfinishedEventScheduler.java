@@ -1,9 +1,8 @@
 package redstonetweaks.world.server;
 
 import net.minecraft.server.world.ServerWorld;
-
-import redstonetweaks.helper.MinecraftServerHelper;
-import redstonetweaks.helper.ServerWorldHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.UnfinishedEventPacket;
 import redstonetweaks.world.common.UnfinishedEvent;
@@ -16,7 +15,7 @@ public class ServerUnfinishedEventScheduler extends UnfinishedEventScheduler {
 	}
 	
 	public void tick() {
-		ServerNeighborUpdateScheduler neighborUpdateScheduler = ((ServerWorldHelper)world).getNeighborUpdateScheduler();
+		ServerNeighborUpdateScheduler neighborUpdateScheduler = ((RTIServerWorld)world).getNeighborUpdateScheduler();
 		
 		while (!neighborUpdateScheduler.hasScheduledNeighborUpdates() && hasScheduledEvents()) {
 			UnfinishedEvent event = unfinishedEvents.removeLast();
@@ -29,7 +28,7 @@ public class ServerUnfinishedEventScheduler extends UnfinishedEventScheduler {
 	
 	private void syncClientNeighborUpdateScheduler(UnfinishedEvent event) {
 		UnfinishedEventPacket packet = new UnfinishedEventPacket(event);
-		ServerPacketHandler packetHandler = ((MinecraftServerHelper)world.getServer()).getPacketHandler();
+		ServerPacketHandler packetHandler = ((RTIMinecraftServer)world.getServer()).getPacketHandler();
 		
 		if (event.viewDistance < 0) {
 			packetHandler.sendPacketToDimension(packet, world.getRegistryKey());

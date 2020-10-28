@@ -10,4 +10,5 @@ public abstract class AbstractBlockHelper extends AbstractBlock {
 	}
 
 	public static final Direction[] FACINGS = AbstractBlock.FACINGS;
+	
 }

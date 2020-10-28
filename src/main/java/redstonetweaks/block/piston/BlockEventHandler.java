@@ -25,9 +25,9 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import redstonetweaks.helper.PistonBlockEntityHelper;
-import redstonetweaks.helper.PistonHandlerHelper;
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.interfaces.RTIPistonHandler;
+import redstonetweaks.interfaces.RTIPistonBlockEntity;
 import redstonetweaks.setting.Settings;
 
 public class BlockEventHandler {
@@ -139,7 +139,7 @@ public class BlockEventHandler {
 				world.setBlockState(pos, blockState, 20);
 				
 				pistonBlockEntity = new PistonBlockEntity(state.getBlock().getDefaultState().with(Properties.FACING, Direction.byId(data & 7)), facing, false, true);
-				((PistonBlockEntityHelper)pistonBlockEntity).setIsMovedByStickyPiston(sticky);
+				((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(sticky);
 				world.setBlockEntity(pos, pistonBlockEntity);
 				
 				world.updateNeighbors(pos, blockState.getBlock());
@@ -226,8 +226,8 @@ public class BlockEventHandler {
 			movedBlocks = Maps.newHashMap();
 			movedBlocksPos = pistonHandler.getMovedBlocks();
 			movedBlockStates = Lists.newArrayList();
-			movedBlockEntities = ((PistonHandlerHelper)pistonHandler).getMovedBlockEntities();
-			splitSlabTypes = ((PistonHandlerHelper)pistonHandler).getSplitSlabTypes();
+			movedBlockEntities = ((RTIPistonHandler)pistonHandler).getMovedBlockEntities();
+			splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
 			
 			for (BlockPos movedBlockPos : movedBlocksPos) {
 				BlockState movedBlockState = world.getBlockState(movedBlockPos);
@@ -300,7 +300,7 @@ public class BlockEventHandler {
 				movedBlocks.remove(headPos);
 				world.setBlockState(headPos, blockState, 68);
 				PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pistonHead, facing, true, true);
-				((PistonBlockEntityHelper)pistonBlockEntity).setIsMovedByStickyPiston(sticky);
+				((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(sticky);
 				world.setBlockEntity(headPos, pistonBlockEntity);
 			}
 			moveProgress++;

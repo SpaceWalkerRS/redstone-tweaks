@@ -5,7 +5,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.world.server.ScheduledNeighborUpdate;
 import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 
@@ -69,6 +69,6 @@ public class NeighborUpdateVisualizerPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((MinecraftClientHelper)client).getNeighborUpdateVisualizer().updateBoxPositions(this);
+		((RTIMinecraftClient)client).getNeighborUpdateVisualizer().updateBoxPositions(this);
 	}
 }

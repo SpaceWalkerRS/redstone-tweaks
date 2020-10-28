@@ -12,8 +12,7 @@ import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
-
-import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.packet.NeighborUpdateSchedulerPacket;
 import redstonetweaks.packet.NeighborUpdateVisualizerPacket;
 import redstonetweaks.packet.RedstoneTweaksPacket;
@@ -158,6 +157,6 @@ public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {
 	}
 	
 	private void sendPacket(RedstoneTweaksPacket packet) {
-		((MinecraftServerHelper)world.getServer()).getPacketHandler().sendPacketToDimension(packet, world.getRegistryKey());
+		((RTIMinecraftServer)world.getServer()).getPacketHandler().sendPacketToDimension(packet, world.getRegistryKey());
 	}
 }

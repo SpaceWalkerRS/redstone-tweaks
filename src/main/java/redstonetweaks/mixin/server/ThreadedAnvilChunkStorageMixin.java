@@ -8,11 +8,10 @@ import com.google.common.collect.Iterables;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
-
-import redstonetweaks.helper.ThreadedAnvilChunkStorageHelper;
+import redstonetweaks.interfaces.RTIThreadedAnvilChunkStorage;
 
 @Mixin(ThreadedAnvilChunkStorage.class)
-public class ThreadedAnvilChunkStorageMixin implements ThreadedAnvilChunkStorageHelper {
+public class ThreadedAnvilChunkStorageMixin implements RTIThreadedAnvilChunkStorage {
 	
 	@Shadow private volatile Long2ObjectLinkedOpenHashMap<ChunkHolder> chunkHolders;
 	

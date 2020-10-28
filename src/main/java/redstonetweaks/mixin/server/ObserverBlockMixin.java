@@ -24,16 +24,15 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
-import redstonetweaks.helper.BlockHelper;
-import redstonetweaks.helper.ServerWorldHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.interfaces.RTIBlock;
+import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 @Mixin(ObserverBlock.class)
-public abstract class ObserverBlockMixin implements BlockHelper {
+public abstract class ObserverBlockMixin implements RTIBlock {
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract void scheduleTick(WorldAccess world, BlockPos pos);
@@ -46,8 +45,8 @@ public abstract class ObserverBlockMixin implements BlockHelper {
 	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/ObserverBlock;updateNeighbors(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
 	private void onScheduledTickInjectBeforeUpdateNeighbors(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
-		if (!((WorldHelper)world).updateNeighborsNormally()) {
-			((ServerWorldHelper)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
+		if (!((RTIWorld)world).updateNeighborsNormally()) {
+			((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
 		}
 	}
 	

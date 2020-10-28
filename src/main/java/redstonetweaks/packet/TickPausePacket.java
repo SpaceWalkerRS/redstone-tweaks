@@ -3,8 +3,7 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
-import redstonetweaks.helper.MinecraftServerHelper;
+import redstonetweaks.interfaces.RTIMinecraftServer;
 
 public class TickPausePacket extends RedstoneTweaksPacket {
 	
@@ -33,7 +32,7 @@ public class TickPausePacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftServer server) {
-		((MinecraftServerHelper)server).getWorldTickHandler().onTickPausePacketReceived(this);
+		((RTIMinecraftServer)server).getWorldTickHandler().onTickPausePacketReceived(this);
 	}
 	
 	@Override

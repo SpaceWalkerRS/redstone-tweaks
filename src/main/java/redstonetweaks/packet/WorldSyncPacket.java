@@ -4,8 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-
-import redstonetweaks.helper.MinecraftClientHelper;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 
 public class WorldSyncPacket extends RedstoneTweaksPacket {
 	
@@ -36,7 +35,7 @@ public class WorldSyncPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((MinecraftClientHelper)client).getWorldTickHandler().onWorldSyncPacketReceived(this);
-		((MinecraftClientHelper)client).getTickInfoLabelRenderer().onWorldSyncPacketReceived(this);
+		((RTIMinecraftClient)client).getWorldTickHandler().onWorldSyncPacketReceived(this);
+		((RTIMinecraftClient)client).getTickInfoLabelRenderer().onWorldSyncPacketReceived(this);
 	}
 }

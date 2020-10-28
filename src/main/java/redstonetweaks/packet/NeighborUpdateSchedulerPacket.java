@@ -5,7 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.helper.ClientWorldHelper;
+import redstonetweaks.interfaces.RTIClientWorld;
 
 public class NeighborUpdateSchedulerPacket extends RedstoneTweaksPacket {
 
@@ -35,6 +35,6 @@ public class NeighborUpdateSchedulerPacket extends RedstoneTweaksPacket {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void execute(MinecraftClient client) {
-		((ClientWorldHelper)client.world).getNeighborUpdateScheduler().onPacketReceived(this);
+		((RTIClientWorld)client.world).getNeighborUpdateScheduler().onPacketReceived(this);
 	}
 }
