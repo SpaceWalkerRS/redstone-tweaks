@@ -17,6 +17,8 @@ import redstonetweaks.util.RelativePos;
 
 public interface WorldHelper {
 	
+	public void addMovedBlockEntity(BlockPos pos, BlockEntity blockEntity);
+	
 	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler);
 	
 	public void removeBlockEventHandler(BlockPos pos);
@@ -39,9 +41,9 @@ public interface WorldHelper {
 		BlockState state = world.getBlockState(pos);
 		if (Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
 			if (state.isOf(Blocks.REDSTONE_WIRE)) {
-				BlockState downState = world.getBlockState(pos.down());
-				if (downState.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
-					if (downState.get(Properties.HORIZONTAL_FACING).getOpposite() != direction) {
+				BlockState belowState = world.getBlockState(pos.down());
+				if (belowState.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
+					if (belowState.get(Properties.HORIZONTAL_FACING).getOpposite() != direction) {
 						return Blocks.AIR.getDefaultState();
 					}
 				}

@@ -3,10 +3,10 @@ package redstonetweaks.mixin.server;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -99,14 +99,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements Pist
 	
 	private void placePushedBlockEntity() {
 		if (pushedBlockEntity != null) {
-			pushedBlockEntity.cancelRemoval();
-			
-			// We need to remove the current block entity that
-			// the block will have created itself upon being placed.
-			world.removeBlockEntity(pos);
-			world.setBlockEntity(pos, pushedBlockEntity);
-			
-			pushedBlockEntity.markDirty();
+			((WorldHelper)world).addMovedBlockEntity(pos, pushedBlockEntity);
 		}
 	}
 }

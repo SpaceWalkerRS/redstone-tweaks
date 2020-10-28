@@ -1,5 +1,6 @@
 package redstonetweaks.mixin.server;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.StairsBlock;
@@ -60,6 +62,7 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	@Shadow protected boolean iteratingTickingBlockEntities;
 	
 	private Iterator<BlockEntity> blockEntitiesIterator;
+	private List<BlockEntity> pendingMovedBlockEntities;
 	private Map<BlockPos, BlockEventHandler> blockEventHandlers;
 	
 	@Shadow public abstract Profiler getProfiler();
@@ -68,9 +71,14 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	@Shadow public abstract void updateListeners(BlockPos pos, BlockState oldState, BlockState newState, int flags);
 	@Shadow public abstract RegistryKey<World> getRegistryKey();
 	@Shadow public abstract MinecraftServer getServer();
+	@Shadow public static boolean isHeightInvalid(BlockPos pos) { return false; }
+	@Shadow public abstract void setBlockEntity(BlockPos pos, BlockEntity blockEntity);
+	@Shadow public abstract void removeBlockEntity(BlockPos pos);
+	@Shadow public abstract void updateComparators(BlockPos pos, Block block);
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(MutableWorldProperties properties, RegistryKey<World> registryKey, final DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l, CallbackInfo ci) {
+		pendingMovedBlockEntities = new ArrayList<>();
 		blockEventHandlers = new HashMap<>();
 	}
 	
@@ -116,6 +124,11 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 		}
 	}
 	
+	@Inject(method = "tickBlockEntities", at = @At(value = "RETURN"))
+	private void onTickBlockEntitiesInjectAtReturn(CallbackInfo ci) {
+		handlePendingMovedBlockEntities();
+	}
+	
 	@Inject(method = "getReceivedStrongRedstonePower", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetReceivedStrongRedstonePowerInjectAtHead(BlockPos pos, CallbackInfoReturnable<Integer> cir) {
 		if (Settings.Stairs.FULL_FACES_ARE_SOLID.get()) {
@@ -150,6 +163,23 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	@ModifyConstant(method = "getReceivedRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetReceivedRedstonePowerModify15(int oldValue) {
 		return Settings.Global.POWER_MAX.get();
+	}
+	
+	@Override
+	public void addMovedBlockEntity(BlockPos pos, BlockEntity blockEntity) {
+		blockEntity.cancelRemoval();
+		blockEntity.setLocation((World)(Object)this, pos);
+		
+		if (iteratingTickingBlockEntities) {
+			for (BlockEntity pendingBlockEntity : pendingMovedBlockEntities) {
+				if (pendingBlockEntity.getPos().equals(pos)) {
+					return;
+				}
+			}
+			pendingMovedBlockEntities.add(blockEntity);
+		} else {
+			setMovedBlockEntity(pos, blockEntity);
+		}
 	}
 	
 	@Override
@@ -210,25 +240,8 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 	public void finishTickingBlockEntities(Profiler profiler) {
 		profiler.push("pendingBlockEntities");
 		
-		if (!pendingBlockEntities.isEmpty()) {
-			for (int i = 0; i < pendingBlockEntities.size(); ++i) {
-				BlockEntity blockEntity = pendingBlockEntities.get(i);
-				if (!blockEntity.isRemoved()) {
-					if (!blockEntities.contains(blockEntity)) {
-						addBlockEntity(blockEntity);
-					}
-
-					if (isChunkLoaded(blockEntity.getPos())) {
-						WorldChunk worldChunk = getWorldChunk(blockEntity.getPos());
-						BlockState blockState = worldChunk.getBlockState(blockEntity.getPos());
-						worldChunk.setBlockEntity(blockEntity.getPos(), blockEntity);
-						updateListeners(blockEntity.getPos(), blockState, blockState, 3);
-					}
-				}
-			}
-
-			pendingBlockEntities.clear();
-		}
+		handlePendingBlockEntities();
+		handlePendingMovedBlockEntities();
 		
 		profiler.pop();
 	}
@@ -266,6 +279,53 @@ public abstract class WorldMixin implements WorldHelper, WorldAccess, WorldView 
 			if (isChunkLoaded(blockEntity.getPos())) {
 				getWorldChunk(blockEntity.getPos()).removeBlockEntity(blockEntity.getPos());
 			}
+		}
+	}
+	
+	private void handlePendingBlockEntities() {
+		if (!pendingBlockEntities.isEmpty()) {
+			for (int i = 0; i < pendingBlockEntities.size(); ++i) {
+				BlockEntity blockEntity = pendingBlockEntities.get(i);
+				if (!blockEntity.isRemoved()) {
+					if (!blockEntities.contains(blockEntity)) {
+						addBlockEntity(blockEntity);
+					}
+
+					if (isChunkLoaded(blockEntity.getPos())) {
+						WorldChunk worldChunk = getWorldChunk(blockEntity.getPos());
+						BlockState blockState = worldChunk.getBlockState(blockEntity.getPos());
+						worldChunk.setBlockEntity(blockEntity.getPos(), blockEntity);
+						updateListeners(blockEntity.getPos(), blockState, blockState, 3);
+					}
+				}
+			}
+
+			pendingBlockEntities.clear();
+		}
+	}
+	
+	private void handlePendingMovedBlockEntities() {
+		if (!pendingMovedBlockEntities.isEmpty()) {
+			for (BlockEntity blockEntity : pendingMovedBlockEntities) {
+				if (!blockEntity.isRemoved() && !blockEntities.contains(blockEntity)) {
+					BlockPos pos = blockEntity.getPos();
+					
+					setMovedBlockEntity(pos, blockEntity);
+				}
+			}
+			
+			pendingMovedBlockEntities.clear();
+		}
+	}
+	
+	private  void setMovedBlockEntity(BlockPos pos, BlockEntity blockEntity) {
+		Block block = getBlockState(pos).getBlock();
+		
+		if (block instanceof BlockEntityProvider) {
+			removeBlockEntity(pos);
+			setBlockEntity(pos, blockEntity);
+			
+			updateComparators(pos, block);
 		}
 	}
 	
