@@ -322,6 +322,8 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		Block block = getBlockState(pos).getBlock();
 		
 		if (block instanceof BlockEntityProvider) {
+			// The moved block will have created a new block entity upon being placed
+			// so we first remove this block entity.
 			removeBlockEntity(pos);
 			setBlockEntity(pos, blockEntity);
 			
