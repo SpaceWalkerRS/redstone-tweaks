@@ -299,9 +299,7 @@ public class BlockEventHandler {
 				blockState = Blocks.MOVING_PISTON.getDefaultState().with(PistonExtensionBlock.FACING, facing).with(PistonExtensionBlock.TYPE, pistonType);
 				movedBlocks.remove(headPos);
 				world.setBlockState(headPos, blockState, 68);
-				PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pistonHead, facing, true, true);
-				((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(sticky);
-				world.setBlockEntity(headPos, pistonBlockEntity);
+				world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(pistonHead, null, facing, true, true, sticky));
 			}
 			moveProgress++;
 			break;

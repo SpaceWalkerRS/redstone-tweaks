@@ -95,6 +95,11 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				
 				if (blockEntity != null) {
 					world.removeBlockEntity(pos);
+					
+					// Fix for disappearing block entities on the client
+					if (world.isClient()) {
+						blockEntity.markDirty();
+					}
 				}
 			}
 		}

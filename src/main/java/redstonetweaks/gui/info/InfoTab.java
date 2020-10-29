@@ -42,6 +42,7 @@ public class InfoTab extends RTMenuTab {
 		}
 		
 		info.get("Credits").add(new TranslatableText("Space Walker - lead developer"));
+		info.get("Credits").add(new TranslatableText("G4me4u - developer"));
 	}
 	
 	@Override

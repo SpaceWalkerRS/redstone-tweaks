@@ -327,7 +327,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 			removeBlockEntity(pos);
 			setBlockEntity(pos, blockEntity);
 			
-			updateComparators(pos, block);
+			blockEntity.markDirty();
 		}
 	}
 	
