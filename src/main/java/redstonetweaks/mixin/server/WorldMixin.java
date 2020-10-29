@@ -249,21 +249,21 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Override
 	public void tickBlockEntity(BlockEntity blockEntity, Profiler profiler) {
 		if (!blockEntity.isRemoved() && blockEntity.hasWorld()) {
-			BlockPos blockPos = blockEntity.getPos();
-			if (getChunkManager().shouldTickBlock(blockPos) && getWorldBorder().contains(blockPos)) {
+			BlockPos pos = blockEntity.getPos();
+			if (getChunkManager().shouldTickBlock(pos) && getWorldBorder().contains(pos)) {
 				try {
 					profiler.push(() -> {
 						return String.valueOf(BlockEntityType.getId(blockEntity.getType()));
 					});
-					if (blockEntity.getType().supports(getBlockState(blockPos).getBlock())) {
+					if (blockEntity.getType().supports(getBlockState(pos).getBlock())) {
 						((Tickable)blockEntity).tick();
 					} else {
 						blockEntity.markInvalid();
 					}
 					
 					profiler.pop();
-				} catch (Throwable var8) {
-					CrashReport crashReport = CrashReport.create(var8, "Ticking block entity");
+				} catch (Throwable t) {
+					CrashReport crashReport = CrashReport.create(t, "Ticking block entity");
 					CrashReportSection crashReportSection = crashReport.addElement("Block entity being ticked");
 					blockEntity.populateCrashReport(crashReportSection);
 					throw new CrashException(crashReport);
@@ -276,8 +276,10 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 				blockEntitiesIterator.remove();
 			}
 			blockEntities.remove(blockEntity);
-			if (isChunkLoaded(blockEntity.getPos())) {
-				getWorldChunk(blockEntity.getPos()).removeBlockEntity(blockEntity.getPos());
+			
+			BlockPos pos = blockEntity.getPos();
+			if (isChunkLoaded(pos)) {
+				getWorldChunk(pos).removeBlockEntity(pos);
 			}
 		}
 	}

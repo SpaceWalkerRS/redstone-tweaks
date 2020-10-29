@@ -8,8 +8,8 @@ public interface RTIPistonBlockEntity {
 	
 	public void setIsMovedByStickyPiston(boolean newValue);
 	
-	public void setPushedBlockEntity(BlockEntity pushedBlockEntity);
+	public void setMovedBlockEntity(BlockEntity pushedBlockEntity);
 	
-	public BlockEntity getPushedBlockEntity();
+	public BlockEntity getMovedBlockEntity();
 	
 }

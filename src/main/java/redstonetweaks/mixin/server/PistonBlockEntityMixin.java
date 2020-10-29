@@ -31,7 +31,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Shadow private BlockState pushedBlock;
 	@Shadow private boolean source;
 	
-	private BlockEntity pushedBlockEntity;
+	private BlockEntity movedBlockEntity;
 	private boolean isMovedByStickyPiston;
 	
 	public PistonBlockEntityMixin(BlockEntityType<?> type) {
@@ -41,26 +41,26 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Inject(method = "getProgress", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetProgressInjectAtReturn(float tickDelta, CallbackInfoReturnable<Float> cir) {
 		if (!((RTIWorld)world).tickWorldsNormally()) {
-			int pistonSpeed = getPistonSpeed();
+			int speed = getSpeed();
 			
-			cir.setReturnValue(MathHelper.clamp(lastProgress + 0.2F / pistonSpeed, 0, pistonSpeed));
+			cir.setReturnValue(MathHelper.clamp(lastProgress + 0.2F / speed, 0, speed));
 			cir.cancel();
 		}
 	}
 	
 	@Inject(method = "finish", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onFinishInjectAfterSetBlockState(CallbackInfo ci) {
-		placePushedBlockEntity();
+		placeMovedBlockEntity();
 	}
 	
 	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.AFTER, ordinal = 1, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onTickInjectAfterSetBlockState(CallbackInfo ci) {
-		placePushedBlockEntity();
+		placeMovedBlockEntity();
 	}
 	
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5f))
 	private float tickIncrementProgress(float oldIncrementValue) {
-		int speed = getPistonSpeed();
+		int speed = getSpeed();
 		return speed == 0 ? 1.0f : 1.0f / speed;
 	}
 	
@@ -70,10 +70,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 
 		if (tag.contains("movedBlockEntity")) {
 			if (pushedBlock.getBlock() instanceof BlockEntityProvider) {
-				pushedBlockEntity = ((BlockEntityProvider)pushedBlock.getBlock()).createBlockEntity(world);
+				movedBlockEntity = ((BlockEntityProvider)pushedBlock.getBlock()).createBlockEntity(world);
 			}
-			if (pushedBlockEntity != null) {
-				pushedBlockEntity.fromTag(pushedBlock, tag.getCompound("movedBlockEntity"));
+			if (movedBlockEntity != null) {
+				movedBlockEntity.fromTag(pushedBlock, tag.getCompound("movedBlockEntity"));
 			}
 		}
 	}
@@ -82,8 +82,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	private void onToTagInjectAtReturn(CompoundTag tag, CallbackInfoReturnable<?> cir) {
 		tag.putBoolean("isMovedByStickyPiston", isMovedByStickyPiston);
 		
-		if (pushedBlockEntity != null) {
-			tag.put("movedBlockEntity", pushedBlockEntity.toTag(new CompoundTag()));
+		if (movedBlockEntity != null) {
+			tag.put("movedBlockEntity", movedBlockEntity.toTag(new CompoundTag()));
 		}
 	}
 	
@@ -98,22 +98,22 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
-	public void setPushedBlockEntity(BlockEntity pushedBlockEntity) {
-		this.pushedBlockEntity = pushedBlockEntity;
+	public void setMovedBlockEntity(BlockEntity blockEntity) {
+		movedBlockEntity = blockEntity;
 	}
 	
 	@Override
-	public BlockEntity getPushedBlockEntity() {
-		return pushedBlockEntity;
+	public BlockEntity getMovedBlockEntity() {
+		return movedBlockEntity;
 	}
 	
-	private int getPistonSpeed() {
+	private int getSpeed() {
 		return extending ? PistonHelper.speedRisingEdge(isMovedByStickyPiston) : PistonHelper.speedFallingEdge(isMovedByStickyPiston);
 	}
 	
-	private void placePushedBlockEntity() {
-		if (pushedBlockEntity != null) {
-			((RTIWorld)world).addMovedBlockEntity(pos, pushedBlockEntity);
+	private void placeMovedBlockEntity() {
+		if (movedBlockEntity != null) {
+			((RTIWorld)world).addMovedBlockEntity(pos, movedBlockEntity);
 		}
 	}
 }

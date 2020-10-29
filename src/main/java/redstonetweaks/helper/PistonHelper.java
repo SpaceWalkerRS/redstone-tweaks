@@ -53,7 +53,7 @@ public class PistonHelper {
 		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlockState, pistonDir, extending, isSource);
 		
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
-		((RTIPistonBlockEntity)pistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
+		((RTIPistonBlockEntity)pistonBlockEntity).setMovedBlockEntity(pushedBlockEntity);
 		
 		return pistonBlockEntity;
 	}
