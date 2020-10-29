@@ -148,7 +148,7 @@ public class ServerSettingsManager {
 	
 	private void updateSettingsOfPlayer(ServerPlayerEntity player) {
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
-		SettingsPacket packet = new SettingsPacket(Settings.settingCount);
+		SettingsPacket packet = new SettingsPacket(Settings.getSettingCount());
 		
 		if (player == null) {
 			packetHandler.sendPacket(packet);

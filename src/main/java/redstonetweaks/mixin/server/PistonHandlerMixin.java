@@ -33,6 +33,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import redstonetweaks.helper.ChainHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.RTIPistonHandler;
@@ -48,6 +49,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	@Shadow @Final private List<BlockPos> movedBlocks;
 
 	private boolean sticky;
+	private List<BlockPos> anchoredChains;
 	private List<BlockEntity> movedBlockEntities;
 	private Map<BlockPos, SlabType> splitSlabTypes;
 	
@@ -64,14 +66,17 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			if (blockEntity instanceof PistonBlockEntity) {
 				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 				if (pistonBlockEntity.isSource()) {
-					BlockState pushedState = pistonBlockEntity.getPushedBlock();
-					if (pushedState.getBlock() instanceof PistonBlock) {
-						sticky = pushedState.isOf(Blocks.STICKY_PISTON);
+					BlockState movedState = pistonBlockEntity.getPushedBlock();
+					if (movedState.getBlock() instanceof PistonBlock) {
+						sticky = movedState.isOf(Blocks.STICKY_PISTON);
 					}
 				}
 			}
 		}
 		
+		if (Settings.Global.CHAINSTONE.get()) {
+			anchoredChains = new ArrayList<>();
+		}
 		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
 			movedBlockEntities = new ArrayList<>();
 		}
@@ -145,7 +150,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	private void onTryMoveInjectBeforeIsAdjacentBlockStuck(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState blockState, Block block, int i, BlockPos blockPos) {
 		BlockPos prevBlockPos = blockPos.offset(motionDirection);
 		BlockState pullingState = world.getBlockState(prevBlockPos);
-		onTryMoveIsAdjacentBlockStuck = isAdjacentBlockStuck(pullingState, blockState, motionDirection.getOpposite());
+		onTryMoveIsAdjacentBlockStuck = isAdjacentBlockStuck(prevBlockPos, pullingState, blockPos, blockState, motionDirection.getOpposite());
 	}
 
 	@Redirect(method = "tryMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
@@ -221,7 +226,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 						type = pushingState.get(SlabBlock.TYPE);
 						
 						if (type == SlabType.DOUBLE) {
-							// Note: Default case should never be caught..
+							// Note: default case should never be caught..
 							type = splitSlabTypes.getOrDefault(pushingPos, SlabType.DOUBLE);
 						}
 					}
@@ -266,7 +271,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 
 	@Inject(method = "canMoveAdjacentBlock", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
 	private void onCanMoveAdjacentBlockInjectBeforeIsAdjacentBlockStuck(BlockPos pos, CallbackInfoReturnable<Boolean> cir, BlockState pullingState, Direction[] directions, int len, int i, Direction dir, BlockPos adjacentPos, BlockState adjacentState) {
-		if (isAdjacentBlockStuck(pullingState, adjacentState, dir) && !tryMove(adjacentPos, dir)) {
+		if (isAdjacentBlockStuck(pos, pullingState, adjacentPos, adjacentState, dir) && !tryMove(adjacentPos, dir)) {
 			cir.setReturnValue(false);
 			cir.cancel();
 		}
@@ -274,11 +279,12 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 
 	@Redirect(method = "canMoveAdjacentBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
 	private boolean onCanMoveAdjacentBlockRedirectIsAdjacentBlockStuck(Block block1, Block block2) {
-		// This will be replaced by the injection above.
+		// This is replaced by the injection above.
 		return false;
 	}
 	
-	private static boolean isAdjacentBlockStuck(BlockState pullingState, BlockState adjacentState, Direction dir) {
+	// dir is the direction from the pulling state towards to adjacent state
+	private boolean isAdjacentBlockStuck(BlockPos pos, BlockState pullingState, BlockPos adjacentPos, BlockState adjacentState, Direction dir) {
 		if (SlabHelper.isSlab(adjacentState) && !PistonHelper.canSlabStickTo(adjacentState, dir.getOpposite()))
 			return false;
 		
@@ -289,8 +295,31 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		if (pullingState.isOf(Blocks.HONEY_BLOCK) && !adjacentState.isOf(Blocks.SLIME_BLOCK)) {
 			return true;
 		}
+		
 		if (Settings.StickyPiston.SUPER_STICKY.get() && pullingState.isOf(Blocks.STICKY_PISTON)) {
 			return dir == pullingState.get(Properties.FACING);
+		}
+		if (Settings.Global.CHAINSTONE.get() && pullingState.isOf(Blocks.CHAIN)) {
+			Direction.Axis axis = pullingState.get(Properties.AXIS);
+			
+			if (axis == dir.getAxis()) {
+				// Identify situations where the adjacent block is definitely not pulled along
+				if (adjacentState.isOf(Blocks.CHAIN)) {
+					if (adjacentState.get(Properties.AXIS) != axis) {
+						return false;
+					}
+				} else
+				if (!Block.sideCoversSmallSquare(world, adjacentPos, dir.getOpposite())) {
+					return false;
+				}
+				
+				// If the chain block moves along its own axis it is always sticky,
+				// otherwise it needs to be part of a chain that is anchored on both ends
+				if (axis == motionDirection.getAxis()) {
+					return true;
+				}
+				return ChainHelper.isFullyAnchored(world, pos, axis, anchoredChains);
+			}
 		}
 		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (pullingState.isOf(Blocks.CHEST) || pullingState.isOf(Blocks.TRAPPED_CHEST))) {
 			ChestType chestType = pullingState.get(Properties.CHEST_TYPE);
@@ -307,8 +336,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				}
 				return (dir == facing.rotateYCounterclockwise());
 			}
-			
-			return false;
 		}
 	
 		return false;
@@ -319,6 +346,9 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			return true;
 		}
 		if (Settings.StickyPiston.SUPER_STICKY.get() && block == Blocks.STICKY_PISTON) {
+			return true;
+		}
+		if (Settings.Global.CHAINSTONE.get() && block == Blocks.CHAIN) {
 			return true;
 		}
 		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (block == Blocks.CHEST || block == Blocks.TRAPPED_CHEST)) {
