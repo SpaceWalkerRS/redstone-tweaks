@@ -3,22 +3,34 @@ package redstonetweaks.mixin.server;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.AbstractPressurePlateBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
+import redstonetweaks.block.AnaloguePowerComponentBlockEntity;
 import redstonetweaks.interfaces.RTIPressurePlate;
 
 @Mixin(AbstractPressurePlateBlock.class)
-public abstract class AbstractPressurePlateBlockMixin {
+public abstract class AbstractPressurePlateBlockMixin extends Block {
+	
+	public AbstractPressurePlateBlockMixin(Settings settings) {
+		super(settings);
+	}
 	
 	@Shadow protected abstract void updatePlateState(World world, BlockPos pos, BlockState blockState, int rsOut);
 	@Shadow protected abstract int getRedstoneOutput(BlockState state);
@@ -42,6 +54,16 @@ public abstract class AbstractPressurePlateBlockMixin {
 		}
 	}
 	
+	@Inject(method = "updatePlateState", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private void onUpdatePlateStateInjectBeforeSetBlockState(World world, BlockPos pos, BlockState state, int rsOut, CallbackInfo ci, int newPower) {
+		if (hasBlockEntity()) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
+				((AnaloguePowerComponentBlockEntity)blockEntity).setPower(newPower);
+			}
+		}
+	}
+	
 	@Redirect(method = "updatePlateState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void updatePlateStateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay, World world, BlockPos blockPos, BlockState state) {
 		int delay = ((RTIPressurePlate)this).delayFallingEdge(state);
@@ -58,13 +80,17 @@ public abstract class AbstractPressurePlateBlockMixin {
 		ci.cancel();
 	}
 	
-	@Redirect(method = "getWeakRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;getRedstoneOutput(Lnet/minecraft/block/BlockState;)I"))
-	private int onGetWeakRedstonePowerRedirectGetRedstoneOutput(AbstractPressurePlateBlock plate, BlockState state) {
-		return ((RTIPressurePlate)this).powerWeak(state);
+	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "HEAD"))
+	private void onGetWeakRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(((RTIPressurePlate)this).powerWeak(world, pos, state));
+		cir.cancel();
 	}
 	
-	@Redirect(method = "getStrongRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;getRedstoneOutput(Lnet/minecraft/block/BlockState;)I"))
-	private int onGetStrongRedstonePowerRedirectGetRedstoneOutput(AbstractPressurePlateBlock plate, BlockState state) {
-		return ((RTIPressurePlate)this).powerStrong(state);
+	@Inject(method = "getStrongRedstonePower", cancellable = true, at = @At(value = "HEAD"))
+	private void onGetStrongRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
+		int power = direction == Direction.UP ? ((RTIPressurePlate)this).powerStrong(world, pos, state) : 0;
+		
+		cir.setReturnValue(power);
+		cir.cancel();
 	}
 }

@@ -11,6 +11,8 @@ public interface RTIPistonHandler {
 	
 	public List<BlockEntity> getMovedBlockEntities();
 	
-	public Map<BlockPos, SlabType> getSplitSlabTypes();
+	public Map<BlockPos, SlabType> getMergingSlabTypes();
+	
+	public Map<BlockPos, SlabType> getSplittingSlabTypes();
 	
 }

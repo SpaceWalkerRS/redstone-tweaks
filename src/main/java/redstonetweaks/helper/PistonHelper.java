@@ -49,11 +49,20 @@ public class PistonHelper {
 		return state;
 	}
 	
+	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
+		return createPistonBlockEntity(pushedBlockState, null, pistonDir, extending, isSource, isMovedByStickyPiston);
+	}
+	
 	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
+		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, null, pistonDir, extending, isSource, isMovedByStickyPiston);
+	}
+	
+	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, BlockState stationaryState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
 		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlockState, pistonDir, extending, isSource);
 		
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
 		((RTIPistonBlockEntity)pistonBlockEntity).setMovedBlockEntity(pushedBlockEntity);
+		((RTIPistonBlockEntity)pistonBlockEntity).setStationaryState(stationaryState);
 		
 		return pistonBlockEntity;
 	}
@@ -214,8 +223,9 @@ public class PistonHelper {
 		if (Settings.Global.MERGE_SLABS.get() && dir.getAxis().isVertical()) {
 			SlabType type = state.get(SlabBlock.TYPE);
 			
-			if (type != SlabType.DOUBLE && type != SlabHelper.getTypeFromDirection(dir))
+			if (type != SlabType.DOUBLE && type != SlabHelper.getTypeFromDirection(dir)) {
 				return false;
+			}
 		}
 		
 		return true;

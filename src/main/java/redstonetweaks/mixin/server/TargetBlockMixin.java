@@ -80,12 +80,11 @@ public class TargetBlockMixin implements BlockEntityProvider {
 	private void onGetWeakRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
-			int power = ((AnaloguePowerComponentBlockEntity)blockEntity).getPower();
+			AnaloguePowerComponentBlockEntity powerBlockEntity = ((AnaloguePowerComponentBlockEntity)blockEntity);
 			
-			if (power > 0 ) {
-				cir.setReturnValue(power);
-				cir.cancel();
-			}
+			powerBlockEntity.ensureCorrectPower(state);
+			cir.setReturnValue(powerBlockEntity.getPower());
+			cir.cancel();
 		}
 	}
 	

@@ -54,7 +54,7 @@ public class Settings {
 				add(RelativePos.SELF, RelativePos.UP).
 				add(RelativePos.SELF, RelativePos.NORTH).
 				add(RelativePos.SELF, RelativePos.SOUTH));
-		public static final BooleanSetting CHAINSTONE = new BooleanSetting(ID, "chainstone", "Inspired by the carpet mod rule of the same name, this setting makes connected chain blocks\nstick to each other and any blocks they anchored to. But be careful! A chain moved perpendicular\nto its axis will only move as a whole if it is anchored at both ends.", false);
+		public static final BooleanSetting CHAINSTONE = new BooleanSetting(ID, "chainstone", "Inspired by the carpet mod rule of the same name, this setting makes connected chain blocks\nstick to each other and any blocks they anchored to. But be careful! A chain will only move as a whole if it is anchored at both ends.", false);
 		public static final IntegerSetting DELAY_MULTIPLIER = new IntegerSetting(ID, "delayMultiplier", "The delay of all scheduled ticks will be multiplied by this value. When set to 0 all scheduled\nticks will be executed instantaneously.", 1, 0, 127);
 		public static final BooleanSetting DO_BLOCK_UPDATES = new BooleanSetting(ID, "doBlockUpdates", "Allow worlds to dispatch block updates.", true);
 		public static final BooleanSetting DO_SHAPE_UPDATES = new BooleanSetting(ID, "doShapeUpdates", "Allow worlds to dispatch shape updates.", true);
@@ -597,39 +597,39 @@ public class Settings {
 		public static final BooleanSetting CONNECTS_TO_WIRE = new BooleanSetting(ID, "connectsToWire", "When enabled, normal pistons connect to redstone wire.", false);
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting(ID, "delayRisingEdge", "Delay in ticks before extending.", 0, 0, Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(ID, "delayFallingEdge", "Delay in ticks before retracting", 0, 0, Common.MAX_DELAY);
-		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting(ID, "supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face, without\nbreaking when the piston extends or retracts.", false);
-		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting(ID, "updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend.\nThis is achieved using scheduled ticks.", false);
-		public static final BooleanSetting SUPPRESS_HEAD_UPDATES_ON_EXTENSION = new BooleanSetting(ID, "suppressHeadUpdatesOnExtension", "Suppress block updates emitted by the moving piston head when the piston starts extending.", false);
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_EXTENDING = new BooleanSetting(ID, "ignoreUpdatesWhileExtending", "Ignore any neighbor updates received during the extension.", false);
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_RETRACTING = new BooleanSetting(ID, "ignoreUpdatesWhileRetracting", "Ignore any neighbor updates received during the retraction.", true);
 		public static final BooleanSetting LAZY_RISING_EDGE = new BooleanSetting(ID, "lazyRisingEdge", Common.DESC_LAZY_RISING_EDGE, false);
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(ID, "lazyFallingEdge", Common.DESC_LAZY_FALLING_EDGE, false);
+		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
 		public static final DirectionalBooleanSetting QC = new DirectionalBooleanSetting(ID, "quasiConnectivity", Common.DESC_QC, new Boolean[] {false, true, false, false, false, false});
 		public static final BooleanSetting RANDOMIZE_QC = new BooleanSetting(ID, "randomizeQuasiConnectivity", Common.DESC_RANDOMIZE_QC, false);
 		public static final IntegerSetting SPEED_RISING_EDGE = new IntegerSetting(ID, "speedRisingEdge", "The duration of the extension in ticks.", 2, 0, Common.MAX_DELAY);
 		public static final IntegerSetting SPEED_FALLING_EDGE = new IntegerSetting(ID, "speedFallingEdge", "The duration of the retraction in ticks.", 2, 0, Common.MAX_DELAY);
+		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting(ID, "supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face, without\nbreaking when the piston extends or retracts.", false);
+		public static final BooleanSetting SUPPRESS_HEAD_UPDATES_ON_EXTENSION = new BooleanSetting(ID, "suppressHeadUpdatesOnExtension", "Suppress block updates emitted by the moving piston head when the piston starts extending.", false);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
-		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
+		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting(ID, "updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend.\nThis is achieved using scheduled ticks.", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				CONNECTS_TO_WIRE,
 				DELAY_RISING_EDGE,
 				DELAY_FALLING_EDGE,
-				SUPPORTS_BRITTLE_BLOCKS,
-				UPDATE_SELF_WHILE_POWERED,
-				SUPPRESS_HEAD_UPDATES_ON_EXTENSION,
 				IGNORE_UPDATES_WHILE_EXTENDING,
 				IGNORE_UPDATES_WHILE_RETRACTING,
 				LAZY_RISING_EDGE,
 				LAZY_FALLING_EDGE,
+				PUSH_LIMIT,
 				QC,
 				RANDOMIZE_QC,
 				SPEED_RISING_EDGE,
 				SPEED_FALLING_EDGE,
+				SUPPORTS_BRITTLE_BLOCKS,
+				SUPPRESS_HEAD_UPDATES_ON_EXTENSION,
 				TICK_PRIORITY_RISING_EDGE,
 				TICK_PRIORITY_FALLING_EDGE,
-				PUSH_LIMIT
+				UPDATE_SELF_WHILE_POWERED
 		);
 	}
 	
@@ -925,21 +925,21 @@ public class Settings {
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting(ID, "delayRisingEdge", Common.DESC_DELAY_RISING_EDGE, 0, 0, Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(ID, "delayFallingEdge", Common.DESC_DELAY_FALLING_EDGE, 0, 0, Common.MAX_DELAY);
 		public static final BooleanSetting FAST_BLOCK_DROPPING = new BooleanSetting(ID, "fastBlockDropping", "When enabled and doBlockDropping is also enabled, a sticky piston will instantly place the block it is dropping.", true);
-		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting(ID, "supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face without\nbreaking when the piston extends or retracts.", false);
-		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting(ID, "updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend.\nThis is achieved using scheduled ticks.", false);
-		public static final BooleanSetting SUPPRESS_HEAD_UPDATES_ON_EXTENSION = new BooleanSetting(ID, "suppressHeadUpdatesOnExtension", "Suppress block updates emitted by the moving piston head when the piston starts extending.", false);
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_EXTENDING = new BooleanSetting(ID, "ignoreUpdatesWhileExtending", "Ignore any neighbor updates received during the extension.", false);
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_RETRACTING = new BooleanSetting(ID, "ignoreUpdatesWhileRetracting", "Ignore any neighbor updates received during the retraction.", true);
 		public static final BooleanSetting LAZY_RISING_EDGE = new BooleanSetting(ID, "lazyRisingEdge", Common.DESC_LAZY_RISING_EDGE, false);
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(ID, "lazyFallingEdge", Common.DESC_LAZY_FALLING_EDGE, false);
+		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
 		public static final DirectionalBooleanSetting QC = new DirectionalBooleanSetting(ID, "quasiConnectivity", Common.DESC_QC, new Boolean[] {false, true, false, false, false, false});
 		public static final BooleanSetting RANDOMIZE_QC = new BooleanSetting(ID, "randomizeQuasiConnectivity", Common.DESC_RANDOMIZE_QC, false);
 		public static final IntegerSetting SPEED_RISING_EDGE = new IntegerSetting(ID, "speedRisingEdge", "The duration of the extension in ticks.", 2, 0, Common.MAX_DELAY);
 		public static final IntegerSetting SPEED_FALLING_EDGE = new IntegerSetting(ID, "speedFallingEdge", "The duration of the retraction in ticks.", 2, 0, Common.MAX_DELAY);
 		public static final BooleanSetting SUPER_STICKY = new BooleanSetting(ID, "superSticky", "Make the face of sticky pistons stick to blocks when moved.", false);
+		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting(ID, "supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face without\nbreaking when the piston extends or retracts.", false);
+		public static final BooleanSetting SUPPRESS_HEAD_UPDATES_ON_EXTENSION = new BooleanSetting(ID, "suppressHeadUpdatesOnExtension", "Suppress block updates emitted by the moving piston head when the piston starts extending.", false);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
-		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
+		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting(ID, "updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend.\nThis is achieved using scheduled ticks.", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				CONNECTS_TO_WIRE,
@@ -947,21 +947,21 @@ public class Settings {
 				DELAY_RISING_EDGE,
 				DELAY_FALLING_EDGE,
 				FAST_BLOCK_DROPPING,
-				SUPPORTS_BRITTLE_BLOCKS,
-				UPDATE_SELF_WHILE_POWERED,
-				SUPPRESS_HEAD_UPDATES_ON_EXTENSION,
 				IGNORE_UPDATES_WHILE_EXTENDING,
 				IGNORE_UPDATES_WHILE_RETRACTING,
 				LAZY_RISING_EDGE,
 				LAZY_FALLING_EDGE,
+				PUSH_LIMIT,
 				QC,
 				RANDOMIZE_QC,
 				SPEED_RISING_EDGE,
 				SPEED_FALLING_EDGE,
 				SUPER_STICKY,
+				SUPPORTS_BRITTLE_BLOCKS,
+				SUPPRESS_HEAD_UPDATES_ON_EXTENSION,
 				TICK_PRIORITY_RISING_EDGE,
 				TICK_PRIORITY_FALLING_EDGE,
-				PUSH_LIMIT
+				UPDATE_SELF_WHILE_POWERED
 		);
 	}
 	

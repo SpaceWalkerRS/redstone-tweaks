@@ -1,5 +1,6 @@
 package redstonetweaks.interfaces;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 
 public interface RTIPistonBlockEntity {
@@ -11,5 +12,9 @@ public interface RTIPistonBlockEntity {
 	public void setMovedBlockEntity(BlockEntity pushedBlockEntity);
 	
 	public BlockEntity getMovedBlockEntity();
+	
+	public BlockState getStationaryState();
+	
+	public void setStationaryState(BlockState state);
 	
 }

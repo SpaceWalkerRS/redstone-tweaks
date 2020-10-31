@@ -37,6 +37,7 @@ import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.RTIPistonHandler;
 import redstonetweaks.interfaces.RTIBlock;
@@ -209,23 +210,37 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		return false;
 	}
 	
-	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 0, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))
+	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 2, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onMoveInjectBeforeSetBlockEntity0(World world, BlockPos pos, Direction pistonDir, boolean extend, CallbackInfoReturnable<Boolean> cir,
 			BlockPos headPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> movedBlockStatesMap,
 			List<BlockPos> movedBlocksPos, List<BlockState> movedBlockStates, List<BlockPos> brokenBlocksPos,
-			BlockState[] affectedBlockStates, Direction motionDirection, int j, int l, BlockPos blockPos4) 
+			BlockState[] affectedBlockStates, Direction motionDirection, int j, int index, BlockPos frontPos) 
 	{
-		BlockState movedBlockState = movedBlockStates.get(l);
+		BlockState movedBlockState = movedBlockStates.get(index);
 		BlockEntity movedBlockEntity = null;
+		BlockState stationarySlab = null;
+		
 		if (redstonetweaks.setting.Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
-			movedBlockEntity = ((RTIPistonHandler)pistonHandler).getMovedBlockEntities().get(l);
+			movedBlockEntity = ((RTIPistonHandler)pistonHandler).getMovedBlockEntities().get(index);
+		}
+		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
+			Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
+			if (PistonHelper.shouldMergeSlabs(world, frontPos.offset(motionDirection.getOpposite()), movedBlockState, frontPos, motionDirection, splitSlabTypes)) {
+				stationarySlab = world.getBlockState(frontPos);
+			}
 		}
 		
-		world.setBlockEntity(blockPos4, PistonHelper.createPistonBlockEntity(movedBlockState, movedBlockEntity, pistonDir, extend, false, sticky));
+		world.setBlockState(frontPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, pistonDir), 68);
+		world.setBlockEntity(frontPos, PistonHelper.createPistonBlockEntity(movedBlockState, movedBlockEntity, stationarySlab, pistonDir, extend, false, sticky));
+	}
+	
+	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 2, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private boolean onMoveRedirectSetBlockState2(World world, BlockPos pos, BlockState state, int flags) {
+		return false;
 	}
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))
-	private void onMoveRedirectSetBlockEntity0(World world1, BlockPos toPos, BlockEntity pistonBlockEntity, World world, BlockPos pos, Direction pistonDir, boolean extend) {
+	private void onMoveRedirectSetBlockEntity0(World world, BlockPos pos, BlockEntity blockEntity) {
 		
 	}
 	
@@ -235,7 +250,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			List<BlockPos> movedBlocksPos, List<BlockState> movedBlockStates, List<BlockPos> brokenBlocksPos,
 			BlockState[] affectedBlockStates, PistonType type, BlockState blockState4) 
 	{
-		world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(blockState4, null, pistonDir, true, true, sticky));
+		world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(blockState4, pistonDir, true, true, sticky));
 	}
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))
@@ -265,15 +280,29 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		}
 	}
 
-	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Ljava/util/Map;remove(Ljava/lang/Object;)Ljava/lang/Object;"))
+	/*@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.BEFORE, target = "Ljava/util/Map;remove(Ljava/lang/Object;)Ljava/lang/Object;"))
 	private void onMoveInjectAfterOffset(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos blockPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> remainingStates, List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> list3, BlockState blockStates[], Direction direction, int j, int listIndex, BlockPos frontPos, BlockState movedState) {
 		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
 			Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
 			PistonHelper.tryMergeMovedSlab(world, movedState, frontPos, listIndex, splitSlabTypes, movedPositions, movedStates, remainingStates);
 		}
-	}
-		
+	}*/
+	
 	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 4, shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private void onMoveInjectBeforeSetBlockState4(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos blockPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> remainingStates, List<BlockPos> list, List<BlockState> list2, List<BlockPos> list3, BlockState[] affectedStates, BlockState airState, Iterator<BlockPos> var25, BlockPos fromPos) {
+		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
+			Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
+			SlabType type = splitSlabTypes.get(fromPos);
+			
+			if (type != null) {
+				world.setBlockState(fromPos, world.getBlockState(fromPos).with(Properties.SLAB_TYPE, type), 82);
+				return;
+			}
+		}
+		world.setBlockState(fromPos, airState, 82);
+	}
+	
+	/*@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 4, shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onMoveInjectBeforeSetBlockState4(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir, BlockPos blockPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> remainingStates, List<BlockPos> list, List<BlockState> list2, List<BlockPos> list3, BlockState[] affectedStates, BlockState blockState6, Iterator<BlockPos> var25, BlockPos blockPos5) {
 		if (redstonetweaks.setting.Settings.Global.MERGE_SLABS.get()) {
 			Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
@@ -281,7 +310,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		} else {
 			world.setBlockState(blockPos5, blockState6, 82);
 		}
-	}
+	}*/
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 4, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private boolean onMoveRedirectSetBlockState4(World world, BlockPos pos, BlockState newState, int flags) {

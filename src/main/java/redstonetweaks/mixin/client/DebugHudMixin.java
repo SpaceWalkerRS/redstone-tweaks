@@ -13,11 +13,13 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.WeightedPressurePlateBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ComparatorBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.util.math.BlockPos;
+
 import redstonetweaks.block.AnaloguePowerComponentBlockEntity;
 
 @Mixin(DebugHud.class)
@@ -29,7 +31,7 @@ public class DebugHudMixin {
 	private void onGetRightTextInjectBeforeGetBlock1(CallbackInfoReturnable<List<String>> cir, long l, long m, long n, long o, List<String> text, BlockPos pos) {
 		BlockState state = client.world.getBlockState(pos);
 		
-		if (state.isOf(Blocks.REDSTONE_WIRE) || state.isOf(Blocks.TARGET)) {
+		if (state.isOf(Blocks.REDSTONE_WIRE) || state.isOf(Blocks.TARGET) || state.getBlock() instanceof WeightedPressurePlateBlock) {
 			BlockEntity blockEntity = client.world.getBlockEntity(pos);
 			if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
 				text.add("power: " + ((AnaloguePowerComponentBlockEntity)blockEntity).getPower());

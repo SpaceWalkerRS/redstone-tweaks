@@ -11,9 +11,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.AbstractRedstoneGateBlock;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
@@ -25,6 +26,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
+
 import redstonetweaks.helper.RedstoneWireHelper;
 import redstonetweaks.interfaces.RTIBlock;
 import redstonetweaks.interfaces.RTIWorld;
@@ -49,13 +51,14 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 		boolean shouldBePowered = lazy ? !powered : isReceivingPower;
 		
 		if (powered != shouldBePowered) {
-			world.setBlockState(pos, state.with(Properties.POWERED, shouldBePowered), 2);
+			BlockState newState = state.with(Properties.POWERED, shouldBePowered);
+			world.setBlockState(pos, newState, 2);
 			
 			if (shouldBePowered != isReceivingPower) {
 				if (((RTIWorld)world).updateNeighborsNormally()) {
-					scheduleTickOnScheduledTick(world, pos, state, random, !powered);
+					scheduleTickOnScheduledTick(world, pos, newState, random);
 				} else {
-					((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
+					((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, newState, pos, 0);
 				}
 			}
 		}
@@ -100,9 +103,14 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 		return Settings.Repeater.TICK_PRIORITY_FALLING_EDGE.get();
 	}
 	
-	@Redirect(method = "getPower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isOf(Lnet/minecraft/block/Block;)Z"))
-	private boolean onGetPowerRedirectIsOf(BlockState behindState, Block block, World world, BlockPos pos, BlockState state) {
-		return behindState.isOf(block) && RedstoneWireHelper.emitsPowerTo(world, pos, state.get(Properties.HORIZONTAL_FACING).getOpposite());
+	@Inject(method = "getPower", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Ljava/lang/Math;max(II)I"))
+	private void onGetPowerInjectBeforeMax(World world, BlockPos pos, BlockState state, CallbackInfoReturnable<Integer> cir, Direction facing, BlockPos behindPos, int power, BlockState behindState) {
+		if (behindState.isOf(Blocks.REDSTONE_WIRE) && RedstoneWireHelper.emitsPowerTo(world, behindPos, facing)) {
+			power = Math.max(power, behindState.getWeakRedstonePower(world, behindPos, facing));
+		}
+		
+		cir.setReturnValue(power);
+		cir.cancel();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -132,20 +140,21 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	@Override
 	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
 		if (type == 0) {
-			scheduleTickOnScheduledTick((ServerWorld)world, pos, state, world.getRandom(), state.get(Properties.POWERED));
+			scheduleTickOnScheduledTick((ServerWorld)world, pos, state, world.getRandom());
 		}
 		
 		return false;
 	}
 	
-	private void scheduleTickOnScheduledTick(ServerWorld world, BlockPos pos, BlockState state, Random random, boolean powered) {
+	private void scheduleTickOnScheduledTick(ServerWorld world, BlockPos pos, BlockState state, Random random) {
+		boolean powered = state.get(Properties.POWERED);
 		int delay = powered ? Settings.Repeater.DELAY_FALLING_EDGE.get() : Settings.Repeater.DELAY_RISING_EDGE.get();
 		
 		if (delay == 0) {
-			scheduledTick(world.getBlockState(pos), world, pos, random);
+			scheduledTick(state, world, pos, random);
 		} else { 
 			TickPriority priority = powered ? Settings.Repeater.TICK_PRIORITY_FALLING_EDGE.get() : Settings.Repeater.TICK_PRIORITY_RISING_EDGE.get();
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), state.get(Properties.DELAY) * delay, priority);
+			world.getBlockTickScheduler().schedule(pos, state.getBlock(), getUpdateDelayInternal(state), priority);
 		}
 	}
 }

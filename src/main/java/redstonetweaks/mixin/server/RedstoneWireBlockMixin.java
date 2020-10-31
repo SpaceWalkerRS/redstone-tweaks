@@ -140,7 +140,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				BlockPos sidePos = pos.offset(dir);
 				BlockState sideState = world.getBlockState(sidePos);
 				
-				wirePower = Math.max(wirePower, getWirePower(world, sidePos, sideState, dir.getOpposite()));
+				wirePower = Math.max(wirePower, getWirePower(world, sidePos, sideState, dir));
 				
 				BlockPos abovePos = pos.up();
 				BlockState aboveState = world.getBlockState(abovePos);
@@ -148,10 +148,10 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				boolean isSideSolid = isSideSolid(world, sidePos, sideState, dir.getOpposite());
 				
 				if ((isSideSolid || isSolidGlass(sideState)) && !hasSolidBottom(world, abovePos, aboveState, dir)) {
-					wirePower = Math.max(wirePower, getWirePower(world, sidePos.up(), dir.getOpposite()));
+					wirePower = Math.max(wirePower, getWirePower(world, sidePos.up(), dir));
 				}
 				if (!(isSideSolid || isSolidGlass(world.getBlockState(pos.down())) || hasSolidBottom(world, sidePos, sideState, dir.getOpposite()))) {
-					wirePower = Math.max(wirePower, getWirePower(world, sidePos.down(), dir.getOpposite()));
+					wirePower = Math.max(wirePower, getWirePower(world, sidePos.down(), dir));
 				}
 			}
 		}
@@ -179,23 +179,11 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	}
 	
 	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "RETURN"))
-	private void onGetWeakRedstonePowerInjectAtReturn(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
+	private void onGetWeakRedstonePowerInjectAtReturn(BlockState state, BlockView world, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
 		int power = cir.getReturnValueI();
 		
 		if (power > 0) {
-			BlockEntity blockEntity = world.getBlockEntity(pos);
-			if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
-				power = ((AnaloguePowerComponentBlockEntity)blockEntity).getPower();
-			}
-			
-			if (redstonetweaks.setting.Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
-				BlockState belowState = world.getBlockState(pos.down());
-				if (belowState.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA) && belowState.get(Properties.HORIZONTAL_FACING) == direction) {
-					power = 0;
-				}
-			}
-			
-			cir.setReturnValue(power);
+			cir.setReturnValue(getWirePower(world, pos, state, dir));
 			cir.cancel();
 		}
 	}
@@ -224,18 +212,10 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
-			power = ((AnaloguePowerComponentBlockEntity)blockEntity).getPower();
+			AnaloguePowerComponentBlockEntity powerBlockEntity = ((AnaloguePowerComponentBlockEntity)blockEntity);
 			
-			// If the world was loaded in vanilla there will not be
-			// any block entity data, but there might still be
-			// powered redstone wires. In that case a new block entity
-			// is created and given a default power value of 0.
-			// In the case where the block entity power is 0 but
-			// the power level in the block state is not, we set
-			// the block entity power level to the block state power level
-			if (power == 0 && blockStatePower > 0) {
-				power = blockStatePower;
-			}
+			powerBlockEntity.ensureCorrectPower(state);
+			power = powerBlockEntity.getPower();
 		} else {
 			power = blockStatePower;
 		}
@@ -269,11 +249,14 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		return getWirePower(world, pos, world.getBlockState(pos), dir);
 	}
 	
-	private int getWirePower(World world, BlockPos pos, BlockState state, Direction dir) {
+	private int getWirePower(BlockView world, BlockPos pos, BlockState state, Direction dir) {
 		if (state.isOf(Blocks.REDSTONE_WIRE) && RedstoneWireHelper.emitsPowerTo(world, pos, dir)) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
-				return ((AnaloguePowerComponentBlockEntity)blockEntity).getPower();
+				AnaloguePowerComponentBlockEntity powerBlockEntity = ((AnaloguePowerComponentBlockEntity)blockEntity);
+				
+				powerBlockEntity.ensureCorrectPower(state);
+				return powerBlockEntity.getPower();
 			}
 			return state.get(Properties.POWER);
 		}

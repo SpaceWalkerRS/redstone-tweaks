@@ -4,13 +4,14 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-
+import net.minecraft.state.property.Properties;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.helper.BlockEntityHelper;
 
 public class AnaloguePowerComponentBlockEntity extends BlockEntity {
 	
 	private int power;
+	private boolean powerCorrected;
 	
 	public AnaloguePowerComponentBlockEntity() {
 		super(RedstoneTweaks.REDSTONE_POWER);
@@ -40,5 +41,17 @@ public class AnaloguePowerComponentBlockEntity extends BlockEntity {
 	
 	public void setPower(int newPower) {
 		power = newPower;
+	}
+	
+	// If the world was loaded in vanilla there will not be any block entity data
+	// but there might still be powered redstone components. In that case a new block entity
+	// is created and given a default power value of 0. In the case where the block entity
+	// power is 0 but the power level in the block state is not, we set the block entity
+	// power level to the block state power level
+	public void ensureCorrectPower(BlockState state) {
+		if (!powerCorrected || getPower() == 0) {
+			setPower(state.get(Properties.POWER));
+			powerCorrected = true;
+		}
 	}
 }

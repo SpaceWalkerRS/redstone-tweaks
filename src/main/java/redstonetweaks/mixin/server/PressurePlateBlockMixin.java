@@ -6,7 +6,10 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
 import net.minecraft.block.PressurePlateBlock;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
+
 import redstonetweaks.interfaces.RTIPressurePlate;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.world.common.UpdateOrder;
@@ -34,12 +37,12 @@ public class PressurePlateBlockMixin implements RTIPressurePlate {
 	}
 	
 	@Override
-	public int powerWeak(BlockState state) {
+	public int powerWeak(BlockView world, BlockPos pos, BlockState state) {
 		return state.get(Properties.POWERED) ? (isStone(state) ? Settings.StonePressurePlate.POWER_WEAK.get() : Settings.WoodenPressurePlate.POWER_WEAK.get()) : 0;
 	}
 	
 	@Override
-	public int powerStrong(BlockState state) {
+	public int powerStrong(BlockView world, BlockPos pos, BlockState state) {
 		return state.get(Properties.POWERED) ? (isStone(state) ? Settings.StonePressurePlate.POWER_STRONG.get() : Settings.WoodenPressurePlate.POWER_STRONG.get()) : 0;
 	}
 	
