@@ -26,6 +26,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.RTIPistonHandler;
 import redstonetweaks.interfaces.RTIPistonBlockEntity;
 import redstonetweaks.setting.Settings;
@@ -50,7 +51,8 @@ public class BlockEventHandler {
 	private List<BlockState> movedBlockStates;
 	private List<BlockEntity> movedBlockEntities;
 	private List<BlockPos> brokenBlocksPos;
-	private Map<BlockPos, SlabType> splitSlabTypes;
+	private Map<BlockPos, SlabType> splittingSlabTypes;
+	private Map<BlockPos, SlabType> mergingSlabTypes;
 	private BlockState[] affectedBlockStates;
 	@SuppressWarnings("rawtypes")
 	private Iterator leftOverBlocks;
@@ -227,7 +229,8 @@ public class BlockEventHandler {
 			movedBlocksPos = pistonHandler.getMovedBlocks();
 			movedBlockStates = Lists.newArrayList();
 			movedBlockEntities = ((RTIPistonHandler)pistonHandler).getMovedBlockEntities();
-			splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
+			splittingSlabTypes = ((RTIPistonHandler)pistonHandler).getSplittingSlabTypes();
+			mergingSlabTypes = ((RTIPistonHandler)pistonHandler).getMergingSlabTypes();
 			
 			for (BlockPos movedBlockPos : movedBlocksPos) {
 				BlockState movedBlockState = world.getBlockState(movedBlockPos);
@@ -257,9 +260,6 @@ public class BlockEventHandler {
 	}
 	
 	private boolean tryContinueMove() {
-		BlockPos blockPos;
-		BlockState blockState;
-		
 		switch (moveProgress) {
 		case 0:
 			if (!isIterating) {
@@ -267,25 +267,37 @@ public class BlockEventHandler {
 				index = movedBlocksPos.size() - 1;
 			}
 			if (index >= 0) {
-				blockPos = movedBlocksPos.get(index);
-				blockState = world.getBlockState(blockPos);
-				blockPos = blockPos.offset(moveDirection);
-				// Merge slabs feature start
-				if (Settings.Global.MERGE_SLABS.get())
-					PistonHelper.tryMergeMovedSlab(world, blockState, blockPos, index, splitSlabTypes, movedBlocksPos, movedBlockStates, movedBlocks);
-				// Merge slabs feature end
-				movedBlocks.remove(blockPos);
-				world.setBlockState(blockPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing), 68);
+				BlockPos fromPos = movedBlocksPos.get(index);
+				BlockPos toPos = fromPos.offset(moveDirection);
 				
-				BlockState movedBlockState = movedBlockStates.get(index);
-				BlockEntity movedBlockEntity = null;
-				if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
-					movedBlockEntity = movedBlockEntities.get(index);
+				BlockState movedState = movedBlockStates.get(index);
+				BlockState affectedState = world.getBlockState(fromPos);
+				BlockEntity movedBlockEntity = movedBlockEntities.get(index);
+				boolean isMergingSlabs = false;
+				
+				
+				if (Settings.Global.MERGE_SLABS.get()) {
+					if (splittingSlabTypes.containsKey(fromPos)) {
+						SlabType movingType = splittingSlabTypes.get(fromPos);
+						SlabType remainingType = SlabHelper.getOppositeType(movingType);
+						BlockState remainingState = movedState.with(Properties.SLAB_TYPE, remainingType);
+						
+						movedBlocks.put(fromPos, remainingState);
+						world.setBlockState(fromPos, remainingState, 4);
+						
+						movedState = movedState.with(Properties.SLAB_TYPE, movingType);
+					}
+					if (mergingSlabTypes.containsKey(toPos)) {
+						isMergingSlabs = true;
+					}
 				}
-				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(movedBlockState, movedBlockEntity, facing, extend, false, sticky);
-				world.setBlockEntity(blockPos, pistonBlockEntity);
 				
-				affectedBlockStates[affectedBlocksIndex++] = blockState;
+				world.setBlockState(toPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing), 68);
+				world.setBlockEntity(toPos, PistonHelper.createPistonBlockEntity(movedState, movedBlockEntity, facing, extend, false, sticky, isMergingSlabs));
+				
+				movedBlocks.remove(toPos);
+				affectedBlockStates[affectedBlocksIndex++] = affectedState;
+				
 				index--;
 			} else {
 				isIterating = false;
@@ -296,10 +308,12 @@ public class BlockEventHandler {
 			if (extend) {
 				PistonType pistonType = sticky ? PistonType.STICKY : PistonType.DEFAULT;
 				BlockState pistonHead = Blocks.PISTON_HEAD.getDefaultState().with(PistonHeadBlock.FACING, facing).with(PistonHeadBlock.TYPE, pistonType);
-				blockState = Blocks.MOVING_PISTON.getDefaultState().with(PistonExtensionBlock.FACING, facing).with(PistonExtensionBlock.TYPE, pistonType);
-				movedBlocks.remove(headPos);
-				world.setBlockState(headPos, blockState, 68);
+				BlockState movingPiston = Blocks.MOVING_PISTON.getDefaultState().with(PistonExtensionBlock.FACING, facing).with(PistonExtensionBlock.TYPE, pistonType);
+				
+				world.setBlockState(headPos, movingPiston, 68);
 				world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(pistonHead, null, facing, true, true, sticky));
+				
+				movedBlocks.remove(headPos);
 			}
 			moveProgress++;
 			break;
@@ -309,16 +323,12 @@ public class BlockEventHandler {
 				leftOverBlocks = movedBlocks.keySet().iterator();
 			}
 			if (leftOverBlocks.hasNext()) {
-				blockPos = (BlockPos)leftOverBlocks.next();
-				// Merge slabs feature start
-				BlockState newState;
-				if (Settings.Global.MERGE_SLABS.get()) {
-					newState = PistonHelper.getAdjustedSlabState(Blocks.AIR.getDefaultState(), world, blockPos, splitSlabTypes);
-				} else {
-					newState = Blocks.AIR.getDefaultState();
+				BlockPos leftOverPos = (BlockPos)leftOverBlocks.next();
+				BlockState airState = Blocks.AIR.getDefaultState();
+				
+				if (!Settings.Global.MERGE_SLABS.get() || !splittingSlabTypes.containsKey(leftOverPos)) {
+					world.setBlockState(leftOverPos, airState, 82);
 				}
-				world.setBlockState(blockPos, newState, 82);
-				// Merge slabs feature end
 			} else {
 				isIterating = false;
 				moveProgress++;
@@ -332,19 +342,18 @@ public class BlockEventHandler {
 			if (leftOverBlocks.hasNext()) {
 				@SuppressWarnings("unchecked")
 				Entry<BlockPos, BlockState> entry = (Entry<BlockPos, BlockState>)leftOverBlocks.next();
-				blockPos = entry.getKey();
-				blockState = entry.getValue();
-				blockState.prepare(world, blockPos, 2);
-				// Merge slabs feature start
+				BlockPos leftOverPos = entry.getKey();
+				BlockState leftOverState = entry.getValue();
+				
+				leftOverState.prepare(world, leftOverPos, 2);
 				BlockState newState;
-				if (Settings.Global.MERGE_SLABS.get()) {
-					newState = PistonHelper.getAdjustedSlabState(Blocks.AIR.getDefaultState(), world, blockPos, splitSlabTypes);
+				if (Settings.Global.MERGE_SLABS.get() && splittingSlabTypes.containsKey(leftOverPos)) {
+					newState = movedBlocks.get(leftOverPos);
 				} else {
 					newState = Blocks.AIR.getDefaultState();
 				}
-				newState.updateNeighbors(world, blockPos, 2);
-				newState.prepare(world, blockPos, 2);
-				// Merge slabs feature end
+				newState.updateNeighbors(world, leftOverPos, 2);
+				newState.prepare(world, leftOverPos, 2);
 			} else {
 				isIterating = false;
 				moveProgress++;
@@ -357,10 +366,12 @@ public class BlockEventHandler {
 				index = brokenBlocksPos.size() - 1;
 			}
 			if (index >= 0) {
-				blockPos = brokenBlocksPos.get(index);
-				blockState = affectedBlockStates[affectedBlocksIndex++];
-				blockState.prepare(world, blockPos, 2);
-				world.updateNeighborsAlways(blockPos, blockState.getBlock());
+				BlockPos brokenPos = brokenBlocksPos.get(index);
+				BlockState brokenState = affectedBlockStates[affectedBlocksIndex++];
+				
+				brokenState.prepare(world, brokenPos, 2);
+				world.updateNeighborsAlways(brokenPos, brokenState.getBlock());
+				
 				index--;
 			} else {
 				isIterating = false;
@@ -373,12 +384,14 @@ public class BlockEventHandler {
 				index = movedBlocksPos.size() - 1;
 			}
 			if (index >= 0) {
-				blockPos = movedBlocksPos.get(index);
-				blockState = affectedBlockStates[affectedBlocksIndex++];
-				world.updateNeighborsAlways(blockPos, blockState.getBlock());
-				if (Settings.BugFixes.MC120986.get() && blockState.hasComparatorOutput()) {
-					world.updateComparators(blockPos, blockState.getBlock());
+				BlockPos blockPos = movedBlocksPos.get(index);
+				BlockState movedState = affectedBlockStates[affectedBlocksIndex++];
+				
+				world.updateNeighborsAlways(blockPos, movedState.getBlock());
+				if (Settings.BugFixes.MC120986.get() && movedState.hasComparatorOutput()) {
+					world.updateComparators(blockPos, movedState.getBlock());
 				}
+				
 				index--;
 			} else {
 				isIterating = false;
