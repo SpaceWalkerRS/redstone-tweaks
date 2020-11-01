@@ -134,17 +134,22 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
 	private void onTryMoveInjectAfterGetBlock0(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState movedState) {
 		if (Settings.Global.MERGE_SLABS.get() && SlabHelper.isSlab(movedState)) {
-			if (dir.getAxis().isVertical()) {
-				// Usually the direction given is the opposite of the side from which the block is pulled along,
-				// but when tryMove is called inside calculatePush for a retraction event, it is not
-				Direction direction = (pos != posTo || retracted) ? dir : dir.getOpposite();
-				
+			// Usually the direction given is the opposite of the side from which the block is pulled along,
+			// but when tryMove is called inside calculatePush for a retraction event, it is not
+			Direction direction = (pos == posTo && !retracted) ? dir : dir.getOpposite();
+			
+			if (shouldTrySplitting(pos, direction)) {
 				// tryMove is usually only called in a situation where a block is pulled along, with the one
 				// exception being when it is called inside calculatePush for an extension event. In this case
 				// a double slab should not split
 				if (pos != posTo || !retracted) {
-					trySplitDoubleSlab(pos, movedState, SlabHelper.getTypeFromDirection(direction.getOpposite()));
+					System.out.println("trying to split " + movedState);
+					trySplitDoubleSlab(pos, movedState, SlabHelper.getTypeFromDirection(direction));
 				}
+			} else {
+				// The block is being pulled along regardless, and if it was pulled from a horizontal face
+				// it is already splitting from another direction that means the entire block will move
+				splittingSlabTypes.remove(pos);
 			}
 			
 			if (!splittingSlabTypes.containsKey(pos)) {
@@ -168,7 +173,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		onTryMoveIsAdjacentBlockStuck = isAdjacentBlockStuck(blockPos, blockState, behindPos, behindState, motionDirection.getOpposite());
 		
 		if (onTryMoveIsAdjacentBlockStuck && Settings.Global.MERGE_SLABS.get() && SlabHelper.isSlab(behindState)) {
-			if (motionDirection.getAxis().isVertical()) {
+			if (shouldTrySplitting(behindPos, motionDirection)) {
 				trySplitDoubleSlab(behindPos, behindState, SlabHelper.getTypeFromDirection(motionDirection));
 			}
 			
@@ -197,6 +202,8 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
 	private void onTryMoveInjectBeforeGetPistonBehavior(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int j, int distance, BlockPos frontPos) {
 		if (Settings.Global.MERGE_SLABS.get()) {
+			System.out.println(frontState + " being pushed!");
+			
 			// We break out of the loop to prevent the front block from being added to the movedBlocks list multiple times
 			boolean breakLoop = movedBlocks.contains(frontPos);
 			
@@ -208,12 +215,9 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				movedState = movedState.with(Properties.SLAB_TYPE, splittingSlabTypes.get(blockPos));
 			}
 			
-			if (movedBlocks.contains(frontPos) && !splittingSlabTypes.containsKey(frontPos)) {
-				// If the block in front is moving as a whole no merging will occur
-				breakLoop = true;
-			} else if (tryMergeSlabs(movedState, frontPos, frontState)) {
+			if (tryMergeSlabs(movedState, frontPos, frontState)) {
 				// tryMergeSlabs will also return true if the moved state merges into a double slab,
-				// in which case one half will be pushed over. In this case the front potition should
+				// in which case one half will be pushed over. In this case the front position should
 				// be added to the movedBlocksList, otherwise we break out of the loop
 				if (!trySplitDoubleSlab(frontPos, frontState, mergingSlabTypes.get(frontPos))) {
 					// If the position is merged into we also don't add it to the movedBlocks list
@@ -221,9 +225,15 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 					breakLoop = true;
 				}
 			} else {
-				// If no merging is occuring, the front position will be moved as a whole,
+				// If no merging is occurring, the front position will be moved as a whole,
 				// so we can remove it from the splittingSlabTypes list
 				splittingSlabTypes.remove(frontPos);
+			}
+			
+			if (isPotentiallySticky(frontState.getBlock())) {
+				if (isAdjacentBlockStuck(frontPos, frontState, blockPos, movedState, motionDirection.getOpposite())) {
+					splittingSlabTypes.remove(blockPos);
+				}
 			}
 			
 			if (breakLoop) {
@@ -334,6 +344,10 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	@Override
 	public Map<BlockPos, SlabType> getSplittingSlabTypes() {
 		return splittingSlabTypes;
+	}
+	
+	private boolean shouldTrySplitting(BlockPos pos, Direction dir) {
+		return dir.getAxis().isVertical() && !movedBlocks.contains(pos);
 	}
 	
 	// Check if a block state is a double slab block that should split
