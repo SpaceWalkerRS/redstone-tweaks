@@ -1,6 +1,5 @@
 package redstonetweaks.interfaces;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 
 public interface RTIPistonBlockEntity {
@@ -13,8 +12,8 @@ public interface RTIPistonBlockEntity {
 	
 	public BlockEntity getMovedBlockEntity();
 	
-	public BlockState getStationaryState();
+	public boolean isMergingSlabs();
 	
-	public void setStationaryState(BlockState state);
+	public void setIsMergingSlabs(boolean isMergingSlabs);
 	
 }

@@ -20,9 +20,10 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.PistonBlockEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
+import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.RTIPistonBlockEntity;
 
 @Mixin(PistonBlockEntityRenderer.class)
@@ -31,7 +32,6 @@ public class PistonBlockEntityRendererMixin {
 	@Inject(method = "render", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/client/render/block/entity/PistonBlockEntityRenderer;method_3575(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/world/World;ZI)V"))
 	private void onRenderInjectAfterMethod_3575(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, int overlay, CallbackInfo ci) {
 		BlockEntity pushedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
-		BlockState stationaryState = ((RTIPistonBlockEntity)pistonBlockEntity).getStationaryState();
 		
 		if (pushedBlockEntity != null) {
 			BlockEntityRenderer<BlockEntity> blockEntityRenderer = BlockEntityRenderDispatcher.INSTANCE.get(pushedBlockEntity);
@@ -41,21 +41,23 @@ public class PistonBlockEntityRendererMixin {
 			}
 		}
 		
-		// Undo the moved block offset
-		matrixStack.pop();
-		
-		if (stationaryState != null) {
+		BlockState pushedBlock = pistonBlockEntity.getPushedBlock();
+		if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs() && SlabHelper.isSlab(pushedBlock)) {
+			// Undo the moved block offset
+			matrixStack.pop();
+			
 			BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();
 			
-			BlockPos pos = pistonBlockEntity.getPos();
 			World world = pistonBlockEntity.getWorld();
-			VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(stationaryState));
+			BlockPos pos = pistonBlockEntity.getPos();
+			BlockState state = pushedBlock.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(pushedBlock.get(Properties.SLAB_TYPE)));
+			VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(state));
 			Random random = world.getRandom();
 			
-			blockRenderManager.renderBlock(stationaryState, pos, world, matrixStack, vertexConsumer, true, random);
+			blockRenderManager.renderBlock(state, pos, world, matrixStack, vertexConsumer, true, random);
+			
+			// Push a new entry onto the stack
+			matrixStack.push();
 		}
-		
-		// Push a new entry onto the stack
-		matrixStack.push();
 	}
 }

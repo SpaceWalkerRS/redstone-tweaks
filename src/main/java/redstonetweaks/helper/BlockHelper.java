@@ -5,10 +5,13 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
+import net.minecraft.block.enums.SlabType;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+
 import redstonetweaks.setting.Settings;
 
 public class BlockHelper {
@@ -45,5 +48,32 @@ public class BlockHelper {
 	
 	public static boolean isPistonRigid(boolean sticky) {
 		return sticky ? Settings.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.get() : Settings.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.get();
+	}
+	
+	public static boolean isStationarySlab(BlockView world, BlockPos pos, BlockState state, Direction face) {
+		if (SlabHelper.isSlab(state)) {
+			SlabType type = state.get(Properties.SLAB_TYPE);
+			
+			if (type == SlabType.DOUBLE) {
+				return true;
+			} else
+			if (face.getAxis().isVertical()) {
+				return type == SlabHelper.getTypeFromDirection(face);
+			}
+		} else
+		if (state.isOf(Blocks.MOVING_PISTON)) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if (!(blockEntity instanceof PistonBlockEntity)) {
+				return false;
+			}
+			
+			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+			BlockState movedBlock = pistonBlockEntity.getPushedBlock();
+			
+			return isStationarySlab(world, pos, movedBlock, face);
+		}
+		
+		return false;
 	}
 }

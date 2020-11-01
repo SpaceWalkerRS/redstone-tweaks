@@ -40,8 +40,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Shadow private boolean source;
 	
 	private BlockEntity movedBlockEntity;
-	private BlockState stationaryState;
 	private boolean isMovedByStickyPiston;
+	private boolean isMergingSlabs;
 	
 	public PistonBlockEntityMixin(BlockEntityType<?> type) {
 		super(type);
@@ -59,7 +59,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Redirect(method = "finish", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;postProcessState(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
 	private BlockState onFinishRedirectPostProcessState(BlockState blockState, WorldAccess worldAccess, BlockPos blockPos) {
-		mergeStationaryState();
+		mergeSlabs();
 		
 		return Block.postProcessState(pushedBlock, world, pos);
 	}
@@ -71,7 +71,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;postProcessState(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
 	private BlockState onTickRedirectPostProcessState(BlockState blockState, WorldAccess worldAccess, BlockPos blockPos) {
-		mergeStationaryState();
+		mergeSlabs();
 		
 		return Block.postProcessState(pushedBlock, world, pos);
 	}
@@ -131,24 +131,22 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
-	public void setStationaryState(BlockState state) {
-		stationaryState = state;
+	public void setIsMergingSlabs(boolean isMergingSlabs) {
+		this.isMergingSlabs = isMergingSlabs;
 	}
 	
 	@Override
-	public BlockState getStationaryState() {
-		return stationaryState;
+	public boolean isMergingSlabs() {
+		return isMergingSlabs;
 	}
 	
 	private int getSpeed() {
 		return extending ? PistonHelper.speedRisingEdge(isMovedByStickyPiston) : PistonHelper.speedFallingEdge(isMovedByStickyPiston);
 	}
 	
-	private void mergeStationaryState() {
-		if (Settings.Global.MERGE_SLABS.get() && stationaryState != null) {
-			if (SlabHelper.isSlab(pushedBlock) && stationaryState.isOf(pushedBlock.getBlock())) {
-				pushedBlock = pushedBlock.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
-			}
+	private void mergeSlabs() {
+		if (Settings.Global.MERGE_SLABS.get() && isMergingSlabs() && SlabHelper.isSlab(pushedBlock)) {
+			pushedBlock = pushedBlock.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
 		}
 	}
 	

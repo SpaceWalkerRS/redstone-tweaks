@@ -54,15 +54,15 @@ public class PistonHelper {
 	}
 	
 	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
-		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, null, pistonDir, extending, isSource, isMovedByStickyPiston);
+		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, pistonDir, extending, isSource, isMovedByStickyPiston, false);
 	}
 	
-	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, BlockState stationaryState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
+	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs) {
 		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlockState, pistonDir, extending, isSource);
 		
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
 		((RTIPistonBlockEntity)pistonBlockEntity).setMovedBlockEntity(pushedBlockEntity);
-		((RTIPistonBlockEntity)pistonBlockEntity).setStationaryState(stationaryState);
+		((RTIPistonBlockEntity)pistonBlockEntity).setIsMergingSlabs(isMergingSlabs);
 		
 		return pistonBlockEntity;
 	}

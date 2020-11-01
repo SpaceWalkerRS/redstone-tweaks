@@ -25,8 +25,19 @@ public abstract class AbstractBlockStateMixin {
 	@Inject(method = "isSideSolidFullSquare", cancellable = true, at = @At(value = "RETURN"))
 	private void onIsSideSolidFullSquareInjectAtReturn(BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (!cir.getReturnValue()) {
-			cir.setReturnValue(BlockHelper.isRigidPistonBase(world, pos, (BlockState)(Object)this));
-			cir.cancel();
+			boolean isSolid = false;
+			
+			if (BlockHelper.isRigidPistonBase(world, pos, (BlockState)(Object)this)) {
+				isSolid = true;
+			} else
+			if (BlockHelper.isStationarySlab(world, pos, (BlockState)(Object)this, direction)) {
+				isSolid = true;
+			}
+			
+			if (isSolid) {
+				cir.setReturnValue(true);
+				cir.cancel();
+			}
 		}
 	}
 
