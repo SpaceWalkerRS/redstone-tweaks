@@ -27,12 +27,12 @@ public class Settings {
 		private static final String DESC_DELAY_BREAKING = "Delay in ticks before breaking.";
 		private static final String DESC_DELAY_RISING_EDGE = "Delay in ticks before powering on.";
 		private static final String DESC_DELAY_FALLING_EDGE = "Delay in ticks before powering off.";
-		private static final String DESC_LAZY = "When enabled, the block is \"lazy\". Whenever it is ticked it will activate without checking for\nreceived power.";
-		private static final String DESC_LAZY_RISING_EDGE = "When enabled, the block is \"lazy\" on  the rising edge. Whenever it is ticked, if it is\nunpowered, it will power on without checking for received power.";
-		private static final String DESC_LAZY_FALLING_EDGE = "When enabled, the block is \"lazy\" on  the falling edge. Whenever it is ticked, if it is powered,\nit will power off without checking for received power.";
+		private static final String DESC_LAZY = "When enabled, the block is \"lazy\". Whenever it is ticked it will activate without checking for received power.";
+		private static final String DESC_LAZY_RISING_EDGE = "When enabled, the block is \"lazy\" on the rising edge. Whenever it is ticked, if it is unpowered, it will power on without checking for received power.";
+		private static final String DESC_LAZY_FALLING_EDGE = "When enabled, the block is \"lazy\" on the falling edge. Whenever it is ticked, if it is powered, it will power off without checking for received power.";
 		private static final String DESC_POWER_WEAK = "Weak power output.";
 		private static final String DESC_POWER_STRONG = "Strong power output.";
-		private static final String DESC_QC = "A list of all directions in which quasi connectivity for this block is enabled. If quasi\nconnectivity is enabled in a direction then the block checks for power to its neighbor in that\ndirection.";
+		private static final String DESC_QC = "A list of all directions in which quasi connectivity for this block is enabled. If quasi connectivity is enabled in a direction then the block checks for power to its neighbor in that direction.";
 		private static final String DESC_RANDOMIZE_QC = "When enabled, quasi connectivity works randomly in all directions where it is enabled.";
 		private static final String DESC_TICK_PRIORITY = "The tick priority of any ticks scheduled by this block.";
 		private static final String DESC_TICK_PRIORITY_FACING_DIODE = "The tick priority when facing another diode that is not facing it.";
@@ -54,21 +54,21 @@ public class Settings {
 				add(RelativePos.SELF, RelativePos.UP).
 				add(RelativePos.SELF, RelativePos.NORTH).
 				add(RelativePos.SELF, RelativePos.SOUTH));
-		public static final BooleanSetting CHAINSTONE = new BooleanSetting(ID, "chainstone", "Inspired by the carpet mod rule of the same name, this setting makes connected chain blocks\nstick to each other and any blocks they anchored to. But be careful! A chain will only move as a whole if it is anchored at both ends.", false);
-		public static final IntegerSetting DELAY_MULTIPLIER = new IntegerSetting(ID, "delayMultiplier", "The delay of all scheduled ticks will be multiplied by this value. When set to 0 all scheduled\nticks will be executed instantaneously.", 1, 0, 127);
+		public static final BooleanSetting CHAINSTONE = new BooleanSetting(ID, "chainstone", "Inspired by the carpet mod rule of the same name, this setting makes connected chain blocks stick to each other and any blocks they anchored to. But be careful! A chain will only move as a whole if it is anchored at both ends.", false);
+		public static final IntegerSetting DELAY_MULTIPLIER = new IntegerSetting(ID, "delayMultiplier", "The delay of all scheduled ticks will be multiplied by this value. When set to 0 all scheduled ticks will be executed instantaneously.", 1, 0, 127);
 		public static final BooleanSetting DO_BLOCK_UPDATES = new BooleanSetting(ID, "doBlockUpdates", "Allow worlds to dispatch block updates.", true);
 		public static final BooleanSetting DO_SHAPE_UPDATES = new BooleanSetting(ID, "doShapeUpdates", "Allow worlds to dispatch shape updates.", true);
 		public static final BooleanSetting DO_COMPARATOR_UPDATES = new BooleanSetting(ID, "doComparatorUpdates", "Allow worlds to dispatch comparator updates.", true);
-		public static final BooleanSetting DOUBLE_RETRACTION = new BooleanSetting(ID, "doubleRetraction", "A re-implementation of behavior that was present in 1.3-1.8, known as \"Jeb retraction\" or\n\"instant double retraction\". It creates a very narrow window where unpowered pistons can be moved.", false);
+		public static final BooleanSetting DOUBLE_RETRACTION = new BooleanSetting(ID, "doubleRetraction", "A re-implementation of behavior that was present in 1.3-1.8, known as \"Jeb retraction\" or \"instant double retraction\". It creates a very narrow window where unpowered pistons can be moved.", false);
 		public static final BooleanSetting INSTANT_BLOCK_EVENTS = new BooleanSetting(ID, "instantBlockEvents", "Execute block events at the moment they are scheduled.", false);
-		public static final BooleanSetting MERGE_SLABS = new BooleanSetting(ID, "mergeSlabs", "Allow half slabs of the same type to be pushed together and merge into a double slab block.\nAdditionally, sticky surfaces can only move half slabs when making physical contact with the slab.\nThis allows half slabs to be split when one half is pulled but not the other.", false);
+		public static final BooleanSetting MERGE_SLABS = new BooleanSetting(ID, "mergeSlabs", "Allow half slabs of the same type to be pushed together and merge into a double slab block. Additionally, sticky surfaces can only move half slabs when making physical contact with the slab. This allows half slabs to be split when one half is pulled but not the other.", false);
 		public static final BooleanSetting MOVABLE_BLOCK_ENTITIES = new BooleanSetting(ID, "movableBlockEntities", "Allow blocks with block entities to be moved by pistons.", false);
-		public static final IntegerSetting POWER_MAX = new IntegerSetting(ID, "maxPower", "The maximum power output of analogue components like redstone wire, comparators, weighted pressure\nplates, etc.", 15, 0, Common.MAX_POWER);
+		public static final IntegerSetting POWER_MAX = new IntegerSetting(ID, "maxPower", "The maximum power output of analogue components like redstone wire, comparators, weighted pressure plates, etc.", 15, 0, Common.MAX_POWER);
 		public static final BooleanSetting RANDOMIZE_BLOCK_EVENTS = new BooleanSetting(ID, "randomizeBlockEvents", "Randomize the order in which block events are processed.", false);
 		public static final BooleanSetting RANDOMIZE_DELAYS = new BooleanSetting(ID, "randomizeDelays", "Randomize the delays of all block and fluid ticks that are scheduled.", false);
 		public static final BooleanSetting RANDOMIZE_TICK_PRIORITIES = new BooleanSetting(ID, "randomizeTickPriorities", "Randomize the tick priorities of all block and fluid ticks that are scheduled.", false);
-		public static final BooleanSetting SHOW_NEIGHBOR_UPDATES = new BooleanSetting(ID, "showNeighborUpdates", "When used in combination with showProcessingOrder, neighbor updates become scheduled events.\nThe world tick will be paused until all neighbor updates have been executed. Colored boxes are\ndrawn at the location of each neighbor update. The white box is the notifier position, a yellow\nbox is a block update, a blue box a shape update and a red box a comparator update.", false);
-		public static final IntegerSetting SHOW_PROCESSING_ORDER = new IntegerSetting(ID, "showProcessingOrder", "When enabled, the world tick will be broken down and each of its phases being executed at the\ngiven interval of server ticks. Some phases, like those of scheduled ticks, block events and\nblock entities, will break down even further and execute one their actions per interval. Information\nabout the current tick, current world and current phase will be displayed in the top left of the screen.", 0, 0, 1023);
+		public static final BooleanSetting SHOW_NEIGHBOR_UPDATES = new BooleanSetting(ID, "showNeighborUpdates", "When used in combination with showProcessingOrder, neighbor updates become scheduled events. The world tick will be paused until all neighbor updates have been executed. Colored boxes are drawn at the location of each neighbor update. The white box is the notifier position, a yellow box is a block update, a blue box a shape update and a red box a comparator update.", false);
+		public static final IntegerSetting SHOW_PROCESSING_ORDER = new IntegerSetting(ID, "showProcessingOrder", "When enabled, the world tick will be broken down and each of its phases being executed at the given interval of server ticks. Some phases, like those of scheduled ticks, block events and block entities, will break down even further and execute one their actions per interval. Information about the current tick, current world and current phase will be displayed in the top left of the screen.", 0, 0, 1023);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				BLOCK_UPDATE_ORDER,
@@ -94,11 +94,11 @@ public class Settings {
 		
 		public static final String ID = "bugFixes";
 		
-		public static final BugFixSetting MC54711 = new BugFixSetting("MC-54711", "A hacky fix for the chain bug. This patch only changes behavior of quick off-pulses in\nrepeaters and comparators.");
-		public static final BugFixSetting MC120986 = new BugFixSetting("MC-120986", "While not nearly a complete fix for the bug described in the report, this patch does fix\ncomparators not being updated when pistons move blocks with a comparator output.");
+		public static final BugFixSetting MC54711 = new BugFixSetting("MC-54711", "A hacky fix for the chain bug. This patch only changes behavior of quick off-pulses in repeaters and comparators.");
+		public static final BugFixSetting MC120986 = new BugFixSetting("MC-120986", "While not nearly a complete fix for the bug described in the report, this patch does fix comparators not being updated when pistons move blocks with a comparator output.");
 		public static final BugFixSetting MC136566 = new BugFixSetting("MC-136566", "Fixes blocks not being updated when a moved active observer materializes.");
 		public static final BugFixSetting MC137127 = new BugFixSetting("MC-137127", "Fixes observers not being updated when a moved active observer materializes.");
-		public static final BugFixSetting MC172213 = new BugFixSetting("MC-172213", "A fix for the so-called \"input bug\", which causes redstone components to lose 1 tick of delay if\nactivated by a player input. To fix this world time is incremented after all dimensions have been ticked.");
+		public static final BugFixSetting MC172213 = new BugFixSetting("MC-172213", "A fix for the so-called \"input bug\", which causes redstone components to lose 1 tick of delay if activated by a player input. To fix this world time is incremented after all dimensions have been ticked.");
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				MC54711,
@@ -220,7 +220,7 @@ public class Settings {
 		
 		public static final String ID = "comparator";
 		
-		public static final BooleanSetting ADDITION_MODE = new BooleanSetting(ID, "additionMode", "When enabled, the comparator's subtract mode turns into \"addition mode\". The output will be the\nsum of the back input and the highest side input.", false);
+		public static final BooleanSetting ADDITION_MODE = new BooleanSetting(ID, "additionMode", "When enabled, the comparator's subtract mode turns into \"addition mode\". The output will be the sum of the back input and the highest side input.", false);
 		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(ID, "blockUpdateOrder", "The order in which the comparator updates its neighbors when its power output changes.", new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.NORMAL).
 				add(BlockUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.FRONT).
 				add(BlockUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.FRONT, RelativePos.BACK));
@@ -570,7 +570,7 @@ public class Settings {
 		
 		public static final String ID = "magentaGlazedTerracotta";
 		
-		public static final BooleanSetting IS_POWER_DIODE = new BooleanSetting(ID, "isPowerDiode", "When enabled, power can only flow in the direction of the arrow on the top side of the block.\nAdditionally, a redstone wire block on top of the block can only flow in the direction of the arrow\non the top side of the block.", false);
+		public static final BooleanSetting IS_POWER_DIODE = new BooleanSetting(ID, "isPowerDiode", "When enabled, power can only flow in the direction of the arrow on the top side of the block. Additionally, a redstone wire block on top of the block can only flow in the direction of the arrow on the top side of the block.", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				IS_POWER_DIODE
@@ -601,16 +601,18 @@ public class Settings {
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_RETRACTING = new BooleanSetting(ID, "ignoreUpdatesWhileRetracting", "Ignore any neighbor updates received during the retraction.", true);
 		public static final BooleanSetting LAZY_RISING_EDGE = new BooleanSetting(ID, "lazyRisingEdge", Common.DESC_LAZY_RISING_EDGE, false);
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(ID, "lazyFallingEdge", Common.DESC_LAZY_FALLING_EDGE, false);
+		public static final BooleanSetting MOVABLE_WHEN_EXTENDED = new BooleanSetting(ID, "movableWhenExtended", "Allow extended pistons to be moved.", false);
+		public static final BooleanSetting MOVABLE_WHEN_MOVING = new BooleanSetting(ID, "movableWhenMoving", "Allow blocks moved by a piston to be moved.", false);
 		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
 		public static final DirectionalBooleanSetting QC = new DirectionalBooleanSetting(ID, "quasiConnectivity", Common.DESC_QC, new Boolean[] {false, true, false, false, false, false});
 		public static final BooleanSetting RANDOMIZE_QC = new BooleanSetting(ID, "randomizeQuasiConnectivity", Common.DESC_RANDOMIZE_QC, false);
 		public static final IntegerSetting SPEED_RISING_EDGE = new IntegerSetting(ID, "speedRisingEdge", "The duration of the extension in ticks.", 2, 0, Common.MAX_DELAY);
 		public static final IntegerSetting SPEED_FALLING_EDGE = new IntegerSetting(ID, "speedFallingEdge", "The duration of the retraction in ticks.", 2, 0, Common.MAX_DELAY);
-		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting(ID, "supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face, without\nbreaking when the piston extends or retracts.", false);
+		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting(ID, "supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face, without breaking when the piston extends or retracts.", false);
 		public static final BooleanSetting SUPPRESS_HEAD_UPDATES_ON_EXTENSION = new BooleanSetting(ID, "suppressHeadUpdatesOnExtension", "Suppress block updates emitted by the moving piston head when the piston starts extending.", false);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
-		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting(ID, "updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend.\nThis is achieved using scheduled ticks.", false);
+		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting(ID, "updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend. This is achieved using scheduled ticks.", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				CONNECTS_TO_WIRE,
@@ -620,6 +622,8 @@ public class Settings {
 				IGNORE_UPDATES_WHILE_RETRACTING,
 				LAZY_RISING_EDGE,
 				LAZY_FALLING_EDGE,
+				MOVABLE_WHEN_EXTENDED,
+				MOVABLE_WHEN_MOVING,
 				PUSH_LIMIT,
 				QC,
 				RANDOMIZE_QC,
@@ -799,7 +803,7 @@ public class Settings {
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(ID, "lazyFallingEdge", Common.DESC_LAZY_FALLING_EDGE, false);
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting(ID, "weakPower", Common.DESC_POWER_WEAK, 15, 0, Common.MAX_POWER);
 		public static final IntegerSetting POWER_STRONG = new IntegerSetting(ID, "strongPower", Common.DESC_POWER_STRONG, 15, 0, Common.MAX_POWER);
-		public static final BooleanSetting SOFT_INVERSION = new BooleanSetting(ID, "softInversion", "An implementation of behavior present in the Bedrock Edition known as \"soft inversion\". It\ncauses a redstone torche attached to a piston to depower when that piston is powered.", false);
+		public static final BooleanSetting SOFT_INVERSION = new BooleanSetting(ID, "softInversion", "An implementation of behavior present in the Bedrock Edition known as \"soft inversion\". It causes a redstone torche attached to a piston to depower when that piston is powered.", false);
 		public static final TickPrioritySetting TICK_PRIORITY_BURNOUT = new TickPrioritySetting(ID, "tickPriorityBurnout", "The tick priority of the tick scheduled when a redstone torch burns out.", TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
@@ -836,7 +840,7 @@ public class Settings {
 				add(BlockUpdate.Mode.NEIGHBORS, RelativePos.EAST, RelativePos.WEST));
 		public static final IntegerSetting DELAY = new IntegerSetting(ID, "delay", Common.DESC_DELAY_ACTIVATING, 0, 0, Common.MAX_DELAY);
 		public static final BooleanSetting INVERT_FLOW_ON_GLASS = new BooleanSetting(ID, "invertFlowOnGlass", "When enabled, redstone wire power can flow down glass, but not up it.", false);
-		public static final BooleanSetting SLABS_ALLOW_UP_CONNECTION = new BooleanSetting(ID, "slabsAllowUpConnection", "When enabled, redstone wire can visually and logically connect to other redstone wire on top of\na neighboring slab block.", true);
+		public static final BooleanSetting SLABS_ALLOW_UP_CONNECTION = new BooleanSetting(ID, "slabsAllowUpConnection", "When enabled, redstone wire can visually and logically connect to other redstone wire on top of a neighboring slab block.", true);
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(ID, "tickPriority", Common.DESC_TICK_PRIORITY, TickPriority.NORMAL);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
@@ -909,7 +913,7 @@ public class Settings {
 		
 		public static final String ID = "stairs";
 		
-		public static final BooleanSetting FULL_FACES_ARE_SOLID = new BooleanSetting(ID, "fullFacesAreSolid", "When enabled, all full faces of stair blocks act like full solid blocks, meaning they conduct\npower and cut off redstone wire.", false);
+		public static final BooleanSetting FULL_FACES_ARE_SOLID = new BooleanSetting(ID, "fullFacesAreSolid", "When enabled, all full faces of stair blocks act like full solid blocks, meaning they conduct power and cut off redstone wire.", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				FULL_FACES_ARE_SOLID
@@ -929,17 +933,19 @@ public class Settings {
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_RETRACTING = new BooleanSetting(ID, "ignoreUpdatesWhileRetracting", "Ignore any neighbor updates received during the retraction.", true);
 		public static final BooleanSetting LAZY_RISING_EDGE = new BooleanSetting(ID, "lazyRisingEdge", Common.DESC_LAZY_RISING_EDGE, false);
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(ID, "lazyFallingEdge", Common.DESC_LAZY_FALLING_EDGE, false);
+		public static final BooleanSetting MOVABLE_WHEN_EXTENDED = new BooleanSetting(ID, "movableWhenExtended", "Allow extended sticky pistons to be moved.", false);
+		public static final BooleanSetting MOVABLE_WHEN_MOVING = new BooleanSetting(ID, "movableWhenMoving", "Allow blocks being moved by a sticky piston to be moved.", false);
 		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(ID, "pushLimit", "The maximum number of blocks a piston can move.", 12, 0, 2048);
 		public static final DirectionalBooleanSetting QC = new DirectionalBooleanSetting(ID, "quasiConnectivity", Common.DESC_QC, new Boolean[] {false, true, false, false, false, false});
 		public static final BooleanSetting RANDOMIZE_QC = new BooleanSetting(ID, "randomizeQuasiConnectivity", Common.DESC_RANDOMIZE_QC, false);
 		public static final IntegerSetting SPEED_RISING_EDGE = new IntegerSetting(ID, "speedRisingEdge", "The duration of the extension in ticks.", 2, 0, Common.MAX_DELAY);
 		public static final IntegerSetting SPEED_FALLING_EDGE = new IntegerSetting(ID, "speedFallingEdge", "The duration of the retraction in ticks.", 2, 0, Common.MAX_DELAY);
 		public static final BooleanSetting SUPER_STICKY = new BooleanSetting(ID, "superSticky", "Make the face of sticky pistons stick to blocks when moved.", false);
-		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting(ID, "supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face without\nbreaking when the piston extends or retracts.", false);
+		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting(ID, "supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face without breaking when the piston extends or retracts.", false);
 		public static final BooleanSetting SUPPRESS_HEAD_UPDATES_ON_EXTENSION = new BooleanSetting(ID, "suppressHeadUpdatesOnExtension", "Suppress block updates emitted by the moving piston head when the piston starts extending.", false);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(ID, "tickPriorityRisingEdge", Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ID, "tickPriorityFallingEdge", Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
-		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting(ID, "updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend.\nThis is achieved using scheduled ticks.", false);
+		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting(ID, "updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend. This is achieved using scheduled ticks.", false);
 		
 		public static final List<ISetting> SETTINGS = Arrays.asList(
 				CONNECTS_TO_WIRE,
@@ -951,6 +957,8 @@ public class Settings {
 				IGNORE_UPDATES_WHILE_RETRACTING,
 				LAZY_RISING_EDGE,
 				LAZY_FALLING_EDGE,
+				MOVABLE_WHEN_EXTENDED,
+				MOVABLE_WHEN_MOVING,
 				PUSH_LIMIT,
 				QC,
 				RANDOMIZE_QC,

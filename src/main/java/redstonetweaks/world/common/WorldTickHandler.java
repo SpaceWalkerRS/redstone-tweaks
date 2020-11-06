@@ -13,11 +13,17 @@ public abstract class WorldTickHandler {
 	protected boolean shouldSwitchTask;
 	protected boolean doTasks;
 	
+	protected boolean inWorldTick;
+	
 	public WorldTickHandler() {
 		this.doWorldTicks = true;
 		this.status = Status.IDLE;
 		this.shouldSwitchTask = true;
 		this.doTasks = true;
+	}
+
+	public boolean inWorldTick() {
+		return inWorldTick;
 	}
 	
 	public boolean doWorldTicks() {
@@ -39,7 +45,7 @@ public abstract class WorldTickHandler {
 		currentTask = task;
 	}
 	
-	public boolean isTickingWorlds() {
+	public boolean tickInProgress() {
 		return status != Status.IDLE;
 	}
 	

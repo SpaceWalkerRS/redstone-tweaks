@@ -61,7 +61,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		currentTooltip = null;
 		
 		renderList(matrices, mouseX, mouseY, delta);
-		if (getMaxScroll() > 0) {
+		if (getMaximumScroll() > 0) {
 			renderScrollbar(matrices);
 		}
 		
@@ -146,7 +146,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		
-		int maxScroll = getMaxScroll();
+		int maxScroll = getMaximumScroll();
 		
 		int length = MathHelper.clamp((getHeight() * getHeight()) / getMaxPosition(), 32, getHeight() - 8);
 		int bar_top = (int)(getScrollAmount() / maxScroll * (getHeight() - length)) + getY();
@@ -219,7 +219,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	}
 	
 	// This method is private in EntryListWidget.class
-	private int getMaxScroll() {
+	private int getMaximumScroll() {
 		return Math.max(0, getMaxPosition() - (getHeight() - 4));
 	}
 	

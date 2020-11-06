@@ -22,6 +22,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.PistonBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -46,8 +47,8 @@ import net.minecraft.world.dimension.DimensionType;
 import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.helper.StairsHelper;
 import redstonetweaks.interfaces.RTIMinecraftServer;
-import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.interfaces.RTIServerWorld;
+import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.packet.TickBlockEntityPacket;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
@@ -82,13 +83,18 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		blockEventHandlers = new HashMap<>();
 	}
 	
-	// Don't display breaking particles if the block that is broken is a piston head
+	// Don't display breaking particles if the block that is broken is a piston (head)
 	// and it's broken during block events or the ticking of block entities
 	@Redirect(method = "breakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;syncWorldEvent(ILnet/minecraft/util/math/BlockPos;I)V"))
 	private void onBreakBlockRedirectSyncWorldEvent(World world, int eventId, BlockPos pos, int data) {
-		if (world.isClient() || !(iteratingTickingBlockEntities || ((RTIServerWorld)world).isProcessingBlockEvents()) || !world.getBlockState(pos).isOf(Blocks.PISTON_HEAD)) {
-			world.syncWorldEvent(eventId, pos, data);
+		if (!world.isClient() && ((RTIWorld)world).getWorldTickHandler().inWorldTick()) {
+			BlockState state = world.getBlockState(pos);
+			
+			if (state.getBlock() instanceof PistonBlock || state.isOf(Blocks.PISTON_HEAD)) {
+				return;
+			}
 		}
+		world.syncWorldEvent(eventId, pos, data);
 	}
 	
 	@Inject(method = "updateNeighborsAlways", cancellable = true, at = @At(value = "HEAD"))

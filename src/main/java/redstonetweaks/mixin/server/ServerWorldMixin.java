@@ -48,10 +48,12 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.timer.Timer;
+
 import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.setting.Settings;
+import redstonetweaks.world.common.WorldTickHandler;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;
 import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
 import redstonetweaks.world.server.ServerWorldTickHandler;
@@ -60,7 +62,7 @@ import redstonetweaks.world.server.ServerWorldTickHandler;
 public abstract class ServerWorldMixin extends World implements RTIWorld, RTIServerWorld  {
 
 	@Shadow @Final private MinecraftServer server;
-	@Shadow @Final private boolean field_25143;
+	@Shadow @Final private boolean shouldTickTime;
 	@Shadow @Final private ServerWorldProperties worldProperties;
 	@Shadow @Final private ObjectLinkedOpenHashSet<BlockEvent> syncedBlockEventQueue;
 	@Shadow @Final private List<ServerPlayerEntity> players;
@@ -172,8 +174,13 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	}
 	
 	@Override
+	public WorldTickHandler getWorldTickHandler() {
+		return ((RTIMinecraftServer)server).getWorldTickHandler();
+	}
+	
+	@Override
 	public void tickTimeAccess() {
-		if (field_25143) {
+		if (shouldTickTime) {
 	        long l = worldProperties.getTime() + 1l;
 	        worldProperties.setTime(l);
 	        if (worldProperties.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)) {
@@ -210,7 +217,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Override
 	public boolean tickWorldsNormally() {
 		ServerWorldTickHandler worldTickHandler = ((RTIMinecraftServer)getServer()).getWorldTickHandler();
-		return worldTickHandler.doWorldTicks() && !(worldTickHandler.isTickingWorlds() || Settings.Global.SHOW_PROCESSING_ORDER.get() > 0);
+		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Settings.Global.SHOW_PROCESSING_ORDER.get() > 0);
 	}
 	
 	@Override
@@ -323,7 +330,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	
 	private void handleTickTime() {
 		if (Settings.BugFixes.MC172213.get()) {
-			if (field_25143) {
+			if (shouldTickTime) {
 				worldProperties.getScheduledEvents().processEvents(server, worldProperties.getTime());
 			}
 		} else {

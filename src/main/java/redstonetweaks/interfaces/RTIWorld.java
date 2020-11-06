@@ -5,8 +5,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.profiler.Profiler;
 
 import redstonetweaks.block.piston.BlockEventHandler;
+import redstonetweaks.world.common.WorldTickHandler;
 
 public interface RTIWorld {
+	
+	public WorldTickHandler getWorldTickHandler();
 	
 	public void addMovedBlockEntity(BlockPos pos, BlockEntity blockEntity);
 	

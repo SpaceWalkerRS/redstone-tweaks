@@ -272,13 +272,15 @@ public class BlockEventHandler {
 				
 				BlockState movedState = movedBlockStates.get(index);
 				BlockState affectedState = world.getBlockState(fromPos);
-				BlockEntity movedBlockEntity = movedBlockEntities.get(index);
+				BlockEntity movedBlockEntity = null;
 				boolean isMergingSlabs = false;
 				
-				
+				if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
+					movedBlockEntity = movedBlockEntities.get(index);
+				}
 				if (Settings.Global.MERGE_SLABS.get()) {
-					if (splittingSlabTypes.containsKey(fromPos)) {
-						SlabType movingType = splittingSlabTypes.get(fromPos);
+					SlabType movingType = splittingSlabTypes.get(fromPos);
+					if (movingType != null) {
 						SlabType remainingType = SlabHelper.getOppositeType(movingType);
 						BlockState remainingState = movedState.with(Properties.SLAB_TYPE, remainingType);
 						

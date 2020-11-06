@@ -39,6 +39,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Shadow private BlockState pushedBlock;
 	@Shadow private boolean source;
 	
+	private PistonBlockEntity parentPistonBlockEntity;
 	private BlockEntity movedBlockEntity;
 	private boolean isMovedByStickyPiston;
 	private boolean isMergingSlabs;
@@ -46,6 +47,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	public PistonBlockEntityMixin(BlockEntityType<?> type) {
 		super(type);
 	}
+	
+	@Shadow public abstract void finish();
 	
 	@Inject(method = "getProgress", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetProgressInjectAtReturn(float tickDelta, CallbackInfoReturnable<Float> cir) {
@@ -138,6 +141,15 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Override
 	public boolean isMergingSlabs() {
 		return isMergingSlabs;
+	}
+	
+	@Override
+	public void finishSource() {
+		if (source) {
+			// We have to set source to false so that the pushed block is not replaced by air
+			source = false;
+			finish();
+		}
 	}
 	
 	private int getSpeed() {

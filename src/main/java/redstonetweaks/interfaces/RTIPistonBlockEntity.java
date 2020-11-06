@@ -16,4 +16,6 @@ public interface RTIPistonBlockEntity {
 	
 	public void setIsMergingSlabs(boolean isMergingSlabs);
 	
+	public void finishSource();
+	
 }

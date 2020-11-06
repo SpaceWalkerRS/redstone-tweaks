@@ -30,6 +30,7 @@ import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.IntegerSetting;
 import redstonetweaks.setting.types.TickPrioritySetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
+import redstonetweaks.util.TextFormatting;
 
 public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> implements ISettingGUIElement {
 	
@@ -261,7 +262,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		
 		private List<Text> createTooltip() {
 			List<Text> tooltip = new ArrayList<>();
-			for (String line : setting.getDescription().split("\n")) {
+			for (String line : TextFormatting.getAsLines(setting.getDescription())) {
 				tooltip.add(new TranslatableText(line));
 			}
 			return tooltip;

@@ -78,7 +78,7 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 		
 		for (RTWindow window : windows) {
 			if (window instanceof ISettingGUIElement) {
-				((ISettingGUIElement) window).onSettingChanged(setting);
+				((ISettingGUIElement)window).onSettingChanged(setting);
 			}
 		}
 	}

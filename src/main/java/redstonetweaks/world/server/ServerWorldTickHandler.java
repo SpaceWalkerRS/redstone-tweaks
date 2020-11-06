@@ -57,7 +57,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		if (doWorldTicks()) {
 			int interval = Settings.Global.SHOW_PROCESSING_ORDER.get();
 			
-			if (interval > 0 || isTickingWorlds()) {
+			if (interval > 0 || tickInProgress()) {
 				if (interval == 0 || server.getTicks() % interval == 0) {
 					tickStepByStep(shouldKeepTicking);
 				}
@@ -80,7 +80,11 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 				server.getPlayerManager().sendToDimension(new WorldTimeUpdateS2CPacket(world.getTime(), world.getTimeOfDay(), world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)), world.getRegistryKey());
 			}
 			
+			inWorldTick = true;
+			
 			world.tick(shouldKeepTicking);
+			
+			inWorldTick = false;
 		}
 		if (Settings.BugFixes.MC172213.get()) {
 			for (ServerWorld world : server.getWorlds()) {
@@ -103,7 +107,11 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			break;
 		case TICKING_WORLDS:
 			if (currentWorld != null) {
+				inWorldTick = true;
+				
 				tickWorld(shouldKeepTicking);
+				
+				inWorldTick = false;
 			} else {
 				shouldUpdateStatus = true;
 			}

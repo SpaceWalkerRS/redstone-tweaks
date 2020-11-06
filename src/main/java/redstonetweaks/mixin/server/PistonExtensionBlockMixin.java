@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.interfaces.RTIBlock;
+import redstonetweaks.interfaces.RTIPistonBlockEntity;
 
 @Mixin(PistonExtensionBlock.class)
 public class PistonExtensionBlockMixin extends Block implements RTIBlock {
@@ -31,12 +32,12 @@ public class PistonExtensionBlockMixin extends Block implements RTIBlock {
 		if (blockEntity instanceof PistonBlockEntity) {
 			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity) blockEntity;
 			if (pistonBlockEntity.isSource() && !pistonBlockEntity.isExtending()) {
-				boolean sticky = state.get(Properties.PISTON_TYPE) == PistonType.STICKY;
+				boolean sticky = ((RTIPistonBlockEntity)pistonBlockEntity).isMovedByStickyPiston();
 				Direction facing = state.get(Properties.FACING);
 				if (!PistonHelper.ignoreUpdatesWhileRetracting(sticky) && (PistonHelper.lazyRisingEdge(sticky) || PistonHelper.isReceivingPower(world, pos, state, facing))) {
 					BlockState pushedState = pistonBlockEntity.getPushedBlock();
 					if (pushedState.getBlock() instanceof PistonBlock) {
-						pistonBlockEntity.finish();
+						((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
 						if (sticky && PistonHelper.fastBlockDropping()) {
 							BlockPos frontPos = pos.offset(facing);
 							BlockState frontState = world.getBlockState(frontPos);

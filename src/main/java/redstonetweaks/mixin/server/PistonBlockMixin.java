@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -38,11 +39,11 @@ import net.minecraft.world.WorldAccess;
 import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
+import redstonetweaks.interfaces.RTIBlock;
 import redstonetweaks.interfaces.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.RTIPistonHandler;
-import redstonetweaks.interfaces.RTIBlock;
-import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.interfaces.RTIServerWorld;
+import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 @Mixin(PistonBlock.class)
@@ -174,7 +175,17 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
 	private PistonBehavior onOnSyncedBlockEventRedirectGetPistonBehavior(BlockState state) {
-		return redstonetweaks.setting.Settings.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER) ? PistonBehavior.NORMAL : state.getPistonBehavior();
+		if (redstonetweaks.setting.Settings.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER)) {
+			return PistonBehavior.NORMAL;
+		}
+		if (PistonHelper.movableWhenExtended(false) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.DEFAULT) {
+			return PistonBehavior.NORMAL;
+		}
+		if (PistonHelper.movableWhenExtended(true) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY) {
+			return PistonBehavior.NORMAL;
+		}
+		
+		return state.getPistonBehavior();
 	}
 	
 	@Inject(method = "onSyncedBlockEvent", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"))
@@ -191,9 +202,32 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		return pistonBlockEntity;
 	}
 	
-	@Redirect(method = "isMovable", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isAir()Z"))
-	private static boolean onIsMovableRedirectIsAir(BlockState state) {
-		return state.isAir() || (state.isOf(Blocks.BARRIER) && redstonetweaks.setting.Settings.Barrier.IS_MOVABLE.get());
+	@Inject(method = "isMovable", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/block/Blocks;PISTON:Lnet/minecraft/block/Block;"))
+	private static void onIsMovedInjectBeforeBlockPiston(BlockState state, World world, BlockPos pos, Direction direction, boolean canBreak, Direction pistonDir, CallbackInfoReturnable<Boolean> cir) {
+		if (PistonHelper.movableWhenExtended(false) && ((state.isOf(Blocks.PISTON) && state.get(Properties.EXTENDED)) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.DEFAULT))) {
+			cir.setReturnValue(true);
+			cir.cancel();
+		} else
+			if (PistonHelper.movableWhenExtended(true) && ((state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.EXTENDED)) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY))) {
+				cir.setReturnValue(true);
+				cir.cancel();
+			}
+	}
+	
+	@Inject(method = "isMovable", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getHardness(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
+	private static void onIsMovedInjectBeforeGetHardness(BlockState state, World world, BlockPos pos, Direction direction, boolean canBreak, Direction pistonDir, CallbackInfoReturnable<Boolean> cir) {
+		if (redstonetweaks.setting.Settings.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER)) {
+			cir.setReturnValue(true);
+			cir.cancel();
+		} else
+		if (state.isOf(Blocks.MOVING_PISTON)) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if (blockEntity instanceof PistonBlockEntity) {
+				cir.setReturnValue(PistonHelper.movableWhenMoving(((RTIPistonBlockEntity)blockEntity).isMovedByStickyPiston()));
+				cir.cancel();
+			}
+		}
 	}
 	
 	@Redirect(method = "isMovable", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;hasBlockEntity()Z"))
@@ -229,15 +263,15 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			
 			BlockPos fromPos = toPos.offset(motionDirection.getOpposite());
 			
-			if (splittingSlabTypes.containsKey(fromPos)) {
-				SlabType movingType = splittingSlabTypes.get(fromPos);
-				SlabType remainingType = SlabHelper.getOppositeType(movingType);
+			SlabType movedType = splittingSlabTypes.get(fromPos);
+			if (movedType != null) {
+				SlabType remainingType = SlabHelper.getOppositeType(movedType);
 				BlockState remainingState = movedState.with(Properties.SLAB_TYPE, remainingType);
 				
 				movedBlockStatesMap.put(fromPos, remainingState);
 				world.setBlockState(fromPos, remainingState, 4);
 				
-				movedState = movedState.with(Properties.SLAB_TYPE, movingType);
+				movedState = movedState.with(Properties.SLAB_TYPE, movedType);
 			}
 			if (mergingSlabTypes.containsKey(toPos)) {
 				isMergingSlabs = true;
@@ -262,9 +296,9 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	private void onMoveInjectBeforeSetBlockEntity1(World world, BlockPos pos, Direction pistonDir, boolean extend, CallbackInfoReturnable<Boolean> cir,
 			BlockPos headPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> movedBlockStatesMap,
 			List<BlockPos> movedBlocksPos, List<BlockState> movedBlockStates, List<BlockPos> brokenBlocksPos,
-			BlockState[] affectedBlockStates, PistonType type, BlockState blockState4) 
+			BlockState[] affectedBlockStates, PistonType type, BlockState headState) 
 	{
-		world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(blockState4, pistonDir, true, true, sticky));
+		world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(headState, pistonDir, true, true, sticky));
 	}
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))
@@ -375,15 +409,12 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		}
 		boolean powered = PistonHelper.isReceivingPower(world, pos, state, facing);
 		
-		// Usually the tryMove method is only called from inside the
-		// onPlaced, neighborUpdate and onBlockAdded methods.
-		// However, Redstone Tweaks allows players to add activation delay to pistons.
-		// This is done using scheduled ticks.
-		// Redstone Tweaks also adds the lazy setting.
-		// If this setting is enabled, pistons should not check for power
-		// if the newTryMove method is called from scheduledTick method.
-		// Instead, the value of shouldExtend is inferred from the current
-		// value of the EXTENDED property.
+		// Usually the tryMove method is only called from inside the onPlaced, neighborUpdate and
+		// onBlockAdded methods. However, Redstone Tweaks allows players to add activation delay to
+		// pistons. This is done using scheduled ticks.
+		// Redstone Tweaks also adds the lazy setting. If this setting is enabled, pistons should not
+		// check for power if the newTryMove method is called from scheduledTick method. Instead,
+		// the value of shouldExtend is inferred from the current value of the EXTENDED property.
 		boolean shouldExtend = (onScheduledTick && lazy) ? !isExtended : powered;
 		
 		if (shouldExtend && !isExtended) {
@@ -396,8 +427,8 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			} else {
 				// We must check that the piston is currently not extending.
 				// Otherwise the piston will continually pulse if the
-				// forceUpdateWhenPowered and lazy settings are both enabled
-				if (powered && PistonHelper.updateSelfWhilePowered(sticky) && !isExtending(world, pos, state, facing)) {
+				// updateSelfWhilePowered and lazy settings are both enabled
+				if (powered && PistonHelper.updateSelfWhilePowered(sticky) && !PistonHelper.isExtending(world, pos, state, facing)) {
 					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, PistonHelper.tickPriorityRisingEdge(sticky));
 				}
 			}
@@ -405,7 +436,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
 			}
 		} else if (!shouldExtend) {
-			if (isExtended && !(PistonHelper.ignoreUpdatesWhileExtending(sticky) && isExtending(world, pos, state, facing))) {
+			if (isExtended && !(PistonHelper.ignoreUpdatesWhileExtending(sticky) && PistonHelper.isExtending(world, pos, state, facing))) {
 				if (activationDelay == 0 || onScheduledTick) {
 					if (redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get()) {
 						world.setBlockState(pos, state.with(Properties.EXTENDED, false), 16);
@@ -419,25 +450,6 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
 			}
 		}
-	}
-	
-	// The base of an extending piston is a piston block with the
-	// EXTENDED property set to true, the same as an extended piston
-	// So to determine whether the piston is extending, we need to
-	// look at the block in front of the piston. If that block is
-	// a moving block that is extending and facing the same direction
-	// as the piston, then we can conclude that the piston is extending.
-	private boolean isExtending(World world, BlockPos pos, BlockState state, Direction facing) {
-		if (!(state.get(Properties.EXTENDED) || redstonetweaks.setting.Settings.Global.DOUBLE_RETRACTION.get())) {
-			return false;
-		}
-		BlockPos frontPos = pos.offset(facing);
-		BlockState frontState = world.getBlockState(frontPos);
-		if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
-			return world.getBlockEntity(frontPos) instanceof PistonBlockEntity;
-		}
-		
-		return false;
 	}
 	
 	private void updateAdjacentRedstoneTorches(World world, BlockPos pos, Block block) {

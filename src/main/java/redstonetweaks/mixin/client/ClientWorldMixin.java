@@ -18,6 +18,7 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
+
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.interfaces.RTIClientWorld;
 import redstonetweaks.interfaces.RTIWorld;
@@ -25,6 +26,7 @@ import redstonetweaks.setting.Settings;
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
 import redstonetweaks.world.client.ClientUnfinishedEventScheduler;
 import redstonetweaks.world.client.ClientWorldTickHandler;
+import redstonetweaks.world.common.WorldTickHandler;
 
 @Mixin(ClientWorld.class)
 public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
@@ -48,6 +50,11 @@ public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
 	}
 	
 	@Override
+	public WorldTickHandler getWorldTickHandler() {
+		return ((RTIMinecraftClient)client).getWorldTickHandler();
+	}
+	
+	@Override
 	public ClientNeighborUpdateScheduler getNeighborUpdateScheduler() {
 		return neighborUpdateScheduler;
 	}
@@ -60,7 +67,7 @@ public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
 	@Override
 	public boolean tickWorldsNormally() {
 		ClientWorldTickHandler worldTickHandler = ((RTIMinecraftClient)client).getWorldTickHandler();
-		return worldTickHandler.doWorldTicks() && !(worldTickHandler.isTickingWorlds() || Settings.Global.SHOW_PROCESSING_ORDER.get() > 0);
+		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Settings.Global.SHOW_PROCESSING_ORDER.get() > 0);
 	}
 	
 	@Override

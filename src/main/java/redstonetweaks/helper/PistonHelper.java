@@ -71,14 +71,37 @@ public class PistonHelper {
 		return state.isOf(Blocks.STICKY_PISTON);
 	}
 	
+	public static boolean isExtended(World world, BlockPos pos, BlockState state) {
+		return isExtended(world, pos, state, state.get(Properties.FACING));
+	}
+	
 	public static boolean isExtended(World world, BlockPos pos, BlockState state, Direction facing) {
-		boolean isExtended = state.get(Properties.EXTENDED);
+		boolean isExtended = state.get(Properties.EXTENDED) && !isExtending(world, pos, state, facing);
 		if (!isExtended && Settings.Global.DOUBLE_RETRACTION.get()) {
 			BlockState frontState = world.getBlockState(pos.offset(facing));
 			isExtended = frontState.isOf(Blocks.PISTON_HEAD) && frontState.get(Properties.FACING) == facing;
 		}
 		
 		return isExtended;
+	}
+	
+	// The base of an extending piston is a piston block with the EXTENDED property set to true,
+	// the same as an extended piston. So to determine whether the piston is extending, we need
+	// to look at the block in front of the piston. If that block is a moving block that is
+	// extending and facing the same direction as the piston, then we can conclude that the piston
+	// is extending.
+	public static boolean isExtending(World world, BlockPos pos, BlockState state, Direction facing) {
+		BlockPos frontPos = pos.offset(facing);
+		BlockState frontState = world.getBlockState(frontPos);
+		if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
+			BlockEntity blockEntity = world.getBlockEntity(frontPos);
+			if (blockEntity instanceof PistonBlockEntity) {
+				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+				
+				return pistonBlockEntity.isExtending() && pistonBlockEntity.isSource();
+			}
+		}
+		return false;
 	}
 	
 	public static boolean isReceivingPower(World world, BlockPos pos, BlockState state, Direction facing) {
@@ -143,6 +166,14 @@ public class PistonHelper {
 	
 	public static boolean lazyFallingEdge(boolean sticky) {
 		return sticky ? Settings.StickyPiston.LAZY_FALLING_EDGE.get() : Settings.NormalPiston.LAZY_FALLING_EDGE.get();
+	}
+	
+	public static boolean movableWhenExtended(boolean sticky) {
+		return sticky ? Settings.StickyPiston.MOVABLE_WHEN_EXTENDED.get() : Settings.NormalPiston.MOVABLE_WHEN_EXTENDED.get();
+	}
+	
+	public static boolean movableWhenMoving(boolean sticky) {
+		return sticky ? Settings.StickyPiston.MOVABLE_WHEN_MOVING.get() : Settings.NormalPiston.MOVABLE_WHEN_MOVING.get();
 	}
 	
 	public static int speedRisingEdge(boolean sticky) {
@@ -223,7 +254,7 @@ public class PistonHelper {
 		if (Settings.Global.MERGE_SLABS.get() && dir.getAxis().isVertical()) {
 			SlabType type = state.get(SlabBlock.TYPE);
 			
-			if (type != SlabType.DOUBLE && type != SlabHelper.getTypeFromDirection(dir)) {
+			if (type == SlabHelper.getTypeFromDirection(dir.getOpposite())) {
 				return false;
 			}
 		}

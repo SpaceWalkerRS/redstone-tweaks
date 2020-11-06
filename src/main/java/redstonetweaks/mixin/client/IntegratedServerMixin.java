@@ -13,6 +13,6 @@ public class IntegratedServerMixin {
 	
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;isPaused()Z"))
 	private boolean onTickRedirectIsPaused(MinecraftClient client) {
-		return client.isPaused() && !((RTIMinecraftServer)(Object)this).getWorldTickHandler().isTickingWorlds();
+		return client.isPaused() && !((RTIMinecraftServer)(Object)this).getWorldTickHandler().tickInProgress();
 	}
 }

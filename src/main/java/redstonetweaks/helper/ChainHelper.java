@@ -2,6 +2,7 @@ package redstonetweaks.helper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -13,7 +14,7 @@ import net.minecraft.world.World;
 
 public class ChainHelper {
 	
-	public static boolean isFullyAnchored(World world, BlockPos pos, Direction.Axis axis, List<BlockPos> anchoredChains) {
+	public static boolean isFullyAnchored(World world, BlockPos pos, Direction.Axis axis, Set<BlockPos> anchoredChains) {
 		if (anchoredChains.contains(pos)) {
 			return true;
 		}
