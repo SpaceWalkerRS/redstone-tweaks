@@ -3,37 +3,32 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.RedstoneTweaks;
+
 import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 
 public class ServerInfoPacket extends RedstoneTweaksPacket {
 	
-	public int modMajor;
-	public int modMinor;
-	public int modPatch;
+	public RedstoneTweaksVersion modVersion;
 	
 	public ServerInfoPacket() {
-		
+		this(RedstoneTweaksVersion.INVALID_VERSION);
 	}
 	
 	public ServerInfoPacket(RedstoneTweaksVersion modVersion) {
-		this.modMajor = modVersion.major;
-		this.modMinor = modVersion.minor;
-		this.modPatch = modVersion.patch;
+		this.modVersion = modVersion;
 	}
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		buffer.writeByte(modMajor);
-		buffer.writeByte(modMinor);
-		buffer.writeByte(modPatch);
+		buffer.writeByte(modVersion.major);
+		buffer.writeByte(modVersion.minor);
+		buffer.writeByte(modVersion.patch);
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		modMajor = buffer.readByte();
-		modMinor = buffer.readByte();
-		modPatch = buffer.readByte();
+		modVersion = RedstoneTweaksVersion.create(buffer.readByte(), buffer.readByte(), buffer.readByte());
 	}
 	
 	@Override
@@ -43,6 +38,8 @@ public class ServerInfoPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		RedstoneTweaks.SERVER_VERSION = new RedstoneTweaksVersion(modMajor, modMinor, modPatch);
+		((RTIMinecraftClient)client).getServerInfo().updateFromPacket(this);
+		
+		((RTIMinecraftClient)client).getSettingsManager().onServerInfoUpdated();
 	}
 }

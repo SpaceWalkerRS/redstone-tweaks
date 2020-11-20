@@ -20,7 +20,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.util.math.BlockPos;
 
-import redstonetweaks.block.AnaloguePowerComponentBlockEntity;
+import redstonetweaks.block.PowerBlockEntity;
 
 @Mixin(DebugHud.class)
 public class DebugHudMixin {
@@ -33,8 +33,8 @@ public class DebugHudMixin {
 		
 		if (state.isOf(Blocks.REDSTONE_WIRE) || state.isOf(Blocks.TARGET) || state.getBlock() instanceof WeightedPressurePlateBlock) {
 			BlockEntity blockEntity = client.world.getBlockEntity(pos);
-			if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
-				text.add("power: " + ((AnaloguePowerComponentBlockEntity)blockEntity).getPower());
+			if (blockEntity instanceof PowerBlockEntity) {
+				text.add("power: " + ((PowerBlockEntity)blockEntity).getPower());
 			}
 		} else if (state.isOf(Blocks.COMPARATOR)) {
 			BlockEntity blockEntity = client.world.getBlockEntity(pos);

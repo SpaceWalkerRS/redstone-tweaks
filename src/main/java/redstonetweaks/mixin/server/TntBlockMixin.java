@@ -20,7 +20,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.setting.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 @Mixin(TntBlock.class)
 public abstract class TntBlockMixin extends AbstractBlock {
@@ -46,9 +47,9 @@ public abstract class TntBlockMixin extends AbstractBlock {
 		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
 			ci.cancel();
 		} else {
-			int delay = redstonetweaks.setting.Settings.TNT.DELAY.get();
+			int delay = Tweaks.TNT.DELAY.get();
 			if (delay > 0) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, redstonetweaks.setting.Settings.TNT.TICK_PRIORITY.get());
+				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Tweaks.TNT.TICK_PRIORITY.get());
 				ci.cancel();
 			}
 		}
@@ -59,9 +60,9 @@ public abstract class TntBlockMixin extends AbstractBlock {
 		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
 			ci.cancel();
 		} else {
-			int delay = redstonetweaks.setting.Settings.TNT.DELAY.get();
+			int delay = Tweaks.TNT.DELAY.get();
 			if (delay > 0) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, redstonetweaks.setting.Settings.TNT.TICK_PRIORITY.get());
+				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Tweaks.TNT.TICK_PRIORITY.get());
 				ci.cancel();
 			}
 		}
@@ -74,17 +75,17 @@ public abstract class TntBlockMixin extends AbstractBlock {
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		if (redstonetweaks.setting.Settings.TNT.LAZY.get() || WorldHelper.isPowered(world, pos, state, true, getQC(), randQC())) {
+		if (Tweaks.TNT.LAZY.get() || WorldHelper.isPowered(world, pos, state, true, getQC(), randQC())) {
 			primeTnt(world, pos);
 			world.removeBlock(pos, false);
 		}
 	}
 	
-	private DirectionalBooleanSetting getQC() {
-		return redstonetweaks.setting.Settings.TNT.QC;
+	private DirectionToBooleanSetting getQC() {
+		return Tweaks.TNT.QC;
 	}
 	
 	private boolean randQC() {
-		return redstonetweaks.setting.Settings.TNT.RANDOMIZE_QC.get();
+		return Tweaks.TNT.RANDOMIZE_QC.get();
 	}
 }

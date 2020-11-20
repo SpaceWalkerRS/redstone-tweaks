@@ -12,7 +12,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 public class BlockHelper {
 	
@@ -47,7 +47,7 @@ public class BlockHelper {
 	}
 	
 	public static boolean isPistonRigid(boolean sticky) {
-		return sticky ? Settings.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.get() : Settings.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.get();
+		return sticky ? Tweaks.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.get() : Tweaks.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.get();
 	}
 	
 	public static boolean isStationarySlab(BlockView world, BlockPos pos, BlockState state, Direction face) {

@@ -7,18 +7,18 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import net.minecraft.fluid.WaterFluid;
 import net.minecraft.world.TickPriority;
 import redstonetweaks.interfaces.RTIFluid;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(WaterFluid.class)
 public class WaterFluidMixin implements RTIFluid {
 
 	@ModifyConstant(method = "getTickRate", constant = @Constant(intValue = 5))
 	private int getWaterDelay(int oldDelay) {
-		return Settings.Water.DELAY.get();
+		return Tweaks.Water.DELAY.get();
 	}
 	
 	@Override
 	public TickPriority getTickPriority() {
-		return Settings.Water.TICK_PRIORITY.get();
+		return Tweaks.Water.TICK_PRIORITY.get();
 	}
 }

@@ -28,6 +28,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
+import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(AbstractButtonBlock.class)
@@ -45,12 +46,12 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 	
 	@ModifyConstant(method = "getPressTicks", constant = @Constant(intValue = 30))
 	private int onGetPressTicksModify30(int oldValue) {
-		return redstonetweaks.setting.Settings.WoodenButton.DELAY_FALLING_EDGE.get();
+		return Tweaks.WoodenButton.DELAY_FALLING_EDGE.get();
 	}
 	
 	@ModifyConstant(method = "getPressTicks", constant = @Constant(intValue = 20))
 	private int onGetPressTicksModify20(int oldValue) {
-		return redstonetweaks.setting.Settings.StoneButton.DELAY_FALLING_EDGE.get();
+		return Tweaks.StoneButton.DELAY_FALLING_EDGE.get();
 	}
 	
 	// This code is executed if a button is pressed but not powered.
@@ -58,9 +59,9 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 	// if the button has activation delay.
 	@Inject(method = "onUse", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/AbstractButtonBlock;powerOn(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
 	private void onOnUseInjectBeforePowerOn(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
-		int delay = wooden ? redstonetweaks.setting.Settings.WoodenButton.DELAY_RISING_EDGE.get() : redstonetweaks.setting.Settings.StoneButton.DELAY_RISING_EDGE.get();
+		int delay = wooden ? Tweaks.WoodenButton.DELAY_RISING_EDGE.get() : Tweaks.StoneButton.DELAY_RISING_EDGE.get();
 		if (delay > 0) {
-			TickPriority priority = wooden ? redstonetweaks.setting.Settings.WoodenButton.TICK_PRIORITY_RISING_EDGE.get() : redstonetweaks.setting.Settings.StoneButton.TICK_PRIORITY_RISING_EDGE.get();
+			TickPriority priority = wooden ? Tweaks.WoodenButton.TICK_PRIORITY_RISING_EDGE.get() : Tweaks.StoneButton.TICK_PRIORITY_RISING_EDGE.get();
 			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
 			
 			cir.setReturnValue(ActionResult.SUCCESS);
@@ -75,7 +76,7 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 				scheduledTick(world.getBlockState(pos), (ServerWorld)world, pos, world.getRandom());
 			}
 		} else {
-			TickPriority priority = wooden ? redstonetweaks.setting.Settings.WoodenButton.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.StoneButton.TICK_PRIORITY_FALLING_EDGE.get();
+			TickPriority priority = wooden ? Tweaks.WoodenButton.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.StoneButton.TICK_PRIORITY_FALLING_EDGE.get();
 			tickScheduler.schedule(pos, object, delay, priority);
 		}
 		
@@ -83,12 +84,12 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePowerModify15(int oldValue) {
-		return wooden ? redstonetweaks.setting.Settings.WoodenButton.POWER_WEAK.get() : redstonetweaks.setting.Settings.StoneButton.POWER_WEAK.get();
+		return wooden ? Tweaks.WoodenButton.POWER_WEAK.get() : Tweaks.StoneButton.POWER_WEAK.get();
 	}
 	
 	@ModifyConstant(method = "getStrongRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetStrongRedstonePowerModify15(int oldValue) {
-		return wooden ? redstonetweaks.setting.Settings.WoodenButton.POWER_STRONG.get() : redstonetweaks.setting.Settings.StoneButton.POWER_STRONG.get();
+		return wooden ? Tweaks.WoodenButton.POWER_STRONG.get() : Tweaks.StoneButton.POWER_STRONG.get();
 	}
 	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "HEAD"))
@@ -109,6 +110,6 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 	}
 	
 	private UpdateOrder updateOrder() {
-		return wooden ? redstonetweaks.setting.Settings.WoodenButton.BLOCK_UPDATE_ORDER.get() : redstonetweaks.setting.Settings.StoneButton.BLOCK_UPDATE_ORDER.get();
+		return wooden ? Tweaks.WoodenButton.BLOCK_UPDATE_ORDER.get() : Tweaks.StoneButton.BLOCK_UPDATE_ORDER.get();
 	}
 }

@@ -9,10 +9,12 @@ import net.minecraft.util.math.BlockPos;
 
 public interface RTIPistonHandler {
 	
+	public void addMovedBlockEntity(BlockEntity blockEntity);
+	
 	public List<BlockEntity> getMovedBlockEntities();
 	
-	public Map<BlockPos, SlabType> getMergingSlabTypes();
+	public Map<BlockPos, SlabType> getMergedSlabTypes();
 	
-	public Map<BlockPos, SlabType> getSplittingSlabTypes();
+	public Map<BlockPos, SlabType> getSplitSlabTypes();
 	
 }

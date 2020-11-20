@@ -10,10 +10,11 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
-
 import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTMenuTab;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 
 public class InfoTab extends RTMenuTab {
 	
@@ -35,10 +36,11 @@ public class InfoTab extends RTMenuTab {
 		
 		info.get("Client").add(new TranslatableText("Mod Version: " + RedstoneTweaks.MOD_VERSION.toString()));
 		
-		if (RedstoneTweaks.SERVER_VERSION == null) {
-			info.get("Server").add(new TranslatableText("Not installed!"));
+		RedstoneTweaksVersion serverVersion = ((RTIMinecraftClient)this.screen.client).getServerInfo().getModVersion();
+		if (serverVersion.isValid()) {
+			info.get("Server").add(new TranslatableText("Mod Version: " + serverVersion.toString()));
 		} else {
-			info.get("Server").add(new TranslatableText("Mod Version: " + RedstoneTweaks.SERVER_VERSION.toString()));
+			info.get("Server").add(new TranslatableText("Not installed!"));
 		}
 		
 		info.get("Credits").add(new TranslatableText("Space Walker - lead developer"));

@@ -9,12 +9,15 @@ import net.minecraft.text.TranslatableText;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTMenuTab;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.hotkeys.HotKeyManager;
+import redstonetweaks.hotkeys.Hotkeys;
 import redstonetweaks.hotkeys.RTKeyBinding;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 
 public class HotkeysTab extends RTMenuTab {
 	
 	private static final int HEADER_HEIGHT = 25;
+	
+	private final Hotkeys hotkeys;
 	
 	private HotkeysListWidget hotkeysList;
 	private RTButtonWidget resetButton;
@@ -23,6 +26,8 @@ public class HotkeysTab extends RTMenuTab {
 	
 	public HotkeysTab(RTMenuScreen screen) {
 		super(screen, new TranslatableText("Hotkeys"));
+		
+		this.hotkeys = ((RTIMinecraftClient)screen.client).getHotkeysManager().getHotkeys();
 	}
 	
 	@Override
@@ -71,11 +76,11 @@ public class HotkeysTab extends RTMenuTab {
 	
 	@Override
 	protected void initContents() {
-		hotkeysList = new HotkeysListWidget(this, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - 5);
+		hotkeysList = new HotkeysListWidget(this, hotkeys, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - 5);
 		addContent(hotkeysList);
 		
 		resetButton = new RTButtonWidget(5, screen.getHeaderHeight(), 50, 20, () -> new TranslatableText("RESET"), (button) -> {
-			HotKeyManager.resetKeyBindings();
+			hotkeys.resetKeyBindings();
 		});
 		addContent(resetButton);
 	}
@@ -94,7 +99,7 @@ public class HotkeysTab extends RTMenuTab {
 		RTKeyBinding keyBinding = focusedKeyBinding;
 		focusedKeyBinding = null;
 		
-		HotKeyManager.updateKeyBinding(keyBinding, newKey);
+		hotkeys.updateKeyBinding(keyBinding, newKey);
 	}
 	
 	public void onHotkeyChanged(RTKeyBinding keyBinding) {

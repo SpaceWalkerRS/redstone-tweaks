@@ -8,13 +8,13 @@ import net.minecraft.state.property.Properties;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.helper.BlockEntityHelper;
 
-public class AnaloguePowerComponentBlockEntity extends BlockEntity {
+public class PowerBlockEntity extends BlockEntity {
 	
 	private int power;
 	private boolean powerCorrected;
 	
-	public AnaloguePowerComponentBlockEntity() {
-		super(RedstoneTweaks.REDSTONE_POWER);
+	public PowerBlockEntity() {
+		super(RedstoneTweaks.POWER_BLOCK_ENTITY_TYPE);
 	}
 	
 	@Override

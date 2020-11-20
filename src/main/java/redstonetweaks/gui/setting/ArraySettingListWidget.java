@@ -15,20 +15,23 @@ import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.interfaces.RTIMinecraftClient;
-import redstonetweaks.setting.types.DirectionalBooleanSetting;
-import redstonetweaks.setting.types.DirectionalSetting;
+import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.setting.types.ArraySetting;
+import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
-public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettingListWidget.Entry> {
+public class ArraySettingListWidget extends RTListWidget<ArraySettingListWidget.Entry> {
 	
-	private final DirectionalSetting<?> setting;
+	private final SettingsCategory category;
+	private final ArraySetting<?, ?> setting;
 	
-	public DirectionalSettingListWidget(RTMenuScreen screen, int x, int y, int width, int height, DirectionalSetting<?> setting) {
+	public ArraySettingListWidget(RTMenuScreen screen, int x, int y, int width, int height, SettingsCategory category, ArraySetting<?, ?> setting) {
 		super(screen, x, y, width, height, 22);
 		
+		this.category = category;
 		this.setting = setting;
 		
-		for (Direction dir : Direction.values()) {
-			addEntry(new Entry(dir));
+		for (int index = 0; index < setting.getSize(); index++) {
+			addEntry(new Entry(index));
 		}
 	}
 	
@@ -43,37 +46,35 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 		}
 	}
 	
-	public class Entry extends RTListWidget.Entry<DirectionalSettingListWidget.Entry> {
+	public class Entry extends RTListWidget.Entry<ArraySettingListWidget.Entry> {
 		
 		private static final int TITLE_WIDTH = 75;
 		
-		private final Direction direction;
+		private final int index;
 		private final Text title;
 		private final List<RTElement> children;
 		private final ButtonPanel buttonPanel;
 		private final RTButtonWidget resetButton;
-		private final boolean buttonsActive;
 		
-		public Entry(Direction direction) {
-			this.buttonsActive = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
-			
-			this.direction = direction;
-			this.title = new TranslatableText(direction.getName());
+		public Entry(int index) {
+			this.index = index;
+			this.title = new TranslatableText(setting.getKeyAsString(index));
 			this.children = new ArrayList<>();
 			
 			this.buttonPanel = new ButtonPanel();
 			this.populateButtonPanel();
-			this.buttonPanel.setX(getX() + TITLE_WIDTH);
-			this.buttonPanel.setActive(buttonsActive);
 			this.children.add(buttonPanel);
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
 				setting.reset();
 				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			});
-			this.resetButton.setX(this.buttonPanel.getX() + this.buttonPanel.getWidth() + 5);
-			this.resetButton.setActive(buttonsActive && !setting.isDefault(direction));
 			this.children.add(resetButton);
+			
+			this.buttonPanel.setX(getX() + TITLE_WIDTH);
+			this.resetButton.setX(this.buttonPanel.getX() + this.buttonPanel.getWidth() + 5);
+			
+			updateButtonsActive();
 		}
 		
 		@Override
@@ -113,13 +114,14 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 		}
 		
 		private void populateButtonPanel() {
-			if (setting instanceof DirectionalBooleanSetting) {
-				DirectionalBooleanSetting bSetting = (DirectionalBooleanSetting)setting;
+			if (setting instanceof DirectionToBooleanSetting) {
+				DirectionToBooleanSetting bSetting = (DirectionToBooleanSetting)setting;
+				Direction dir = Direction.byId(index);
 				buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> {
-					Formatting formatting = bSetting.get(direction) ? Formatting.GREEN : Formatting.RED;
-					return new TranslatableText(bSetting.valueToText(bSetting.get(direction))).formatted(formatting);
+					Formatting formatting = bSetting.get(dir) ? Formatting.GREEN : Formatting.RED;
+					return new TranslatableText(bSetting.elementToString(bSetting.get(dir))).formatted(formatting);
 				}, (button) -> {
-					bSetting.set(direction, !bSetting.get(direction));
+					bSetting.set(dir, !bSetting.get(dir));
 					((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(bSetting);
 				}));
 			}
@@ -127,7 +129,14 @@ public class DirectionalSettingListWidget extends RTListWidget<DirectionalSettin
 		
 		private void onSettingChanged() {
 			buttonPanel.updateButtonLabels();
-			resetButton.setActive(buttonsActive && !setting.isDefault(direction));
+			updateButtonsActive();
+		}
+		
+		private void updateButtonsActive() {
+			boolean canChangeSettings = ((RTIMinecraftClient)screen.client).getSettingsManager().canChangeSettings();
+			
+			buttonPanel.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
+			resetButton.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked() && !setting.isDefault(index));
 		}
 	}
 }

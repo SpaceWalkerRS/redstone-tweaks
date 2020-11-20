@@ -35,6 +35,7 @@ public class ServerSettingsManager {
 	}
 	
 	private void onStartUp() {
+		Settings.enableAll();
 		loadSettings();
 	}
 	
@@ -62,7 +63,7 @@ public class ServerSettingsManager {
 						
 						ISetting setting = Settings.getSettingFromId(args[0]);
 						if (setting != null) {
-							setting.setFromText(args[1]);
+							setting.setFromString(args[1]);
 						}
 					} catch (Exception e) {
 						
@@ -89,13 +90,12 @@ public class ServerSettingsManager {
 			bw.write(RedstoneTweaks.SETTINGS_VERSION.toString());
 			bw.newLine();
 			
-			for (SettingsPack pack : Settings.SETTINGS_PACKS) {
-				for (ISetting setting : pack.getSettings()) {
-					bw.write(setting.getId());
-					bw.write(" = ");
-					bw.write(setting.getAsText());
-					bw.newLine();
-				}
+			for (ISetting setting : Settings.ALL) {
+				bw.write(setting.getId());
+				bw.write(" = ");
+				bw.write(setting.getAsString());
+				
+				bw.newLine();
 			}
 		} catch (IOException e) {
 			
@@ -116,8 +116,8 @@ public class ServerSettingsManager {
 		return new File(getCacheDir(), SETTINGS_PATH);
 	}
 	
-	// Setting changes occur on a client
-	// The server then notifies all clients of the change
+	// Setting changes occur on a client and are then sent to the server,
+	// which then notifies all clients of the change
 	public void onSettingPacketReceived(ISetting setting) {
 		if (server.isDedicated() || server.isRemote()) {
 			SettingPacket packet = new SettingPacket(setting);
@@ -148,7 +148,7 @@ public class ServerSettingsManager {
 	
 	private void updateSettingsOfPlayer(ServerPlayerEntity player) {
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
-		SettingsPacket packet = new SettingsPacket(Settings.getSettingCount());
+		SettingsPacket packet = new SettingsPacket(null);
 		
 		if (player == null) {
 			packetHandler.sendPacket(packet);

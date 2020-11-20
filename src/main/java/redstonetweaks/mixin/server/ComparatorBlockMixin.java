@@ -26,10 +26,10 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
+
 import redstonetweaks.interfaces.RTIRedstoneDiode;
 import redstonetweaks.interfaces.RTIServerTickScheduler;
-import redstonetweaks.setting.Settings.BugFixes;
-import redstonetweaks.setting.Settings.Comparator;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(ComparatorBlock.class)
 public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock implements RTIRedstoneDiode {
@@ -45,25 +45,25 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	
 	@ModifyConstant(method = "getUpdateDelayInternal", constant = @Constant(intValue = 2))
 	private int onGetUpdateDelayInternalModify2(int oldDelay) {
-		return Comparator.DELAY.get();
+		return Tweaks.Comparator.DELAY.get();
 	}
 	
 	@Redirect(method = "calculateOutputSignal", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/ComparatorBlock;getMaxInputLevelSides(Lnet/minecraft/world/WorldView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)I"))
 	private int onCalculateOutputSignalRedirectGetMaxInputLevelSides(ComparatorBlock gate, WorldView world, BlockPos pos, BlockState state) {
 		int sidePower = getMaxInputLevelSides(world, pos, state);
-		return Comparator.ADDITION_MODE.get() ? - sidePower : sidePower;
+		return Tweaks.Comparator.ADDITION_MODE.get() ? - sidePower : sidePower;
 	}
 	
 	@Inject(method = "hasPower", at = @At(value = "RETURN", ordinal = 0), cancellable = true)
 	private void onHasPowerInjectAtReturn0(World world, BlockPos pos, BlockState state, CallbackInfoReturnable<Boolean> cir) {
-		cir.setReturnValue(state.get(Properties.COMPARATOR_MODE) == ComparatorMode.SUBTRACT && Comparator.ADDITION_MODE.get() && getMaxInputLevelSides(world, pos, state) > 0);
+		cir.setReturnValue(state.get(Properties.COMPARATOR_MODE) == ComparatorMode.SUBTRACT && Tweaks.Comparator.ADDITION_MODE.get() && getMaxInputLevelSides(world, pos, state) > 0);
 		cir.cancel();
 	}
 	
 	@Inject(method = "hasPower", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "RETURN", ordinal = 2), cancellable = true)
 	private void onHasPowerInjectAtReturn2(World world, BlockPos pos, BlockState state, CallbackInfoReturnable<Boolean> cir, int backPower, int sidePower) {
 		if (!cir.getReturnValueZ()) {
-			if (state.get(Properties.COMPARATOR_MODE) == ComparatorMode.SUBTRACT && Comparator.ADDITION_MODE.get()) {
+			if (state.get(Properties.COMPARATOR_MODE) == ComparatorMode.SUBTRACT && Tweaks.Comparator.ADDITION_MODE.get()) {
 				cir.setReturnValue(backPower + sidePower > 0);
 				cir.cancel();
 			}
@@ -72,7 +72,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	
 	@ModifyConstant(method = "getPower", constant = @Constant(intValue = 15))
 	private int onGetPowerModify15(int oldValue) {
-		return redstonetweaks.setting.Settings.Global.POWER_MAX.get();
+		return redstonetweaks.setting.Tweaks.Global.POWER_MAX.get();
 	}
 	
 	@Inject(method = "updatePowered", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
@@ -88,21 +88,21 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority onUpdatePoweredRedirectPriorityHigh(World world, BlockPos pos, BlockState state) {
-		if (BugFixes.MC54711.get() && ((RTIRedstoneDiode)this).isInputBugOccurring(world, pos, state)) {
-			return Comparator.TICK_PRIORITY.get();
+		if (Tweaks.BugFixes.MC54711.get() && ((RTIRedstoneDiode)this).isInputBugOccurring(world, pos, state)) {
+			return Tweaks.Comparator.TICK_PRIORITY.get();
 		} else {
-			return Comparator.TICK_PRIORITY_FACING_DIODE.get();
+			return Tweaks.Comparator.TICK_PRIORITY_FACING_DIODE.get();
 		}
 	}
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;NORMAL:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority onUpdatePoweredRedirectPriorityNormal() {
-		return Comparator.TICK_PRIORITY.get();
+		return Tweaks.Comparator.TICK_PRIORITY.get();
 	}
 	
 	@ModifyConstant(method = "updatePowered", constant = @Constant(intValue = 2))
 	private int onUpdatePowerModifyDelay(int oldDelay) {
-		return Comparator.DELAY.get();
+		return Tweaks.Comparator.DELAY.get();
 	}
 	
 	// To fix the chain bug without altering other behavior,

@@ -50,7 +50,7 @@ import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.packet.TickBlockEntityPacket;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 
 @Mixin(World.class)
@@ -99,14 +99,14 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Inject(method = "updateNeighborsAlways", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsAlwaysInjectAtHead(BlockPos pos, Block block, CallbackInfo ci) {
-		Settings.Global.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates((World)(Object)this, pos, block);
+		Tweaks.Global.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates((World)(Object)this, pos, block);
 		
 		ci.cancel();
 	}
 	
 	@Redirect(method = "updateNeighbor", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;neighborUpdate(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;Z)V"))
 	private void onUpdateNeighborRedirectNeighborUpdate(BlockState blockState, World world, BlockPos pos, Block sourceBlock, BlockPos notifierPos, boolean notify) {
-		if (Settings.Global.DO_BLOCK_UPDATES.get()) {
+		if (Tweaks.Global.DO_BLOCK_UPDATES.get()) {
 			if (updateNeighborsNormally()) {
 				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
 			} else {
@@ -119,7 +119,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Redirect(method = "updateComparators", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;neighborUpdate(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;Z)V"))
 	private void onUpdateComparatorsRedirectNeighborUpdate(BlockState blockState, World world, BlockPos pos, Block sourceBlock, BlockPos notifierPos, boolean notify) {
-		if (Settings.Global.DO_COMPARATOR_UPDATES.get()) {
+		if (Tweaks.Global.DO_COMPARATOR_UPDATES.get()) {
 			if (updateNeighborsNormally()) {
 				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
 			} else {
@@ -137,7 +137,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Inject(method = "getReceivedStrongRedstonePower", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetReceivedStrongRedstonePowerInjectAtHead(BlockPos pos, CallbackInfoReturnable<Integer> cir) {
-		if (Settings.Stairs.FULL_FACES_ARE_SOLID.get()) {
+		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
 			BlockState state = getBlockState(pos);
 			if (state.getBlock() instanceof StairsBlock) {
 				cir.setReturnValue(StairsHelper.getReceivedStrongRedstonePower((World)(Object)this, pos, state));
@@ -148,17 +148,17 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@ModifyConstant(method = "getReceivedStrongRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetReceivedStrongRedstonePowerModify15(int oldValue) {
-		return Settings.Global.POWER_MAX.get();
+		return Tweaks.Global.POWER_MAX.get();
 	}
 	
 	@Redirect(method = "getEmittedRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onGetEmittedRedstonePowerRedirectIsSolidBlock(BlockState state, BlockView world, BlockPos pos1, BlockPos pos, Direction direction) {
-		if (Settings.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
+		if (Tweaks.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
 			if (state.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
 				return state.get(Properties.HORIZONTAL_FACING) == direction;
 			}
 		}
-		if (Settings.Stairs.FULL_FACES_ARE_SOLID.get()) {
+		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
 			if (state.getBlock() instanceof StairsBlock) {
 				return state.isSideSolidFullSquare(world, pos, direction.getOpposite());
 			}
@@ -168,7 +168,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@ModifyConstant(method = "getReceivedRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetReceivedRedstonePowerModify15(int oldValue) {
-		return Settings.Global.POWER_MAX.get();
+		return Tweaks.Global.POWER_MAX.get();
 	}
 	
 	@Override

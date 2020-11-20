@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(FallingBlock.class)
 public abstract class FallingBlockMixin {
@@ -23,16 +23,16 @@ public abstract class FallingBlockMixin {
 	// Modify the delay gravity blocks have before falling
 	@ModifyConstant(method = "getFallDelay", constant = @Constant(intValue = 2))
 	private int getGravityBlockDelay(int oldDelay) {
-		return Settings.GravityBlock.DELAY.get();
+		return Tweaks.GravityBlock.DELAY.get();
 	}
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, delay, Settings.GravityBlock.TICK_PRIORITY.get());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, delay, Tweaks.GravityBlock.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, delay, Settings.GravityBlock.TICK_PRIORITY.get());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, delay, Tweaks.GravityBlock.TICK_PRIORITY.get());
 	}
 }

@@ -22,7 +22,7 @@ import net.minecraft.world.dimension.DimensionType;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.interfaces.RTIClientWorld;
 import redstonetweaks.interfaces.RTIWorld;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
 import redstonetweaks.world.client.ClientUnfinishedEventScheduler;
 import redstonetweaks.world.client.ClientWorldTickHandler;
@@ -67,12 +67,12 @@ public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
 	@Override
 	public boolean tickWorldsNormally() {
 		ClientWorldTickHandler worldTickHandler = ((RTIMinecraftClient)client).getWorldTickHandler();
-		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Settings.Global.SHOW_PROCESSING_ORDER.get() > 0);
+		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Tweaks.Global.SHOW_PROCESSING_ORDER.get() > 0);
 	}
 	
 	@Override
 	public boolean updateNeighborsNormally() {
 		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
-		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || Settings.Global.SHOW_NEIGHBOR_UPDATES.get());
+		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || Tweaks.Global.SHOW_NEIGHBOR_UPDATES.get());
 	}
 }

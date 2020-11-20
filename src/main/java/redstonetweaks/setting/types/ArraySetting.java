@@ -2,10 +2,14 @@ package redstonetweaks.setting.types;
 
 import java.util.Arrays;
 
-public abstract class ArraySetting<T> extends Setting<T[]> {
+public abstract class ArraySetting<K, V> extends Setting<V[]> {
 	
-	public ArraySetting(String prefix, String name, String description, T[] defaultValue) {
-		super(prefix, name, description, defaultValue);
+	private final int size;
+	
+	public ArraySetting(String name, String description, V[] defaultValues) {
+		super(name, description, defaultValues);
+		
+		this.size = getDefault().length;
 	}
 	
 	@Override
@@ -14,12 +18,12 @@ public abstract class ArraySetting<T> extends Setting<T[]> {
 	}
 	
 	@Override
-	public void setFromText(String text) {
-		String[] args = text.split(", ");
+	public void setValueFromString(String string) {
+		String[] args = string.split(",");
 		
 		for (int i = 0; i < args.length; i++) {
 			try {
-				set(i, textToValue(args[i]));
+				set(i, stringToElement(args[i]));
 			} catch (Exception e) {
 				
 			}
@@ -27,40 +31,55 @@ public abstract class ArraySetting<T> extends Setting<T[]> {
 	}
 	
 	@Override
-	public String getAsText() {
-		String asText = "";
+	public String getValueAsString() {
+		String string = "";
 		
-		for (T value : get()) {
-			asText += valueToText(value) + ", ";
+		for (V value : get()) {
+			string += elementToString(value) + ",";
 		}
 		
-		return asText.substring(0, asText.length() - 2);
+		return string.substring(0, string.length() - 1);
 	}
 	
+
 	@Override
-	public void set(T[] newValue) {
+	public void set(V[] newValue) {
 		super.set(newValue.clone());
 	}
 	
-	public abstract T textToValue(String text);
+	public abstract V stringToElement(String string);
 	
-	public abstract String valueToText(T element);
+	public String elementToString(V element) {
+		return element.toString();
+	}
 	
-	public T get(int index) {
+	public V get(int index) {
 		if (inRange(index)) {
 			return get()[index];
 		}
 		return null;
 	}
 	
-	public void set(int index, T value) {
+	public V get(K key) {
+		return get(getIndexFromKey(key));
+	}
+	
+	public void set(int index, V value) {
 		if (inRange(index)) {
 			get()[index] = value;
 		}
 	}
 	
+	public void set(K key, V value) {
+		set(getIndexFromKey(key), value);
+	}
+	
 	public void reset(int index) {
 		set(index, getDefault(index));
+	}
+	
+	public void reset(K key) {
+		reset(getIndexFromKey(key));
 	}
 	
 	public boolean isDefault(int index) {
@@ -70,14 +89,38 @@ public abstract class ArraySetting<T> extends Setting<T[]> {
 		return false;
 	}
 	
-	public T getDefault(int index) {
+	public boolean isDefault(K key) {
+		return isDefault(getIndexFromKey(key));
+	}
+	
+	public V getDefault(int index) {
 		if (inRange(index)) {
 			return getDefault()[index];
 		}
 		return null;
 	}
 	
+	public V getDefault(K key) {
+		return getDefault(getIndexFromKey(key));
+	}
+	
+	public abstract int getIndexFromKey(K key);
+	
+	public abstract K getKeyFromIndex(int index);
+	
+	public String getKeyAsString(K key) {
+		return key.toString();
+	}
+	
+	public String getKeyAsString(int index) {
+		return getKeyAsString(getKeyFromIndex(index));
+	}
+	
+	public int getSize() {
+		return size;
+	}
+	
 	private boolean inRange(int index) {
-		return index >= 0 && index < get().length;
+		return index >= 0 && index < getSize();
 	}
 }

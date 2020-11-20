@@ -10,8 +10,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
-import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.hotkeys.HotKeyManager;
+
+import redstonetweaks.ServerInfo;
+import redstonetweaks.hotkeys.HotkeysManager;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.setting.ClientSettingsManager;
@@ -24,21 +25,23 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Shadow public ClientWorld world;
 	
-	private ClientSettingsManager settingsManager;
-	private NeighborUpdateVisualizer neighborUpdateVisualizer;
+	private ServerInfo serverInfo;
 	private ClientPacketHandler packetHandler;
+	private ClientSettingsManager settingsManager;
+	private HotkeysManager hotkeysManager;
 	private ClientWorldTickHandler worldTickHandler;
+	private NeighborUpdateVisualizer neighborUpdateVisualizer;
 	private TickInfoLabelRenderer tickInfoLabelRenderer;
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(RunArgs args, CallbackInfo ci) {
-		settingsManager = new ClientSettingsManager((MinecraftClient)(Object)this);
-		neighborUpdateVisualizer = new NeighborUpdateVisualizer((MinecraftClient)(Object)this);
+		serverInfo = new ServerInfo();
 		packetHandler = new ClientPacketHandler((MinecraftClient)(Object)this);
+		settingsManager = new ClientSettingsManager((MinecraftClient)(Object)this);
+		hotkeysManager = new HotkeysManager((MinecraftClient)(Object)this);
 		worldTickHandler = new ClientWorldTickHandler((MinecraftClient)(Object)this);
+		neighborUpdateVisualizer = new NeighborUpdateVisualizer((MinecraftClient)(Object)this);
 		tickInfoLabelRenderer = new TickInfoLabelRenderer((MinecraftClient)(Object)this);
-		
-		HotKeyManager.loadHotkeys();
 	}
 	
 	@Inject(method = "joinWorld", at = @At(value = "RETURN"))
@@ -48,14 +51,24 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "RETURN"))
 	private void onDisconnect(Screen screen, CallbackInfo ci) {
-		RedstoneTweaks.SERVER_VERSION = null;
+		serverInfo.clear();
 		worldTickHandler.onDisconnect();
 		settingsManager.onDisconnect();
 	}
 	
 	@Inject(method = "stop", at = @At(value = "HEAD"))
 	private void onStopInjectAtHead(CallbackInfo ci) {
-		HotKeyManager.saveHotkeys();
+		hotkeysManager.saveHotkeys();
+	}
+	
+	@Override
+	public ServerInfo getServerInfo() {
+		return serverInfo;
+	}
+	
+	@Override
+	public ClientPacketHandler getPacketHandler() {
+		return packetHandler;
 	}
 	
 	@Override
@@ -64,18 +77,18 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	}
 	
 	@Override
-	public NeighborUpdateVisualizer getNeighborUpdateVisualizer() {
-		return neighborUpdateVisualizer;
+	public HotkeysManager getHotkeysManager() {
+		return hotkeysManager;
 	}
-
-	@Override
-	public ClientPacketHandler getPacketHandler() {
-		return packetHandler;
-	}
-
+	
 	@Override
 	public ClientWorldTickHandler getWorldTickHandler() {
 		return worldTickHandler;
+	}
+	
+	@Override
+	public NeighborUpdateVisualizer getNeighborUpdateVisualizer() {
+		return neighborUpdateVisualizer;
 	}
 	
 	@Override

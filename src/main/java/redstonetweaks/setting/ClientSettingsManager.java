@@ -7,6 +7,7 @@ import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.ResetSettingPacket;
 import redstonetweaks.packet.ResetSettingsPacket;
 import redstonetweaks.packet.SettingPacket;
+import redstonetweaks.packet.SettingsPacket;
 import redstonetweaks.setting.types.ISetting;
 
 public class ClientSettingsManager {
@@ -18,7 +19,11 @@ public class ClientSettingsManager {
 	}
 	
 	public boolean canChangeSettings() {
-		return RedstoneTweaks.SERVER_VERSION != null && client.player.hasPermissionLevel(2);
+		return ((RTIMinecraftClient)client).getServerInfo().getModVersion().isValid() && client.player.hasPermissionLevel(2);
+	}
+	
+	public boolean canLockSettings() {
+		return canChangeSettings();
 	}
 	
 	public void onSettingChanged(ISetting setting) {
@@ -29,6 +34,14 @@ public class ClientSettingsManager {
 		notifyMenuScreenOfSettingChange(setting);
 	}
 	
+	public void onSettingsChanged(SettingsCategory category) {
+		if (!client.isInSingleplayer() || client.getServer().isRemote()) {
+			SettingsPacket packet = new SettingsPacket(category);
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+		}
+		notifyMenuScreenOfSettingChange(null);
+	}
+	
 	public void onSettingReset(ISetting setting) {
 		if (!client.isInSingleplayer() || client.getServer().isRemote()) {
 			ResetSettingPacket packet = new ResetSettingPacket(setting);
@@ -37,9 +50,9 @@ public class ClientSettingsManager {
 		notifyMenuScreenOfSettingChange(setting);
 	}
 	
-	public void onSettingsReset() {
+	public void onSettingsReset(SettingsCategory category) {
 		if (!client.isInSingleplayer() || client.getServer().isRemote()) {
-			ResetSettingsPacket packet = new ResetSettingsPacket();
+			ResetSettingsPacket packet = new ResetSettingsPacket(category);
 			((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 		}
 		notifyMenuScreenOfSettingChange(null);
@@ -67,13 +80,13 @@ public class ClientSettingsManager {
 		}
 	}
 	
-	public void onDisconnect() {
-		resetSettings();
+	public void onServerInfoUpdated() {
+		if (((RTIMinecraftClient)client).getServerInfo().getModVersion().equals(RedstoneTweaks.MOD_VERSION)) {
+			Settings.enableAll();
+		}
 	}
 	
-	private void resetSettings() {
-		for (SettingsPack pack : Settings.SETTINGS_PACKS) {
-			pack.getSettings().forEach(setting -> setting.reset());
-		}
+	public void onDisconnect() {
+		Settings.toDefault();
 	}
 }

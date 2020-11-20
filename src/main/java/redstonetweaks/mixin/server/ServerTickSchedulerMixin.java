@@ -28,7 +28,7 @@ import net.minecraft.world.ScheduledTick;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import redstonetweaks.interfaces.RTIServerTickScheduler;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(ServerTickScheduler.class)
 public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickScheduler, TickScheduler<T> {
@@ -47,10 +47,10 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 	
 	@Inject(method = "schedule", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
 	private void onScheduledInjectBeforeAddScheduledTick(BlockPos pos, T object, int delay, TickPriority priority, CallbackInfo ci) {
-		if (Settings.Global.DELAY_MULTIPLIER.get() == 0) {
+		if (Tweaks.Global.DELAY_MULTIPLIER.get() == 0) {
 			tickConsumer.accept(new ScheduledTick<>(pos, object, 0, priority));
 		} else {
-			if (Settings.Global.RANDOMIZE_TICK_PRIORITIES.get()) {
+			if (Tweaks.Global.RANDOMIZE_TICK_PRIORITIES.get()) {
 				int index = world.getRandom().nextInt(TickPriority.values().length) + TickPriority.values()[0].getIndex();
 				priority = TickPriority.byIndex(index);
 			}
@@ -145,9 +145,9 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 		int min = 1;
 		int max = 127;
 		
-		if (Settings.Global.RANDOMIZE_DELAYS.get()) {
+		if (Tweaks.Global.RANDOMIZE_DELAYS.get()) {
 			delay = min + world.getRandom().nextInt(max);
 		}
-		return Settings.Global.DELAY_MULTIPLIER.get() * delay;
+		return Tweaks.Global.DELAY_MULTIPLIER.get() * delay;
 	}
 }

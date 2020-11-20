@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.PistonBlockEntity;
@@ -22,13 +23,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
-
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.RTIWorld;
-import redstonetweaks.setting.Settings;
 
 @Mixin(PistonBlockEntity.class)
 public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIPistonBlockEntity {
@@ -39,8 +40,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Shadow private BlockState pushedBlock;
 	@Shadow private boolean source;
 	
-	private PistonBlockEntity parentPistonBlockEntity;
+	private BlockState movedState;
 	private BlockEntity movedBlockEntity;
+	private PistonBlockEntity parentPistonBlockEntity;
+	
 	private boolean isMovedByStickyPiston;
 	private boolean isMergingSlabs;
 	
@@ -95,7 +98,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		isMovedByStickyPiston = tag.contains("isMovedByStickyPiston") ? tag.getBoolean("isMovedByStickyPiston") : false;
 
 		if (tag.contains("movedBlockEntity")) {
-			if (pushedBlock.getBlock() instanceof BlockEntityProvider) {
+			if (pushedBlock.getBlock().hasBlockEntity()) {
 				movedBlockEntity = ((BlockEntityProvider)pushedBlock.getBlock()).createBlockEntity(world);
 			}
 			if (movedBlockEntity != null) {
@@ -124,8 +127,21 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
+	public BlockState getMovedState() {
+		if (movedState.isOf(Blocks.MOVING_PISTON) && movedBlockEntity instanceof PistonBlockEntity) {
+			return ((RTIPistonBlockEntity)movedBlockEntity).getMovedState();
+		}
+		return movedState;
+	}
+	
+	@Override
 	public void setMovedBlockEntity(BlockEntity blockEntity) {
 		movedBlockEntity = blockEntity;
+		
+		movedState = pushedBlock;
+		if (movedState.isOf(Blocks.MOVING_PISTON) && movedBlockEntity instanceof PistonBlockEntity) {
+			pushedBlock = ((RTIPistonBlockEntity)movedBlockEntity).getMovedState();
+		}
 	}
 	
 	@Override
@@ -149,6 +165,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			// We have to set source to false so that the pushed block is not replaced by air
 			source = false;
 			finish();
+			source = true;
 		}
 	}
 	
@@ -157,7 +174,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	private void mergeSlabs() {
-		if (Settings.Global.MERGE_SLABS.get() && isMergingSlabs() && SlabHelper.isSlab(pushedBlock)) {
+		if (isMergingSlabs() && SlabHelper.isSlab(pushedBlock)) {
 			pushedBlock = pushedBlock.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
 		}
 	}

@@ -16,7 +16,7 @@ import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.packet.NeighborUpdateSchedulerPacket;
 import redstonetweaks.packet.NeighborUpdateVisualizerPacket;
 import redstonetweaks.packet.RedstoneTweaksPacket;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.NeighborUpdateScheduler;
 
 public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {
@@ -45,7 +45,7 @@ public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {
 	public void tick() {
 		tickTime++;
 		
-		if (!Settings.Global.SHOW_NEIGHBOR_UPDATES.get()) {
+		if (!Tweaks.Global.SHOW_NEIGHBOR_UPDATES.get()) {
 			clearUpdates();
 		} else if (scheduledNeighborUpdates.isEmpty()) {
 			clearCurrentUpdate();
@@ -96,7 +96,7 @@ public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {
 				state.neighborUpdate(world, currentUpdate.pos, sourceBlock, currentUpdate.notifierPos, false);
 			}
 			break;
-		case STATE_UPDATE:
+		case SHAPE_UPDATE:
 			if (currentUpdate.flags >= 0 && currentUpdate.depth >= 0) {
 				BlockState notifierState = world.getBlockState(currentUpdate.notifierPos);
 				BlockState newState = state.getStateForNeighborUpdate(currentUpdate.direction, notifierState, world, currentUpdate.pos, currentUpdate.notifierPos);
@@ -123,7 +123,7 @@ public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {
 	
 	public void schedule(BlockPos pos, BlockPos notifierPos, Direction direction, int flags, int depth, ScheduledNeighborUpdate.UpdateType updateType) {
 		boolean isEmpty = !hasScheduledNeighborUpdates();
-		long time = Settings.Global.SHOW_PROCESSING_ORDER.get() > 0 ? tickTime : world.getTime();
+		long time = Tweaks.Global.SHOW_PROCESSING_ORDER.get() > 0 ? tickTime : world.getTime();
 		
 		scheduledNeighborUpdates.add(new ScheduledNeighborUpdate(pos, notifierPos, currentSourcePos, direction, flags | 2, depth, updateType, time));
 		

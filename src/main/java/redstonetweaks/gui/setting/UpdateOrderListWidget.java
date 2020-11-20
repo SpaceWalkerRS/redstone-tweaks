@@ -13,20 +13,24 @@ import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 import redstonetweaks.util.RelativePos;
 import redstonetweaks.world.common.BlockUpdate;
 
 public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.Entry> {
 	
+	private final SettingsCategory category;
 	private final UpdateOrderSetting setting;
 	
 	private boolean updateCountChanged;
 	
-	public UpdateOrderListWidget(RTMenuScreen screen, int x, int y, int width, int height, UpdateOrderSetting setting) {
+	public UpdateOrderListWidget(RTMenuScreen screen, int x, int y, int width, int height, SettingsCategory category, UpdateOrderSetting setting) {
 		super(screen, x, y, width, height, 22);
 		
+		this.category = category;
 		this.setting = setting;
+		
 		init();
 	}
 	
@@ -56,26 +60,23 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 		
 		private final BlockUpdate update;
 		private final List<RTElement> children;
+		private final RTButtonWidget modeButton;
 		private final ButtonPanel buttonPanel1;
 		private final ButtonPanel buttonPanel2;
-		private final boolean buttonsActive;
 		
 		public Entry(int index) {
-			this.buttonsActive = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
-			
 			this.update = setting.get().getBlockUpdates().get(index);
 			this.children = new ArrayList<>();
 			
-			this.buttonPanel1 = new ButtonPanel(5);
-			this.buttonPanel2 = new ButtonPanel(5);
-			
-			RTButtonWidget modeButton = new RTButtonWidget(0, 0, 140, 20, () -> new TranslatableText("Mode: " + update.getMode().getName()), (button) -> {
+			this.modeButton = new RTButtonWidget(0, 0, 140, 20, () -> new TranslatableText("Mode: " + update.getMode().getName()), (button) -> {
 				update.setMode(update.getMode().next());
 				updateCountChanged = true;
 				
 				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			});
-			this.buttonPanel1.addButton(modeButton);
+			this.children.add(modeButton);
+			
+			this.buttonPanel1 = new ButtonPanel(5);
 			this.buttonPanel1.addButton(new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText(update.getNotifierPos().getName()), (button) -> {
 				update.setNotifierPos(update.getNotifierPos().next(setting.get().getDirectionality()));
 				
@@ -88,11 +89,9 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 					((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 				}));
 			}
-			this.buttonPanel1.setX(getX() + 30);
-			this.buttonPanel1.setActive(buttonsActive);
-			modeButton.setActive(buttonsActive && !setting.get().modeLocked());
 			this.children.add(buttonPanel1);
 			
+			this.buttonPanel2 = new ButtonPanel(5);
 			this.buttonPanel2.addButton(new RTButtonWidget(0, 0, 20, 20, () -> new TranslatableText("+"), (button) -> {
 				if (Screen.hasShiftDown()) {
 					setting.get().insert(index, update.copy());
@@ -109,9 +108,13 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				
 				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			}));
-			this.buttonPanel2.setX(getX() + getWidth() - 60);
-			this.buttonPanel2.setActive(buttonsActive);
 			this.children.add(buttonPanel2);
+			
+			this.modeButton.setX(getX() + 30);
+			this.buttonPanel1.setX(this.modeButton.getX() + this.modeButton.getWidth() + 5);
+			this.buttonPanel2.setX(getX() + getWidth() - 60);
+			
+			updateButtonsActive();
 		}
 		
 		@Override
@@ -133,6 +136,8 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			client.textRenderer.drawWithShadow(matrices, new TranslatableText(index + "."), x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
+			modeButton.setY(y);
+			modeButton.render(matrices, mouseX, mouseY, tickDelta);
 			buttonPanel1.setY(y);
 			buttonPanel1.render(matrices, mouseX, mouseY, tickDelta);
 			buttonPanel2.setY(y);
@@ -142,6 +147,14 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 		@Override
 		protected boolean hasFocusedTextField() {
 			return false;
+		}
+		
+		private void updateButtonsActive() {
+			boolean canChangeSettings = ((RTIMinecraftClient)screen.client).getSettingsManager().canChangeSettings();
+			
+			modeButton.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked() && !setting.get().modeLocked());
+			buttonPanel1.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
+			buttonPanel2.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
 		}
 	}
 }

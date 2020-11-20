@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Settings;;
+import redstonetweaks.setting.Tweaks;;
 
 @Mixin(ScaffoldingBlock.class)
 public abstract class ScaffoldingBlockMixin {
@@ -26,7 +26,7 @@ public abstract class ScaffoldingBlockMixin {
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, Settings.Scaffolding.DELAY.get(), Settings.Scaffolding.TICK_PRIORITY.get());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, Tweaks.Scaffolding.DELAY.get(), Tweaks.Scaffolding.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
@@ -36,6 +36,6 @@ public abstract class ScaffoldingBlockMixin {
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule1(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, Settings.Scaffolding.DELAY.get(), Settings.Scaffolding.TICK_PRIORITY.get());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, Tweaks.Scaffolding.DELAY.get(), Tweaks.Scaffolding.TICK_PRIORITY.get());
 	}
 }

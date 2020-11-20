@@ -14,7 +14,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import redstonetweaks.interfaces.RTIRedstoneDiode;
 import redstonetweaks.interfaces.RTIServerTickScheduler;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(RepeaterBlock.class)
 public abstract class RepeaterBlockMixin implements RTIRedstoneDiode {
@@ -23,7 +23,7 @@ public abstract class RepeaterBlockMixin implements RTIRedstoneDiode {
 	
 	@ModifyConstant(method = "getUpdateDelayInternal", constant = @Constant(intValue = 2))
 	private int onGetUpdateDelayInternalModify2(int oldValue, BlockState state) {
-		return state.get(Properties.POWERED) ? Settings.Repeater.DELAY_FALLING_EDGE.get() : Settings.Repeater.DELAY_RISING_EDGE.get();
+		return state.get(Properties.POWERED) ? Tweaks.Repeater.DELAY_FALLING_EDGE.get() : Tweaks.Repeater.DELAY_RISING_EDGE.get();
 	}
 	
 	// To fix the chain bug without altering other behavior,

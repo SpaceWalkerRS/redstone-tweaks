@@ -22,7 +22,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
-import redstonetweaks.block.AnaloguePowerComponentBlockEntity;
+import redstonetweaks.block.PowerBlockEntity;
 import redstonetweaks.interfaces.RTIPressurePlate;
 
 @Mixin(AbstractPressurePlateBlock.class)
@@ -58,8 +58,8 @@ public abstract class AbstractPressurePlateBlockMixin extends Block {
 	private void onUpdatePlateStateInjectBeforeSetBlockState(World world, BlockPos pos, BlockState state, int rsOut, CallbackInfo ci, int newPower) {
 		if (hasBlockEntity()) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
-			if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
-				((AnaloguePowerComponentBlockEntity)blockEntity).setPower(newPower);
+			if (blockEntity instanceof PowerBlockEntity) {
+				((PowerBlockEntity)blockEntity).setPower(newPower);
 			}
 		}
 	}

@@ -6,10 +6,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -22,59 +18,27 @@ import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.TickPausePacket;
 
-public class HotKeyManager {
+public class HotkeysManager {
 	
 	private static final String CACHE_DIRECTORY = "redstonetweaks";
 	private static final String HOTKEYS_PATH = "hotkeys.txt";
 	
-	private static final List<RTKeyBinding> KEYS = new ArrayList<>();
-	private static final Map<String, RTKeyBinding> NAME_TO_BINDING = new HashMap<>();
-	private static final Map<Key, RTKeyBinding> KEY_TO_BINDING = new HashMap<>();
+	private final MinecraftClient client;
+	private final Hotkeys hotkeys;
 	
-	public static final RTKeyBinding TOGGLE_MENU;
-	public static final RTKeyBinding PAUSE_WORLD_TICKING;
-	public static final RTKeyBinding ADVANCE_WORLD_TICKING;
-	
-	public static RTKeyBinding register(RTKeyBinding keyBinding) {
-		KEYS.add(keyBinding);
-		NAME_TO_BINDING.put(keyBinding.getName(), keyBinding);
-		KEY_TO_BINDING.put(keyBinding.getKey(), keyBinding);
+	public HotkeysManager(MinecraftClient client) {
+		this.client = client;
+		this.hotkeys = new Hotkeys(this);
 		
-		return keyBinding;
+		this.loadHotkeys();
 	}
 	
-	public static RTKeyBinding getKeyBinding(Key key) {
-		return KEY_TO_BINDING.get(key);
+	public Hotkeys getHotkeys() {
+		return hotkeys;
 	}
 	
-	public static List<RTKeyBinding> getKeyBindings() {
-		return KEYS;
-	}
-	
-	public static void updateKeyBinding(RTKeyBinding keyBinding, Key newKey) {
-		KEY_TO_BINDING.remove(keyBinding.getKey());
-		
-		keyBinding.setKey(newKey);
-		
-		KEY_TO_BINDING.put(newKey, keyBinding);
-		
-		onKeyBindingChanged(keyBinding);
-	}
-	
-	public static void resetKeyBindings() {
-		KEY_TO_BINDING.clear();
-		
-		for (RTKeyBinding keyBinding : KEYS) {
-			keyBinding.setKey(keyBinding.getDefaultKey());
-			
-			KEY_TO_BINDING.put(keyBinding.getKey(), keyBinding);
-		}
-		
-		onKeyBindingChanged(null);
-	}
-	
-	public static boolean onKey(int keyCode, int scanCode, int event) {
-		RTKeyBinding keyBinding = getKeyBinding(InputUtil.fromKeyCode(keyCode, scanCode));
+	public boolean onKey(int keyCode, int scanCode, int event) {
+		RTKeyBinding keyBinding = hotkeys.getKeyBinding(InputUtil.fromKeyCode(keyCode, scanCode));
 		
 		if (keyBinding == null) {
 			return false;
@@ -95,16 +59,16 @@ public class HotKeyManager {
 		return false;
 	}
 	
-	private static boolean keyPress(RTKeyBinding keyBinding) {
+	private boolean keyPress(RTKeyBinding keyBinding) {
 		MinecraftClient client = MinecraftClient.getInstance();
-		if (keyBinding == TOGGLE_MENU) {
+		if (keyBinding == hotkeys.toggleMenu) {
 			if (client.currentScreen == null) {
 				client.openScreen(new RTMenuScreen(client));
 				
 				return true;
 			}
 		} else
-		if (keyBinding == PAUSE_WORLD_TICKING) {
+		if (keyBinding == hotkeys.pauseWorldTicking) {
 			if (client.currentScreen == null) {
 				TickPausePacket packet = new TickPausePacket(TickPausePacket.PAUSE);
 				((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
@@ -112,7 +76,7 @@ public class HotKeyManager {
 				return true;
 			}
 		} else
-		if (keyBinding == ADVANCE_WORLD_TICKING) {
+		if (keyBinding == hotkeys.advanceWorldTicking) {
 			if (client.currentScreen == null) {
 				TickPausePacket packet = new TickPausePacket(TickPausePacket.ADVANCE);
 				((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
@@ -124,16 +88,15 @@ public class HotKeyManager {
 		return false;
 	}
 	
-	private static boolean keyRepeat(RTKeyBinding keyBinding) {
+	private boolean keyRepeat(RTKeyBinding keyBinding) {
 		return false;
 	}
 	
-	private static boolean keyRelease(RTKeyBinding keyBinding) {
+	private boolean keyRelease(RTKeyBinding keyBinding) {
 		return false;
 	}
 	
-	private static void onKeyBindingChanged(RTKeyBinding keyBinding) {
-		MinecraftClient client = MinecraftClient.getInstance();
+	public void onKeyBindingChanged(RTKeyBinding keyBinding) {
 		Screen screen = client.currentScreen;
 		
 		if (screen instanceof RTMenuScreen) {
@@ -141,7 +104,7 @@ public class HotKeyManager {
 		}
 	}
 	
-	public static void loadHotkeys() {
+	public void loadHotkeys() {
 		File hotkeysFile = getHotkeysFile();
 		
 		if (hotkeysFile.isFile()) {
@@ -152,13 +115,11 @@ public class HotKeyManager {
 					try {
 						String[] args = line.split(": ", 2);
 						
-						RTKeyBinding keyBinding = NAME_TO_BINDING.get(args[0]);
+						RTKeyBinding keyBinding = hotkeys.getKeyBinding(args[0]);
 						Key key = InputUtil.fromTranslationKey(args[1]);
 						
 						if (keyBinding != null && key != null) {
-							KEY_TO_BINDING.remove(keyBinding.getKey());
-							keyBinding.setKey(key);
-							KEY_TO_BINDING.put(key, keyBinding);
+							hotkeys.setKeyBinding(keyBinding, key);
 						}
 					} catch (Exception e) {
 						
@@ -170,7 +131,7 @@ public class HotKeyManager {
 		}
 	}
 	
-	public static void saveHotkeys() {
+	public void saveHotkeys() {
 		File hotkeysFile = getHotkeysFile();
 		
 		try {
@@ -182,7 +143,7 @@ public class HotKeyManager {
 		}
 		
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(hotkeysFile))) {
-			for (RTKeyBinding keyBinding : KEYS) {
+			for (RTKeyBinding keyBinding : hotkeys.getKeyBindings()) {
 				bw.write(keyBinding.getName());
 				bw.write(": ");
 				bw.write(keyBinding.getKey().getTranslationKey());
@@ -193,7 +154,7 @@ public class HotKeyManager {
 		}
 	}
 	
-	private static File getCacheDir() {
+	private File getCacheDir() {
 		MinecraftClient client = MinecraftClient.getInstance();
 		File directory = new File(client.runDirectory, CACHE_DIRECTORY);
 
@@ -204,13 +165,7 @@ public class HotKeyManager {
 		return directory;
 	}
 	
-	private static File getHotkeysFile() {
+	private File getHotkeysFile() {
 		return new File(getCacheDir(), HOTKEYS_PATH);
-	}
-	
-	static {
-		TOGGLE_MENU = register(new RTKeyBinding("Open Menu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_R).alwaysBound());
-		PAUSE_WORLD_TICKING = register(new RTKeyBinding("Pause World Ticking", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_P));
-		ADVANCE_WORLD_TICKING = register(new RTKeyBinding("Advance World Ticking", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_O));
 	}
 }

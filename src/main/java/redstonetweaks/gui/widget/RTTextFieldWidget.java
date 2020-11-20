@@ -11,6 +11,7 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 	
 	private final UpdateText updateText;
 	
+	private boolean isEditable = true;
 	private boolean allowHover = true;
 	private boolean deaf = false;
 	
@@ -42,7 +43,7 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 			updateText();
 		}
 		
-		super.setSelected(selected);
+		super.setSelected(selected && isEditable);
 	}
 	
 	@Override
@@ -101,12 +102,21 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 	
 	@Override
 	public void setActive(boolean active) {
-		setEditable(active);
+		setIsEditable(active);
+		
+		if (!active) {
+			unFocus();
+		}
 	}
 	
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
+	}
+	
+	public void setIsEditable(boolean isEditable) {
+		this.isEditable = isEditable;
+		super.setEditable(isEditable);
 	}
 	
 	public void unFocus() {

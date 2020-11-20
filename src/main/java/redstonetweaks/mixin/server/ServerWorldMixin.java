@@ -52,7 +52,7 @@ import net.minecraft.world.timer.Timer;
 import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.interfaces.RTIServerWorld;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.WorldTickHandler;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;
 import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
@@ -109,14 +109,14 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/timer/Timer;processEvents(Ljava/lang/Object;J)V"))
 	private <T> void onTickTimeRedirectProcessEvents(Timer<T> timer, T server, long time) {
-		if (!Settings.BugFixes.MC172213.get()) {
+		if (!Tweaks.BugFixes.MC172213.get()) {
 			timer.processEvents(server, time);
 		}
 	}
 	
 	@Inject(method = "addSyncedBlockEvent", cancellable = true, at = @At(value = "HEAD"))
 	private void onAddSyncedBlockEventInjectAtHead(BlockPos pos, Block block, int type, int data, CallbackInfo ci) {
-		if (Settings.Global.INSTANT_BLOCK_EVENTS.get()) {
+		if (Tweaks.Global.INSTANT_BLOCK_EVENTS.get()) {
 			if (processBlockEvent(new BlockEvent(pos, block, type, data))) {
 				server.getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, getRegistryKey(), new BlockEventS2CPacket(pos, block, type, data));
 			}
@@ -127,7 +127,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	
 	@Redirect(method = "addSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;add(Ljava/lang/Object;)Z"))
 	private <T> boolean onAddSyncedBlockEventRedirectAdd(ObjectLinkedOpenHashSet<T> set, T event) {
-		if (set.add(event) && isProcessingBlockEvents && Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
+		if (set.add(event) && isProcessingBlockEvents && Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.add((BlockEvent)event);
 		}
 		return true;
@@ -137,7 +137,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	private void onProcessSyncedBlockEventsInjectAtHead(CallbackInfo ci) {
 		isProcessingBlockEvents = true;
 		
-		if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
+		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.ensureCapacity(syncedBlockEventQueue.size());
 			for (BlockEvent event : syncedBlockEventQueue) {
 				blockEventList.add(event);
@@ -152,7 +152,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	
 	@Redirect(method = "processSyncedBlockEvents", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;removeFirst()Ljava/lang/Object;"))
 	private Object onProcessSyncedBlockEventsRedirectRemoveFirst(ObjectLinkedOpenHashSet<BlockEvent> set) {
-		if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
+		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			int index = random.nextInt(set.size());
 			int lastIndex = blockEventList.size() - 1;
 			Collections.swap(blockEventList, index, lastIndex);
@@ -168,7 +168,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	private void onProcessSyncedBlockEventsInjectAtReturn(CallbackInfo ci) {
 		isProcessingBlockEvents = false;
 		
-		if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
+		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.clear();
 		}
 	}
@@ -217,13 +217,13 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Override
 	public boolean tickWorldsNormally() {
 		ServerWorldTickHandler worldTickHandler = ((RTIMinecraftServer)getServer()).getWorldTickHandler();
-		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Settings.Global.SHOW_PROCESSING_ORDER.get() > 0);
+		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Tweaks.Global.SHOW_PROCESSING_ORDER.get() > 0);
 	}
 	
 	@Override
 	public boolean updateNeighborsNormally() {
 		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
-		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || Settings.Global.SHOW_NEIGHBOR_UPDATES.get());
+		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || Tweaks.Global.SHOW_NEIGHBOR_UPDATES.get());
 	}
 	
 	@Override
@@ -329,7 +329,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	}
 	
 	private void handleTickTime() {
-		if (Settings.BugFixes.MC172213.get()) {
+		if (Tweaks.BugFixes.MC172213.get()) {
 			if (shouldTickTime) {
 				worldProperties.getScheduledEvents().processEvents(server, worldProperties.getTime());
 			}
@@ -351,7 +351,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Override
 	public void startProcessingBlockEvents() {
 		isProcessingBlockEvents = true;
-		if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
+		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.ensureCapacity(syncedBlockEventQueue.size());
 			for (BlockEvent event : syncedBlockEventQueue) {
 				blockEventList.add(event);
@@ -364,14 +364,14 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 		if (isProcessingBlockEvents) {
 			if (syncedBlockEventQueue.isEmpty()) {
 				isProcessingBlockEvents = false;
-				if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
+				if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 					blockEventList.clear();
 				}
 				
 				return false;
 			} else {
 				BlockEvent blockEvent;
-				if (Settings.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
+				if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 					int index = random.nextInt(syncedBlockEventQueue.size());
 					int lastIndex = blockEventList.size() - 1;
 					Collections.swap(blockEventList, index, lastIndex);

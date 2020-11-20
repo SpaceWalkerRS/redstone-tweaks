@@ -19,7 +19,7 @@ import redstonetweaks.packet.TickStatusPacket;
 import redstonetweaks.packet.WorldSyncPacket;
 import redstonetweaks.packet.DoWorldTicksPacket;
 import redstonetweaks.packet.WorldTimeSyncPacket;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.WorldTickHandler;
 
 public class ServerWorldTickHandler extends WorldTickHandler {
@@ -55,7 +55,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	
 	public void tick(BooleanSupplier shouldKeepTicking) {
 		if (doWorldTicks()) {
-			int interval = Settings.Global.SHOW_PROCESSING_ORDER.get();
+			int interval = Tweaks.Global.SHOW_PROCESSING_ORDER.get();
 			
 			if (interval > 0 || tickInProgress()) {
 				if (interval == 0 || server.getTicks() % interval == 0) {
@@ -86,7 +86,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			
 			inWorldTick = false;
 		}
-		if (Settings.BugFixes.MC172213.get()) {
+		if (Tweaks.BugFixes.MC172213.get()) {
 			for (ServerWorld world : server.getWorlds()) {
 				((RTIServerWorld)world).tickTimeAccess();
 			}
@@ -142,7 +142,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	}
 	
 	private void endTick() {
-		if (Settings.BugFixes.MC172213.get()) {
+		if (Tweaks.BugFixes.MC172213.get()) {
 			for (ServerWorld world : server.getWorlds()) {
 				((RTIServerWorld)world).tickTimeAccess();
 			}

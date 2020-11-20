@@ -3,12 +3,14 @@ package redstonetweaks.gui.setting;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
+
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 import redstonetweaks.util.RelativePos;
@@ -19,19 +21,19 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 	private static final int WIDTH = 360;
 	private static final int HEIGHT = 230;
 	
+	private final SettingsCategory category;
 	private final UpdateOrderSetting setting;
-	private final boolean buttonsActive;
 	
 	private UpdateOrderListWidget list;
 	private RTButtonWidget notifierOrderButton;
 	private ButtonPanel offsetButtons;
 	private RTButtonWidget addUpdateButton;
 	
-	public UpdateOrderWindow(RTMenuScreen screen, UpdateOrderSetting setting) {
+	public UpdateOrderWindow(RTMenuScreen screen, SettingsCategory category, UpdateOrderSetting setting) {
 		super(screen, new TranslatableText("Update Order"), (screen.getWidth() - WIDTH) / 2, (screen.getHeight() - HEIGHT) / 2, WIDTH, HEIGHT);
 		
+		this.category = category;
 		this.setting = setting;
-		this.buttonsActive = ((RTIMinecraftClient)screen.client).getSettingsManager().canChangeSettings();
 	}
 	
 	@Override
@@ -44,7 +46,6 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 			
 			((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 		});
-		notifierOrderButton.setActive(buttonsActive);
 		addChild(notifierOrderButton);
 		
 		boolean locationalOrder = setting.get().getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL;
@@ -90,7 +91,6 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 		}));
 		offsetButtons.setX(getX() + getWidth() / 2 + 13);
 		offsetButtons.setY(notifierOrderButton.getY());
-		offsetButtons.setActive(buttonsActive);
 		offsetButtons.setVisible(locationalOrder);
 		addChild(offsetButtons);
 		
@@ -105,7 +105,9 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 		addUpdateButton.visible = false;
 		addChild(addUpdateButton);
 		
-		list = new UpdateOrderListWidget(screen, getX() + 2, getY() + getHeaderHeight(), getWidth() - 4, getHeight() - getHeaderHeight() - 18, setting);
+		updateButtonsActive();
+		
+		list = new UpdateOrderListWidget(screen, getX() + 2, getY() + getHeaderHeight(), getWidth() - 4, getHeight() - getHeaderHeight() - 18, category, setting);
 		addChild(list);
 	}
 	
@@ -134,15 +136,6 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 		
 		drawBackgroundTextureBelow(matrices, list.getY() + list.getHeight() + 5, mouseX, mouseY, delta);
 	}
-	
-	@Override
-	public void onSettingChanged(ISetting setting) {
-		if (this.setting == setting) {
-			notifierOrderButton.updateMessage();
-			offsetButtons.updateButtonLabels();
-			list.init();
-		}
-	}
 
 	@Override
 	public void unfocusTextFields(Element except) {
@@ -152,5 +145,24 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 	@Override
 	protected boolean hasFocusedTextField() {
 		return offsetButtons.focusedIsTextField();
+	}
+	
+	@Override
+	public void onSettingChanged(ISetting setting) {
+		if (this.setting == setting) {
+			notifierOrderButton.updateMessage();
+			offsetButtons.updateButtonLabels();
+			updateButtonsActive();
+			
+			list.init();
+		}
+	}
+	
+	private void updateButtonsActive() {
+		boolean canChangeSettings = ((RTIMinecraftClient)screen.client).getSettingsManager().canChangeSettings();
+		
+		notifierOrderButton.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
+		offsetButtons.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
+		addUpdateButton.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
 	}
 }

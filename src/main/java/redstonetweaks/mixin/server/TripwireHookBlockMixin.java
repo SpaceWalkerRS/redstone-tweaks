@@ -14,29 +14,29 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(TripwireHookBlock.class)
 public class TripwireHookBlockMixin {
 	
 	@Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
-		tickScheduler.schedule(pos, object, Settings.TripwireHook.DELAY.get(), Settings.TripwireHook.TICK_PRIORITY.get());
+		tickScheduler.schedule(pos, object, Tweaks.TripwireHook.DELAY.get(), Tweaks.TripwireHook.TICK_PRIORITY.get());
 	}
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {
-		return Settings.TripwireHook.POWER_WEAK.get();
+		return Tweaks.TripwireHook.POWER_WEAK.get();
 	}
 	
 	@ModifyConstant(method = "getStrongRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetStrongRedstonePower(int oldValue) {
-		return Settings.TripwireHook.POWER_STRONG.get();
+		return Tweaks.TripwireHook.POWER_STRONG.get();
 	}
 	
 	@Inject(method = "updateNeighborsOnAxis", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsOnAxisInjectAtHead(World world, BlockPos pos, Direction dir, CallbackInfo ci) {
-		Settings.TripwireHook.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, world.getBlockState(pos).getBlock(), dir.getOpposite());
+		Tweaks.TripwireHook.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, world.getBlockState(pos).getBlock(), dir.getOpposite());
 		
 		ci.cancel();
 	}

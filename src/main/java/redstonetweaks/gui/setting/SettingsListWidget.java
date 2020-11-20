@@ -2,7 +2,9 @@ package redstonetweaks.gui.setting;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -17,15 +19,16 @@ import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
+import redstonetweaks.gui.widget.RTLockButtonWidget;
 import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.gui.widget.RTTexturedButtonWidget;
 import redstonetweaks.interfaces.RTIMinecraftClient;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
+import redstonetweaks.setting.types.ArraySetting;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.BugFixSetting;
-import redstonetweaks.setting.types.DirectionalSetting;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.IntegerSetting;
 import redstonetweaks.setting.types.TickPrioritySetting;
@@ -34,12 +37,16 @@ import redstonetweaks.util.TextFormatting;
 
 public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> implements ISettingGUIElement {
 	
-	private static double savedScrollAmount;
+	private static final Map<SettingsCategory, Double> SAVED_SCROLL_AMOUNTS = new HashMap<>();
 	
-	public SettingsListWidget(RTMenuScreen screen, int x, int y, int width, int height) {
+	private final SettingsCategory category;
+	
+	public SettingsListWidget(RTMenuScreen screen, SettingsCategory category, int x, int y, int width, int height) {
 		super(screen, x, y, width, height, 22);
 		
-		for (SettingsPack pack : Settings.SETTINGS_PACKS) {
+		this.category = category;
+		
+		for (SettingsPack pack : category.getSettingsPacks()) {
 			addEntry(new SettingsPackEntry(pack));
 			
 			for (ISetting setting : pack.getSettings()) {
@@ -55,7 +62,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 			entry.init(getEntryTitleWidth());
 		}
 		
-		setScrollAmount(savedScrollAmount);
+		setScrollAmount(SAVED_SCROLL_AMOUNTS.getOrDefault(category, 0.0D));
 	}
 	
 	@Override
@@ -67,7 +74,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 	protected void filterEntries(String query) {
 		clearEntries();
 		
-		for (SettingsPack pack : Settings.SETTINGS_PACKS) {
+		for (SettingsPack pack : category.getSettingsPacks()) {
 			if (pack.getName().toLowerCase().contains(query)) {
 				addEntry(new SettingsPackEntry(pack));
 				
@@ -117,7 +124,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 	}
 	
 	public void saveScrollAmount() {
-		savedScrollAmount = getScrollAmount();
+		SAVED_SCROLL_AMOUNTS.put(category, getScrollAmount());
 	}
 	
 	public class SettingsPackEntry extends Entry {
@@ -193,16 +200,22 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		private final List<Text> tooltip;
 		private final List<RTElement> children;
 		private final ButtonPanel buttonPanel;
+		private final RTLockButtonWidget lockButton;
 		private final RTButtonWidget resetButton;
-		private final boolean buttonsActive;
 		
 		public SettingEntry(ISetting setting) {
-			this.buttonsActive = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
-			
 			this.setting = setting;
 			this.title = new TranslatableText(setting.getName());
 			this.tooltip = createTooltip();
 			this.children = new ArrayList<>();
+			
+			this.lockButton = new RTLockButtonWidget(0, 0, setting.isLocked(), (button) -> {
+				button.toggleLocked();
+				
+				setting.setLocked(button.isLocked());
+				((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(setting);
+			});
+			this.children.add(lockButton);
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
 				setting.reset();
@@ -223,6 +236,9 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 			buttonPanel.setY(y);
 			buttonPanel.render(matrices, mouseX, mouseY, tickDelta);
 			
+			lockButton.setY(y);
+			lockButton.render(matrices, mouseX, mouseY, tickDelta);
+			
 			resetButton.setY(y);
 			resetButton.render(matrices, mouseX, mouseY, tickDelta);
 			
@@ -239,10 +255,10 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		@Override
 		public void init(int entryTitleWidth) {
 			buttonPanel.setX(getX() + entryTitleWidth);
-			resetButton.setX(buttonPanel.getX() + buttonPanel.getWidth() + 5);
+			lockButton.setX(buttonPanel.getX() + buttonPanel.getWidth() + 5);
+			resetButton.setX(lockButton.getX() + lockButton.getWidth() + 2);
 			
-			buttonPanel.setActive(buttonsActive);
-			resetButton.setActive(buttonsActive && !setting.isDefault());
+			updateButtonsActive();
 		}
 		
 		@Override
@@ -269,12 +285,18 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		}
 		
 		private void populateButtonPanel() {
+			if (setting instanceof ArraySetting<?, ?>) {
+				ArraySetting<?, ?> aSetting = (ArraySetting<?, ?>)setting;
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
+					screen.openWindow(new ArraySettingWindow(screen, category, aSetting));
+				})).alwaysActive());
+			} else
 			if (setting instanceof BooleanSetting) {
 				if (setting instanceof BugFixSetting) {
 					BugFixSetting bSetting = (BugFixSetting)setting;
 					buttonPanel.addButton(new RTButtonWidget(0, 0, 78, 20, () -> {
 						Formatting formatting = bSetting.get() ? Formatting.GREEN : Formatting.RED;
-						return new TranslatableText(bSetting.getAsText()).formatted(formatting);
+						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
 					}, (button) -> {
 						bSetting.set(!bSetting.get());
 						((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(bSetting);
@@ -295,32 +317,25 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 					BooleanSetting bSetting = (BooleanSetting)setting;
 					buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> {
 						Formatting formatting = bSetting.get() ? Formatting.GREEN : Formatting.RED;
-						return new TranslatableText(bSetting.getAsText()).formatted(formatting);
+						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
 					}, (button) -> {
 						bSetting.set(!bSetting.get());
 						((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(bSetting);
 					}));
 				}
-				
-			} else
-			if (setting instanceof DirectionalSetting<?>) {
-				DirectionalSetting<?> dSetting = (DirectionalSetting<?>)setting;
-				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					screen.openWindow(new DirectionalSettingWindow(screen, dSetting));
-				})).alwaysActive());
 			} else
 			if (setting instanceof IntegerSetting) {
 				IntegerSetting iSetting = (IntegerSetting)setting;
 				buttonPanel.addButton(new RTTextFieldWidget(client.textRenderer, 0, 0, 100, 20, (textField) -> {
-					textField.setText(iSetting.getAsText());
+					textField.setText(iSetting.getValueAsString());
 				}, (text) -> {
-					iSetting.setFromText(text);
+					iSetting.setValueFromString(text);
 					((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(iSetting);
 				}));
 			} else
 			if (setting instanceof TickPrioritySetting) {
 				TickPrioritySetting tSetting = (TickPrioritySetting)setting;
-				buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, 0.0D, () -> new TranslatableText(tSetting.getAsText()), (slider) -> {
+				buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, 0.0D, () -> new TranslatableText(tSetting.getValueAsString()), (slider) -> {
 					TickPriority[] priorities = TickPriority.values();
 					
 					int min = priorities[0].getIndex();
@@ -337,9 +352,18 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 			if (setting instanceof UpdateOrderSetting) {
 				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					screen.openWindow(new UpdateOrderWindow(screen, uSetting));
+					screen.openWindow(new UpdateOrderWindow(screen, category, uSetting));
 				})).alwaysActive());
 			}
+		}
+		
+		private void updateButtonsActive() {
+			boolean canChangeSettings = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
+			boolean canLockSettings = ((RTIMinecraftClient)client).getSettingsManager().canLockSettings();
+			
+			buttonPanel.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
+			lockButton.setActive(canLockSettings && !category.isLocked());
+			resetButton.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked() && !setting.isDefault());
 		}
 		
 		private boolean titleHovered(int mouseX, int mouseY) {
@@ -351,7 +375,8 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		
 		public void onSettingChanged() {
 			buttonPanel.updateButtonLabels();
-			resetButton.setActive(buttonsActive && !setting.isDefault());
+			
+			updateButtonsActive();
 		}
 	}
 	

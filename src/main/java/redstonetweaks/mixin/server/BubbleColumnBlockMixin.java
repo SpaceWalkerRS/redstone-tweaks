@@ -16,7 +16,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(BubbleColumnBlock.class)
 public abstract class BubbleColumnBlockMixin {
@@ -25,11 +25,11 @@ public abstract class BubbleColumnBlockMixin {
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule0(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, Settings.BubbleColumn.DELAY.get(), Settings.BubbleColumn.TICK_PRIORITY.get());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, Tweaks.BubbleColumn.DELAY.get(), Tweaks.BubbleColumn.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule1(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, Settings.Water.TICK_PRIORITY.get());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, Tweaks.Water.TICK_PRIORITY.get());
 	}
 }

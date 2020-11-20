@@ -6,20 +6,24 @@ import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTWindow;
-import redstonetweaks.setting.types.DirectionalSetting;
+import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.setting.types.ArraySetting;
 import redstonetweaks.setting.types.ISetting;
 
-public class DirectionalSettingWindow extends RTWindow implements ISettingGUIElement {
+public class ArraySettingWindow extends RTWindow implements ISettingGUIElement {
 	
 	private static final int WIDTH = 230;
 	private static final int HEIGHT = 185;
 	
-	private final DirectionalSetting<?> setting;
-	private DirectionalSettingListWidget list;
+	private final SettingsCategory category;
+	private final ArraySetting<?, ?> setting;
 	
-	public DirectionalSettingWindow(RTMenuScreen screen, DirectionalSetting<?> setting) {
+	private ArraySettingListWidget list;
+	
+	public ArraySettingWindow(RTMenuScreen screen, SettingsCategory category, ArraySetting<?, ?> setting) {
 		super(screen, new TranslatableText(setting.getName()), (screen.getWidth() - WIDTH) / 2, (screen.getHeight() - HEIGHT) / 2, WIDTH, HEIGHT);
 		
+		this.category = category;
 		this.setting = setting;
 	}
 	
@@ -30,7 +34,7 @@ public class DirectionalSettingWindow extends RTWindow implements ISettingGUIEle
 	
 	@Override
 	protected void initContents() {
-		list = new DirectionalSettingListWidget(screen, getX(), getY() + getHeaderHeight(), getWidth(), getHeight() - getHeaderHeight(), setting);
+		list = new ArraySettingListWidget(screen, getX(), getY() + getHeaderHeight(), getWidth(), getHeight() - getHeaderHeight(), category, setting);
 		addChild(list);
 	}
 	

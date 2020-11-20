@@ -2,7 +2,6 @@ package redstonetweaks.helper;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -11,7 +10,9 @@ import net.minecraft.block.PistonBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
+import net.minecraft.block.enums.PistonType;
 import net.minecraft.block.enums.SlabType;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
@@ -19,10 +20,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+
 import redstonetweaks.interfaces.RTIPistonBlockEntity;
-import redstonetweaks.setting.Settings;
-import redstonetweaks.setting.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 public class PistonHelper {
 	
@@ -35,18 +36,14 @@ public class PistonHelper {
 		Blocks.END_PORTAL
 	);
 	
-	// When the doubleRetraction setting is enabled this method is called from getMovedBlocks
-	// in PistonHandler.class to get all the moved block states. If the block state is
-	// a retracted piston a block change packet is sent to the client.
-	public static BlockState getDoubleRetractionState(World world, BlockPos pos) {
-		BlockState state = world.getBlockState(pos);
-		
-		if (state.getBlock() instanceof PistonBlock && !state.get(Properties.EXTENDED)) {
-			BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
-			((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
+	// Notify clients of any pistons that are about to be "double retracted"
+	public static void prepareDoubleRetraction(World world, BlockPos pos, BlockState state) {
+		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
+			if (state.getBlock() instanceof PistonBlock && !state.get(Properties.EXTENDED)) {
+				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
+				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
+			}
 		}
-		
-		return state;
 	}
 	
 	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
@@ -57,11 +54,11 @@ public class PistonHelper {
 		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, pistonDir, extending, isSource, isMovedByStickyPiston, false);
 	}
 	
-	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs) {
-		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlockState, pistonDir, extending, isSource);
+	public static PistonBlockEntity createPistonBlockEntity(BlockState movedState, BlockEntity movedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs) {
+		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(movedState, pistonDir, extending, isSource);
 		
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
-		((RTIPistonBlockEntity)pistonBlockEntity).setMovedBlockEntity(pushedBlockEntity);
+		((RTIPistonBlockEntity)pistonBlockEntity).setMovedBlockEntity(movedBlockEntity);
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMergingSlabs(isMergingSlabs);
 		
 		return pistonBlockEntity;
@@ -77,7 +74,7 @@ public class PistonHelper {
 	
 	public static boolean isExtended(World world, BlockPos pos, BlockState state, Direction facing) {
 		boolean isExtended = state.get(Properties.EXTENDED) && !isExtending(world, pos, state, facing);
-		if (!isExtended && Settings.Global.DOUBLE_RETRACTION.get()) {
+		if (!isExtended && Tweaks.Global.DOUBLE_RETRACTION.get()) {
 			BlockState frontState = world.getBlockState(pos.offset(facing));
 			isExtended = frontState.isOf(Blocks.PISTON_HEAD) && frontState.get(Properties.FACING) == facing;
 		}
@@ -93,8 +90,10 @@ public class PistonHelper {
 	public static boolean isExtending(World world, BlockPos pos, BlockState state, Direction facing) {
 		BlockPos frontPos = pos.offset(facing);
 		BlockState frontState = world.getBlockState(frontPos);
+		
 		if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
 			BlockEntity blockEntity = world.getBlockEntity(frontPos);
+			
 			if (blockEntity instanceof PistonBlockEntity) {
 				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 				
@@ -124,134 +123,34 @@ public class PistonHelper {
 		return block.hasBlockEntity() && !IMMOVABLE_BLOCK_ENTITIES.contains(block);
 	}
 	
-	public static boolean doBlockDropping() {
-		return Settings.StickyPiston.DO_BLOCK_DROPPING.get();
+	public static float getSoundPitch(World world, boolean extending, boolean sticky) {
+		float basePitch = 0.6F + world.getRandom().nextFloat() * (extending ? 0.25F : 0.15F);
+		
+		return adjustSoundPitch(basePitch, extending, sticky);
 	}
 	
-	public static boolean fastBlockDropping() {
-		return doBlockDropping() && Settings.StickyPiston.FAST_BLOCK_DROPPING.get();
+	public static float adjustSoundPitch(float pitch, boolean extending, boolean sticky) {
+		int speed = extending ? speedRisingEdge(sticky) : speedFallingEdge(sticky);
+		
+		return speed == 0 ? Float.POSITIVE_INFINITY : pitch * (2.0F / speed);
 	}
 	
-	public static DirectionalBooleanSetting getQC(BlockState state) {
-		return isSticky(state) ? Settings.StickyPiston.QC : Settings.NormalPiston.QC;
-	}
-	
-	public static boolean randQC(BlockState state) {
-		return isSticky(state) ? Settings.StickyPiston.RANDOMIZE_QC.get() : Settings.NormalPiston.RANDOMIZE_QC.get();
-	}
-	
-	public static boolean connectsToWire(boolean sticky) {
-		return sticky ? Settings.StickyPiston.CONNECTS_TO_WIRE.get() : Settings.NormalPiston.CONNECTS_TO_WIRE.get();
-	}
-	
-	public static int delayRisingEdge(boolean sticky) {
-		return sticky ? Settings.StickyPiston.DELAY_RISING_EDGE.get() : Settings.NormalPiston.DELAY_RISING_EDGE.get();
-	}
-	
-	public static int delayFallingEdge(boolean sticky) {
-		return sticky ? Settings.StickyPiston.DELAY_FALLING_EDGE.get() : Settings.NormalPiston.DELAY_FALLING_EDGE.get();
-	}
-	
-	public static boolean ignoreUpdatesWhileExtending(boolean sticky) {
-		return sticky ? Settings.StickyPiston.IGNORE_UPDATES_WHILE_EXTENDING.get() : Settings.NormalPiston.IGNORE_UPDATES_WHILE_EXTENDING.get();
-	}
-	
-	public static boolean ignoreUpdatesWhileRetracting(boolean sticky) {
-		return sticky ? Settings.StickyPiston.IGNORE_UPDATES_WHILE_RETRACTING.get() : Settings.NormalPiston.IGNORE_UPDATES_WHILE_RETRACTING.get();
-	}
-	
-	public static boolean lazyRisingEdge(boolean sticky) {
-		return sticky ? Settings.StickyPiston.LAZY_RISING_EDGE.get() : Settings.NormalPiston.LAZY_RISING_EDGE.get();
-	}
-	
-	public static boolean lazyFallingEdge(boolean sticky) {
-		return sticky ? Settings.StickyPiston.LAZY_FALLING_EDGE.get() : Settings.NormalPiston.LAZY_FALLING_EDGE.get();
-	}
-	
-	public static boolean movableWhenExtended(boolean sticky) {
-		return sticky ? Settings.StickyPiston.MOVABLE_WHEN_EXTENDED.get() : Settings.NormalPiston.MOVABLE_WHEN_EXTENDED.get();
-	}
-	
-	public static boolean movableWhenMoving(boolean sticky) {
-		return sticky ? Settings.StickyPiston.MOVABLE_WHEN_MOVING.get() : Settings.NormalPiston.MOVABLE_WHEN_MOVING.get();
-	}
-	
-	public static int speedRisingEdge(boolean sticky) {
-		return sticky ? Settings.StickyPiston.SPEED_RISING_EDGE.get() : Settings.NormalPiston.SPEED_RISING_EDGE.get();
-	}
-	
-	public static int speedFallingEdge(boolean sticky) {
-		return sticky ? Settings.StickyPiston.SPEED_FALLING_EDGE.get() : Settings.NormalPiston.SPEED_FALLING_EDGE.get();
-	}
-	
-	public static boolean suppressHeadUpdatesOnExtension(boolean sticky) {
-		return sticky ? Settings.StickyPiston.SUPPRESS_HEAD_UPDATES_ON_EXTENSION.get() : Settings.NormalPiston.SUPPRESS_HEAD_UPDATES_ON_EXTENSION.get();
-	}
-	
-	public static TickPriority tickPriorityRisingEdge(boolean sticky) {
-		return sticky ? Settings.StickyPiston.TICK_PRIORITY_RISING_EDGE.get() : Settings.NormalPiston.TICK_PRIORITY_RISING_EDGE.get();
-	}
-	
-	public static TickPriority tickPriorityFallingEdge(boolean sticky) {
-		return sticky ? Settings.StickyPiston.TICK_PRIORITY_FALLING_EDGE.get() : Settings.NormalPiston.TICK_PRIORITY_FALLING_EDGE.get();
-	}
-	
-	public static boolean updateSelfWhilePowered(boolean sticky) {
-		return sticky ? Settings.StickyPiston.UPDATE_SELF_WHILE_POWERED.get() : Settings.NormalPiston.UPDATE_SELF_WHILE_POWERED.get();
-	}
-	
-	public static void tryMergeMovedSlab(World world, BlockState movedState, BlockPos frontPos, int listIndex, Map<BlockPos, SlabType> splitSlabTypes, List<BlockPos> movedPositions, List<BlockState> movedStates, Map<BlockPos, BlockState> remainingStates) {
-		if (SlabHelper.isSlab(movedState)) {
-			SlabType type = movedState.get(SlabBlock.TYPE);
-			
-			// Check if we should split the slab
-			if (type == SlabType.DOUBLE) {
-				// Test if we should pull the slab apart
-				type = splitSlabTypes.get(movedPositions.get(listIndex));
-				
-				if (type != null) {
-					movedState = movedState.with(SlabBlock.TYPE, type);
-					movedStates.set(listIndex, movedState);
-				}
-			}
-			
-			// Merge the slab with other slabs.
-			if (type != SlabType.DOUBLE) {
-				BlockState frontState = world.getBlockState(frontPos);
-				
-				if (frontState.isOf(movedState.getBlock())) {
-					SlabType frontType = frontState.get(SlabBlock.TYPE);
-					
-					if (frontType == SlabType.DOUBLE) {
-						if (splitSlabTypes.get(frontPos) == type) {
-							// Merge with the double slab (the double slab has split).
-							movedStates.set(listIndex, movedState.with(SlabBlock.TYPE, SlabType.DOUBLE));
-						}
-					} else {
-						// Test if we can merge the two slabs (make sure it is not part of moving blocks).
-						if (frontType == SlabHelper.getOppositeType(type) && !remainingStates.containsKey(frontPos))
-							movedStates.set(listIndex, movedState.with(SlabBlock.TYPE, SlabType.DOUBLE));
-					}
-				}
-			}
+	public static PistonBehavior getPistonBehavior(BlockState state) {
+		if (redstonetweaks.setting.Tweaks.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER)) {
+			return PistonBehavior.NORMAL;
 		}
-	}
-	
-	public static BlockState getAdjustedSlabState(BlockState fallbackState, WorldAccess world, BlockPos pos, Map<BlockPos, SlabType> splitSlabTypes) {
-		BlockState oldBlockState = world.getBlockState(pos);
-		if (SlabHelper.isSlab(oldBlockState) && oldBlockState.get(SlabBlock.TYPE) == SlabType.DOUBLE) {
-			// Check if we have split the slab, and one of the two
-			// halves should stay behind.
-			SlabType splitType = splitSlabTypes.get(pos);
-			if (splitType != null && splitType != SlabType.DOUBLE)
-				return oldBlockState.with(SlabBlock.TYPE, SlabHelper.getOppositeType(splitType));
+		if (PistonHelper.movableWhenExtended(false) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.DEFAULT) {
+			return PistonBehavior.NORMAL;
 		}
-
-		return fallbackState;
+		if (PistonHelper.movableWhenExtended(true) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY) {
+			return PistonBehavior.NORMAL;
+		}
+		
+		return state.getPistonBehavior();
 	}
 	
 	public static boolean canSlabStickTo(BlockState state, Direction dir) {
-		if (Settings.Global.MERGE_SLABS.get() && dir.getAxis().isVertical()) {
+		if (Tweaks.Global.MERGE_SLABS.get() && dir.getAxis().isVertical()) {
 			SlabType type = state.get(SlabBlock.TYPE);
 			
 			if (type == SlabHelper.getTypeFromDirection(dir.getOpposite())) {
@@ -260,5 +159,77 @@ public class PistonHelper {
 		}
 		
 		return true;
+	}
+	
+	public static boolean doBlockDropping() {
+		return Tweaks.StickyPiston.DO_BLOCK_DROPPING.get();
+	}
+	
+	public static boolean fastBlockDropping() {
+		return doBlockDropping() && Tweaks.StickyPiston.FAST_BLOCK_DROPPING.get();
+	}
+	
+	public static DirectionToBooleanSetting getQC(BlockState state) {
+		return isSticky(state) ? Tweaks.StickyPiston.QC : Tweaks.NormalPiston.QC;
+	}
+	
+	public static boolean randQC(BlockState state) {
+		return isSticky(state) ? Tweaks.StickyPiston.RANDOMIZE_QC.get() : Tweaks.NormalPiston.RANDOMIZE_QC.get();
+	}
+	
+	public static boolean connectsToWire(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.CONNECTS_TO_WIRE.get() : Tweaks.NormalPiston.CONNECTS_TO_WIRE.get();
+	}
+	
+	public static int delayRisingEdge(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.DELAY_RISING_EDGE.get() : Tweaks.NormalPiston.DELAY_RISING_EDGE.get();
+	}
+	
+	public static int delayFallingEdge(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.DELAY_FALLING_EDGE.get() : Tweaks.NormalPiston.DELAY_FALLING_EDGE.get();
+	}
+	
+	public static boolean ignoreUpdatesWhileExtending(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_EXTENDING.get() : Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_EXTENDING.get();
+	}
+	
+	public static boolean ignoreUpdatesWhileRetracting(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_RETRACTING.get() : Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_RETRACTING.get();
+	}
+	
+	public static boolean lazyRisingEdge(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.LAZY_RISING_EDGE.get() : Tweaks.NormalPiston.LAZY_RISING_EDGE.get();
+	}
+	
+	public static boolean lazyFallingEdge(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.LAZY_FALLING_EDGE.get() : Tweaks.NormalPiston.LAZY_FALLING_EDGE.get();
+	}
+	
+	public static boolean movableWhenExtended(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.get() : Tweaks.NormalPiston.MOVABLE_WHEN_EXTENDED.get();
+	}
+	
+	public static int speedRisingEdge(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.SPEED_RISING_EDGE.get() : Tweaks.NormalPiston.SPEED_RISING_EDGE.get();
+	}
+	
+	public static int speedFallingEdge(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.SPEED_FALLING_EDGE.get() : Tweaks.NormalPiston.SPEED_FALLING_EDGE.get();
+	}
+	
+	public static boolean suppressHeadUpdatesOnExtension(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.SUPPRESS_HEAD_UPDATES_ON_EXTENSION.get() : Tweaks.NormalPiston.SUPPRESS_HEAD_UPDATES_ON_EXTENSION.get();
+	}
+	
+	public static TickPriority tickPriorityRisingEdge(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.TICK_PRIORITY_RISING_EDGE.get() : Tweaks.NormalPiston.TICK_PRIORITY_RISING_EDGE.get();
+	}
+	
+	public static TickPriority tickPriorityFallingEdge(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.NormalPiston.TICK_PRIORITY_FALLING_EDGE.get();
+	}
+	
+	public static boolean updateSelfWhilePowered(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.UPDATE_SELF_WHILE_POWERED.get() : Tweaks.NormalPiston.UPDATE_SELF_WHILE_POWERED.get();
 	}
 }

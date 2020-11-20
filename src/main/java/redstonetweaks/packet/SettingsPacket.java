@@ -1,11 +1,14 @@
 package redstonetweaks.packet;
 
+import java.util.List;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
-import redstonetweaks.setting.SettingsPack;
+import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.ISetting;
 
 public class SettingsPacket extends RedstoneTweaksPacket {
@@ -18,20 +21,20 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 		
 	}
 	
-	public SettingsPacket(int count) {
-		this.count = count;
+	public SettingsPacket(SettingsCategory category) {
+		List<ISetting> list = category == null ? Settings.ALL : category.getSettings();
+		
+		count = list.size();
 		settings = new ISetting[count];
 		values = new String[count];
 		
-		for (SettingsPack pack : Settings.SETTINGS_PACKS) {
-			for (ISetting setting : pack.getSettings()) {
-				if (--count < 0) {
-					break;
-				}
-				
-				settings[count] = setting;
-				values[count] = setting.getAsText();
+		for (ISetting setting : list) {
+			if (--count < 0) {
+				break;
 			}
+			
+			settings[count] = setting;
+			values[count] = setting.getAsString();
 		}
 	}
 	
@@ -64,9 +67,19 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		for (int i = 0; i < count; i++) {
-			settings[i].setFromText(values[i]);
-		}
+		updateSettings();
+		
 		((RTIMinecraftClient)client).getSettingsManager().onSettingsPacketReceived();
+	}
+	
+	private void updateSettings() {
+		for (int i = 0; i < count; i++) {
+			ISetting setting = settings[i];
+			
+			if (setting != null) {
+				setting.setEnabled(true);
+				setting.setFromString(values[i]);
+			}
+		}
 	}
 }

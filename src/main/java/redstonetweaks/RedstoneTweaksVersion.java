@@ -27,6 +27,17 @@ public class RedstoneTweaksVersion {
 	public String toString() {
 		return major + "." + minor + "." + patch;
 	}
+	
+	public boolean isValid() {
+		return !this.equals(INVALID_VERSION);
+	}
+	
+	public static RedstoneTweaksVersion create(int major, int minor, int patch) {
+		if (major >= 0 && minor >= 0 && patch >= 0) {
+			return new RedstoneTweaksVersion(major, minor, patch);
+		}
+		return INVALID_VERSION;
+	}
 
 	public static RedstoneTweaksVersion fromString(String str) {
 		String[] args = str.split("[.]", 0);

@@ -26,6 +26,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
+import redstonetweaks.setting.Tweaks;
+
 @Mixin(LeverBlock.class)
 public abstract class LeverBlockMixin extends WallMountedBlock {
 	
@@ -60,17 +62,17 @@ public abstract class LeverBlockMixin extends WallMountedBlock {
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {
-		return redstonetweaks.setting.Settings.Lever.POWER_WEAK.get();
+		return Tweaks.Lever.POWER_WEAK.get();
 	}
 	
 	@ModifyConstant(method = "getStrongRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetStrongRedstonePower(int oldValue) {
-		return redstonetweaks.setting.Settings.Lever.POWER_STRONG.get();
+		return Tweaks.Lever.POWER_STRONG.get();
 	}
 	
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(BlockState state, World world, BlockPos pos, CallbackInfo ci) {
-		redstonetweaks.setting.Settings.Lever.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock(), getDirection(state).getOpposite());
+		Tweaks.Lever.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock(), getDirection(state).getOpposite());
 		
 		ci.cancel();
 	}
@@ -83,10 +85,10 @@ public abstract class LeverBlockMixin extends WallMountedBlock {
 	}
 	
 	private int getDelay(boolean powered) {
-		return powered ? redstonetweaks.setting.Settings.Lever.DELAY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.Lever.DELAY_RISING_EDGE.get();
+		return powered ? Tweaks.Lever.DELAY_FALLING_EDGE.get() : Tweaks.Lever.DELAY_RISING_EDGE.get();
 	}
 	
 	private TickPriority getTickPriority(boolean powered) {
-		return powered ? redstonetweaks.setting.Settings.Lever.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.Lever.TICK_PRIORITY_RISING_EDGE.get();
+		return powered ? Tweaks.Lever.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.Lever.TICK_PRIORITY_RISING_EDGE.get();
 	}
 }

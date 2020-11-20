@@ -413,7 +413,7 @@ public class NeighborUpdateVisualizer {
 			return BLOCK_UPDATE_RED;
 		case COMPARATOR_UPDATE:
 			return COMPARATOR_UPDATE_RED;
-		case STATE_UPDATE:
+		case SHAPE_UPDATE:
 			return OBSERVER_UPDATE_RED;
 		default:
 			return 0.0f;
@@ -426,7 +426,7 @@ public class NeighborUpdateVisualizer {
 			return BLOCK_UPDATE_GREEN;
 		case COMPARATOR_UPDATE:
 			return COMPARATOR_UPDATE_GREEN;
-		case STATE_UPDATE:
+		case SHAPE_UPDATE:
 			return OBSERVER_UPDATE_GREEN;
 		default:
 			return 0.0f;
@@ -439,7 +439,7 @@ public class NeighborUpdateVisualizer {
 			return BLOCK_UPDATE_BLUE;
 		case COMPARATOR_UPDATE:
 			return COMPARATOR_UPDATE_BLUE;
-		case STATE_UPDATE:
+		case SHAPE_UPDATE:
 			return OBSERVER_UPDATE_BLUE;
 		default:
 			return 0.0f;
@@ -452,7 +452,7 @@ public class NeighborUpdateVisualizer {
 			return BLOCK_UPDATE_ALPHA;
 		case COMPARATOR_UPDATE:
 			return COMPARATOR_UPDATE_ALPHA;
-		case STATE_UPDATE:
+		case SHAPE_UPDATE:
 			return OBSERVER_UPDATE_ALPHA;
 		default:
 			return 0.0f;

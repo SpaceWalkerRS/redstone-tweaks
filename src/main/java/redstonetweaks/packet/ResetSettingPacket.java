@@ -3,8 +3,9 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.interfaces.RTIMinecraftServer;
+
 import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 

@@ -8,7 +8,7 @@ import net.minecraft.text.Text;
 
 public class RTButtonWidget extends ButtonWidget implements IAbstractButtonWidget {
 	
-	private static final ButtonWidget.PressAction NONE = (button) -> {};
+	public static final ButtonWidget.PressAction NONE = (button) -> {};
 	
 	private final PressAction onPress;
 	private final Supplier<Text> messageSupplier;

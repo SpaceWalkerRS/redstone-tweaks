@@ -2,25 +2,34 @@ package redstonetweaks.setting.types;
 
 public abstract class Setting<T> implements ISetting {
 	
-	private final String id;
 	private final String name;
 	private final String description;
-	
 	private final T defaultValue;
+	
+	private String id;
+	private boolean enabled;
+	private boolean locked;
 	private T value;
 	
-	public Setting(String prefix, String name, String description, T defaultValue) {
-		this.id = prefix + "_" +  name;
+	public Setting(String name, String description, T defaultValue) {
 		this.name = name;
 		this.description = description;
 		this.defaultValue = defaultValue;
+		this.locked = true;
 		
-		set(getDefault());
+		reset();
 	}
 	
 	@Override
 	public String getId() {
 		return id;
+	}
+	
+	@Override
+	public void setId(String id) {
+		if (this.id == null) {
+			this.id = id;
+		}
 	}
 	
 	@Override
@@ -34,6 +43,26 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
+	@Override
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	
+	@Override
+	public void setLocked(boolean locked) {
+		this.locked = locked;
+	}
+	
+	@Override
+	public boolean isLocked() {
+		return locked;
+	}
+	
+	@Override
 	public boolean isDefault() {
 		return get().equals(getDefault());
 	}
@@ -44,7 +73,18 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	@Override
-	public String getAsText() {
+	public String getAsString() {
+		return (isLocked() ? '1' : '0') + getValueAsString();
+	}
+	
+	@Override
+	public void setFromString(String string) {
+		setLocked(string.charAt(0) == '1');
+		setValueFromString(string.substring(1));
+	}
+	
+	@Override
+	public String getValueAsString() {
 		return get().toString();
 	}
 	

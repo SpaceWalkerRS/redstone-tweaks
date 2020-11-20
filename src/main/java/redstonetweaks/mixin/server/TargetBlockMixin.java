@@ -24,32 +24,32 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 
-import redstonetweaks.block.AnaloguePowerComponentBlockEntity;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.block.PowerBlockEntity;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(TargetBlock.class)
 public class TargetBlockMixin implements BlockEntityProvider {
 	
 	@ModifyConstant(method = "trigger", constant = @Constant(intValue = 20))
 	private static int onTriggerPersistentProjectileDelay(int oldValue) {
-		return Settings.TargetBlock.DELAY_PERSISTENT_PROJECTILE.get();
+		return Tweaks.TargetBlock.DELAY_PERSISTENT_PROJECTILE.get();
 	}
 	
 	@ModifyConstant(method = "trigger", constant = @Constant(intValue = 8))
 	private static int onTriggerDefaultDelay(int oldValue) {
-		return Settings.TargetBlock.DELAY_DEFAULT.get();
+		return Tweaks.TargetBlock.DELAY_DEFAULT.get();
 	}
 	
 	@ModifyConstant(method = "calculatePower", constant = @Constant(doubleValue = 15.0D))
 	private static double onCalculatePowerModify15(double oldValue) {
-		return Settings.Global.POWER_MAX.get();
+		return Tweaks.Global.POWER_MAX.get();
 	}
 	
 	@Inject(method = "setPower", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/WorldAccess;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private static void onSetPowerInjectBeforeSetBlockState(WorldAccess world, BlockState state, int power, BlockPos pos, int delay, CallbackInfo ci) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
-			((AnaloguePowerComponentBlockEntity)blockEntity).setPower(power);
+		if (blockEntity instanceof PowerBlockEntity) {
+			((PowerBlockEntity)blockEntity).setPower(power);
 		}
 	}
 	
@@ -62,7 +62,7 @@ public class TargetBlockMixin implements BlockEntityProvider {
 	@Redirect(method = "setPower", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private static <T> void onSetPowerRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay1, WorldAccess world, BlockState state, int power, BlockPos pos, int delay) {
 		if (delay > 0) {
-			tickScheduler.schedule(pos, object, delay, Settings.TargetBlock.TICK_PRIORITY.get());
+			tickScheduler.schedule(pos, object, delay, Tweaks.TargetBlock.TICK_PRIORITY.get());
 		} else if (world instanceof ServerWorld) {
 			state.scheduledTick((ServerWorld)world, pos, world.getRandom());
 		}
@@ -71,16 +71,16 @@ public class TargetBlockMixin implements BlockEntityProvider {
 	@Inject(method = "scheduledTick", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onScheduledTickInjectBeforeSetBlockState(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
-			((AnaloguePowerComponentBlockEntity)blockEntity).setPower(0);
+		if (blockEntity instanceof PowerBlockEntity) {
+			((PowerBlockEntity)blockEntity).setPower(0);
 		}
 	}
 	
 	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetWeakRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof AnaloguePowerComponentBlockEntity) {
-			AnaloguePowerComponentBlockEntity powerBlockEntity = ((AnaloguePowerComponentBlockEntity)blockEntity);
+		if (blockEntity instanceof PowerBlockEntity) {
+			PowerBlockEntity powerBlockEntity = ((PowerBlockEntity)blockEntity);
 			
 			powerBlockEntity.ensureCorrectPower(state);
 			cir.setReturnValue(powerBlockEntity.getPower());
@@ -90,6 +90,6 @@ public class TargetBlockMixin implements BlockEntityProvider {
 	
 	@Override
 	public BlockEntity createBlockEntity(BlockView world) {
-		return new AnaloguePowerComponentBlockEntity();
+		return new PowerBlockEntity();
 	}
 }

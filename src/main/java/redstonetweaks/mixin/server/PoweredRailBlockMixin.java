@@ -26,7 +26,8 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.setting.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 @Mixin(PoweredRailBlock.class)
 public abstract class PoweredRailBlockMixin extends AbstractBlock {
@@ -39,7 +40,7 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 
 	@ModifyConstant(method = "isPoweredByOtherRails(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;ZI)Z", constant = @Constant(intValue = 8))
 	private int getPoweredRailLimit(int oldValue, World world, BlockPos pos, BlockState state, boolean bl, int distance) {
-		int limit = state.isOf(Blocks.ACTIVATOR_RAIL) ? redstonetweaks.setting.Settings.ActivatorRail.POWER_LIMIT.get() : redstonetweaks.setting.Settings.PoweredRail.POWER_LIMIT.get() ;
+		int limit = state.isOf(Blocks.ACTIVATOR_RAIL) ? Tweaks.ActivatorRail.POWER_LIMIT.get() : Tweaks.PoweredRail.POWER_LIMIT.get() ;
 		return limit - 1;
 	}
 	
@@ -85,35 +86,35 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 		return WorldHelper.isPowered(world, pos, state, onScheduledTick, getQC(state), randQC(state)) || isPoweredByOtherRails(world, pos, state, true, 0) || isPoweredByOtherRails(world, pos, state, false, 0);
 	}
 	
-	private DirectionalBooleanSetting getQC(BlockState state) {
-		return state.isOf(Blocks.ACTIVATOR_RAIL) ? redstonetweaks.setting.Settings.ActivatorRail.QC : redstonetweaks.setting.Settings.PoweredRail.QC;
+	private DirectionToBooleanSetting getQC(BlockState state) {
+		return state.isOf(Blocks.ACTIVATOR_RAIL) ? Tweaks.ActivatorRail.QC : Tweaks.PoweredRail.QC;
 	}
 	
 	private boolean randQC(BlockState state) {
-		return state.isOf(Blocks.ACTIVATOR_RAIL) ? redstonetweaks.setting.Settings.ActivatorRail.RANDOMIZE_QC.get() : redstonetweaks.setting.Settings.PoweredRail.RANDOMIZE_QC.get();
+		return state.isOf(Blocks.ACTIVATOR_RAIL) ? Tweaks.ActivatorRail.RANDOMIZE_QC.get() : Tweaks.PoweredRail.RANDOMIZE_QC.get();
 	}
 
 	private int getDelay(BlockState state, boolean currentlyPowered) {
 		if (state.isOf(Blocks.ACTIVATOR_RAIL)) {
-			return currentlyPowered ? redstonetweaks.setting.Settings.ActivatorRail.DELAY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.ActivatorRail.DELAY_RISING_EDGE.get();
+			return currentlyPowered ? Tweaks.ActivatorRail.DELAY_FALLING_EDGE.get() : Tweaks.ActivatorRail.DELAY_RISING_EDGE.get();
 		} else {
-			return currentlyPowered ? redstonetweaks.setting.Settings.PoweredRail.DELAY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.PoweredRail.DELAY_RISING_EDGE.get();
+			return currentlyPowered ? Tweaks.PoweredRail.DELAY_FALLING_EDGE.get() : Tweaks.PoweredRail.DELAY_RISING_EDGE.get();
 		}
 	}
 
 	private TickPriority getTickPriority(BlockState state, boolean currentlyPowered) {
 		if (state.isOf(Blocks.ACTIVATOR_RAIL)) {
-			return currentlyPowered ? redstonetweaks.setting.Settings.ActivatorRail.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.ActivatorRail.TICK_PRIORITY_RISING_EDGE.get();
+			return currentlyPowered ? Tweaks.ActivatorRail.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.ActivatorRail.TICK_PRIORITY_RISING_EDGE.get();
 		} else {
-			return currentlyPowered ? redstonetweaks.setting.Settings.PoweredRail.TICK_PRIORITY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.PoweredRail.TICK_PRIORITY_RISING_EDGE.get();
+			return currentlyPowered ? Tweaks.PoweredRail.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.PoweredRail.TICK_PRIORITY_RISING_EDGE.get();
 		}
 	}
 
 	private boolean isLazy(BlockState state, boolean currentlyPowered) {
 		if (state.isOf(Blocks.ACTIVATOR_RAIL)) {
-			return currentlyPowered ? redstonetweaks.setting.Settings.ActivatorRail.LAZY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.ActivatorRail.LAZY_RISING_EDGE.get();
+			return currentlyPowered ? Tweaks.ActivatorRail.LAZY_FALLING_EDGE.get() : Tweaks.ActivatorRail.LAZY_RISING_EDGE.get();
 		} else {
-			return currentlyPowered ? redstonetweaks.setting.Settings.PoweredRail.LAZY_FALLING_EDGE.get() : redstonetweaks.setting.Settings.PoweredRail.LAZY_RISING_EDGE.get();
+			return currentlyPowered ? Tweaks.PoweredRail.LAZY_FALLING_EDGE.get() : Tweaks.PoweredRail.LAZY_RISING_EDGE.get();
 		}
 	}
 }

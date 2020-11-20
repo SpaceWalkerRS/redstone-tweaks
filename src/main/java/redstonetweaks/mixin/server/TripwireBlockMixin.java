@@ -7,13 +7,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.block.TripwireBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickScheduler;
-import redstonetweaks.setting.Settings;;
+import redstonetweaks.setting.Tweaks;;
 
 @Mixin(TripwireBlock.class)
 public class TripwireBlockMixin {
 	
 	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onUpdatePoweredRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
-		tickScheduler.schedule(pos, object, Settings.Tripwire.DELAY.get(), Settings.Tripwire.TICK_PRIORITY.get());
+		tickScheduler.schedule(pos, object, Tweaks.Tripwire.DELAY.get(), Tweaks.Tripwire.TICK_PRIORITY.get());
 	}
 }

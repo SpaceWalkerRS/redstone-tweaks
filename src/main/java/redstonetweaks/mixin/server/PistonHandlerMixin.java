@@ -39,7 +39,7 @@ import redstonetweaks.helper.ChainHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.RTIPistonHandler;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(PistonHandler.class)
 public abstract class PistonHandlerMixin implements RTIPistonHandler {
@@ -52,70 +52,54 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	@Shadow @Final private List<BlockPos> movedBlocks;
 	@Shadow @Final private List<BlockPos> brokenBlocks;
 
-	private boolean sticky;
+	private boolean sticky = false;
 	private Set<BlockPos> anchoredChains;
 	private List<BlockEntity> movedBlockEntities;
 	// A map of positions where two slabs will merge, mapped to the type of slab that will move in
-	private Map<BlockPos, SlabType> mergingSlabTypes;
+	private Map<BlockPos, SlabType> mergedSlabTypes;
 	// A map of positions where a double slab is split, mapped to type of slab that will move out
-	private Map<BlockPos, SlabType> splittingSlabTypes;
+	private Map<BlockPos, SlabType> splitSlabTypes;
 	
 	@Shadow protected abstract boolean tryMove(BlockPos pos, Direction dir);
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(World world, BlockPos pos, Direction dir, boolean retracted, CallbackInfo ci) {
 		BlockState state = world.getBlockState(pos);
-		if (state.getBlock() instanceof PistonBlock) {
-			sticky = state.isOf(Blocks.STICKY_PISTON);
+		
+		if (state.isOf(Blocks.STICKY_PISTON)) {
+			sticky = true;
 		} else
 		if (state.isOf(Blocks.MOVING_PISTON)) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
 			if (blockEntity instanceof PistonBlockEntity) {
 				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+				
 				if (pistonBlockEntity.isSource()) {
 					BlockState movedState = pistonBlockEntity.getPushedBlock();
-					if (movedState.getBlock() instanceof PistonBlock) {
-						sticky = movedState.isOf(Blocks.STICKY_PISTON);
+					
+					if (movedState.isOf(Blocks.STICKY_PISTON) || (movedState.isOf(Blocks.PISTON_HEAD) && movedState.get(Properties.PISTON_TYPE) == PistonType.STICKY)) {
+						sticky = true;
 					}
 				}
 			}
 		}
 		
-		if (Settings.Global.CHAINSTONE.get()) {
+		if (Tweaks.Global.CHAINSTONE.get()) {
 			anchoredChains = new HashSet<>();
 		}
-		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
-			movedBlockEntities = new ArrayList<>();
+		if (Tweaks.Global.MERGE_SLABS.get()) {
+			mergedSlabTypes = new HashMap<>();
+			splitSlabTypes = new HashMap<>();
 		}
-		if (Settings.Global.MERGE_SLABS.get()) {
-			mergingSlabTypes = new HashMap<>();
-			splittingSlabTypes = new HashMap<>();
+		if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get()) {
+			movedBlockEntities = new ArrayList<>();
 		}
 	}
 	
-	@Inject(method = "getMovedBlocks", at = @At(value = "HEAD"))
-	private void onGetMovedBlocksInjectAtHead(CallbackInfoReturnable<List<BlockPos>> cir) {
-		for (BlockPos pos : movedBlocks) {
-			// Notify clients of any pistons that are about to be "double retracted"
-			if (Settings.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
-				PistonHelper.getDoubleRetractionState(world, pos);
-			}
-			
-			// Create list of block entities that are about to be moved
-			if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get()) {
-				BlockEntity blockEntity = world.getBlockEntity(pos);
-				movedBlockEntities.add(blockEntity);
-				
-				if (blockEntity != null) {
-					world.removeBlockEntity(pos);
-					
-					// Fix for disappearing block entities on the client
-					if (world.isClient()) {
-						blockEntity.markDirty();
-					}
-				}
-			}
-		}
+	@Override
+	public void addMovedBlockEntity(BlockEntity blockEntity) {
+		movedBlockEntities.add(blockEntity);
 	}
 	
 	@Override
@@ -140,20 +124,20 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	private void onTryMoveInjectBeforeListContains(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState movedState, Block movedBlock) {
 		alreadyMoved = movedBlocks.contains(pos);
 		
-		if (Settings.Global.MERGE_SLABS.get() && SlabHelper.isSlab(movedBlock)) {
+		if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(movedBlock)) {
 			// Usually the direction given is the opposite of the side from which the block is pulled along,
 			// but when tryMove is called inside calculatePush for a retraction event, it is not
 			Direction pulledFrom = (pos == posTo && !retracted) ? dir : dir.getOpposite();
 			
 			if (alreadyMoved) {
-				SlabType movedType = splittingSlabTypes.get(pos);
+				SlabType movedType = splitSlabTypes.get(pos);
 				
 				// Check if the block is a splitting double slab and if the stationary half is now pulled along as well
 				if (movedType != null && pulledFrom != SlabHelper.getDirectionFromType(movedType)) {
 					// We need to re-evaluate the movement of this block
 					movedBlocks.remove(pos);
-					splittingSlabTypes.remove(pos);
-					mergingSlabTypes.remove(pos);
+					splitSlabTypes.remove(pos);
+					mergedSlabTypes.remove(pos);
 					
 					alreadyMoved = false;
 				}
@@ -162,8 +146,8 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			}
 			
 			// This slab cannot be merged into if not at least one half stays behind
-			if (pulledFrom.getAxis().isHorizontal() || !splittingSlabTypes.containsKey(pos)) {
-				mergingSlabTypes.remove(pos);
+			if (pulledFrom.getAxis().isHorizontal() || !splitSlabTypes.containsKey(pos)) {
+				mergedSlabTypes.remove(pos);
 			}
 		}
 	}
@@ -186,13 +170,13 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		BlockState blockState = world.getBlockState(blockPos);
 		isAdjacentBlockStuck = isAdjacentBlockStuck(blockPos, blockState, behindPos, behindState, motionDirection.getOpposite());
 		
-		if (Settings.Global.MERGE_SLABS.get() && isAdjacentBlockStuck && SlabHelper.isSlab(behindState)) {
+		if (Tweaks.Global.MERGE_SLABS.get() && isAdjacentBlockStuck && SlabHelper.isSlab(behindState)) {
 			if (motionDirection.getAxis().isVertical() && !movedBlocks.contains(behindPos)) {
 				trySplitDoubleSlab(behindPos, behindState, SlabHelper.getTypeFromDirection(motionDirection));
 			}
 			
 			// If the slab is pulled in the direction of the movement, it cannot be merged into!
-			mergingSlabTypes.remove(behindPos);
+			mergedSlabTypes.remove(behindPos);
 		}
 	}
 
@@ -203,8 +187,8 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	@Redirect(method = "tryMove", at = @At(value = "INVOKE", target = "Ljava/util/List;indexOf(Ljava/lang/Object;)I"))
 	private int onTryMoveRedirectIndexOf(List<Object> list, Object pos) {
-		if (Settings.Global.MERGE_SLABS.get() && splittingSlabTypes.remove(pos) != null) {
-			mergingSlabTypes.remove(pos);
+		if (Tweaks.Global.MERGE_SLABS.get() && splitSlabTypes.remove(pos) != null) {
+			mergedSlabTypes.remove(pos);
 			list.remove(pos);
 			
 			return -1;
@@ -214,7 +198,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
 	private void onTryMoveInjectBeforeGetPistonBehavior(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int j, int distance, BlockPos frontPos) {
-		if (Settings.Global.MERGE_SLABS.get()) {
+		if (Tweaks.Global.MERGE_SLABS.get()) {
 			// We break out of the loop to prevent the front block from being added to the movedBlocks list multiple times
 			boolean breakLoop = alreadyMoved;
 			
@@ -222,7 +206,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			BlockState pushingState = world.getBlockState(blockPos);
 			
 			// If the pushing state is a split double slab only one half of it will be moving
-			SlabType pushingType = splittingSlabTypes.get(blockPos);
+			SlabType pushingType = splitSlabTypes.get(blockPos);
 			if (pushingType != null) {
 				pushingState = pushingState.with(Properties.SLAB_TYPE, pushingType);
 			}
@@ -231,7 +215,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				// tryMergeSlabs will also return true if the pushing state merges into a double slab,
 				// in which case one half will be pushed over. In this case the front position should
 				// be added to the movedBlocksList, otherwise we break out of the loop
-				if (!trySplitDoubleSlab(frontPos, frontState, mergingSlabTypes.get(frontPos))) {
+				if (!trySplitDoubleSlab(frontPos, frontState, mergedSlabTypes.get(frontPos))) {
 					// If the position that is merged into does not split we do not need to add it
 					// to the movedBlocks list
 					breakLoop = true;
@@ -241,7 +225,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			if (isPotentiallySticky(frontState)) {
 				// If a splitting double slab pushes a sticky block, the double slab should move as a whole after all!
 				if (isAdjacentBlockStuck(frontPos, frontState, blockPos, pushingState, motionDirection.getOpposite())) {
-					splittingSlabTypes.remove(blockPos);
+					splitSlabTypes.remove(blockPos);
 				}
 			}
 			
@@ -254,7 +238,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	@ModifyConstant(method = "tryMove", constant = @Constant(intValue = 12))
 	private int pushLimit(int oldPushLimit) {
-		return sticky ? Settings.StickyPiston.PUSH_LIMIT.get() : Settings.NormalPiston.PUSH_LIMIT.get();
+		return sticky ? Tweaks.StickyPiston.PUSH_LIMIT.get() : Tweaks.NormalPiston.PUSH_LIMIT.get();
 	}
 
 	@Inject(method = "canMoveAdjacentBlock", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
@@ -279,19 +263,19 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		if (block == Blocks.SLIME_BLOCK || block == Blocks.HONEY_BLOCK) {
 			return true;
 		}
-		if (Settings.StickyPiston.SUPER_STICKY.get() && block == Blocks.STICKY_PISTON) {
+		if (Tweaks.StickyPiston.SUPER_STICKY.get() && block == Blocks.STICKY_PISTON) {
 			return true;
 		}
-		if (Settings.Global.CHAINSTONE.get() && block == Blocks.CHAIN) {
+		if (Tweaks.Global.CHAINSTONE.get() && block == Blocks.CHAIN) {
 			return true;
 		}
-		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (block == Blocks.CHEST || block == Blocks.TRAPPED_CHEST)) {
+		if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get() && (block == Blocks.CHEST || block == Blocks.TRAPPED_CHEST)) {
 			return true;
 		}
-		if (Settings.NormalPiston.MOVABLE_WHEN_EXTENDED.get() && (block == Blocks.PISTON || block == Blocks.PISTON_HEAD)) {
+		if (Tweaks.NormalPiston.MOVABLE_WHEN_EXTENDED.get() && (block == Blocks.PISTON || block == Blocks.PISTON_HEAD)) {
 			return true;
 		}
-		if (Settings.StickyPiston.MOVABLE_WHEN_EXTENDED.get() && (block == Blocks.STICKY_PISTON || block == Blocks.PISTON_HEAD)) {
+		if (Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.get() && (block == Blocks.STICKY_PISTON || block == Blocks.PISTON_HEAD)) {
 			return true;
 		}
 		return false;
@@ -310,10 +294,10 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			return true;
 		}
 		
-		if (Settings.StickyPiston.SUPER_STICKY.get() && state.isOf(Blocks.STICKY_PISTON)) {
+		if (Tweaks.StickyPiston.SUPER_STICKY.get() && state.isOf(Blocks.STICKY_PISTON)) {
 			return dir == state.get(Properties.FACING);
 		}
-		if (Settings.Global.CHAINSTONE.get() && state.isOf(Blocks.CHAIN)) {
+		if (Tweaks.Global.CHAINSTONE.get() && state.isOf(Blocks.CHAIN)) {
 			Direction.Axis axis = state.get(Properties.AXIS);
 			
 			if (axis == dir.getAxis()) {
@@ -335,7 +319,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				return ChainHelper.isFullyAnchored(world, pos, axis, anchoredChains);
 			}
 		}
-		if (Settings.Global.MOVABLE_BLOCK_ENTITIES.get() && (state.isOf(Blocks.CHEST) || state.isOf(Blocks.TRAPPED_CHEST))) {
+		if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get() && (state.isOf(Blocks.CHEST) || state.isOf(Blocks.TRAPPED_CHEST))) {
 			ChestType chestType = state.get(Properties.CHEST_TYPE);
 			
 			if (chestType == ChestType.SINGLE) {
@@ -379,7 +363,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				Direction facing = state.get(Properties.FACING);
 				
 				if (facing == dir) {
-					return Settings.StickyPiston.SUPER_STICKY.get();
+					return Tweaks.StickyPiston.SUPER_STICKY.get();
 				}
 				if (facing == dir.getOpposite()) {
 					return adjacentState.isOf(Blocks.STICKY_PISTON);
@@ -391,28 +375,28 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	}
 	
 	@Override
-	public Map<BlockPos, SlabType> getMergingSlabTypes() {
-		return mergingSlabTypes;
+	public Map<BlockPos, SlabType> getMergedSlabTypes() {
+		return mergedSlabTypes;
 	}
 	
 	@Override
-	public Map<BlockPos, SlabType> getSplittingSlabTypes() {
-		return splittingSlabTypes;
+	public Map<BlockPos, SlabType> getSplitSlabTypes() {
+		return splitSlabTypes;
 	}
 	
 	// Check if a slab block is a double slab block that should split
 	// if a pulling force is applied to the given half
 	private boolean trySplitDoubleSlab(BlockPos pos, BlockState movedState, SlabType half) {
 		if (movedState.get(Properties.SLAB_TYPE) == SlabType.DOUBLE) {
-			SlabType oldHalf = splittingSlabTypes.get(pos);
+			SlabType oldHalf = splitSlabTypes.get(pos);
 			
 			if (oldHalf == null) {
-				splittingSlabTypes.put(pos, half);
+				splitSlabTypes.put(pos, half);
 				
 				return true;
 			} else if (oldHalf != half) {
-				splittingSlabTypes.remove(pos);
-				mergingSlabTypes.remove(pos);
+				splitSlabTypes.remove(pos);
+				mergedSlabTypes.remove(pos);
 			}
 		}
 		
@@ -439,7 +423,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			// If the movement is horizontal, merging will occur (given the slabs are different types)
 			// If the movement is vertical, merging will only occur if the two slabs are not already touching
 			if (motionDirection.getAxis().isHorizontal() || toType == SlabHelper.getTypeFromDirection(motionDirection)) {
-				mergingSlabTypes.put(toPos, fromType);
+				mergedSlabTypes.put(toPos, fromType);
 				return true;
 			}
 		}

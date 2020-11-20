@@ -54,7 +54,7 @@ public class ScheduledNeighborUpdate implements Comparable<ScheduledNeighborUpda
 		NONE(-1),
 		BLOCK_UPDATE(0),
 		COMPARATOR_UPDATE(1),
-		STATE_UPDATE(2);
+		SHAPE_UPDATE(2);
 
 		private final int index;
 
@@ -69,7 +69,7 @@ public class ScheduledNeighborUpdate implements Comparable<ScheduledNeighborUpda
 			case 1:
 				return COMPARATOR_UPDATE;
 			case 2:
-				return STATE_UPDATE;
+				return SHAPE_UPDATE;
 			default:
 				return NONE;
 			}

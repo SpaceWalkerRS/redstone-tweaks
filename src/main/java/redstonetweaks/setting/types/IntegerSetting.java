@@ -5,23 +5,21 @@ public class IntegerSetting extends Setting<Integer> {
 	private int minValue;
 	private int maxValue;
 	
-	public IntegerSetting(String prefix, String name, String description, int defaultValue, int minValue, int maxValue) {
-		super(prefix, name, description, defaultValue);
+	public IntegerSetting(String name, String description, int defaultValue, int minValue, int maxValue) {
+		super(name, description, defaultValue);
 		
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		
-		// we need to initialize the value here
-		// because the min/max values are not yet
-		// initialized when the super class tries
-		// to initialize the value.
+		// we need to initialize the value here because the min/max values are not yet
+		// initialized when the super class tries to initialize the value.
 		set(getDefault());
 	}
 	
 	@Override
-	public void setFromText(String text) {
+	public void setValueFromString(String string) {
 		try {
-			set(Integer.parseInt(text));
+			set(Integer.parseInt(string));
 		} catch (Exception e) {
 			
 		}

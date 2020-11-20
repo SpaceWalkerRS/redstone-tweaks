@@ -4,7 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 public class StairsHelper {
 	
@@ -14,8 +14,8 @@ public class StairsHelper {
 		for (Direction direction : Direction.values()) {
 			if (state.isSideSolidFullSquare(world, pos, direction)) {
 				power = Math.max(power, world.getStrongRedstonePower(pos.offset(direction), direction));
-				if (power >= Settings.Global.POWER_MAX.get()) {
-					return Settings.Global.POWER_MAX.get();
+				if (power >= Tweaks.Global.POWER_MAX.get()) {
+					return Tweaks.Global.POWER_MAX.get();
 				}
 			}
 		}

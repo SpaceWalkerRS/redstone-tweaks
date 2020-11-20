@@ -17,8 +17,10 @@ import redstonetweaks.gui.info.InfoTab;
 import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.hotkeys.HotKeyManager;
 import redstonetweaks.hotkeys.RTKeyBinding;
+import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.ISetting;
 
 public class RTMenuScreen extends Screen {
@@ -77,7 +79,7 @@ public class RTMenuScreen extends Screen {
 		if (getSelectedTab().keyPressed(keyCode, scanCode, modifiers)) {
 			return true;
 		}
-		if (keyCode == 256 || (HotKeyManager.TOGGLE_MENU.matchesKey(keyCode, scanCode) && !focusedIsTextField())) {
+		if (keyCode == 256 || (((RTIMinecraftClient)client).getHotkeysManager().getHotkeys().toggleMenu.matchesKey(keyCode, scanCode) && !focusedIsTextField())) {
 			onClose();
 			return true;
 		}
@@ -151,7 +153,9 @@ public class RTMenuScreen extends Screen {
 	}
 	
 	private void createTabs() {
-		tabs.add(new SettingsTab(this));
+		for (SettingsCategory category : Settings.CATEGORIES) {
+			tabs.add(new SettingsTab(this, category));
+		}
 		tabs.add(new HotkeysTab(this));
 		tabs.add(new InfoTab(this));
 	}
@@ -188,6 +192,7 @@ public class RTMenuScreen extends Screen {
 		tabButtons.get(selectedTabIndex).setActive(true);
 		tabButtons.get(newIndex).setActive(false);
 		
+		getSelectedTab().onTabClosed();
 		selectedTabIndex = newIndex;
 		getSelectedTab().init();
 	}

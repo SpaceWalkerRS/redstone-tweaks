@@ -6,13 +6,13 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import net.minecraft.block.RespawnAnchorBlock;
 
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(RespawnAnchorBlock.class)
 public class RespawnAnchorBlockMixin {
 	
 	@ModifyConstant(method = "getComparatorOutput", constant = @Constant(intValue = 15))
 	private int onGetComparatorOutputModify15(int oldValue) {
-		return Settings.Global.POWER_MAX.get();
+		return Tweaks.Global.POWER_MAX.get();
 	}
 }

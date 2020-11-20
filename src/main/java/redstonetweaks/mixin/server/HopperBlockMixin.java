@@ -17,7 +17,8 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.setting.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 @Mixin(HopperBlock.class)
 public abstract class HopperBlockMixin extends Block {
@@ -63,23 +64,23 @@ public abstract class HopperBlockMixin extends Block {
 		}
 	}
 	
-	private DirectionalBooleanSetting getQC() {
-		return redstonetweaks.setting.Settings.Hopper.QC;
+	private DirectionToBooleanSetting getQC() {
+		return Tweaks.Hopper.QC;
 	}
 	
 	private boolean randQC() {
-		return redstonetweaks.setting.Settings.Hopper.RANDOMIZE_QC.get();
+		return Tweaks.Hopper.RANDOMIZE_QC.get();
 	}
 	
 	private int getDelay(boolean enabled) {
-		return enabled ? redstonetweaks.setting.Settings.Hopper.DELAY_RISING_EDGE.get() : redstonetweaks.setting.Settings.Hopper.DELAY_FALLING_EDGE.get();
+		return enabled ? Tweaks.Hopper.DELAY_RISING_EDGE.get() : Tweaks.Hopper.DELAY_FALLING_EDGE.get();
 	}
 	
 	private boolean isLazy(boolean enabled) {
-		return enabled ? redstonetweaks.setting.Settings.Hopper.LAZY_RISING_EDGE.get() : redstonetweaks.setting.Settings.Hopper.LAZY_FALLING_EDGE.get();
+		return enabled ? Tweaks.Hopper.LAZY_RISING_EDGE.get() : Tweaks.Hopper.LAZY_FALLING_EDGE.get();
 	}
 	
 	private TickPriority getTickPriority(boolean enabled) {
-		return enabled ? redstonetweaks.setting.Settings.Hopper.TICK_PRIORITY_RISING_EDGE.get() : redstonetweaks.setting.Settings.Hopper.TICK_PRIORITY_FALLING_EDGE.get();
+		return enabled ? Tweaks.Hopper.TICK_PRIORITY_RISING_EDGE.get() : Tweaks.Hopper.TICK_PRIORITY_FALLING_EDGE.get();
 	}
 }

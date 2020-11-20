@@ -12,13 +12,13 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(AbstractSignBlock.class)
 public class AbstractSignBlockMixin {
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, Settings.Water.TICK_PRIORITY.get());
+		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, Tweaks.Water.TICK_PRIORITY.get());
 	}
 }

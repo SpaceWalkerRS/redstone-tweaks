@@ -11,7 +11,7 @@ import net.minecraft.util.Formatting;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.hotkeys.HotKeyManager;
+import redstonetweaks.hotkeys.Hotkeys;
 import redstonetweaks.hotkeys.RTKeyBinding;
 
 public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
@@ -19,13 +19,15 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 	private static double savedScrollAmount;
 	
 	private final HotkeysTab parent;
+	private final Hotkeys hotkeys;
 	
-	public HotkeysListWidget(HotkeysTab parent, int x, int y, int width, int height) {
+	public HotkeysListWidget(HotkeysTab parent, Hotkeys hotkeys, int x, int y, int width, int height) {
 		super(parent.screen, x, y, width, height, 22);
 		
 		this.parent = parent;
+		this.hotkeys = hotkeys;
 		
-		for (RTKeyBinding keyBinding : HotKeyManager.getKeyBindings()) {
+		for (RTKeyBinding keyBinding : hotkeys.getKeyBindings()) {
 			addEntry(new Entry(keyBinding));
 			
 			updateEntryTitleWidth(client.textRenderer.getWidth(keyBinding.getName()));
@@ -86,7 +88,7 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 			this.children.add(editButton);
 			
 			this.resetButton = new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText("RESET"), (button) -> {
-				HotKeyManager.updateKeyBinding(keyBinding, keyBinding.getDefaultKey());
+				hotkeys.updateKeyBinding(keyBinding, keyBinding.getDefaultKey());
 			});
 			this.children.add(resetButton);
 		}

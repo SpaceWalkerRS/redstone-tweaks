@@ -12,6 +12,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
+import redstonetweaks.setting.Tweaks;
+
 @Mixin(RedstoneBlock.class)
 public abstract class RedstoneBlockMixin extends AbstractBlock {
 	
@@ -21,26 +23,26 @@ public abstract class RedstoneBlockMixin extends AbstractBlock {
 
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {
-		return redstonetweaks.setting.Settings.RedstoneBlock.POWER_WEAK.get();
+		return Tweaks.RedstoneBlock.POWER_WEAK.get();
 	}
 	
 	@Override
 	public int getStrongRedstonePower(BlockState state, BlockView view, BlockPos pos, Direction facing) {
-		return redstonetweaks.setting.Settings.RedstoneBlock.POWER_STRONG.get();
+		return Tweaks.RedstoneBlock.POWER_STRONG.get();
 	}
 	
 	@Override
 	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		if (redstonetweaks.setting.Settings.RedstoneBlock.POWER_STRONG.get() > 0) {
-			redstonetweaks.setting.Settings.RedstoneBlock.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
+		if (Tweaks.RedstoneBlock.POWER_STRONG.get() > 0) {
+			Tweaks.RedstoneBlock.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
 		}
 	}
 	
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
 		if (!state.isOf(newState.getBlock())) {
-			if (redstonetweaks.setting.Settings.RedstoneBlock.POWER_STRONG.get() > 0) {
-				redstonetweaks.setting.Settings.RedstoneBlock.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
+			if (Tweaks.RedstoneBlock.POWER_STRONG.get() > 0) {
+				Tweaks.RedstoneBlock.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
 			}
 		}
 	}

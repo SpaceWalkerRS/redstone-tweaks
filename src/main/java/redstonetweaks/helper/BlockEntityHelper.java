@@ -15,7 +15,7 @@ public class BlockEntityHelper {
 	@SuppressWarnings("serial")
 	public static final Map<BlockEntityType<? extends BlockEntity>, Integer> IDS = new HashMap<BlockEntityType<? extends BlockEntity>, Integer>() {
 		{
-			put(RedstoneTweaks.REDSTONE_POWER, 101);
+			put(RedstoneTweaks.POWER_BLOCK_ENTITY_TYPE, 101);
 			put(BlockEntityType.COMPARATOR, 102);
 		}
 	};

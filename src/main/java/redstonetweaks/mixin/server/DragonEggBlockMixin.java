@@ -5,13 +5,13 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import net.minecraft.block.DragonEggBlock;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(DragonEggBlock.class)
 public class DragonEggBlockMixin {
 	
 	@ModifyConstant(method = "getFallDelay", constant = @Constant(intValue = 5))
 	private int onGetFallDelayModify5(int oldValue) {
-		return Settings.DragonEgg.DELAY.get();
+		return Tweaks.DragonEgg.DELAY.get();
 	}
 }

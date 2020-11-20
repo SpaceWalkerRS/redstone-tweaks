@@ -21,8 +21,8 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.setting.Settings;
-import redstonetweaks.setting.types.DirectionalBooleanSetting;
+import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 @Mixin(DispenserBlock.class)
 public abstract class DispenserBlockMixin {
@@ -58,23 +58,23 @@ public abstract class DispenserBlockMixin {
 		}
 	}
 	
-	private DirectionalBooleanSetting getQC(BlockState state) {
-		return state.isOf(Blocks.DISPENSER) ? Settings.Dispenser.QC : Settings.Dropper.QC;
+	private DirectionToBooleanSetting getQC(BlockState state) {
+		return state.isOf(Blocks.DISPENSER) ? Tweaks.Dispenser.QC : Tweaks.Dropper.QC;
 	}
 	
 	private boolean randQC(BlockState state) {
-		return state.isOf(Blocks.DISPENSER) ? Settings.Dispenser.RANDOMIZE_QC.get() : Settings.Dropper.RANDOMIZE_QC.get();
+		return state.isOf(Blocks.DISPENSER) ? Tweaks.Dispenser.RANDOMIZE_QC.get() : Tweaks.Dropper.RANDOMIZE_QC.get();
 	}
 	
 	private int getDelay(BlockState state) {
-		return state.isOf(Blocks.DISPENSER) ? Settings.Dispenser.DELAY.get() : Settings.Dropper.DELAY.get();
+		return state.isOf(Blocks.DISPENSER) ? Tweaks.Dispenser.DELAY.get() : Tweaks.Dropper.DELAY.get();
 	}
 	
 	private boolean isLazy(BlockState state) {
-		return state.isOf(Blocks.DISPENSER) ? Settings.Dispenser.LAZY.get() : Settings.Dropper.LAZY.get();
+		return state.isOf(Blocks.DISPENSER) ? Tweaks.Dispenser.LAZY.get() : Tweaks.Dropper.LAZY.get();
 	}
 	
 	private TickPriority getTickPriority(BlockState state) {
-		return state.isOf(Blocks.DISPENSER) ? Settings.Dispenser.TICK_PRIORITY.get() : Settings.Dropper.TICK_PRIORITY.get();
+		return state.isOf(Blocks.DISPENSER) ? Tweaks.Dispenser.TICK_PRIORITY.get() : Tweaks.Dropper.TICK_PRIORITY.get();
 	}
 }

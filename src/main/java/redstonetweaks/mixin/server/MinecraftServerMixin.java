@@ -12,6 +12,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+
+import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.ServerInfo;
 import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.setting.ServerSettingsManager;
@@ -22,16 +25,18 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	
 	@Shadow private int ticks;
 	
-	private ServerSettingsManager settingsManager;
+	private ServerInfo serverInfo;
 	private ServerPacketHandler packetHandler;
+	private ServerSettingsManager settingsManager;
 	private ServerWorldTickHandler worldTickHandler;
 	
 	@Shadow public abstract Iterable<ServerWorld> getWorlds();
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(CallbackInfo ci) {
-		settingsManager = new ServerSettingsManager((MinecraftServer)(Object)this);
+		serverInfo = new ServerInfo(RedstoneTweaks.MOD_VERSION);
 		packetHandler = new ServerPacketHandler((MinecraftServer)(Object)this);
+		settingsManager = new ServerSettingsManager((MinecraftServer)(Object)this);
 	}
 	
 	@Inject(method = "loadWorld", at = @At(value = "RETURN"))
@@ -52,13 +57,18 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	}
 	
 	@Override
-	public ServerSettingsManager getSettingsManager() {
-		return settingsManager;
+	public ServerInfo getServerInfo() {
+		return serverInfo;
 	}
 	
 	@Override
 	public ServerPacketHandler getPacketHandler() {
 		return packetHandler;
+	}
+	
+	@Override
+	public ServerSettingsManager getSettingsManager() {
+		return settingsManager;
 	}
 	
 	@Override

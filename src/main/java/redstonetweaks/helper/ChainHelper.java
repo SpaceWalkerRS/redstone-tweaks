@@ -19,7 +19,7 @@ public class ChainHelper {
 			return true;
 		}
 		
-		List<BlockPos> chain = new ArrayList<>();
+		List<BlockPos> currentChain = new ArrayList<>();
 		
 		for (Direction.AxisDirection side : Direction.AxisDirection.values()) {
 			Direction dir = Direction.from(axis, side);
@@ -29,7 +29,7 @@ public class ChainHelper {
 			
 			while(sideState.isOf(Blocks.CHAIN)) {
 				if (sideState.get(Properties.AXIS) == axis) {
-					chain.add(sidePos);
+					currentChain.add(sidePos);
 				} else {
 					return false;
 				}
@@ -43,7 +43,7 @@ public class ChainHelper {
 			}
 		}
 		
-		anchoredChains.addAll(chain);
+		anchoredChains.addAll(currentChain);
 		
 		return true;
 	}

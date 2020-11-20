@@ -28,9 +28,11 @@ public class BlockUpdate {
 	}
 	
 	@Override
-	public boolean equals(Object other) {
-		if (other instanceof BlockUpdate) {
-			return id == ((BlockUpdate)other).id;
+	public boolean equals(Object o) {
+		if (o instanceof BlockUpdate) {
+			BlockUpdate other = (BlockUpdate)o;
+			
+			return other.mode == mode && other.notifier == notifier && (mode == Mode.NEIGHBORS || other.update == update);
 		}
 		return false;
 	}
@@ -38,6 +40,17 @@ public class BlockUpdate {
 	@Override
 	public int hashCode() {
 		return notifierPos == null ? (int)id : notifierPos.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return mode + ":" + notifier + ":" + update;
+	}
+	
+	public static BlockUpdate parseBlockUpdate(String string) {
+		String[] args = string.split(":");
+		
+		return new BlockUpdate(Mode.valueOf(args[0]), RelativePos.valueOf(args[1]), RelativePos.valueOf(args[2]));
 	}
 	
 	public BlockUpdate copy() {
