@@ -14,6 +14,10 @@ public class RTSliderWidget extends SliderWidget implements IAbstractButtonWidge
 	
 	private boolean allowHover = true;
 	
+	public RTSliderWidget(int x, int y, int width, int height, Supplier<Text> messageSupplier, SlideAction onSlide, Snap snap) {
+		this(x, y, width, height, 0.0D, messageSupplier, onSlide, snap);
+	}
+	
 	public RTSliderWidget(int x, int y, int width, int height, double value, Supplier<Text> messageSupplier, SlideAction onSlide, Snap snap) {
 		super(x, y, width, height, messageSupplier.get(), value);
 		
@@ -37,7 +41,7 @@ public class RTSliderWidget extends SliderWidget implements IAbstractButtonWidge
 	
 	@Override
 	public boolean isHovered() {
-		return allowHover && super.isHovered();
+		return allowHover && active && super.isHovered();
 	}
 	
 	@Override

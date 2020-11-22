@@ -60,21 +60,21 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	@Redirect(method = "onPlaced", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;tryMove(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
 	private void onPlacedRedirectTryMove(PistonBlock piston, World world, BlockPos pos, BlockState state) {
 		if (!world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
-			newTryMove(world, pos, state, false);
+			tryMove(world, pos, state, false);
 		}
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;tryMove(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
 	private void neighborUpdateRedirectTryMove(PistonBlock piston, World world, BlockPos pos, BlockState state) {
 		if (!world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
-			newTryMove(world, pos, state, false);
+			tryMove(world, pos, state, false);
 		}
 	}
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;tryMove(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
 	private void onBlockAddedRedirectTryMove(PistonBlock piston, World world, BlockPos pos, BlockState state) {
 		if (!world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
-			newTryMove(world, pos, state, false);
+			tryMove(world, pos, state, false);
 		}
 	}
 	
@@ -325,7 +325,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Inject(method = "move", cancellable = true, at = @At(value = "INVOKE", ordinal = 2, shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;updateNeighborsAlways(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;)V"))
 	private void onMoveInjectBeforeUpdateNeighborsAlways2(World world, BlockPos pos, Direction dir, boolean extend, CallbackInfoReturnable<Boolean> cir) {
-		if (PistonHelper.suppressHeadUpdatesOnExtension(sticky)) {
+		if (!PistonHelper.headUpdatesOnExtension(sticky)) {
 			cir.setReturnValue(true);
 			cir.cancel();
 		}
@@ -350,15 +350,11 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			BlockPos headPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> movedStatesMap,
 			List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> brokenPositions,
 			BlockState[] affectedStates, BlockState airState, Iterator<BlockPos> leftOverPositions, Map.Entry<BlockPos, BlockState> entry) {
-		if (Tweaks.Global.MERGE_SLABS.get()) {
-			Map<BlockPos, SlabType> splittingSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
+		if (Tweaks.Global.MERGE_SLABS.get() && ((RTIPistonHandler)pistonHandler).getSplitSlabTypes().containsKey(entry.getKey())) {
+			BlockState newState = movedStatesMap.get(entry.getKey());
 			
-			if (splittingSlabTypes.containsKey(entry.getKey())) {
-				BlockState newState = movedStatesMap.get(entry.getKey());
-				
-				newState.updateNeighbors(world, entry.getKey(), 2);
-				newState.prepare(world, entry.getKey(), 2);
-			}
+			newState.updateNeighbors(world, entry.getKey(), 2);
+			newState.prepare(world, entry.getKey(), 2);
 			
 		} else {
 			airState.updateNeighbors(world, entry.getKey(), 2);
@@ -378,7 +374,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		newTryMove(world, pos, state, true);
+		tryMove(world, pos, state, true);
 	}
 	
 	@Override
@@ -401,7 +397,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	// The onScheduledTick argument tells us if this method is called
 	// from inside the scheduledTick method.
-	private void newTryMove(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
+	private void tryMove(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
 		Direction facing = state.get(Properties.FACING);
 		boolean isExtended = state.get(Properties.EXTENDED);
 		int activationDelay;

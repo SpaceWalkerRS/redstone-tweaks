@@ -46,10 +46,13 @@ public enum RelativePos {
 	}
 	
 	public static RelativePos fromIndex(int index) {
-		if (index >= 0 && index < POSITIONS.length) {
-			return POSITIONS[index];
+		if (index < 0) {
+			return POSITIONS[POSITIONS.length - 1];
 		}
-		return SELF;
+		if (index >= POSITIONS.length) {
+			return POSITIONS[0];
+		}
+		return POSITIONS[index];
 	}
 	
 	public String getName() {
@@ -70,5 +73,10 @@ public enum RelativePos {
 	public RelativePos next(Directionality directionality) {
 		RelativePos nextPos = fromIndex(index + 1);
 		return nextPos.matches(directionality) ? nextPos : nextPos.next(directionality);
+	}
+	
+	public RelativePos previous(Directionality directionality) {
+		RelativePos nextPos = fromIndex(index - 1);
+		return nextPos.matches(directionality) ? nextPos : nextPos.previous(directionality);
 	}
 }

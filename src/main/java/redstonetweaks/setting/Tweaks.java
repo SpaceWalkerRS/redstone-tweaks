@@ -398,7 +398,7 @@ public class Tweaks {
 		public static final IntegerSetting SPEED_RISING_EDGE = new IntegerSetting("speedRisingEdge", "The duration of the extension in ticks.", 2, 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting SPEED_FALLING_EDGE = new IntegerSetting("speedFallingEdge", "The duration of the retraction in ticks.", 2, 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting("supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face, without breaking when the piston extends or retracts.", false);
-		public static final BooleanSetting SUPPRESS_HEAD_UPDATES_ON_EXTENSION = new BooleanSetting("suppressHeadUpdatesOnExtension", "Suppress block updates emitted by the moving piston head when the piston starts extending.", false);
+		public static final BooleanSetting HEAD_UPDATES_ON_EXTENSION = new BooleanSetting("headUpdatesOnExtension", "Emit block updates around the piston head when it starts extending.", true);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting("tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting("tickPriorityFallingEdge", Settings.Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
 		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting("updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend. This is achieved using scheduled ticks.", false);
@@ -612,7 +612,7 @@ public class Tweaks {
 		public static final IntegerSetting SPEED_FALLING_EDGE = new IntegerSetting("speedFallingEdge", "The duration of the retraction in ticks.", 2, 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting SUPER_STICKY = new BooleanSetting("superSticky", "Make the face of sticky pistons stick to blocks when moved.", false);
 		public static final BooleanSetting SUPPORTS_BRITTLE_BLOCKS = new BooleanSetting("supportsBrittleBlocks", "Allow brittle blocks, like torches, pressure plates and doors, to be placed on any face without breaking when the piston extends or retracts.", false);
-		public static final BooleanSetting SUPPRESS_HEAD_UPDATES_ON_EXTENSION = new BooleanSetting("suppressHeadUpdatesOnExtension", "Suppress block updates emitted by the moving piston head when the piston starts extending.", false);
+		public static final BooleanSetting HEAD_UPDATES_ON_EXTENSION = new BooleanSetting("headUpdatesOnExtension", "Emit block updates around the piston head when it starts extending.", true);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting("tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE, TickPriority.NORMAL);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting("tickPriorityFallingEdge", Settings.Common.DESC_TICK_PRIORITY_FALLING_EDGE, TickPriority.NORMAL);
 		public static final BooleanSetting UPDATE_SELF_WHILE_POWERED = new BooleanSetting("updateSelfWhilePowered", "If the piston is powered but cannot extend, it will update itself each tick until it can extend. This is achieved using scheduled ticks.", false);
@@ -963,7 +963,7 @@ public class Tweaks {
 		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.SPEED_RISING_EDGE);
 		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.SPEED_FALLING_EDGE);
 		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.SUPPORTS_BRITTLE_BLOCKS);
-		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.SUPPRESS_HEAD_UPDATES_ON_EXTENSION);
+		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.HEAD_UPDATES_ON_EXTENSION);
 		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.TICK_PRIORITY_RISING_EDGE);
 		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.TICK_PRIORITY_FALLING_EDGE);
 		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.UPDATE_SELF_WHILE_POWERED);
@@ -1083,7 +1083,7 @@ public class Tweaks {
 		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.SPEED_FALLING_EDGE);
 		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.SUPER_STICKY);
 		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.SUPPORTS_BRITTLE_BLOCKS);
-		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.SUPPRESS_HEAD_UPDATES_ON_EXTENSION);
+		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.HEAD_UPDATES_ON_EXTENSION);
 		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.TICK_PRIORITY_RISING_EDGE);
 		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.TICK_PRIORITY_FALLING_EDGE);
 		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.UPDATE_SELF_WHILE_POWERED);

@@ -39,7 +39,7 @@ public class RedstoneTweaksVersion {
 		return INVALID_VERSION;
 	}
 
-	public static RedstoneTweaksVersion fromString(String str) {
+	public static RedstoneTweaksVersion parseVersion(String str) {
 		String[] args = str.split("[.]", 0);
 		if (args.length == 3) {
 			try {

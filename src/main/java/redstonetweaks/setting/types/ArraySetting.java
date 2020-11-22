@@ -2,11 +2,11 @@ package redstonetweaks.setting.types;
 
 import java.util.Arrays;
 
-public abstract class ArraySetting<K, V> extends Setting<V[]> {
+public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
 	private final int size;
 	
-	public ArraySetting(String name, String description, V[] defaultValues) {
+	public ArraySetting(String name, String description, E[] defaultValues) {
 		super(name, description, defaultValues);
 		
 		this.size = getDefault().length;
@@ -34,7 +34,7 @@ public abstract class ArraySetting<K, V> extends Setting<V[]> {
 	public String getValueAsString() {
 		String string = "";
 		
-		for (V value : get()) {
+		for (E value : get()) {
 			string += elementToString(value) + ",";
 		}
 		
@@ -43,34 +43,34 @@ public abstract class ArraySetting<K, V> extends Setting<V[]> {
 	
 
 	@Override
-	public void set(V[] newValue) {
+	public void set(E[] newValue) {
 		super.set(newValue.clone());
 	}
 	
-	public abstract V stringToElement(String string);
+	public abstract E stringToElement(String string);
 	
-	public String elementToString(V element) {
+	public String elementToString(E element) {
 		return element.toString();
 	}
 	
-	public V get(int index) {
+	public E get(int index) {
 		if (inRange(index)) {
 			return get()[index];
 		}
 		return null;
 	}
 	
-	public V get(K key) {
+	public E get(K key) {
 		return get(getIndexFromKey(key));
 	}
 	
-	public void set(int index, V value) {
+	public void set(int index, E value) {
 		if (inRange(index)) {
 			get()[index] = value;
 		}
 	}
 	
-	public void set(K key, V value) {
+	public void set(K key, E value) {
 		set(getIndexFromKey(key), value);
 	}
 	
@@ -93,14 +93,14 @@ public abstract class ArraySetting<K, V> extends Setting<V[]> {
 		return isDefault(getIndexFromKey(key));
 	}
 	
-	public V getDefault(int index) {
+	public E getDefault(int index) {
 		if (inRange(index)) {
 			return getDefault()[index];
 		}
 		return null;
 	}
 	
-	public V getDefault(K key) {
+	public E getDefault(K key) {
 		return getDefault(getIndexFromKey(key));
 	}
 	

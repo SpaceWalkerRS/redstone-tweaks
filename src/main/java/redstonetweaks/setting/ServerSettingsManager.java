@@ -26,12 +26,16 @@ public class ServerSettingsManager {
 	private static final String CACHE_DIRECTORY = "redstonetweaks";
 	private static final String SETTINGS_PATH = "settings.txt";
 	
-	private MinecraftServer server;
+	private final MinecraftServer server;
 	
 	public ServerSettingsManager(MinecraftServer server) {
 		this.server = server;
 
 		onStartUp();
+	}
+	
+	public MinecraftServer getServer() {
+		return server;
 	}
 	
 	private void onStartUp() {
@@ -53,7 +57,7 @@ public class ServerSettingsManager {
 				if ((line = br.readLine()) == null) {
 					return;
 				}
-				if (!RedstoneTweaks.SETTINGS_VERSION.equals(RedstoneTweaksVersion.fromString(line))) {
+				if (!RedstoneTweaks.SETTINGS_VERSION.equals(RedstoneTweaksVersion.parseVersion(line))) {
 					return;
 				}
 				

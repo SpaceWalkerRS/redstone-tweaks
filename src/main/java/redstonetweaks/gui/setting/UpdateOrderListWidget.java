@@ -76,22 +76,30 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 			});
 			this.children.add(modeButton);
 			
-			this.buttonPanel1 = new ButtonPanel(5);
+			this.buttonPanel1 = new ButtonPanel();
 			this.buttonPanel1.addButton(new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText(update.getNotifierPos().getName()), (button) -> {
-				update.setNotifierPos(update.getNotifierPos().next(setting.get().getDirectionality()));
+				if (Screen.hasShiftDown()) {
+					update.setNotifierPos(update.getNotifierPos().previous(setting.get().getDirectionality()));
+				} else {
+					update.setNotifierPos(update.getNotifierPos().next(setting.get().getDirectionality()));
+				}
 				
 				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			}));
 			if (update.getMode() != BlockUpdate.Mode.NEIGHBORS) {
 				this.buttonPanel1.addButton(new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText(update.getUpdatePos().getName()), (button) -> {
-					update.setUpdatePos(update.getUpdatePos().next(setting.get().getDirectionality()));
+					if (Screen.hasShiftDown()) {
+						update.setUpdatePos(update.getUpdatePos().previous(setting.get().getDirectionality()));
+					} else {
+						update.setUpdatePos(update.getUpdatePos().next(setting.get().getDirectionality()));
+					}
 					
 					((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 				}));
 			}
 			this.children.add(buttonPanel1);
 			
-			this.buttonPanel2 = new ButtonPanel(5);
+			this.buttonPanel2 = new ButtonPanel();
 			this.buttonPanel2.addButton(new RTButtonWidget(0, 0, 20, 20, () -> new TranslatableText("+"), (button) -> {
 				if (Screen.hasShiftDown()) {
 					setting.get().insert(index, update.copy());
@@ -111,8 +119,8 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 			this.children.add(buttonPanel2);
 			
 			this.modeButton.setX(getX() + 30);
-			this.buttonPanel1.setX(this.modeButton.getX() + this.modeButton.getWidth() + 5);
-			this.buttonPanel2.setX(getX() + getWidth() - 60);
+			this.buttonPanel1.setX(this.modeButton.getX() + this.modeButton.getWidth() + 2);
+			this.buttonPanel2.setX(getX() + getWidth() - 57);
 			
 			updateButtonsActive();
 		}

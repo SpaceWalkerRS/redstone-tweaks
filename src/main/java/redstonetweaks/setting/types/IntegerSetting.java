@@ -39,4 +39,8 @@ public class IntegerSetting extends Setting<Integer> {
 	public int getMax() {
 		return maxValue;
 	}
+	
+	public int getRange() {
+		return getMax() - getMin();
+	}
 }

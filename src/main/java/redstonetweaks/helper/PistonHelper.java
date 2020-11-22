@@ -217,8 +217,8 @@ public class PistonHelper {
 		return sticky ? Tweaks.StickyPiston.SPEED_FALLING_EDGE.get() : Tweaks.NormalPiston.SPEED_FALLING_EDGE.get();
 	}
 	
-	public static boolean suppressHeadUpdatesOnExtension(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.SUPPRESS_HEAD_UPDATES_ON_EXTENSION.get() : Tweaks.NormalPiston.SUPPRESS_HEAD_UPDATES_ON_EXTENSION.get();
+	public static boolean headUpdatesOnExtension(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.HEAD_UPDATES_ON_EXTENSION.get() : Tweaks.NormalPiston.HEAD_UPDATES_ON_EXTENSION.get();
 	}
 	
 	public static TickPriority tickPriorityRisingEdge(boolean sticky) {

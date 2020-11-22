@@ -213,13 +213,13 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 				button.toggleLocked();
 				
 				setting.setLocked(button.isLocked());
-				((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(setting);
+				onClientChangeSetting();
 			});
 			this.children.add(lockButton);
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
 				setting.reset();
-				((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(setting);
+				onClientChangeSetting();
 			});
 			this.children.add(resetButton);
 			
@@ -299,7 +299,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
 					}, (button) -> {
 						bSetting.set(!bSetting.get());
-						((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(bSetting);
+						onClientChangeSetting();
 					}));
 					buttonPanel.addButton(new RTTexturedButtonWidget(0, 0, 20, 20, RTTexturedButtonWidget.WIDGETS_LOCATION, 0, 106, 256, 256, 20, (button) -> {
 						saveScrollAmount();
@@ -320,29 +320,42 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
 					}, (button) -> {
 						bSetting.set(!bSetting.get());
-						((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(bSetting);
+						onClientChangeSetting();
 					}));
 				}
 			} else
 			if (setting instanceof IntegerSetting) {
 				IntegerSetting iSetting = (IntegerSetting)setting;
-				buttonPanel.addButton(new RTTextFieldWidget(client.textRenderer, 0, 0, 100, 20, (textField) -> {
-					textField.setText(iSetting.getValueAsString());
-				}, (text) -> {
-					iSetting.setValueFromString(text);
-					((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(iSetting);
-				}));
+				if (iSetting.getRange() < 10) {
+					buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(iSetting.getValueAsString()), (slider) -> {
+						int min = iSetting.getMin();
+						int steps = (int)(slider.getValue() * (iSetting.getRange() + 1));
+						
+						iSetting.set(min + steps);
+						onClientChangeSetting();
+					}, (slider) -> {
+						double steps = iSetting.get() - iSetting.getMin();
+						slider.setValue(steps / (iSetting.getRange()));
+					}));
+				} else {
+					buttonPanel.addButton(new RTTextFieldWidget(client.textRenderer, 0, 0, 100, 20, (textField) -> {
+						textField.setText(iSetting.getValueAsString());
+					}, (text) -> {
+						iSetting.setValueFromString(text);
+						onClientChangeSetting();
+					}));
+				}
 			} else
 			if (setting instanceof TickPrioritySetting) {
 				TickPrioritySetting tSetting = (TickPrioritySetting)setting;
-				buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, 0.0D, () -> new TranslatableText(tSetting.getValueAsString()), (slider) -> {
+				buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(tSetting.getValueAsString()), (slider) -> {
 					TickPriority[] priorities = TickPriority.values();
 					
 					int min = priorities[0].getIndex();
 					int steps = (int)Math.round((priorities.length - 1) * slider.getValue());
 					
 					tSetting.set(TickPriority.byIndex(min + steps));
-					((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(tSetting);
+					onClientChangeSetting();
 				}, (slider) -> {
 					TickPriority[] priorities = TickPriority.values();
 					double steps = tSetting.get().getIndex() - priorities[0].getIndex();
@@ -377,6 +390,10 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 			buttonPanel.updateButtonLabels();
 			
 			updateButtonsActive();
+		}
+		
+		private void onClientChangeSetting() {
+			((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(setting);
 		}
 	}
 	

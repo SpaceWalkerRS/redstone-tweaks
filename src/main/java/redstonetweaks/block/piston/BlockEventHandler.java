@@ -420,7 +420,7 @@ public class BlockEventHandler {
 			break;
 		case 6:
 			if (extend) {
-				if (!PistonHelper.suppressHeadUpdatesOnExtension(sticky)) {
+				if (PistonHelper.headUpdatesOnExtension(sticky)) {
 					world.updateNeighborsAlways(headPos, Blocks.PISTON_HEAD);
 				}
 				
