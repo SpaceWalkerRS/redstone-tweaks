@@ -12,6 +12,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
+import redstonetweaks.interfaces.RTIPistonBlockEntity;
 import redstonetweaks.setting.Tweaks;
 
 public class BlockHelper {
@@ -69,9 +70,13 @@ public class BlockHelper {
 			}
 			
 			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
-			BlockState movedBlock = pistonBlockEntity.getPushedBlock();
+			BlockState movedState = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedState();
 			
-			return isStationarySlab(world, pos, movedBlock, face);
+			if (movedState.isOf(Blocks.MOVING_PISTON)) {
+				return false;
+			}
+			
+			return isStationarySlab(world, pos, movedState, face);
 		}
 		
 		return false;

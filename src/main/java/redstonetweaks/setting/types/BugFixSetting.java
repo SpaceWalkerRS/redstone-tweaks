@@ -3,7 +3,7 @@ package redstonetweaks.setting.types;
 public class BugFixSetting extends BooleanSetting {
 	
 	public BugFixSetting(String name, String description) {
-		super(name, description, false);
+		super(name, description);
 	}
 	
 	public String getBugReportURL() {

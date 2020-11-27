@@ -45,7 +45,7 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/ObserverBlock;updateNeighbors(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
 	private void onScheduledTickInjectBeforeUpdateNeighbors(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
-		if (!((RTIWorld)world).updateNeighborsNormally()) {
+		if (!((RTIWorld)world).updateNeighborsImmediately()) {
 			((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
 		}
 	}
@@ -71,8 +71,7 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 	
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
-		Tweaks.Observer.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock(), state.get(Properties.FACING).getOpposite());
-		
+		((RTIWorld)world).dispatchBlockUpdates(pos, state.get(Properties.FACING).getOpposite(), state.getBlock(), Tweaks.Observer.BLOCK_UPDATE_ORDER.get());
 		ci.cancel();
 	}
 	

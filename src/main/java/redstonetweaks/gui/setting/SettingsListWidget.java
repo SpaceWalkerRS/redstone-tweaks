@@ -2,9 +2,7 @@ package redstonetweaks.gui.setting;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -37,15 +35,21 @@ import redstonetweaks.util.TextFormatting;
 
 public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> implements ISettingGUIElement {
 	
-	private static final Map<SettingsCategory, Double> SAVED_SCROLL_AMOUNTS = new HashMap<>();
-	
 	private final SettingsCategory category;
 	
 	public SettingsListWidget(RTMenuScreen screen, SettingsCategory category, int x, int y, int width, int height) {
-		super(screen, x, y, width, height, 22);
+		super(screen, x, y, width, height, 22, category.getName());
 		
 		this.category = category;
-		
+	}
+	
+	@Override
+	protected int getMaxPosition() {
+		return (getItemCount() - 1) * itemHeight + headerHeight;
+	}
+	
+	@Override
+	protected void initList() {
 		for (SettingsPack pack : category.getSettingsPacks()) {
 			addEntry(new SettingsPackEntry(pack));
 			
@@ -61,13 +65,6 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		for (Entry entry : children()) {
 			entry.init(getEntryTitleWidth());
 		}
-		
-		setScrollAmount(SAVED_SCROLL_AMOUNTS.getOrDefault(category, 0.0D));
-	}
-	
-	@Override
-	protected int getMaxPosition() {
-		return (getItemCount() - 1) * itemHeight + headerHeight;
 	}
 	
 	@Override
@@ -121,10 +118,6 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 				}
 			}
 		}
-	}
-	
-	public void saveScrollAmount() {
-		SAVED_SCROLL_AMOUNTS.put(category, getScrollAmount());
 	}
 	
 	public class SettingsPackEntry extends Entry {

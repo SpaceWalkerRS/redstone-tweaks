@@ -71,7 +71,7 @@ public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
 	}
 	
 	@Override
-	public boolean updateNeighborsNormally() {
+	public boolean updateNeighborsImmediately() {
 		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
 		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || Tweaks.Global.SHOW_NEIGHBOR_UPDATES.get());
 	}

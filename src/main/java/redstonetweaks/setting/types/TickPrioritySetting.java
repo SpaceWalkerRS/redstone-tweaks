@@ -4,16 +4,12 @@ import net.minecraft.world.TickPriority;
 
 public class TickPrioritySetting extends Setting<TickPriority> {
 	
-	public TickPrioritySetting(String name, String description, TickPriority defaultValue) {
-		super(name, description, defaultValue);
+	public TickPrioritySetting(String name, String description) {
+		super(name, description, TickPriority.NORMAL);
 	}
 	
 	@Override
-	public void setValueFromString(String string) {
-		try {
-			set(TickPriority.valueOf(string));
-		} catch (Exception e) {
-			
-		}
+	public TickPriority stringToValue(String string) {
+		return TickPriority.valueOf(string);
 	}
 }

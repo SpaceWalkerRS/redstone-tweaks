@@ -73,6 +73,7 @@
 	"server.RedstoneWireBlockMixin",
 	"server.RepeaterBlockMixin",
 	"server.RespawnAnchorBlockMixin",
+	"server.SandBlockMixin",
 	"server.ScaffoldingBlockMixin",
 	"server.ScreenHandlerMixin",
 	"server.SeagrassBlockMixin",

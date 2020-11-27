@@ -19,7 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-
+import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(RedstoneOreBlock.class)
@@ -49,14 +49,14 @@ public abstract class RedstoneOreBlockMixin extends AbstractBlock {
 	@Inject(method = "light", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private static void onLightInjectAfterSetBlockState(BlockState state, World world, BlockPos pos, CallbackInfo ci) {
 		if (Tweaks.RedstoneOre.POWER_STRONG.get() > 0) {
-			Tweaks.RedstoneOre.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
+			updateNeighbors(world, pos, state);
 		}
 	}
 	
 	@Inject(method = "randomTick", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onRandomTickInjectAfterSetBlockState(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		if (Tweaks.RedstoneOre.POWER_STRONG.get() > 0) {
-			Tweaks.RedstoneOre.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
+			updateNeighbors(world, pos, state);
 		}
 	}
 	
@@ -87,5 +87,9 @@ public abstract class RedstoneOreBlockMixin extends AbstractBlock {
 		} else {
 			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Tweaks.RedstoneOre.TICK_PRIORITY.get());
 		}
+	}
+	
+	private static void updateNeighbors(World world, BlockPos pos, BlockState state) {
+		((RTIWorld)world).dispatchBlockUpdates(pos, null, state.getBlock(), Tweaks.RedstoneOre.BLOCK_UPDATE_ORDER.get());
 	}
 }

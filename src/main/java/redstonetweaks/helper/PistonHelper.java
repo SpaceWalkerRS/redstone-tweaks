@@ -139,10 +139,13 @@ public class PistonHelper {
 		if (redstonetweaks.setting.Tweaks.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER)) {
 			return PistonBehavior.NORMAL;
 		}
-		if (PistonHelper.movableWhenExtended(false) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.DEFAULT) {
+		if (movableWhenExtended(false) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.DEFAULT) {
 			return PistonBehavior.NORMAL;
 		}
-		if (PistonHelper.movableWhenExtended(true) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY) {
+		if (movableWhenExtended(true) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY) {
+			return PistonBehavior.NORMAL;
+		}
+		if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() && state.isOf(Blocks.MOVING_PISTON)) {
 			return PistonBehavior.NORMAL;
 		}
 		
@@ -159,6 +162,20 @@ public class PistonHelper {
 		}
 		
 		return true;
+	}
+	
+	public static BlockState getStateToMove(World world, BlockPos pos) {
+		BlockState state = world.getBlockState(pos);
+		
+		if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() && state.isOf(Blocks.MOVING_PISTON)) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if (blockEntity instanceof PistonBlockEntity) {
+				state = ((RTIPistonBlockEntity)blockEntity).getMovedState();
+			}
+		}
+		
+		return state;
 	}
 	
 	public static boolean doBlockDropping() {

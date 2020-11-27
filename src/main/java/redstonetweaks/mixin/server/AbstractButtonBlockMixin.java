@@ -27,7 +27,7 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
+import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.UpdateOrder;
 
@@ -104,8 +104,7 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 	
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(BlockState state, World world, BlockPos pos, CallbackInfo ci) {
-		updateOrder().dispatchBlockUpdates(world, pos, state.getBlock(), getDirection(state).getOpposite());
-		
+		((RTIWorld)world).dispatchBlockUpdates(pos, getDirection(state).getOpposite(), state.getBlock(), updateOrder());
 		ci.cancel();
 	}
 	

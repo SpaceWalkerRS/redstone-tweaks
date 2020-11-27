@@ -24,6 +24,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import redstonetweaks.block.PowerBlockEntity;
 import redstonetweaks.interfaces.RTIPressurePlate;
+import redstonetweaks.interfaces.RTIWorld;
 
 @Mixin(AbstractPressurePlateBlock.class)
 public abstract class AbstractPressurePlateBlockMixin extends Block {
@@ -75,8 +76,7 @@ public abstract class AbstractPressurePlateBlockMixin extends Block {
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, CallbackInfo ci) {
 		BlockState state = world.getBlockState(pos);
-		((RTIPressurePlate)this).updateOrder(state).dispatchBlockUpdates(world, pos, state.getBlock());
-		
+		((RTIWorld)world).dispatchBlockUpdates(pos, null, state.getBlock(), ((RTIPressurePlate)this).updateOrder(state));
 		ci.cancel();
 	}
 	

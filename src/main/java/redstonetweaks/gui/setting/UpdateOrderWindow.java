@@ -96,7 +96,7 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 		
 		setHeaderHeight(55);
 		
-		addUpdateButton = new RTButtonWidget(getX() + (getWidth() - 100) / 2, getY() + getHeaderHeight() + 4, 100, 20, () -> new TranslatableText("Add Block Update"), (button) -> {
+		addUpdateButton = new RTButtonWidget(getX() + (getWidth() - 100) / 2, getY() + getHeaderHeight() + 4, 100, 20, () -> new TranslatableText("Add Update"), (button) -> {
 			setting.get().add(RelativePos.SELF, RelativePos.WEST);
 			button.visible = false;
 			
@@ -108,6 +108,7 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 		updateButtonsActive();
 		
 		list = new UpdateOrderListWidget(screen, getX() + 2, getY() + getHeaderHeight(), getWidth() - 4, getHeight() - getHeaderHeight() - 18, category, setting);
+		list.init();
 		addChild(list);
 	}
 	

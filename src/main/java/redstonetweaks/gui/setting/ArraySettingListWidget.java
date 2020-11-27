@@ -25,11 +25,14 @@ public class ArraySettingListWidget extends RTListWidget<ArraySettingListWidget.
 	private final ArraySetting<?, ?> setting;
 	
 	public ArraySettingListWidget(RTMenuScreen screen, int x, int y, int width, int height, SettingsCategory category, ArraySetting<?, ?> setting) {
-		super(screen, x, y, width, height, 22);
+		super(screen, x, y, width, height, 22, setting.getId());
 		
 		this.category = category;
 		this.setting = setting;
-		
+	}
+	
+	@Override
+	protected void initList() {
 		for (int index = 0; index < setting.getSize(); index++) {
 			addEntry(new Entry(index));
 		}

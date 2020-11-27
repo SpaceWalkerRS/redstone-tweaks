@@ -35,6 +35,7 @@ public class ArraySettingWindow extends RTWindow implements ISettingGUIElement {
 	@Override
 	protected void initContents() {
 		list = new ArraySettingListWidget(screen, getX(), getY() + getHeaderHeight(), getWidth(), getHeight() - getHeaderHeight(), category, setting);
+		list.init();
 		addChild(list);
 	}
 	

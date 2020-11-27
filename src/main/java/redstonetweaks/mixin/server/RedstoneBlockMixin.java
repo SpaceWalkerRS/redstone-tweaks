@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-
+import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(RedstoneBlock.class)
@@ -34,7 +34,7 @@ public abstract class RedstoneBlockMixin extends AbstractBlock {
 	@Override
 	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
 		if (Tweaks.RedstoneBlock.POWER_STRONG.get() > 0) {
-			Tweaks.RedstoneBlock.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
+			updateNeighbors(world, pos);
 		}
 	}
 	
@@ -42,8 +42,12 @@ public abstract class RedstoneBlockMixin extends AbstractBlock {
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
 		if (!state.isOf(newState.getBlock())) {
 			if (Tweaks.RedstoneBlock.POWER_STRONG.get() > 0) {
-				Tweaks.RedstoneBlock.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
+				updateNeighbors(world, pos);
 			}
 		}
+	}
+	
+	private void updateNeighbors(World world, BlockPos pos) {
+		((RTIWorld)world).dispatchBlockUpdates(pos, null, (RedstoneBlock)(Object)this, Tweaks.RedstoneBlock.BLOCK_UPDATE_ORDER.get());
 	}
 }

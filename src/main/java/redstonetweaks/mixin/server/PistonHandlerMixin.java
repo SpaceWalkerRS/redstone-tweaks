@@ -118,6 +118,16 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		return PistonBlock.isMovable(state, world, blockPos, direction, canBreak, pistonDir) && (retracted || !SlabHelper.isSlab(state) || PistonHelper.canSlabStickTo(state, direction));
 	}
 	
+	@Redirect(method = "calculatePush", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
+	private BlockState onCalculatePushRedirectGetBlockState1(World world, BlockPos pos) {
+		return PistonHelper.getStateToMove(world, pos);
+	}
+	
+	@Redirect(method = "tryMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
+	private BlockState onTryMoveRedirectGetBlockState(World world, BlockPos pos) {
+		return PistonHelper.getStateToMove(world, pos);
+	}
+	
 	private boolean alreadyMoved;
 	
 	@Inject(method = "tryMove", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Ljava/util/List;contains(Ljava/lang/Object;)Z"))
@@ -167,7 +177,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	@Inject(method = "tryMove", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
 	private void onTryMoveInjectBeforeIsAdjacentBlockStuck(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState behindState, Block block, int i, BlockPos behindPos) {
 		BlockPos blockPos = behindPos.offset(motionDirection);
-		BlockState blockState = world.getBlockState(blockPos);
+		BlockState blockState = PistonHelper.getStateToMove(world, blockPos);
 		isAdjacentBlockStuck = isAdjacentBlockStuck(blockPos, blockState, behindPos, behindState, motionDirection.getOpposite());
 		
 		if (Tweaks.Global.MERGE_SLABS.get() && isAdjacentBlockStuck && SlabHelper.isSlab(behindState)) {
@@ -240,6 +250,11 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	private int pushLimit(int oldPushLimit) {
 		return sticky ? Tweaks.StickyPiston.PUSH_LIMIT.get() : Tweaks.NormalPiston.PUSH_LIMIT.get();
 	}
+	
+	@Redirect(method = "canMoveAdjacentBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
+	private BlockState onCanMoveAdjacentBlockRedirectGetBlockState(World world, BlockPos pos) {
+		return PistonHelper.getStateToMove(world, pos);
+	}
 
 	@Inject(method = "canMoveAdjacentBlock", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/piston/PistonHandler;isAdjacentBlockStuck(Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"))
 	private void onCanMoveAdjacentBlockInjectBeforeIsAdjacentBlockStuck(BlockPos pos, CallbackInfoReturnable<Boolean> cir, BlockState pullingState, Direction[] directions, int len, int index, Direction dir, BlockPos adjacentPos, BlockState adjacentState) {
@@ -263,7 +278,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		if (block == Blocks.SLIME_BLOCK || block == Blocks.HONEY_BLOCK) {
 			return true;
 		}
-		if (Tweaks.StickyPiston.SUPER_STICKY.get() && block == Blocks.STICKY_PISTON) {
+		if (Tweaks.StickyPiston.SUPER_STICKY.get() && (block == Blocks.STICKY_PISTON || block == Blocks.PISTON_HEAD)) {
 			return true;
 		}
 		if (Tweaks.Global.CHAINSTONE.get() && block == Blocks.CHAIN) {
@@ -294,8 +309,20 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			return true;
 		}
 		
-		if (Tweaks.StickyPiston.SUPER_STICKY.get() && state.isOf(Blocks.STICKY_PISTON)) {
-			return dir == state.get(Properties.FACING);
+		if (Tweaks.StickyPiston.SUPER_STICKY.get()) {
+			if (state.isOf(Blocks.STICKY_PISTON)) {
+				return dir == state.get(Properties.FACING);
+			}
+			if (state.isOf(Blocks.PISTON_HEAD)) {
+				Direction facing = state.get(Properties.FACING);
+				
+				if (dir == facing) {
+					return state.get(Properties.PISTON_TYPE) == PistonType.STICKY;
+				}
+				if (dir == facing.getOpposite()) {
+					return adjacentState.getBlock() instanceof PistonBlock;
+				}
+			}
 		}
 		if (Tweaks.Global.CHAINSTONE.get() && state.isOf(Blocks.CHAIN)) {
 			Direction.Axis axis = state.get(Properties.AXIS);

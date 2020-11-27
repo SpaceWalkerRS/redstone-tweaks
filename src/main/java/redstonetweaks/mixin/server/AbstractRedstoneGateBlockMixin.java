@@ -29,9 +29,9 @@ import net.minecraft.world.WorldView;
 
 import redstonetweaks.helper.RedstoneWireHelper;
 import redstonetweaks.interfaces.RTIBlock;
-import redstonetweaks.interfaces.RTIWorld;
-import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.interfaces.RTIRedstoneDiode;
+import redstonetweaks.interfaces.RTIServerWorld;
+import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.UnfinishedEvent.Source;
 import redstonetweaks.world.common.UpdateOrder;
@@ -55,7 +55,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 			world.setBlockState(pos, newState, 2);
 			
 			if (shouldBePowered != isReceivingPower) {
-				if (((RTIWorld)world).updateNeighborsNormally()) {
+				if (((RTIWorld)world).updateNeighborsImmediately()) {
 					scheduleTickOnScheduledTick(world, pos, newState, random);
 				} else {
 					((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, newState, pos, 0);
@@ -127,7 +127,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	@Inject(method = "updateTarget", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateTargetInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
 		UpdateOrder updateOrder = state.isOf(Blocks.COMPARATOR) ? Tweaks.Comparator.BLOCK_UPDATE_ORDER.get() : Tweaks.Repeater.BLOCK_UPDATE_ORDER.get();
-		updateOrder.dispatchBlockUpdates(world, pos, state.getBlock(), state.get(Properties.HORIZONTAL_FACING).getOpposite());
+		((RTIWorld)world).dispatchBlockUpdates(pos, state.get(Properties.HORIZONTAL_FACING).getOpposite(), state.getBlock(), updateOrder);
 		
 		ci.cancel();
 	}

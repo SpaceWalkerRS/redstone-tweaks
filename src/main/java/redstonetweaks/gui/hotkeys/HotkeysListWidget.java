@@ -16,17 +16,23 @@ import redstonetweaks.hotkeys.RTKeyBinding;
 
 public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 	
-	private static double savedScrollAmount;
-	
 	private final HotkeysTab parent;
 	private final Hotkeys hotkeys;
 	
 	public HotkeysListWidget(HotkeysTab parent, Hotkeys hotkeys, int x, int y, int width, int height) {
-		super(parent.screen, x, y, width, height, 22);
+		super(parent.screen, x, y, width, height, 22, "Hotkeys");
 		
 		this.parent = parent;
 		this.hotkeys = hotkeys;
-		
+	}
+	
+	@Override
+	protected int getMaxPosition() {
+		return (getItemCount() - 1) * itemHeight + headerHeight;
+	}
+	
+	@Override
+	protected void initList() {
 		for (RTKeyBinding keyBinding : hotkeys.getKeyBindings()) {
 			addEntry(new Entry(keyBinding));
 			
@@ -36,22 +42,11 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 		for (Entry entry : children()) {
 			entry.init(getEntryTitleWidth());
 		}
-		
-		setScrollAmount(savedScrollAmount);
-	}
-	
-	@Override
-	protected int getMaxPosition() {
-		return (getItemCount() - 1) * itemHeight + headerHeight;
 	}
 	
 	@Override
 	protected void filterEntries(String query) {
 
-	}
-	
-	public void saveScrollAmount() {
-		savedScrollAmount = getScrollAmount();
 	}
 	
 	public void onHotkeyChanged(RTKeyBinding keyBinding) {

@@ -1,14 +1,11 @@
 package redstonetweaks.helper;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
-import redstonetweaks.util.RelativePos;
 
 public class WorldHelper {
 	
@@ -28,9 +25,5 @@ public class WorldHelper {
 		}
 		
 		return false;
-	}
-	
-	public static void updateNeighborsExcept(World world, BlockPos notifierPos, Block sourceBlock, RelativePos except) {
-		Tweaks.Global.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdatesExcept(world, notifierPos, sourceBlock, except);
 	}
 }

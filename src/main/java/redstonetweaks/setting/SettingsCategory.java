@@ -1,7 +1,9 @@
 package redstonetweaks.setting;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
 public class SettingsCategory {
@@ -11,6 +13,10 @@ public class SettingsCategory {
 	private final List<SettingsPack> settingsPacks;
 	
 	private boolean locked;
+	
+	public SettingsCategory(String name) {
+		this(name, new ArrayList<>(), new ArrayList<>());
+	}
 	
 	public SettingsCategory(String name, List<ISetting> settings, List<SettingsPack> packs) {
 		this.name = name;
@@ -36,6 +42,10 @@ public class SettingsCategory {
 	
 	public void setLocked(boolean locked) {
 		this.locked = locked;
+	}
+	
+	public void applyPreset(Preset preset) {
+		settings.forEach((setting) -> setting.applyPreset(preset));
 	}
 	
 	public void resetAll() {

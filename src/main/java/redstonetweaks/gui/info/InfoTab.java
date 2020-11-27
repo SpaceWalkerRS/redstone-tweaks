@@ -34,11 +34,11 @@ public class InfoTab extends RTMenuTab {
 		info.put("Server", new ArrayList<>());
 		info.put("Credits", new ArrayList<>());
 		
-		info.get("Client").add(new TranslatableText("Mod Version: " + RedstoneTweaks.MOD_VERSION.toString()));
+		info.get("Client").add(new TranslatableText("Mod Version: " + RedstoneTweaks.MOD_VERSION));
 		
-		RedstoneTweaksVersion serverVersion = ((RTIMinecraftClient)this.screen.client).getServerInfo().getModVersion();
+		RedstoneTweaksVersion serverVersion = ((RTIMinecraftClient)screen.client).getServerInfo().getModVersion();
 		if (serverVersion.isValid()) {
-			info.get("Server").add(new TranslatableText("Mod Version: " + serverVersion.toString()));
+			info.get("Server").add(new TranslatableText("Mod Version: " + serverVersion));
 		} else {
 			info.get("Server").add(new TranslatableText("Not installed!"));
 		}

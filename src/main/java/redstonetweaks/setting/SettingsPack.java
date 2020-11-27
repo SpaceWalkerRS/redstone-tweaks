@@ -1,5 +1,6 @@
 package redstonetweaks.setting;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import redstonetweaks.setting.types.ISetting;
@@ -8,6 +9,10 @@ public class SettingsPack {
 	
 	private final String name;
 	private final List<ISetting> settings;
+	
+	public SettingsPack(String name) {
+		this(name, new ArrayList<>());
+	}
 	
 	public SettingsPack(String name, List<ISetting> settings) {
 		this.name = name;

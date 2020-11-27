@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
-
+import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(TripwireHookBlock.class)
@@ -36,8 +36,7 @@ public class TripwireHookBlockMixin {
 	
 	@Inject(method = "updateNeighborsOnAxis", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsOnAxisInjectAtHead(World world, BlockPos pos, Direction dir, CallbackInfo ci) {
-		Tweaks.TripwireHook.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, world.getBlockState(pos).getBlock(), dir.getOpposite());
-		
+		((RTIWorld)world).dispatchBlockUpdates(pos, dir.getOpposite(), world.getBlockState(pos).getBlock(), Tweaks.TripwireHook.BLOCK_UPDATE_ORDER.get());
 		ci.cancel();
 	}
 }

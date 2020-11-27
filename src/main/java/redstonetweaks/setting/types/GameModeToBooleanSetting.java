@@ -4,8 +4,13 @@ import net.minecraft.world.GameMode;
 
 public class GameModeToBooleanSetting extends ArraySetting<GameMode, Boolean> {
 	
-	public GameModeToBooleanSetting(String name, String description, Boolean[] defaultValues) {
-		super(name, description, defaultValues);
+	public GameModeToBooleanSetting(String name, String description) {
+		super(name, description, new Boolean[GameMode.values().length]);
+	}
+	
+	@Override
+	public Boolean[] getEmptyArray(int size) {
+		return new Boolean[size];
 	}
 	
 	@Override

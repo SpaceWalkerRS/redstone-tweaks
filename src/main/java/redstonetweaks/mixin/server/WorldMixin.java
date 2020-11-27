@@ -35,6 +35,7 @@ import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.MutableWorldProperties;
@@ -51,7 +52,13 @@ import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.packet.TickBlockEntityPacket;
 import redstonetweaks.setting.Tweaks;
-import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
+import redstonetweaks.util.RelativePos;
+import redstonetweaks.world.common.BlockUpdate;
+import redstonetweaks.world.common.ComparatorUpdate;
+import redstonetweaks.world.common.NeighborUpdate;
+import redstonetweaks.world.common.AbstractNeighborUpdate;
+import redstonetweaks.world.common.ShapeUpdate;
+import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(World.class)
 public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
@@ -77,6 +84,10 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Shadow public abstract void removeBlockEntity(BlockPos pos);
 	@Shadow public abstract void updateComparators(BlockPos pos, Block block);
 	
+	private World world() {
+		return (World)(Object)this;
+	}
+	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(MutableWorldProperties properties, RegistryKey<World> registryKey, final DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l, CallbackInfo ci) {
 		pendingMovedBlockEntities = new ArrayList<>();
@@ -99,35 +110,26 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Inject(method = "updateNeighborsAlways", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsAlwaysInjectAtHead(BlockPos pos, Block block, CallbackInfo ci) {
-		Tweaks.Global.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates((World)(Object)this, pos, block);
-		
+		if (!isClient()) {
+			dispatchBlockUpdatesAround(pos, pos, null, block);
+		}
 		ci.cancel();
 	}
 	
-	@Redirect(method = "updateNeighbor", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;neighborUpdate(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;Z)V"))
-	private void onUpdateNeighborRedirectNeighborUpdate(BlockState blockState, World world, BlockPos pos, Block sourceBlock, BlockPos notifierPos, boolean notify) {
-		if (Tweaks.Global.DO_BLOCK_UPDATES.get()) {
-			if (updateNeighborsNormally()) {
-				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
-			} else {
-				if (!world.isClient()) {
-					((RTIServerWorld)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, null, UpdateType.BLOCK_UPDATE);
-				}
-			}
+	@Inject(method = "updateNeighbor", cancellable = true, at = @At(value = "HEAD"))
+	private void onUpdateNeighborInjectAtHead(BlockPos pos, Block sourceBlock, BlockPos notifierPos, CallbackInfo ci) {
+		if (!isClient()) {
+			dispatchBlockUpdate(false, new BlockUpdate(pos, notifierPos, notifierPos, getBlockState(pos), sourceBlock));
 		}
+		ci.cancel();
 	}
 	
-	@Redirect(method = "updateComparators", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;neighborUpdate(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;Z)V"))
-	private void onUpdateComparatorsRedirectNeighborUpdate(BlockState blockState, World world, BlockPos pos, Block sourceBlock, BlockPos notifierPos, boolean notify) {
-		if (Tweaks.Global.DO_COMPARATOR_UPDATES.get()) {
-			if (updateNeighborsNormally()) {
-				blockState.neighborUpdate(world, pos, sourceBlock, notifierPos, notify);
-			} else {
-				if (!world.isClient) {
-					((RTIServerWorld)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, null, UpdateType.COMPARATOR_UPDATE);
-				}
-			}
+	@Inject(method = "updateComparators", cancellable = true, at = @At(value = "HEAD"))
+	private void onUpdateComparatorsInjectAtHead(BlockPos pos, Block block, CallbackInfo ci) {
+		if (!isClient()) {
+			dispatchComparatorUpdatesAround(pos, pos, null, block);
 		}
+		ci.cancel();
 	}
 	
 	@Inject(method = "tickBlockEntities", at = @At(value = "RETURN"))
@@ -140,7 +142,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
 			BlockState state = getBlockState(pos);
 			if (state.getBlock() instanceof StairsBlock) {
-				cir.setReturnValue(StairsHelper.getReceivedStrongRedstonePower((World)(Object)this, pos, state));
+				cir.setReturnValue(StairsHelper.getReceivedStrongRedstonePower(world(), pos, state));
 				cir.cancel();
 			}
 		}
@@ -174,7 +176,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Override
 	public void addMovedBlockEntity(BlockPos pos, BlockEntity blockEntity) {
 		blockEntity.cancelRemoval();
-		blockEntity.setLocation((World)(Object)this, pos);
+		blockEntity.setLocation(world(), pos);
 		
 		if (iteratingTickingBlockEntities) {
 			for (BlockEntity pendingBlockEntity : pendingMovedBlockEntities) {
@@ -189,6 +191,11 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	}
 	
 	@Override
+	public BlockEventHandler getBlockEventHandler(BlockPos pos) {
+		return blockEventHandlers.get(pos);
+	}
+	
+	@Override
 	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler) {
 		return blockEventHandlers.putIfAbsent(blockEventHandler.getPos(), blockEventHandler) == null;
 	}
@@ -196,11 +203,6 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Override
 	public void removeBlockEventHandler(BlockPos pos) {
 		blockEventHandlers.remove(pos);
-	}
-	
-	@Override
-	public BlockEventHandler getBlockEventHandler(BlockPos pos) {
-		return blockEventHandlers.get(pos);
 	}
 	
 	@Override
@@ -288,6 +290,156 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 				getWorldChunk(pos).removeBlockEntity(pos);
 			}
 		}
+	}
+	
+	@Override
+	public void dispatchBlockUpdates(BlockPos sourcePos, Direction sourceFacing, Block sourceBlock, UpdateOrder updateOrder) {
+		for (AbstractNeighborUpdate update : updateOrder.getUpdates(sourcePos, sourceFacing)) {
+			BlockPos notifierPos = update.getNotifierPos().toBlockPos(sourcePos, sourceFacing);
+			
+			switch (update.getMode()) {
+			case NEIGHBORS:
+				dispatchBlockUpdatesAround(notifierPos, sourcePos, sourceFacing, sourceBlock);
+				break;
+			case NEIGHBORS_EXCEPT:
+				dispatchBlockUpdatesAroundExcept(notifierPos, sourcePos, sourceFacing, sourceBlock, update.getUpdatePos());
+				break;
+			case SINGLE_UPDATE:
+				dispatchBlockUpdate(false, update.toBlockUpdate(world(), sourcePos, sourcePos, sourceFacing, sourceBlock));
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	
+	@Override
+	public void dispatchBlockUpdatesAround(BlockPos notifierPos, BlockPos sourcePos, Direction sourceFacing, Block sourceBlock) {
+		for (AbstractNeighborUpdate update : Tweaks.Global.BLOCK_UPDATE_ORDER.get().getUpdates(notifierPos, sourceFacing)) {
+			dispatchBlockUpdate(false, update.toBlockUpdate(world(), notifierPos, sourcePos, sourceFacing, sourceBlock));
+		}
+	}
+	
+	@Override
+	public void dispatchBlockUpdatesAroundExcept(BlockPos notifierPos, BlockPos sourcePos, Direction sourceFacing, Block sourceBlock, RelativePos except) {
+		for (AbstractNeighborUpdate update : Tweaks.Global.BLOCK_UPDATE_ORDER.get().getUpdates(notifierPos, sourceFacing)) {
+			if (!update.getUpdatePos().equals(except)) {
+				dispatchBlockUpdate(false, update.toBlockUpdate(world(), notifierPos, sourcePos, sourceFacing, sourceBlock));
+			}
+		}
+	}
+	
+	@Override
+	public void dispatchBlockUpdate(boolean scheduled, BlockUpdate blockUpdate) {
+		if (Tweaks.Global.DO_BLOCK_UPDATES.get()) {
+			if (scheduled || updateNeighborsImmediately()) {
+				BlockPos pos = blockUpdate.getUpdatePos();
+				BlockPos notifierPos = blockUpdate.getNotifierPos();
+				BlockState state = blockUpdate.getState();
+				Block sourceBlock = blockUpdate.getSourceBlock();
+				
+				stateNeighborUpdate(state, pos, notifierPos, sourceBlock);
+			} else if (!isClient()) {
+				scheduleNeighborUpdate(blockUpdate);
+			}
+		}
+	}
+	
+	@Override
+	public void dispatchComparatorUpdatesAround(BlockPos notifierPos, BlockPos sourcePos, Direction sourceFacing, Block sourceBlock) {
+		for (AbstractNeighborUpdate update : Tweaks.Global.COMPARATOR_UPDATE_ORDER.get().getUpdates(notifierPos, sourceFacing)) {
+			ComparatorUpdate comparatorUpdate = update.toComparatorUpdate(world(), notifierPos, sourcePos, sourceFacing, sourceBlock);
+			
+			if (comparatorUpdate != null) {
+				dispatchComparatorUpdate(false, comparatorUpdate);
+			}
+		}
+	}
+	
+	@Override
+	public void dispatchComparatorUpdate(boolean scheduled, ComparatorUpdate comparatorUpdate) {
+		if (Tweaks.Global.DO_COMPARATOR_UPDATES.get()) {
+			if (scheduled || updateNeighborsImmediately()) {
+				BlockPos pos = comparatorUpdate.getUpdatePos();
+				BlockPos notifierPos = comparatorUpdate.getNotifierPos();
+				BlockState state = comparatorUpdate.getState();
+				Block sourceBlock = comparatorUpdate.getSourceBlock();
+				
+				if (state.isOf(Blocks.COMPARATOR)) {
+					stateNeighborUpdate(state, pos, notifierPos, sourceBlock);
+				}
+			} else if (!isClient()) {
+				scheduleNeighborUpdate(comparatorUpdate);
+			}
+		}
+	}
+	
+	private void stateNeighborUpdate(BlockState state, BlockPos pos, BlockPos notifierPos, Block sourceBlock) {
+		try {
+			state.neighborUpdate(world(), pos, sourceBlock, notifierPos, false);
+		} catch (Throwable t) {
+			CrashReport crashReport = CrashReport.create(t, "Exception while updating neighbours");
+			CrashReportSection crashReportSection = crashReport.addElement("Block being updated");
+			crashReportSection.add("Source block type", () -> {
+				try {
+					return String.format("ID #%s (%s // %s)", Registry.BLOCK.getId(sourceBlock), sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
+				} catch (Throwable t2) {
+					return "ID #" + Registry.BLOCK.getId(sourceBlock);
+				}
+			});
+			CrashReportSection.addBlockInfo(crashReportSection, pos, state);
+			
+			throw new CrashException(crashReport);
+		}
+	}
+	
+	@Override
+	public void dispatchShapeUpdatesAround(BlockPos notifierPos, BlockPos sourcePos, BlockState notifierState, int flags, int depth) {
+		for (AbstractNeighborUpdate update : Tweaks.Global.SHAPE_UPDATE_ORDER.get().getUpdates(notifierPos, null)) {
+			dispatchShapeUpdate(false, update.toShapeUpdate(world(), notifierPos, notifierPos, notifierState, flags, depth));
+		}
+	}
+	
+	@Override
+	public void dispatchShapeUpdate(boolean scheduled, ShapeUpdate shapeUpdate) {
+		if (Tweaks.Global.DO_SHAPE_UPDATES.get()) {
+			if (scheduled || updateNeighborsImmediately()) {
+				BlockPos pos = shapeUpdate.getUpdatePos();
+				BlockPos notifierPos = shapeUpdate.getNotifierPos();
+				BlockState state = shapeUpdate.getState();
+				BlockState notifierState = shapeUpdate.getNotifierState();
+				Direction dir = shapeUpdate.getDirection();
+				int flags  = shapeUpdate.getFlags();
+				int depth = shapeUpdate.getDepth();
+				
+				try {
+					BlockState newState = state.getStateForNeighborUpdate(dir, notifierState, world(), pos, notifierPos);
+					Block.replace(state, newState, world(), pos, flags, depth);
+				} catch (Throwable t) {
+					Block sourceBlock = notifierState.getBlock();
+					
+					CrashReport crashReport = CrashReport.create(t, "Exception while updating neighbours");
+					CrashReportSection crashReportSection = crashReport.addElement("Block being updated");
+					crashReportSection.add("Source block type", () -> {
+						try {
+							return String.format("ID #%s (%s // %s)", Registry.BLOCK.getId(sourceBlock), sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
+						} catch (Throwable var2) {
+							return "ID #" + Registry.BLOCK.getId(sourceBlock);
+						}
+					});
+					CrashReportSection.addBlockInfo(crashReportSection, pos, state);
+					
+					throw new CrashException(crashReport);
+				}
+			} else if (!isClient()) {
+				scheduleNeighborUpdate(shapeUpdate);
+			}
+		}
+		
+	}
+	
+	private void scheduleNeighborUpdate(NeighborUpdate neighborUpdate) {
+		((RTIServerWorld)this).getNeighborUpdateScheduler().schedule(neighborUpdate);
 	}
 	
 	private void handlePendingBlockEntities() {

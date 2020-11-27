@@ -25,7 +25,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
-
+import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(LeverBlock.class)
@@ -72,8 +72,7 @@ public abstract class LeverBlockMixin extends WallMountedBlock {
 	
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(BlockState state, World world, BlockPos pos, CallbackInfo ci) {
-		Tweaks.Lever.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock(), getDirection(state).getOpposite());
-		
+		((RTIWorld)world).dispatchBlockUpdates(pos, getDirection(state).getOpposite(), state.getBlock(), Tweaks.Lever.BLOCK_UPDATE_ORDER.get());
 		ci.cancel();
 	}
 	

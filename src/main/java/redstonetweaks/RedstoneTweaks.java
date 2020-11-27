@@ -6,6 +6,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.util.registry.Registry;
 import redstonetweaks.block.PowerBlockEntity;
 import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.preset.Presets;
 
 public class RedstoneTweaks implements ModInitializer {
 	
@@ -20,5 +21,8 @@ public class RedstoneTweaks implements ModInitializer {
 		POWER_BLOCK_ENTITY_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, "redstonetweaks", BlockEntityType.Builder.create(PowerBlockEntity::new, Blocks.REDSTONE_WIRE, Blocks.TARGET, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE).build(null));
 		
 		Settings.init();
+		Presets.init();
+		
+		System.out.println("Initialized Redstone Tweaks " + MOD_VERSION);
 	}
 }

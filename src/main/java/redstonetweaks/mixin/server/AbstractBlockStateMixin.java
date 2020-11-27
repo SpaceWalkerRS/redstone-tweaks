@@ -15,9 +15,6 @@ import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.interfaces.RTIWorld;
-import redstonetweaks.interfaces.RTIServerWorld;
-import redstonetweaks.setting.Tweaks;
-import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
 
 @Mixin(AbstractBlockState.class)
 public abstract class AbstractBlockStateMixin {
@@ -43,19 +40,7 @@ public abstract class AbstractBlockStateMixin {
 
 	@Inject(method = "updateNeighbors(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;II)V", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(WorldAccess world, BlockPos pos, int flags, int maxUpdateDepth, CallbackInfo ci) {
-		if (Tweaks.Global.DO_SHAPE_UPDATES.get()) {
-			if (!((RTIWorld)world).updateNeighborsNormally()) {
-				if (!world.isClient()) {
-					for (Direction direction : BlockHelper.FACINGS) {
-						BlockPos neighborPos = pos.offset(direction);
-						((RTIServerWorld)world).getNeighborUpdateScheduler().schedule(neighborPos, pos, direction.getOpposite(), flags, maxUpdateDepth, UpdateType.SHAPE_UPDATE);
-					}
-				}
-
-				ci.cancel();
-			}
-		} else {
-			ci.cancel();
-		}
+		((RTIWorld)world).dispatchShapeUpdatesAround(pos, pos, world.getBlockState(pos), flags, maxUpdateDepth);
+		ci.cancel();
 	}
 }

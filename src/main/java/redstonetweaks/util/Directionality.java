@@ -2,7 +2,7 @@ package redstonetweaks.util;
 
 public enum Directionality {
 	NONE,
-	ALL,
+	BOTH,
 	HORIZONTAL,
 	VERTICAL;
 }

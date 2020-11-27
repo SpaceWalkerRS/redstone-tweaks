@@ -1,23 +1,23 @@
 package redstonetweaks.util;
 
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 public enum RelativePos {
 	
-	SELF (0 , "self" , Directionality.NONE      , (sourcePos, forward) -> sourcePos),
-	DOWN (1 , "down" , Directionality.NONE      , (sourcePos, forward) -> sourcePos.down()),
-	UP   (2 , "up"   , Directionality.NONE      , (sourcePos, forward) -> sourcePos.up()),
-	NORTH(3 , "north", Directionality.NONE      , (sourcePos, forward) -> sourcePos.north()),
-	SOUTH(4 , "south", Directionality.NONE      , (sourcePos, forward) -> sourcePos.south()),
-	WEST (5 , "west" , Directionality.NONE      , (sourcePos, forward) -> sourcePos.west()),
-	EAST (6 , "east" , Directionality.NONE      , (sourcePos, forward) -> sourcePos.east()),
-	FRONT(7 , "front", Directionality.ALL       , (sourcePos, forward) -> sourcePos.offset(forward)),
-	BACK (8 , "back" , Directionality.ALL       , (sourcePos, forward) -> sourcePos.offset(forward.getOpposite())),
-	LEFT (9 , "left" , Directionality.HORIZONTAL, (sourcePos, forward) -> sourcePos.offset(forward.rotateYCounterclockwise())),
-	RIGHT(10, "right", Directionality.HORIZONTAL, (sourcePos, forward) -> sourcePos.offset(forward.rotateYClockwise()));
+	SELF (0 , "self" , Directionality.NONE      , (forward) -> null),
+	DOWN (1 , "down" , Directionality.NONE      , (forward) -> Direction.DOWN),
+	UP   (2 , "up"   , Directionality.NONE      , (forward) -> Direction.UP),
+	NORTH(3 , "north", Directionality.NONE      , (forward) -> Direction.NORTH),
+	SOUTH(4 , "south", Directionality.NONE      , (forward) -> Direction.SOUTH),
+	WEST (5 , "west" , Directionality.NONE      , (forward) -> Direction.WEST),
+	EAST (6 , "east" , Directionality.NONE      , (forward) -> Direction.EAST),
+	FRONT(7 , "front", Directionality.BOTH      , (forward) -> forward),
+	BACK (8 , "back" , Directionality.BOTH      , (forward) -> forward.getOpposite()),
+	LEFT (9 , "left" , Directionality.HORIZONTAL, (forward) -> forward.rotateYCounterclockwise()),
+	RIGHT(10, "right", Directionality.HORIZONTAL, (forward) -> forward.rotateYClockwise());
 	
 	private static final RelativePos[] POSITIONS;
 	
@@ -32,13 +32,13 @@ public enum RelativePos {
 	private final int index;
 	private final String name;
 	private final Directionality directionality;
-	private final BiFunction<BlockPos, Direction, BlockPos> toBlockPos;
+	private final Function<Direction, Direction> asDirection;
 	
-	private RelativePos(int index, String name, Directionality directionality, BiFunction<BlockPos, Direction, BlockPos> toBlockPos) {
+	private RelativePos(int index, String name, Directionality directionality, Function<Direction, Direction> asDirection) {
 		this.index = index;
 		this.name = name;
 		this.directionality = directionality;
-		this.toBlockPos = toBlockPos;
+		this.asDirection = asDirection;
 	}
 	
 	public int getIndex() {
@@ -59,24 +59,33 @@ public enum RelativePos {
 		return name;
 	}
 	
-	public BlockPos getPos(BlockPos sourcePos, Direction sourceFacing) {
-		return toBlockPos.apply(sourcePos, sourceFacing);
+	public Directionality getDirectionality() {
+		return directionality;
 	}
 	
-	public boolean matches(Directionality directionality) {
+	public Direction asDirection(Direction forward) {
+		return asDirection.apply(forward);
+	}
+	
+	public BlockPos toBlockPos(BlockPos pos, Direction forward) {
+		Direction dir = asDirection(forward);
+		return dir == null ? pos : pos.offset(dir);
+	}
+	
+	public boolean isValid(Directionality directionality) {
 		if (this.directionality == directionality || this.directionality == Directionality.NONE) {
 			return true;
 		}
-		return directionality != Directionality.NONE && this.directionality == Directionality.ALL;
+		return directionality != Directionality.NONE && this.directionality == Directionality.BOTH;
 	}
 	
 	public RelativePos next(Directionality directionality) {
 		RelativePos nextPos = fromIndex(index + 1);
-		return nextPos.matches(directionality) ? nextPos : nextPos.next(directionality);
+		return nextPos.isValid(directionality) ? nextPos : nextPos.next(directionality);
 	}
 	
 	public RelativePos previous(Directionality directionality) {
 		RelativePos nextPos = fromIndex(index - 1);
-		return nextPos.matches(directionality) ? nextPos : nextPos.previous(directionality);
+		return nextPos.isValid(directionality) ? nextPos : nextPos.previous(directionality);
 	}
 }

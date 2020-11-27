@@ -6,10 +6,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 
 import redstonetweaks.util.Directionality;
 import redstonetweaks.util.RelativePos;
@@ -17,25 +15,25 @@ import redstonetweaks.util.RelativePos;
 public class UpdateOrder {
 	
 	private final Directionality directionality;
-	private final BlockUpdate.Mode defaultMode;
+	private final AbstractNeighborUpdate.Mode defaultMode;
 	private final boolean modeLocked;
 	
 	private int offsetX;
 	private int offsetY;
 	private int offsetZ;
 	private NotifierOrder notifierOrder;
-	private List<BlockUpdate> blockUpdates;
+	private List<AbstractNeighborUpdate> neighborUpdates;
 	
 	public UpdateOrder(Directionality directionality, NotifierOrder notifierOrder) {
-		this(directionality, notifierOrder, BlockUpdate.Mode.SINGLE_UPDATE, false);
+		this(directionality, notifierOrder, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, false);
 	}
 	
-	public UpdateOrder(Directionality directionality, NotifierOrder notifierOrder, BlockUpdate.Mode defaultMode, boolean modeLocked) {
+	public UpdateOrder(Directionality directionality, NotifierOrder notifierOrder, AbstractNeighborUpdate.Mode defaultMode, boolean modeLocked) {
 		this.directionality = directionality;
 		this.notifierOrder = notifierOrder;
 		this.defaultMode = defaultMode;
 		this.modeLocked = modeLocked;
-		this.blockUpdates = new ArrayList<>();
+		this.neighborUpdates = new ArrayList<>();
 		this.offsetX = 0;
 		this.offsetY = 0;
 		this.offsetZ = 0;
@@ -53,13 +51,13 @@ public class UpdateOrder {
 				|| order.offsetX != offsetX
 				|| order.offsetY != offsetY
 				|| order.offsetZ != offsetZ
-				|| order.blockUpdates.size() != blockUpdates.size())
+				|| order.neighborUpdates.size() != neighborUpdates.size())
 			{
 				return false;
 			}
-			for (int i = 0; i < blockUpdates.size(); i++) {
-				BlockUpdate update = blockUpdates.get(i);
-				BlockUpdate otherUpdate = order.blockUpdates.get(i);
+			for (int i = 0; i < neighborUpdates.size(); i++) {
+				AbstractNeighborUpdate update = neighborUpdates.get(i);
+				AbstractNeighborUpdate otherUpdate = order.neighborUpdates.get(i);
 				
 				if (!update.equals(otherUpdate)) {
 					return false;
@@ -83,7 +81,7 @@ public class UpdateOrder {
 		string += offsetZ + ";";
 		string += notifierOrder + ";";
 		
-		for (BlockUpdate update : getBlockUpdates()) {
+		for (AbstractNeighborUpdate update : getNeighborUpdates()) {
 			string += update + ",";
 		}
 		
@@ -92,23 +90,24 @@ public class UpdateOrder {
 	
 	public static UpdateOrder parseUpdateOrder(String string) {
 		String[] args = string.split(";");
+		int index = 0;
 		
-		Directionality directionality = Directionality.valueOf(args[0]);
-		BlockUpdate.Mode defaultMode = BlockUpdate.Mode.valueOf(args[1]);
-		boolean modeLocked = Boolean.parseBoolean(args[2]);
+		Directionality directionality = Directionality.valueOf(args[index++]);
+		AbstractNeighborUpdate.Mode defaultMode = AbstractNeighborUpdate.Mode.valueOf(args[index++]);
+		boolean modeLocked = Boolean.parseBoolean(args[index++]);
 		
-		int offsetX = Integer.parseInt(args[3]);
-		int offsetY = Integer.parseInt(args[4]);
-		int offsetZ = Integer.parseInt(args[5]);
-		NotifierOrder notifierOrder = NotifierOrder.valueOf(args[6]);
+		int offsetX = Integer.parseInt(args[index++]);
+		int offsetY = Integer.parseInt(args[index++]);
+		int offsetZ = Integer.parseInt(args[index++]);
+		NotifierOrder notifierOrder = NotifierOrder.valueOf(args[index++]);
 		
 		UpdateOrder order = new UpdateOrder(directionality, notifierOrder, defaultMode, modeLocked);
 		
 		order.setOffset(offsetX, offsetY, offsetZ);
 		
-		String[] updates = args[7].split(",");
+		String[] updates = args[index++].split(",");
 		for (int i = 0; i < args.length; i++) {
-			order.add(BlockUpdate.parseBlockUpdate(updates[i]));
+			order.add(AbstractNeighborUpdate.parseRelativeNeighborUpdate(updates[i]));
 		}
 		
 		return order;
@@ -117,8 +116,8 @@ public class UpdateOrder {
 	public UpdateOrder copy() {
 		UpdateOrder copy = new UpdateOrder(directionality, notifierOrder, defaultMode, modeLocked);
 		
-		for (BlockUpdate update : blockUpdates) {
-			copy.add(update.getMode(), update.getNotifierPos(), update.getUpdatePos());
+		for (AbstractNeighborUpdate update : neighborUpdates) {
+			copy.add(update.copy());
 		}
 		copy.setOffset(offsetX, offsetY, offsetZ);
 		
@@ -175,84 +174,94 @@ public class UpdateOrder {
 		setNotifierOrder(getNotifierOrder().next());
 	}
 	
-	public List<BlockUpdate> getBlockUpdates() {
-		return blockUpdates;
+	public List<AbstractNeighborUpdate> getNeighborUpdates() {
+		return neighborUpdates;
 	}
 	
 	public void insert(int index, RelativePos notifier, RelativePos update) {
 		insert(index, defaultMode, notifier, update);
 	}
 	
-	public void insert(int index, BlockUpdate.Mode mode, RelativePos notifier, RelativePos update) {
-		insert(index, new BlockUpdate(mode, notifier, update));
+	public void insert(int index, AbstractNeighborUpdate.Mode mode, RelativePos notifier, RelativePos update) {
+		insert(index, new AbstractNeighborUpdate(mode, update, notifier));
 	}
 	
-	public void insert(int index, BlockUpdate update) {
+	public void insert(int index, AbstractNeighborUpdate update) {
 		try {
-			blockUpdates.add(index, update);
+			getNeighborUpdates().add(index, update);
 		} catch (Exception e) {
 			
 		}
 	}
 	
 	public UpdateOrder add(RelativePos notifier, RelativePos update) {
-		insert(getBlockUpdates().size(), notifier, update);
+		insert(getNeighborUpdates().size(), notifier, update);
 		return this;
 	}
 	
-	public UpdateOrder add(BlockUpdate.Mode mode, RelativePos notifier, RelativePos update) {
-		insert(getBlockUpdates().size(), mode, notifier, update);
+	public UpdateOrder add(AbstractNeighborUpdate.Mode mode, RelativePos notifier, RelativePos update) {
+		insert(getNeighborUpdates().size(), mode, notifier, update);
 		return this;
 	}
 	
-	public UpdateOrder add(BlockUpdate update) {
-		insert(getBlockUpdates().size(), update);
+	public UpdateOrder add(AbstractNeighborUpdate update) {
+		insert(getNeighborUpdates().size(), update);
 		return this;
 	}
 	
 	public void remove(int index) {
 		try {
-			blockUpdates.remove(index);
+			getNeighborUpdates().remove(index);
 		} catch (Exception e) {
 			
 		}
 	}
 	
-	public void dispatchBlockUpdates(World world, BlockPos sourcePos, Block sourceBlock) {
-		dispatchBlockUpdates(world, sourcePos, sourceBlock, null);
+	public void moveUp(int index) {
+		swap(index, index - 1);
 	}
 	
-	public void dispatchBlockUpdates(World world, BlockPos sourcePos, Block sourceBlock, Direction sourceFacing) {
-		getUpdates(sourcePos, sourceFacing).forEach((update) -> {
-			update.removeOffset(offsetX, offsetY, offsetZ);
-			update.dispatch(world, sourceBlock);
-		});
+	public void moveDown(int index) {
+		swap(index, index + 1);
 	}
 	
-	// Only call this method from the updateNeighborsExcept method
-	public void dispatchBlockUpdatesExcept(World world, BlockPos sourcePos, Block sourceBlock, RelativePos except) {
-		for (BlockUpdate update : getUpdates(sourcePos, null)) {
-			update.removeOffset(offsetX, offsetY, offsetZ);
-			if (update.getUpdatePos() != except) {
-				update.dispatch(world, sourceBlock);
+	public void swap(int index1, int index2) {
+		if (index1 != index2 && inRange(index1) && inRange(index2)) {
+			if (index1 < index2) {
+				swapElements(index1, index2);
+			} else {
+				swapElements(index2, index1);
 			}
 		}
 	}
 	
-	protected Collection<BlockUpdate> getUpdates(BlockPos sourcePos, Direction sourceFacing) {
-		Collection<BlockUpdate> updates = (notifierOrder == NotifierOrder.LOCATIONAL) ? new HashSet<>() : new ArrayList<>();
+	private void swapElements(int index1, int index2) {
+		AbstractNeighborUpdate update1 = getNeighborUpdates().set(index1, null);
+		AbstractNeighborUpdate update2 = getNeighborUpdates().set(index2, null);
 		
-		for (BlockUpdate update : blockUpdates) {
-			BlockUpdate copy = update.copy();
+		getNeighborUpdates().set(index1, update2);
+		getNeighborUpdates().set(index2, update1);
+	}
+	
+	private boolean inRange(int index) {
+		return index >= 0 && index < getNeighborUpdates().size();
+	}
+	
+	public Collection<AbstractNeighborUpdate> getUpdates(BlockPos pos, Direction sourceFacing) {
+		Collection<AbstractNeighborUpdate> updates = (getNotifierOrder() == NotifierOrder.LOCATIONAL) ? new HashSet<>() : new ArrayList<>();
+		
+		for (AbstractNeighborUpdate update : getNeighborUpdates()) {
+			AbstractNeighborUpdate copy = update.copy();
 			
-			copy.initNotifier(sourcePos, sourceFacing);
-			copy.applyOffset(offsetX, offsetY, offsetZ);
+			if (getNotifierOrder() == NotifierOrder.LOCATIONAL) {
+				copy.setHashPos(pos, sourceFacing, offsetX, offsetY, offsetZ);
+			}
 			
 			updates.add(copy);
 		}
 		
-		if (notifierOrder == NotifierOrder.RANDOM) {
-			Collections.shuffle((List<BlockUpdate>)updates);
+		if (getNotifierOrder() == NotifierOrder.RANDOM) {
+			Collections.shuffle((List<AbstractNeighborUpdate>)updates);
 		}
 		
 		return updates;
@@ -265,15 +274,12 @@ public class UpdateOrder {
 		RANDOM(2, "Random");
 		
 		public static final NotifierOrder[] ORDERS;
-		public static final String[] NAMES;
 		
 		static {
 			ORDERS = new NotifierOrder[values().length];
-			NAMES = new String[values().length];
 			
-			for (NotifierOrder mode : NotifierOrder.values()) {
-				ORDERS[mode.index] = mode;
-				NAMES[mode.index] = mode.name;
+			for (NotifierOrder order : NotifierOrder.values()) {
+				ORDERS[order.index] = order;
 			}
 		}
 		

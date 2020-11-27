@@ -27,6 +27,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(RedstoneTorchBlock.class)
@@ -37,15 +38,14 @@ public abstract class RedstoneTorchBlockMixin {
 	
 	@Inject(method = "onBlockAdded", cancellable = true, at = @At(value = "HEAD"))
 	private void onOnBlockAddedInjectAtHead(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo ci) {
-		Tweaks.RedstoneTorch.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, (RedstoneTorchBlock)(Object)this);
-		
+		updateNeighbors(world, pos);
 		ci.cancel();
 	}
 	
 	@Inject(method = "onStateReplaced", cancellable = true, at = @At(value = "HEAD"))
 	private void onOnStateReplacedInjectAtHead(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved, CallbackInfo ci) {
 		if (!moved) {
-			Tweaks.RedstoneTorch.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, (RedstoneTorchBlock)(Object)this);
+			updateNeighbors(world, pos);
 		}
 		ci.cancel();
 	}
@@ -115,5 +115,9 @@ public abstract class RedstoneTorchBlockMixin {
 	@ModifyConstant(method = "isBurnedOut", constant = @Constant(intValue = 8))
 	private static int onIsBurnedOutModifyBurnoutCount(int oldValue) {
 		return Tweaks.RedstoneTorch.BURNOUT_COUNT.get();
+	}
+	
+	private void updateNeighbors(World world, BlockPos pos) {
+		((RTIWorld)world).dispatchBlockUpdates(pos, null, (RedstoneTorchBlock)(Object)this, Tweaks.RedstoneTorch.BLOCK_UPDATE_ORDER.get());
 	}
 }

@@ -45,6 +45,7 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 	@Override
 	protected void initContents() {
 		settingsList = new SettingsListWidget(screen, category, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - HEADER_HEIGHT - 5);
+		settingsList.init();
 		addContent(settingsList);
 		
 		int y = screen.getHeaderHeight();

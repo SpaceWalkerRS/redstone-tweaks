@@ -6,7 +6,6 @@ import java.util.List;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
-
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
@@ -14,19 +13,20 @@ import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 import redstonetweaks.util.RelativePos;
-import redstonetweaks.world.common.BlockUpdate;
+import redstonetweaks.world.common.AbstractNeighborUpdate;
 
 public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.Entry> {
 	
 	private final SettingsCategory category;
 	private final UpdateOrderSetting setting;
 	
-	private boolean updateCountChanged;
+	private boolean updateOrderChanged;
 	
 	public UpdateOrderListWidget(RTMenuScreen screen, int x, int y, int width, int height, SettingsCategory category, UpdateOrderSetting setting) {
-		super(screen, x, y, width, height, 22);
+		super(screen, x, y, width, height, 22, setting.getId());
 		
 		this.category = category;
 		this.setting = setting;
@@ -36,9 +36,17 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 	
 	@Override
 	public void tick() {
-		if (updateCountChanged) {
+		if (updateOrderChanged) {
 			init();
-			updateCountChanged = false;
+			updateOrderChanged = false;
+		}
+	}
+	
+	@Override
+	protected void initList() {
+		int length = setting.get().getNeighborUpdates().size();
+		for (int i = 0; i < length; i++) {
+			addEntry(new Entry(i));
 		}
 	}
 	
@@ -47,30 +55,21 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 		
 	}
 	
-	public void init() {
-		children().clear();
-		
-		int length = setting.get().getBlockUpdates().size();
-		for (int i = 0; i < length; i++) {
-			addEntry(new Entry(i));
-		}
-	}
-	
 	public class Entry extends RTListWidget.Entry<UpdateOrderListWidget.Entry> {
 		
-		private final BlockUpdate update;
+		private final AbstractNeighborUpdate update;
 		private final List<RTElement> children;
 		private final RTButtonWidget modeButton;
 		private final ButtonPanel buttonPanel1;
 		private final ButtonPanel buttonPanel2;
 		
 		public Entry(int index) {
-			this.update = setting.get().getBlockUpdates().get(index);
+			this.update = setting.get().getNeighborUpdates().get(index);
 			this.children = new ArrayList<>();
 			
 			this.modeButton = new RTButtonWidget(0, 0, 140, 20, () -> new TranslatableText("Mode: " + update.getMode().getName()), (button) -> {
 				update.setMode(update.getMode().next());
-				updateCountChanged = true;
+				updateOrderChanged = true;
 				
 				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			});
@@ -86,12 +85,14 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				
 				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			}));
-			if (update.getMode() != BlockUpdate.Mode.NEIGHBORS) {
+			if (update.getMode() != AbstractNeighborUpdate.Mode.NEIGHBORS) {
 				this.buttonPanel1.addButton(new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText(update.getUpdatePos().getName()), (button) -> {
 					if (Screen.hasShiftDown()) {
 						update.setUpdatePos(update.getUpdatePos().previous(setting.get().getDirectionality()));
 					} else {
-						update.setUpdatePos(update.getUpdatePos().next(setting.get().getDirectionality()));
+						do {
+							update.setUpdatePos(update.getUpdatePos().next(setting.get().getDirectionality()));
+						} while (setting == Tweaks.Global.SHAPE_UPDATE_ORDER && update.getUpdatePos() == RelativePos.SELF);
 					}
 					
 					((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
@@ -102,17 +103,24 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 			this.buttonPanel2 = new ButtonPanel();
 			this.buttonPanel2.addButton(new RTButtonWidget(0, 0, 20, 20, () -> new TranslatableText("+"), (button) -> {
 				if (Screen.hasShiftDown()) {
+					setting.get().moveUp(index);
+				} else
+				if (Screen.hasControlDown()) {
 					setting.get().insert(index, update.copy());
 				} else {
 					setting.get().insert(index + 1, RelativePos.SELF, RelativePos.WEST);
 				}
-				updateCountChanged = true;
+				updateOrderChanged = true;
 				
 				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			}));
 			this.buttonPanel2.addButton(new RTButtonWidget(0, 0, 20, 20, () -> new TranslatableText("-"), (button) -> {
-				setting.get().remove(index);
-				updateCountChanged = true;
+				if (Screen.hasShiftDown()) {
+					setting.get().moveDown(index);
+				} else {
+					setting.get().remove(index);
+				}
+				updateOrderChanged = true;
 				
 				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
 			}));

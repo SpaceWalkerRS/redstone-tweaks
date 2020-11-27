@@ -40,19 +40,19 @@ public class PistonBlockEntityRendererMixin {
 	
 	@Inject(method = "render", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/client/render/block/entity/PistonBlockEntityRenderer;method_3575(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/world/World;ZI)V"))
 	private void onRenderInjectAfterMethod_3575(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, int overlay, CallbackInfo ci) {
-		BlockEntity pushedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
+		BlockEntity movedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
 		
-		if (pushedBlockEntity != null) {
-			BlockEntityRenderer<BlockEntity> blockEntityRenderer = BlockEntityRenderDispatcher.INSTANCE.get(pushedBlockEntity);
+		if (movedBlockEntity != null) {
+			BlockEntityRenderer<BlockEntity> blockEntityRenderer = BlockEntityRenderDispatcher.INSTANCE.get(movedBlockEntity);
 			
 			if (blockEntityRenderer != null) {
-				blockEntityRenderer.render(pushedBlockEntity, tickDelta, matrixStack, vertexConsumerProvider, light, overlay);
+				blockEntityRenderer.render(movedBlockEntity, tickDelta, matrixStack, vertexConsumerProvider, light, overlay);
 			}
 		}
 		
 		BlockState pushedBlock = pistonBlockEntity.getPushedBlock();
 		if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs() && SlabHelper.isSlab(pushedBlock)) {
-			// Undo the moved block offset
+			// Undo the offset
 			matrixStack.pop();
 			
 			BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();

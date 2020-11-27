@@ -4,12 +4,8 @@ import java.util.Arrays;
 
 public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
-	private final int size;
-	
-	public ArraySetting(String name, String description, E[] defaultValues) {
-		super(name, description, defaultValues);
-		
-		this.size = getDefault().length;
+	public ArraySetting(String name, String description, E[] backupValues) {
+		super(name, description, backupValues);
 	}
 	
 	@Override
@@ -18,20 +14,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	}
 	
 	@Override
-	public void setValueFromString(String string) {
-		String[] args = string.split(",");
-		
-		for (int i = 0; i < args.length; i++) {
-			try {
-				set(i, stringToElement(args[i]));
-			} catch (Exception e) {
-				
-			}
-		}
-	}
-	
-	@Override
-	public String getValueAsString() {
+	public String valueToString(E[] values) {
 		String string = "";
 		
 		for (E value : get()) {
@@ -41,11 +24,25 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 		return string.substring(0, string.length() - 1);
 	}
 	
-
+	@Override
+	public E[] stringToValue(String string) {
+		String[] args = string.split(",");
+		int size = args.length;
+		
+		E[] values = getEmptyArray(size);
+		for (int i = 0; i < size; i++) {
+			values[i] = stringToElement(args[i]);
+		}
+		
+		return values;
+	}
+	
 	@Override
 	public void set(E[] newValue) {
 		super.set(newValue.clone());
 	}
+	
+	protected abstract E[] getEmptyArray(int size);
 	
 	public abstract E stringToElement(String string);
 	
@@ -117,7 +114,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	}
 	
 	public int getSize() {
-		return size;
+		return get().length;
 	}
 	
 	private boolean inRange(int index) {

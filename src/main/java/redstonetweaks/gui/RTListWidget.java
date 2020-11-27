@@ -1,6 +1,8 @@
 package redstonetweaks.gui;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -14,6 +16,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
+
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.util.RTMathHelper;
 
@@ -21,6 +24,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	
 	protected static final int SCROLLBAR_WIDTH = 6;
 	protected static final int TEXT_COLOR = 16777215;
+	private static final Map<String, Double> SAVED_SCROLL_AMOUNTS = new HashMap<>();
 	
 	public final RTMenuScreen screen;
 	private final int rowWidth;
@@ -28,13 +32,16 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	protected List<Text> currentTooltip;
 	private int entryTitleWidth = 0;
 	private boolean scrolling;
+	private String savedScrollAmountKey;
 
-	public RTListWidget(RTMenuScreen screen, int x, int y, int width, int height, int entryHeight) {
+	public RTListWidget(RTMenuScreen screen, int x, int y, int width, int height, int entryHeight, String savedScrollAmountKey) {
 		super(screen.client, width, height, y, y + height, entryHeight);
 		setLeftPos(x);
 		
 		this.screen = screen;
 		this.rowWidth = width - 10;
+		
+		this.savedScrollAmountKey = savedScrollAmountKey;
 	}
 	
 	@Override
@@ -105,6 +112,15 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	public void allowHover(boolean allowHover) {
 		children().forEach((element) -> element.allowHover(allowHover));
 	}
+	
+	public void init() {
+		children().clear();
+		initList();
+
+		setScrollAmount(SAVED_SCROLL_AMOUNTS.getOrDefault(savedScrollAmountKey, 0.0D));
+	}
+	
+	protected abstract void initList();
 	
 	public boolean focusedIsTextField() {
 		E focused = getFocused();
@@ -221,6 +237,10 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	// This method is private in EntryListWidget.class
 	private int getMaximumScroll() {
 		return Math.max(0, getMaxPosition() - (getHeight() - 4));
+	}
+	
+	public void saveScrollAmount() {
+		SAVED_SCROLL_AMOUNTS.put(savedScrollAmountKey, getScrollAmount());
 	}
 	
 	public void tick() {

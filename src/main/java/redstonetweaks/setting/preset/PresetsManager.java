@@ -1,4 +1,4 @@
-package redstonetweaks.setting;
+package redstonetweaks.setting.preset;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,6 +10,8 @@ import java.io.IOException;
 import net.minecraft.util.WorldSavePath;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.setting.ServerSettingsManager;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 
 public class PresetsManager {

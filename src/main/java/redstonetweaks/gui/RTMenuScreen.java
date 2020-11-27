@@ -14,6 +14,7 @@ import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.gui.hotkeys.HotkeysTab;
 import redstonetweaks.gui.info.InfoTab;
+import redstonetweaks.gui.preset.PresetsTab;
 import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
@@ -156,6 +157,7 @@ public class RTMenuScreen extends Screen {
 		for (SettingsCategory category : Settings.CATEGORIES) {
 			tabs.add(new SettingsTab(this, category));
 		}
+		tabs.add(new PresetsTab(this));
 		tabs.add(new HotkeysTab(this));
 		tabs.add(new InfoTab(this));
 	}

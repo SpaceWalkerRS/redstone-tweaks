@@ -36,10 +36,9 @@ import net.minecraft.world.WorldAccess;
 import redstonetweaks.block.PowerBlockEntity;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.RedstoneWireHelper;
-import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
-import redstonetweaks.world.server.ScheduledNeighborUpdate.UpdateType;
+import redstonetweaks.world.common.ShapeUpdate;
 
 @Mixin(RedstoneWireBlock.class)
 public abstract class RedstoneWireBlockMixin extends AbstractBlock implements BlockEntityProvider {
@@ -80,18 +79,21 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Redirect(method = "prepare", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
 	private BlockState onPrepareRedirectGetStateForNeighborUpdate(BlockState state, Direction direction, BlockState blockState, WorldAccess world, BlockPos mutable, BlockPos notifierPos) {
-		return Tweaks.Global.DO_SHAPE_UPDATES.get() && ((RTIWorld)world).updateNeighborsNormally() ? state.getStateForNeighborUpdate(direction, blockState, world, mutable, notifierPos) : state;
+		return state;
+	}
+	
+	@Redirect(method = "prepare", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RedstoneWireBlock;replace(Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;II)V"))
+	private void onPrepareRedirectReplace(BlockState oldState, BlockState newState, WorldAccess world, BlockPos pos, int flags, int depth) {
+		
 	}
 	
 	@Inject(method = "prepare", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-	private void onPrepareInjectAfterGetStateForNeighborUpdate(BlockState state, WorldAccess world, BlockPos blockPos, int flags, int depth, CallbackInfo ci, BlockPos.Mutable mutable, Iterator<Direction> horizontalDirections, Direction direction) {
-		if (Tweaks.Global.DO_SHAPE_UPDATES.get() && !((RTIWorld)world).updateNeighborsNormally()) {
-			if (!world.isClient()) {
-				BlockPos pos = mutable.toImmutable();
-				BlockPos notifierPos = pos.offset(direction.getOpposite());
-				((RTIServerWorld)world).getNeighborUpdateScheduler().schedule(pos, notifierPos, direction.getOpposite(), flags, depth, UpdateType.SHAPE_UPDATE);
-			}
-		}
+	private void onPrepareInjectAfterGetStateForNeighborUpdate(BlockState state, WorldAccess world, BlockPos sourcePos, int flags, int depth, CallbackInfo ci, BlockPos.Mutable mutable, Iterator<Direction> horizontalDirections, Direction direction) {
+		Direction dir = direction.getOpposite();
+		BlockPos pos = mutable.toImmutable();
+		BlockPos notifierPos = pos.offset(dir);
+		
+		((RTIWorld)world).dispatchShapeUpdate(false, new ShapeUpdate(pos, notifierPos, sourcePos, world.getBlockState(pos), world.getBlockState(notifierPos), dir, flags, depth));
 	}
 	
 	@Redirect(method = "getRenderConnectionType", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
@@ -167,16 +169,6 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		cir.cancel();
 	}
 	
-	@Inject(method = "updateNeighbors", at = @At(value = "HEAD"))
-	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, CallbackInfo ci) {
-		((RTIServerWorld)world).getNeighborUpdateScheduler().setCurrentSourcePos(pos);
-	}
-	
-	@Inject(method = "updateNeighbors", at = @At(value = "RETURN"))
-	private void onUpdateNeighborsInjectAtReturn(World world, BlockPos pos, CallbackInfo ci) {
-		((RTIServerWorld)world).getNeighborUpdateScheduler().clearCurrentSourcePos();
-	}
-	
 	@Inject(method = "onBlockAdded", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/RedstoneWireBlock;update(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
 	private void onOnBlockAddedInjectBeforeUpdate(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo ci) {
 		if (world.getBlockEntity(pos) == null) {
@@ -231,11 +223,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	}
 	
 	private void updateNeighborsOnStateChange(World world, BlockPos pos, BlockState state) {
-		((RTIServerWorld)world).getNeighborUpdateScheduler().setCurrentSourcePos(pos);
-		
-		Tweaks.RedstoneWire.BLOCK_UPDATE_ORDER.get().dispatchBlockUpdates(world, pos, state.getBlock());
-		
-		((RTIServerWorld)world).getNeighborUpdateScheduler().clearCurrentSourcePos();
+		((RTIWorld)world).dispatchBlockUpdates(pos, null, state.getBlock(), Tweaks.RedstoneWire.BLOCK_UPDATE_ORDER.get());
 	}
 	
 	private int getWirePower(World world, BlockPos pos, Direction dir) {

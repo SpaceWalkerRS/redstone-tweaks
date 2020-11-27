@@ -77,6 +77,7 @@ public class HotkeysTab extends RTMenuTab {
 	@Override
 	protected void initContents() {
 		hotkeysList = new HotkeysListWidget(this, hotkeys, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - 5);
+		hotkeysList.init();
 		addContent(hotkeysList);
 		
 		resetButton = new RTButtonWidget(5, screen.getHeaderHeight(), 50, 20, () -> new TranslatableText("RESET"), (button) -> {

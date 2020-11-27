@@ -2,16 +2,12 @@ package redstonetweaks.setting.types;
 
 public class BooleanSetting extends Setting<Boolean> {
 	
-	public BooleanSetting(String name, String description, Boolean defaultValue) {
-		super(name, description, defaultValue);
+	public BooleanSetting(String name, String description) {
+		super(name, description, false);
 	}
 	
 	@Override
-	public void setValueFromString(String string) {
-		try {
-			set(Boolean.parseBoolean(string));
-		} catch (Exception e) {
-			
-		}
+	public Boolean stringToValue(String string) {
+		return Boolean.parseBoolean(string);
 	}
 }

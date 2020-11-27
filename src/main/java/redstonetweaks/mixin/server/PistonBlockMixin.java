@@ -85,7 +85,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Inject(method = "onSyncedBlockEvent", at = @At(value = "HEAD"), cancellable = true)
 	private void onOnSyncedBlockEventInjectAtHead(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
-		if (!((RTIWorld)world).updateNeighborsNormally()) {
+		if (!((RTIWorld)world).updateNeighborsImmediately()) {
 			BlockEventHandler blockEventHandler = new BlockEventHandler(world, pos, state, type, data, sticky);
 			boolean startedBlockEvent = false;
 			
@@ -148,7 +148,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	}
 	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-	private BlockState onOnSyncedBlockEventGetBlockState(World world, BlockPos pos) {
+	private BlockState onOnSyncedBlockEventRedirectGetBlockState(World world, BlockPos pos) {
 		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
 			BlockState state = world.getBlockState(pos);
 			
@@ -162,12 +162,19 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/PistonBlockEntity;isExtending()Z"))
 	private boolean onOnSyncedBlockEventRedirectIsExtending(PistonBlockEntity pistonBlockEntity) {
 		if (pistonBlockEntity.isExtending()) {
-			if (Tweaks.StickyPiston.DO_BLOCK_DROPPING.get() && !Tweaks.StickyPiston.FAST_BLOCK_DROPPING.get()) {
-				return false;
+			if (Tweaks.StickyPiston.DO_BLOCK_DROPPING.get()) {
+				return true;
 			}
 			pistonBlockEntity.finish();
 		}
 		return false;
+	}
+	
+	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/block/entity/PistonBlockEntity;finish()V"))
+	private void onOnSyncedBlockEventRedirectFinish1(PistonBlockEntity pistonBlockEntity) {
+		if (Tweaks.StickyPiston.FAST_BLOCK_DROPPING.get()) {
+			pistonBlockEntity.finish();
+		}
 	}
 	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
@@ -193,10 +200,10 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			cir.setReturnValue(true);
 			cir.cancel();
 		} else
-			if (PistonHelper.movableWhenExtended(true) && ((state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.EXTENDED)) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY))) {
-				cir.setReturnValue(true);
-				cir.cancel();
-			}
+		if (PistonHelper.movableWhenExtended(true) && ((state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.EXTENDED)) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY))) {
+			cir.setReturnValue(true);
+			cir.cancel();
+		}
 	}
 	
 	@Inject(method = "isMovable", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getHardness(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
@@ -206,7 +213,20 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			cir.cancel();
 		} else
 		if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() && state.isOf(Blocks.MOVING_PISTON)) {
-			cir.setReturnValue(true);
+			boolean movable = true;
+			
+			// Prevent a piston from pushing its own extending piston head
+			if (direction == pistonDir && direction == state.get(Properties.FACING)) {
+				BlockEntity blockEntity = world.getBlockEntity(pos);
+				
+				if (blockEntity instanceof PistonBlockEntity) {
+					PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+					
+					movable = !(pistonBlockEntity.isSource() && pistonBlockEntity.isExtending());
+				}
+			}
+			
+			cir.setReturnValue(movable);
 			cir.cancel();
 		}
 	}
@@ -246,7 +266,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		PistonHelper.prepareDoubleRetraction(world, movedPos, movedState);
 	}
 	
-	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 2, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.AFTER, ordinal = 2, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onMoveInjectBeforeSetBlockState2(World world, BlockPos pistonPos, Direction pistonDir, boolean extend, CallbackInfoReturnable<Boolean> cir,
 			BlockPos headPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> movedStatesMap,
 			List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> brokenBlocksPos,
@@ -280,13 +300,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			}
 		}
 		
-		world.setBlockState(toPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, pistonDir), 68);
 		world.setBlockEntity(toPos, PistonHelper.createPistonBlockEntity(movedState, movedBlockEntity, pistonDir, extend, false, sticky, isMergingSlabs));
-	}
-	
-	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 2, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
-	private boolean onMoveRedirectSetBlockState2(World world, BlockPos pos, BlockState state, int flags) {
-		return false;
 	}
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))

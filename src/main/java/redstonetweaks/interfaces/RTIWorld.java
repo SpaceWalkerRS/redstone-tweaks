@@ -1,10 +1,19 @@
 package redstonetweaks.interfaces;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.profiler.Profiler;
 
 import redstonetweaks.block.piston.BlockEventHandler;
+import redstonetweaks.util.RelativePos;
+import redstonetweaks.world.common.BlockUpdate;
+import redstonetweaks.world.common.ComparatorUpdate;
+import redstonetweaks.world.common.NeighborUpdate;
+import redstonetweaks.world.common.ShapeUpdate;
+import redstonetweaks.world.common.UpdateOrder;
 import redstonetweaks.world.common.WorldTickHandler;
 
 public interface RTIWorld {
@@ -13,11 +22,11 @@ public interface RTIWorld {
 	
 	public void addMovedBlockEntity(BlockPos pos, BlockEntity blockEntity);
 	
+	public BlockEventHandler getBlockEventHandler(BlockPos pos);
+	
 	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler);
 	
 	public void removeBlockEventHandler(BlockPos pos);
-	
-	public BlockEventHandler getBlockEventHandler(BlockPos pos);
 	
 	public void startTickingBlockEntities(boolean startIterating);
 	
@@ -29,6 +38,38 @@ public interface RTIWorld {
 	
 	public boolean tickWorldsNormally();
 	
-	public boolean updateNeighborsNormally();
+	public boolean updateNeighborsImmediately();
+	
+	default void dispatchNeighborUpdate(boolean scheduled, NeighborUpdate neighborUpdate) {
+		switch (neighborUpdate.getType()) {
+		case BLOCK_UPDATE:
+			dispatchBlockUpdate(true, (BlockUpdate)neighborUpdate);
+			break;
+		case COMPARATOR_UPDATE:
+			dispatchComparatorUpdate(true, (ComparatorUpdate)neighborUpdate);
+			break;
+		case SHAPE_UPDATE:
+			dispatchShapeUpdate(true, (ShapeUpdate)neighborUpdate);
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void dispatchBlockUpdates(BlockPos sourcePos, Direction sourceFacing, Block sourceBlock, UpdateOrder updateOrder);
+	
+	public void dispatchBlockUpdatesAround(BlockPos notifierPos, BlockPos sourcePos, Direction sourceFacing, Block sourceBlock);
+	
+	public void dispatchBlockUpdatesAroundExcept(BlockPos notifierPos, BlockPos sourcePos, Direction sourceFacing, Block sourceBlock, RelativePos except);
+	
+	public void dispatchBlockUpdate(boolean scheduled, BlockUpdate blockUpdate);
+	
+	public void dispatchComparatorUpdatesAround(BlockPos notifierPos, BlockPos sourcePos, Direction sourceFacing, Block block);
+	
+	public void dispatchComparatorUpdate(boolean scheduled, ComparatorUpdate comparatorUpdate);
+	
+	public void dispatchShapeUpdatesAround(BlockPos notifierPos, BlockPos sourcePos, BlockState notifierState, int flags, int depth);
+	
+	public void dispatchShapeUpdate(boolean scheduled, ShapeUpdate shapeUpdate);
 	
 }

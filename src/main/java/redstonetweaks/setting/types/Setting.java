@@ -1,23 +1,32 @@
 package redstonetweaks.setting.types;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import redstonetweaks.setting.preset.Preset;
+import redstonetweaks.setting.preset.Presets;
+
 public abstract class Setting<T> implements ISetting {
 	
+	private String id;
 	private final String name;
 	private final String description;
-	private final T defaultValue;
+	private final T backupValue;
+	private final Map<Preset, T> presetValues;
 	
-	private String id;
 	private boolean enabled;
 	private boolean locked;
 	private T value;
 	
-	public Setting(String name, String description, T defaultValue) {
+	public Setting(String name, String description, T backupValue) {
 		this.name = name;
 		this.description = description;
-		this.defaultValue = defaultValue;
-		this.locked = true;
+		this.backupValue = backupValue;
+		this.presetValues = new HashMap<>();
 		
-		reset();
+		this.enabled = false;
+		this.locked = true;
+		this.value = this.backupValue;
 	}
 	
 	@Override
@@ -53,13 +62,13 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	@Override
-	public void setLocked(boolean locked) {
-		this.locked = locked;
+	public boolean isLocked() {
+		return locked;
 	}
 	
 	@Override
-	public boolean isLocked() {
-		return locked;
+	public void setLocked(boolean locked) {
+		this.locked = locked;
 	}
 	
 	@Override
@@ -85,7 +94,38 @@ public abstract class Setting<T> implements ISetting {
 	
 	@Override
 	public String getValueAsString() {
-		return get().toString();
+		return valueToString(get());
+	}
+	
+	@Override
+	public void setValueFromString(String string) {
+		try {
+			set(stringToValue(string));
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	@Override
+	public String getPresetValueAsString(Preset preset) {
+		return valueToString(getPresetValue(preset));
+	}
+	
+	@Override
+	public void setPresetValueFromString(Preset preset, String string) {
+		try {
+			setPresetValue(preset, stringToValue(string));
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	@Override
+	public void applyPreset(Preset preset) {
+		T value = presetValues.get(preset);
+		if (value != null) {
+			set(value);
+		}
 	}
 	
 	public T get() {
@@ -97,6 +137,26 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	public T getDefault() {
-		return defaultValue;
+		T value = presetValues.get(Presets.Default.DEFAULT);
+		if (value == null) {
+			System.out.println(getClass() + " setting with id " + getId() + " has no default value! Falling back to the backup value.");
+			
+			return backupValue;
+		}
+		return value;
+	}
+	
+	public String valueToString(T value) {
+		return get().toString();
+	}
+	
+	public abstract T stringToValue(String string);
+	
+	public T getPresetValue(Preset preset) {
+		return presetValues.get(preset);
+	}
+	
+	public void setPresetValue(Preset preset, T value) {
+		presetValues.put(preset, value);
 	}
 }

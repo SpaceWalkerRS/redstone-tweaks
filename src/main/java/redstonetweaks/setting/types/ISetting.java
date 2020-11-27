@@ -1,5 +1,7 @@
 package redstonetweaks.setting.types;
 
+import redstonetweaks.setting.preset.Preset;
+
 public interface ISetting {
 	
 	public String getId();
@@ -29,5 +31,11 @@ public interface ISetting {
 	public String getValueAsString();
 	
 	public void setValueFromString(String string);
+	
+	public String getPresetValueAsString(Preset preset);
+	
+	public void setPresetValueFromString(Preset preset, String string) ;
+	
+	public void applyPreset(Preset preset);
 	
 }
