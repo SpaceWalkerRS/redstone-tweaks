@@ -44,7 +44,7 @@ public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
 	
 	@Redirect(method = "tickEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;tickBlockEntities()V"))
 	private void onTickEntitiesRedirectTickBlockEntities(ClientWorld world) {
-		if (tickWorldsNormally()) {
+		if (normalWorldTicks()) {
 			world.tickBlockEntities();
 		}
 	}
@@ -65,14 +65,14 @@ public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
 	}
 	
 	@Override
-	public boolean tickWorldsNormally() {
+	public boolean normalWorldTicks() {
 		ClientWorldTickHandler worldTickHandler = ((RTIMinecraftClient)client).getWorldTickHandler();
 		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Tweaks.Global.SHOW_PROCESSING_ORDER.get() > 0);
 	}
 	
 	@Override
-	public boolean updateNeighborsImmediately() {
+	public boolean immediateNeighborUpdates() {
 		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
-		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || Tweaks.Global.SHOW_NEIGHBOR_UPDATES.get());
+		return normalWorldTicks() || !(hasScheduledNeighborUpdates || Tweaks.Global.SHOW_NEIGHBOR_UPDATES.get());
 	}
 }

@@ -39,6 +39,7 @@ import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.RTIBlock;
+import redstonetweaks.interfaces.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.RTIPistonHandler;
 import redstonetweaks.interfaces.RTIServerWorld;
 import redstonetweaks.interfaces.RTIWorld;
@@ -85,7 +86,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Inject(method = "onSyncedBlockEvent", at = @At(value = "HEAD"), cancellable = true)
 	private void onOnSyncedBlockEventInjectAtHead(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
-		if (!((RTIWorld)world).updateNeighborsImmediately()) {
+		if (!((RTIWorld)world).immediateNeighborUpdates()) {
 			BlockEventHandler blockEventHandler = new BlockEventHandler(world, pos, state, type, data, sticky);
 			boolean startedBlockEvent = false;
 			
@@ -215,15 +216,23 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() && state.isOf(Blocks.MOVING_PISTON)) {
 			boolean movable = true;
 			
-			// Prevent a piston from pushing its own extending piston head
-			if (direction == pistonDir && direction == state.get(Properties.FACING)) {
-				BlockEntity blockEntity = world.getBlockEntity(pos);
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if (blockEntity instanceof PistonBlockEntity) {
+				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 				
-				if (blockEntity instanceof PistonBlockEntity) {
-					PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
-					
-					movable = !(pistonBlockEntity.isSource() && pistonBlockEntity.isExtending());
+				// Check if the block that is moved by the moving block is movable itself
+				// By default piston heads are not movable but they do appear in the moving blocks of extending pistons
+				if (PistonBlock.isMovable(((RTIPistonBlockEntity)pistonBlockEntity).getMovedState(), world, pos, direction, canBreak, pistonDir)) {
+					// Prevent a piston from pushing its own extending piston head
+					if (direction == pistonDir && direction == state.get(Properties.FACING)) {
+						movable = !(pistonBlockEntity.isSource() && pistonBlockEntity.isExtending());
+					}
+				} else {
+					movable = false;
 				}
+			} else {
+				movable = false;
 			}
 			
 			cir.setReturnValue(movable);

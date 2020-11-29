@@ -119,7 +119,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Inject(method = "updateNeighbor", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborInjectAtHead(BlockPos pos, Block sourceBlock, BlockPos notifierPos, CallbackInfo ci) {
 		if (!isClient()) {
-			dispatchBlockUpdate(false, new BlockUpdate(pos, notifierPos, notifierPos, getBlockState(pos), sourceBlock));
+			dispatchBlockUpdate(false, new BlockUpdate(pos, notifierPos, notifierPos, sourceBlock));
 		}
 		ci.cancel();
 	}
@@ -332,11 +332,12 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Override
 	public void dispatchBlockUpdate(boolean scheduled, BlockUpdate blockUpdate) {
 		if (Tweaks.Global.DO_BLOCK_UPDATES.get()) {
-			if (scheduled || updateNeighborsImmediately()) {
+			if (scheduled || immediateNeighborUpdates()) {
 				BlockPos pos = blockUpdate.getUpdatePos();
 				BlockPos notifierPos = blockUpdate.getNotifierPos();
-				BlockState state = blockUpdate.getState();
 				Block sourceBlock = blockUpdate.getSourceBlock();
+				
+				BlockState state = getBlockState(pos);
 				
 				stateNeighborUpdate(state, pos, notifierPos, sourceBlock);
 			} else if (!isClient()) {
@@ -359,11 +360,12 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Override
 	public void dispatchComparatorUpdate(boolean scheduled, ComparatorUpdate comparatorUpdate) {
 		if (Tweaks.Global.DO_COMPARATOR_UPDATES.get()) {
-			if (scheduled || updateNeighborsImmediately()) {
+			if (scheduled || immediateNeighborUpdates()) {
 				BlockPos pos = comparatorUpdate.getUpdatePos();
 				BlockPos notifierPos = comparatorUpdate.getNotifierPos();
-				BlockState state = comparatorUpdate.getState();
 				Block sourceBlock = comparatorUpdate.getSourceBlock();
+				
+				BlockState state = getBlockState(pos);
 				
 				if (state.isOf(Blocks.COMPARATOR)) {
 					stateNeighborUpdate(state, pos, notifierPos, sourceBlock);
@@ -403,14 +405,15 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Override
 	public void dispatchShapeUpdate(boolean scheduled, ShapeUpdate shapeUpdate) {
 		if (Tweaks.Global.DO_SHAPE_UPDATES.get()) {
-			if (scheduled || updateNeighborsImmediately()) {
+			if (scheduled || immediateNeighborUpdates()) {
 				BlockPos pos = shapeUpdate.getUpdatePos();
 				BlockPos notifierPos = shapeUpdate.getNotifierPos();
-				BlockState state = shapeUpdate.getState();
 				BlockState notifierState = shapeUpdate.getNotifierState();
 				Direction dir = shapeUpdate.getDirection();
 				int flags  = shapeUpdate.getFlags();
 				int depth = shapeUpdate.getDepth();
+				
+				BlockState state = getBlockState(pos);
 				
 				try {
 					BlockState newState = state.getStateForNeighborUpdate(dir, notifierState, world(), pos, notifierPos);

@@ -438,6 +438,8 @@ public class Presets {
 			Tweaks.Water.DELAY.setPresetValue(DEFAULT, 5);
 			Tweaks.Water.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
+			Tweaks.WhiteConcretePowder.IS_SOLID.setPresetValue(DEFAULT, true);
+			
 			Tweaks.WoodenButton.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.NORMAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.FRONT, RelativePos.WEST));

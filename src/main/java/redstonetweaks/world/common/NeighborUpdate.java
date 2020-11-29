@@ -1,6 +1,5 @@
 package redstonetweaks.world.common;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 
 import redstonetweaks.util.UpdateType;
@@ -12,14 +11,12 @@ public class NeighborUpdate {
 	private final BlockPos updatePos;
 	private final BlockPos notifierPos;
 	private final BlockPos sourcePos;
-	private final BlockState state;
 	
-	public NeighborUpdate(UpdateType type, BlockPos updatePos, BlockPos notifierPos, BlockPos sourcePos, BlockState state) {
+	public NeighborUpdate(UpdateType type, BlockPos updatePos, BlockPos notifierPos, BlockPos sourcePos) {
 		this.type = type;
 		this.updatePos = updatePos;
 		this.notifierPos = notifierPos;
 		this.sourcePos = sourcePos;
-		this.state = state;
 	}
 	
 	public UpdateType getType() {
@@ -36,9 +33,5 @@ public class NeighborUpdate {
 	
 	public BlockPos getSourcePos() {
 		return sourcePos;
-	}
-	
-	public BlockState getState() {
-		return state;
 	}
 }

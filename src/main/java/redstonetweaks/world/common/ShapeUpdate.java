@@ -13,8 +13,8 @@ public class ShapeUpdate extends NeighborUpdate {
 	private final int flags;
 	private final int depth;
 	
-	public ShapeUpdate(BlockPos updatePos, BlockPos notifierPos, BlockPos sourcePos, BlockState state, BlockState notifierState, Direction dir, int flags, int depth) {
-		super(UpdateType.SHAPE_UPDATE, updatePos, notifierPos, sourcePos, state);
+	public ShapeUpdate(BlockPos updatePos, BlockPos notifierPos, BlockPos sourcePos, BlockState notifierState, Direction dir, int flags, int depth) {
+		super(UpdateType.SHAPE_UPDATE, updatePos, notifierPos, sourcePos);
 		
 		this.notifierState = notifierState;
 		this.direction = dir;

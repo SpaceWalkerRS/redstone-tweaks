@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.AbstractBlock.AbstractBlockState;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
@@ -15,10 +16,19 @@ import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(AbstractBlockState.class)
 public abstract class AbstractBlockStateMixin {
-
+	
+	@Inject(method = "isSolidBlock", cancellable = true, at = @At(value = "HEAD"))
+	private void onIsSolidBlockInjectAtHead(BlockView world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+		if (((AbstractBlockState)(Object)this).isOf(Blocks.WHITE_CONCRETE_POWDER)) {
+			cir.setReturnValue(Tweaks.WhiteConcretePowder.IS_SOLID.get());
+			cir.cancel();
+		}
+	}
+	
 	@Inject(method = "isSideSolidFullSquare", cancellable = true, at = @At(value = "RETURN"))
 	private void onIsSideSolidFullSquareInjectAtReturn(BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (!cir.getReturnValue()) {

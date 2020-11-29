@@ -55,7 +55,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 			world.setBlockState(pos, newState, 2);
 			
 			if (shouldBePowered != isReceivingPower) {
-				if (((RTIWorld)world).updateNeighborsImmediately()) {
+				if (((RTIWorld)world).immediateNeighborUpdates()) {
 					scheduleTickOnScheduledTick(world, pos, newState, random);
 				} else {
 					((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, newState, pos, 0);

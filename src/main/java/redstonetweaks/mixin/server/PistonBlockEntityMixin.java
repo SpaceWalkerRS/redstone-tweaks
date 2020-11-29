@@ -57,7 +57,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Inject(method = "getProgress", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetProgressInjectAtReturn(float tickDelta, CallbackInfoReturnable<Float> cir) {
-		if (!((RTIWorld)world).tickWorldsNormally()) {
+		if (!((RTIWorld)world).normalWorldTicks()) {
 			int speed = getSpeed();
 			
 			cir.setReturnValue(MathHelper.clamp(lastProgress + 0.2F / speed, 0, speed));

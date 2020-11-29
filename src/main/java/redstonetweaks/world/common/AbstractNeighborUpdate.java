@@ -85,7 +85,7 @@ public class AbstractNeighborUpdate {
 	public BlockUpdate toBlockUpdate(World world, BlockPos pos, BlockPos source, Direction sourceFacing, Block sourceBlock) {
 		BlockPos notifier = notifierPos.toBlockPos(pos, sourceFacing);
 		BlockPos update = updatePos.toBlockPos(notifier, sourceFacing);
-		return new BlockUpdate(update, notifier, source, world.getBlockState(update), sourceBlock);
+		return new BlockUpdate(update, notifier, source, sourceBlock);
 	}
 	
 	public ComparatorUpdate toComparatorUpdate(World world, BlockPos pos, BlockPos source, Direction sourceFacing, Block sourceBlock) {
@@ -108,13 +108,13 @@ public class AbstractNeighborUpdate {
 				return null;
 			}
 		}
-		return new ComparatorUpdate(update, notifier, source, state, sourceBlock);
+		return new ComparatorUpdate(update, notifier, source, sourceBlock);
 	}
 	
 	public ShapeUpdate toShapeUpdate(World world, BlockPos pos, BlockPos source, BlockState notifierState, int flags, int depth) {
 		BlockPos notifier = notifierPos.toBlockPos(pos, null);
 		BlockPos update = updatePos.toBlockPos(notifier, null);
-		return new ShapeUpdate(update, notifier, source, world.getBlockState(update), notifierState, updatePos.asDirection(null).getOpposite(), flags, depth);
+		return new ShapeUpdate(update, notifier, source, notifierState, updatePos.asDirection(null).getOpposite(), flags, depth);
 	}
 	
 	public enum Mode {

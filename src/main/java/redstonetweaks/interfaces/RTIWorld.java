@@ -36,9 +36,9 @@ public interface RTIWorld {
 	
 	public void tickBlockEntity(BlockEntity blockEntity, Profiler profiler);
 	
-	public boolean tickWorldsNormally();
+	public boolean normalWorldTicks();
 	
-	public boolean updateNeighborsImmediately();
+	public boolean immediateNeighborUpdates();
 	
 	default void dispatchNeighborUpdate(boolean scheduled, NeighborUpdate neighborUpdate) {
 		switch (neighborUpdate.getType()) {

@@ -45,7 +45,7 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/ObserverBlock;updateNeighbors(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
 	private void onScheduledTickInjectBeforeUpdateNeighbors(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
-		if (!((RTIWorld)world).updateNeighborsImmediately()) {
+		if (!((RTIWorld)world).immediateNeighborUpdates()) {
 			((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
 		}
 	}

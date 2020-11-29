@@ -23,8 +23,8 @@ public class Tweaks {
 		public static final BooleanSetting CHAINSTONE = new BooleanSetting("chainstone", "Inspired by the carpet mod rule of the same name, this setting makes connected chain blocks stick to each other and any blocks they anchored to. But be careful! A chain will only move as a whole if it is anchored at both ends.");
 		public static final IntegerSetting DELAY_MULTIPLIER = new IntegerSetting("delayMultiplier", "The delay of all scheduled ticks will be multiplied by this value. When set to 0 all scheduled ticks will be executed instantaneously.", 0, 127);
 		public static final BooleanSetting DO_BLOCK_UPDATES = new BooleanSetting("doBlockUpdates", "Allow worlds to dispatch block updates.");
-		public static final BooleanSetting DO_SHAPE_UPDATES = new BooleanSetting("doShapeUpdates", "Allow worlds to dispatch shape updates.");
 		public static final BooleanSetting DO_COMPARATOR_UPDATES = new BooleanSetting("doComparatorUpdates", "Allow worlds to dispatch comparator updates.");
+		public static final BooleanSetting DO_SHAPE_UPDATES = new BooleanSetting("doShapeUpdates", "Allow worlds to dispatch shape updates.");
 		public static final BooleanSetting DOUBLE_RETRACTION = new BooleanSetting("doubleRetraction", "A re-implementation of behavior that was present in 1.3-1.8, known as \"Jeb retraction\" or \"instant double retraction\". It creates a very narrow window where unpowered pistons can be moved.");
 		public static final BooleanSetting INSTANT_BLOCK_EVENTS = new BooleanSetting("instantBlockEvents", "Execute block events at the moment they are scheduled.");
 		public static final BooleanSetting MERGE_SLABS = new BooleanSetting("mergeSlabs", "Allow half slabs of the same type to be pushed together and merge into a double slab block. Additionally, sticky surfaces can only move half slabs when making physical contact with the slab. This allows half slabs to be split when one half is pulled but not the other.");
@@ -679,6 +679,14 @@ public class Tweaks {
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting("tickPriority", Settings.Common.DESC_TICK_PRIORITY);
 	}
 	
+	public static class WhiteConcretePowder {
+		
+		private static final String PACK_NAME = "White Concrete Powder";
+		private static final SettingsPack WHITE_CONCRETE_POWDER = new SettingsPack(PACK_NAME);
+		
+		public static final BooleanSetting IS_SOLID = new BooleanSetting("isSolid", "When enabled white concrete powder is solid and will conduct redstone power.");
+	}
+	
 	public static class WoodenButton {
 		
 		private static final String PACK_NAME = "Wooden Button";
@@ -717,8 +725,8 @@ public class Tweaks {
 		Settings.register(TWEAKS, Global.GLOBAL, Global.CHAINSTONE);
 		Settings.register(TWEAKS, Global.GLOBAL, Global.DELAY_MULTIPLIER);
 		Settings.register(TWEAKS, Global.GLOBAL, Global.DO_BLOCK_UPDATES);
-		Settings.register(TWEAKS, Global.GLOBAL, Global.DO_SHAPE_UPDATES);
 		Settings.register(TWEAKS, Global.GLOBAL, Global.DO_COMPARATOR_UPDATES);
+		Settings.register(TWEAKS, Global.GLOBAL, Global.DO_SHAPE_UPDATES);
 		Settings.register(TWEAKS, Global.GLOBAL, Global.DOUBLE_RETRACTION);
 		Settings.register(TWEAKS, Global.GLOBAL, Global.INSTANT_BLOCK_EVENTS);
 		Settings.register(TWEAKS, Global.GLOBAL, Global.MERGE_SLABS);
@@ -1101,6 +1109,9 @@ public class Tweaks {
 		Settings.registerPack(TWEAKS, Water.WATER);
 		Settings.register(TWEAKS, Water.WATER, Water.DELAY);
 		Settings.register(TWEAKS, Water.WATER, Water.TICK_PRIORITY);
+		
+		Settings.registerPack(TWEAKS, WhiteConcretePowder.WHITE_CONCRETE_POWDER);
+		Settings.register(TWEAKS, WhiteConcretePowder.WHITE_CONCRETE_POWDER, WhiteConcretePowder.IS_SOLID);
 		
 		Settings.registerPack(TWEAKS, WoodenButton.WOODEN_BUTTON);
 		Settings.register(TWEAKS, WoodenButton.WOODEN_BUTTON, WoodenButton.BLOCK_UPDATE_ORDER);

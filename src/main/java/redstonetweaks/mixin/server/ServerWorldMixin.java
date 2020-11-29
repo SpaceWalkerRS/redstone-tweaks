@@ -215,15 +215,15 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	}
 	
 	@Override
-	public boolean tickWorldsNormally() {
+	public boolean normalWorldTicks() {
 		ServerWorldTickHandler worldTickHandler = ((RTIMinecraftServer)getServer()).getWorldTickHandler();
 		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Tweaks.Global.SHOW_PROCESSING_ORDER.get() > 0);
 	}
 	
 	@Override
-	public boolean updateNeighborsImmediately() {
+	public boolean immediateNeighborUpdates() {
 		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
-		return tickWorldsNormally() || !(hasScheduledNeighborUpdates || Tweaks.Global.SHOW_NEIGHBOR_UPDATES.get());
+		return normalWorldTicks() || !(hasScheduledNeighborUpdates || Tweaks.Global.SHOW_NEIGHBOR_UPDATES.get());
 	}
 	
 	@Override

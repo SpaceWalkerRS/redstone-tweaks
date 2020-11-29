@@ -10,6 +10,10 @@ import redstonetweaks.setting.Tweaks;
 
 public class RedstoneWireHelper {
 	
+	public static boolean emitsPowerTo(BlockView world, BlockPos pos, BlockState state, Direction dir) {
+		return state.isOf(Blocks.REDSTONE_WIRE) ? emitsPowerTo(world, pos, dir) : false;
+	}
+	
 	public static boolean emitsPowerTo(BlockView world, BlockPos pos, Direction dir) {
 		if (Tweaks.MagentaGlazedTerracotta.IS_POWER_DIODE.get() && dir.getAxis().isHorizontal()) {
 			BlockState belowState = world.getBlockState(pos.down());

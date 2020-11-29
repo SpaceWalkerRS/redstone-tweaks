@@ -70,9 +70,8 @@ public class ServerNeighborUpdateScheduler extends NeighborUpdateScheduler {
 	
 	public void schedule(NeighborUpdate neighborUpdate) {
 		boolean wasEmpty = !hasScheduledNeighborUpdates();
-		long time = Tweaks.Global.SHOW_PROCESSING_ORDER.get() > 0 ? tickTime : world.getTime();
 		
-		scheduledNeighborUpdates.add(new ScheduledNeighborUpdate(time, neighborUpdate));
+		scheduledNeighborUpdates.add(new ScheduledNeighborUpdate(tickTime, neighborUpdate));
 		
 		if (wasEmpty) {
 			syncClientNeighborUpdateScheduler();

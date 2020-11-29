@@ -93,7 +93,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		BlockPos pos = mutable.toImmutable();
 		BlockPos notifierPos = pos.offset(dir);
 		
-		((RTIWorld)world).dispatchShapeUpdate(false, new ShapeUpdate(pos, notifierPos, sourcePos, world.getBlockState(pos), world.getBlockState(notifierPos), dir, flags, depth));
+		((RTIWorld)world).dispatchShapeUpdate(false, new ShapeUpdate(pos, notifierPos, sourcePos, world.getBlockState(notifierPos), dir, flags, depth));
 	}
 	
 	@Redirect(method = "getRenderConnectionType", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
@@ -134,15 +134,15 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Inject(method = "getReceivedRedstonePower", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetReceivedPowerInjectAtHead(World world, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
-		wiresGivePower = false;
-		int power = world.getReceivedRedstonePower(pos);
-		wiresGivePower = true;
-		
 		int maxPower = Tweaks.Global.POWER_MAX.get();
+		
+		int power = getExternalPower(world, pos);
 		int wirePower = 0;
 		
-		for (int index = 0; index < 4 && power < maxPower; index++) {
-			Direction dir = Direction.fromHorizontal(index);
+		for (Direction dir : Direction.Type.HORIZONTAL) {
+			if (power >= maxPower) {
+				break;
+			}
 			
 			BlockPos sidePos = pos.offset(dir);
 			BlockPos abovePos = pos.up();
@@ -200,6 +200,14 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		return new PowerBlockEntity();
 	}
 	
+	private int getExternalPower(World world, BlockPos pos) {
+		wiresGivePower = false;
+		int power = world.getReceivedRedstonePower(pos);
+		wiresGivePower = true;
+		
+		return power;
+	}
+	
 	private void updatePowered(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
 		int power = getWirePower(world, pos, state, Direction.DOWN);
 		int powerReceived = getReceivedRedstonePower(world, pos);
@@ -213,7 +221,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				if (blockEntity instanceof PowerBlockEntity) {
 					((PowerBlockEntity)blockEntity).setPower(powerReceived);
 				}
-				world.setBlockState(pos, state.with(Properties.POWER, Math.min(15, powerReceived)), 2);
+				world.setBlockState(pos, state.with(Properties.POWER, Math.min(powerReceived, 15)), 2);
 				
 				updateNeighborsOnStateChange(world, pos, state);
 			} else {
@@ -231,7 +239,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	}
 	
 	private int getWirePower(BlockView world, BlockPos pos, BlockState state, Direction dir) {
-		if (state.isOf(Blocks.REDSTONE_WIRE) && RedstoneWireHelper.emitsPowerTo(world, pos, dir)) {
+		if (RedstoneWireHelper.emitsPowerTo(world, pos, state, dir)) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PowerBlockEntity) {
