@@ -3,7 +3,6 @@ package redstonetweaks.setting;
 import java.util.ArrayList;
 import java.util.List;
 
-import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
 public class SettingsCategory {
@@ -42,10 +41,6 @@ public class SettingsCategory {
 	
 	public void setLocked(boolean locked) {
 		this.locked = locked;
-	}
-	
-	public void applyPreset(Preset preset) {
-		settings.forEach((setting) -> setting.applyPreset(preset));
 	}
 	
 	public void resetAll() {

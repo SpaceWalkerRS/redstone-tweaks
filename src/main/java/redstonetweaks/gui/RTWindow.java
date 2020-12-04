@@ -142,8 +142,8 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	
 	protected abstract void renderContents(MatrixStack matrices, int mouseX, int mouseY, float delta);
 	
-	protected void addChild(RTElement child) {
-		contents.add(child);
+	protected void addContent(RTElement content) {
+		contents.add(content);
 	}
 	
 	public int getHeaderHeight() {
@@ -157,6 +157,13 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	public void close() {
 		screen.closeWindow(this);
 	}
+	
+	public void refresh() {
+		onRefresh();
+		init();
+	}
+	
+	protected abstract void onRefresh();
 	
 	public boolean focusedIsTextField() {
 		if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {

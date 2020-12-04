@@ -2,39 +2,42 @@ package redstonetweaks.gui.setting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Direction;
 
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.interfaces.RTIMinecraftClient;
-import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.ArraySetting;
-import redstonetweaks.setting.types.DirectionToBooleanSetting;
+import redstonetweaks.setting.types.ISetting;
 
-public class ArraySettingListWidget extends RTListWidget<ArraySettingListWidget.Entry> {
+public class ArraySettingListWidget<K, E> extends RTListWidget<ArraySettingListWidget<K, E>.Entry> {
 	
-	private final SettingsCategory category;
-	private final ArraySetting<?, ?> setting;
+	private final ArraySetting<K, E> setting;
+	private final E[] array;
+	private final Consumer<ISetting> changeListener;
 	
-	public ArraySettingListWidget(RTMenuScreen screen, int x, int y, int width, int height, SettingsCategory category, ArraySetting<?, ?> setting) {
+	public ArraySettingListWidget(RTMenuScreen screen, int x, int y, int width, int height, ArraySetting<K, E> setting, E[] array, Consumer<ISetting> changeListener) {
 		super(screen, x, y, width, height, 22, setting.getId());
 		
-		this.category = category;
 		this.setting = setting;
+		this.array = array;
+		this.changeListener = changeListener;
 	}
 	
 	@Override
 	protected void initList() {
-		for (int index = 0; index < setting.getSize(); index++) {
+		for (int index = 0; index < array.length; index++) {
 			addEntry(new Entry(index));
+			
+			updateEntryTitleWidth(client.textRenderer.getWidth(setting.getKeyAsString(index)));
 		}
 	}
 	
@@ -43,21 +46,18 @@ public class ArraySettingListWidget extends RTListWidget<ArraySettingListWidget.
 		
 	}
 	
-	public void onSettingChanged() {
-		for (Entry entry : children()) {
-			entry.onSettingChanged();
+	public void disableButtons() {
+		for (Entry e : children()) {
+			e.disableButtons();
 		}
 	}
 	
-	public class Entry extends RTListWidget.Entry<ArraySettingListWidget.Entry> {
-		
-		private static final int TITLE_WIDTH = 75;
+	public class Entry extends RTListWidget.Entry<ArraySettingListWidget<K, E>.Entry> {
 		
 		private final int index;
 		private final Text title;
 		private final List<RTElement> children;
 		private final ButtonPanel buttonPanel;
-		private final RTButtonWidget resetButton;
 		
 		public Entry(int index) {
 			this.index = index;
@@ -67,17 +67,6 @@ public class ArraySettingListWidget extends RTListWidget<ArraySettingListWidget.
 			this.buttonPanel = new ButtonPanel();
 			this.populateButtonPanel();
 			this.children.add(buttonPanel);
-			
-			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
-				setting.reset();
-				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
-			});
-			this.children.add(resetButton);
-			
-			this.buttonPanel.setX(getX() + TITLE_WIDTH);
-			this.resetButton.setX(this.buttonPanel.getX() + this.buttonPanel.getWidth() + 5);
-			
-			updateButtonsActive();
 		}
 		
 		@Override
@@ -96,9 +85,6 @@ public class ArraySettingListWidget extends RTListWidget<ArraySettingListWidget.
 			
 			buttonPanel.setY(y);
 			buttonPanel.render(matrices, mouseX, mouseY, tickDelta);
-			
-			resetButton.setY(y);
-			resetButton.render(matrices, mouseX, mouseY, tickDelta);
 		}
 		
 		@Override
@@ -107,8 +93,8 @@ public class ArraySettingListWidget extends RTListWidget<ArraySettingListWidget.
 		}
 		
 		@Override
-		public void unfocusTextFields() {
-			
+		public void unfocusTextFields(Element except) {
+			buttonPanel.unfocusTextFields(except);
 		}
 		
 		@Override
@@ -116,30 +102,26 @@ public class ArraySettingListWidget extends RTListWidget<ArraySettingListWidget.
 			return buttonPanel.focusedIsTextField();
 		}
 		
+		@Override
+		public void init(int titleWidth) {
+			buttonPanel.setX(getX() + getWidth() - 110);
+		}
+		
 		private void populateButtonPanel() {
-			if (setting instanceof DirectionToBooleanSetting) {
-				DirectionToBooleanSetting bSetting = (DirectionToBooleanSetting)setting;
-				Direction dir = Direction.byId(index);
+			if (array instanceof Boolean[]) {
+				Boolean[] bArray = (Boolean[])array;
 				buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> {
-					Formatting formatting = bSetting.get(dir) ? Formatting.GREEN : Formatting.RED;
-					return new TranslatableText(bSetting.elementToString(bSetting.get(dir))).formatted(formatting);
+					Formatting color = bArray[index] ? Formatting.GREEN : Formatting.RED;
+					return new TranslatableText(setting.elementToString(array[index])).formatted(color);
 				}, (button) -> {
-					bSetting.set(dir, !bSetting.get(dir));
-					((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(bSetting);
+					bArray[index] = !bArray[index];
+					changeListener.accept(setting);
 				}));
 			}
 		}
 		
-		private void onSettingChanged() {
-			buttonPanel.updateButtonLabels();
-			updateButtonsActive();
-		}
-		
-		private void updateButtonsActive() {
-			boolean canChangeSettings = ((RTIMinecraftClient)screen.client).getSettingsManager().canChangeSettings();
-			
-			buttonPanel.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
-			resetButton.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked() && !setting.isDefault(index));
+		private void disableButtons() {
+			buttonPanel.setActive(false);
 		}
 	}
 }

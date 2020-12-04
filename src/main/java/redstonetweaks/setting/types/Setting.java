@@ -128,6 +128,23 @@ public abstract class Setting<T> implements ISetting {
 		}
 	}
 	
+	@Override
+	public void removePreset(Preset preset) {
+		presetValues.remove(preset);
+	}
+	
+	@Override
+	public void copyPresetValue(Preset from, Preset to) {
+		if (hasPreset(from)) {
+			setPresetValue(to, getPresetValue(from));
+		}
+	}
+	
+	@Override
+	public boolean hasPreset(Preset preset) {
+		return presetValues.containsKey(preset);
+	}
+	
 	public T get() {
 		return value;
 	}
@@ -139,15 +156,13 @@ public abstract class Setting<T> implements ISetting {
 	public T getDefault() {
 		T value = presetValues.get(Presets.Default.DEFAULT);
 		if (value == null) {
-			System.out.println(getClass() + " setting with id " + getId() + " has no default value! Falling back to the backup value.");
-			
 			return backupValue;
 		}
 		return value;
 	}
 	
 	public String valueToString(T value) {
-		return get().toString();
+		return value.toString();
 	}
 	
 	public abstract T stringToValue(String string);

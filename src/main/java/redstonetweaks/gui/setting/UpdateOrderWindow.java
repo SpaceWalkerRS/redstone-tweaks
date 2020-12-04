@@ -1,5 +1,7 @@
 package redstonetweaks.gui.setting;
 
+import java.util.function.Consumer;
+
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
@@ -9,82 +11,87 @@ import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
-import redstonetweaks.interfaces.RTIMinecraftClient;
-import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 import redstonetweaks.util.RelativePos;
 import redstonetweaks.world.common.UpdateOrder;
 
-public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
+public class UpdateOrderWindow extends RTWindow {
 	
 	private static final int WIDTH = 360;
 	private static final int HEIGHT = 230;
 	
-	private final SettingsCategory category;
 	private final UpdateOrderSetting setting;
+	private final UpdateOrder updateOrder;
+	private final Consumer<ISetting> changeListener;
 	
 	private UpdateOrderListWidget list;
 	private RTButtonWidget notifierOrderButton;
 	private ButtonPanel offsetButtons;
 	private RTButtonWidget addUpdateButton;
 	
-	public UpdateOrderWindow(RTMenuScreen screen, SettingsCategory category, UpdateOrderSetting setting) {
+	private boolean canEdit;
+	
+	public UpdateOrderWindow(RTMenuScreen screen, UpdateOrderSetting setting, UpdateOrder updateOrder, Consumer<ISetting> changeListener) {
 		super(screen, new TranslatableText("Update Order"), (screen.getWidth() - WIDTH) / 2, (screen.getHeight() - HEIGHT) / 2, WIDTH, HEIGHT);
 		
-		this.category = category;
 		this.setting = setting;
+		this.updateOrder = updateOrder;
+		this.changeListener = changeListener;
+		
+		this.canEdit = true;
 	}
 	
 	@Override
 	protected void initContents() {
-		notifierOrderButton = new RTButtonWidget(getX() + 32, getY() + 30, 140, 20, () -> new TranslatableText("Notifier Order: " + setting.get().getNotifierOrder().getName()), (button) -> {
-			setting.get().cycleNotifierOrder();
+		notifierOrderButton = new RTButtonWidget(getX() + 32, getY() + 30, 140, 20, () -> new TranslatableText("Notifier Order: " + updateOrder.getNotifierOrder().getName()), (button) -> {
+			updateOrder.cycleNotifierOrder();
 			
-			boolean locationalOrder = setting.get().getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL;
+			boolean locationalOrder = updateOrder.getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL;
 			offsetButtons.setVisible(locationalOrder);
 			
-			((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
+			changeListener.accept(setting);
 		});
-		addChild(notifierOrderButton);
+		notifierOrderButton.setActive(canEdit);
+		addContent(notifierOrderButton);
 		
-		boolean locationalOrder = setting.get().getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL;
+		boolean locationalOrder = updateOrder.getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL;
 		
 		offsetButtons = new ButtonPanel(15);
 		offsetButtons.addButton(new RTTextFieldWidget(screen.getTextRenderer(), 0, 0, 40, 20, (textField) -> {
-			textField.setText(String.valueOf(setting.get().getOffsetX()));
+			textField.setText(String.valueOf(updateOrder.getOffsetX()));
 		}, (text) -> {
 			try {
 				int newOffset = Integer.parseInt(text);
-				setting.get().setOffsetX(newOffset);
+				updateOrder.setOffsetX(newOffset);
 				
-				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
+				changeListener.accept(setting);
 			} catch (Exception e) {
 				
 			}
 		}));
 		offsetButtons.addButton(new RTTextFieldWidget(screen.getTextRenderer(), 0, 0, 40, 20, (textField) -> {
-			textField.setText(String.valueOf(setting.get().getOffsetY()));
+			textField.setText(String.valueOf(updateOrder.getOffsetY()));
 		}, (text) -> {
 			try {
 				int newOffset = Integer.parseInt(text);
 				if (Math.abs(newOffset) < 256) {
-					setting.get().setOffsetY(newOffset);
+					updateOrder.setOffsetY(newOffset);
 					
-					((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
+					changeListener.accept(setting);
 				}
 			} catch (Exception e) {
 				
 			}
 		}));
 		offsetButtons.addButton(new RTTextFieldWidget(screen.getTextRenderer(), 0, 0, 40, 20, (textField) -> {
-			textField.setText(String.valueOf(setting.get().getOffsetZ()));
+			textField.setText(String.valueOf(updateOrder.getOffsetZ()));
 		}, (text) -> {
 			try {
 				int newOffset = Integer.parseInt(text);
-				setting.get().setOffsetZ(newOffset);
+				updateOrder.setOffsetZ(newOffset);
 				
-				((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
+				changeListener.accept(setting);
 			} catch (Exception e) {
 				
 			}
@@ -92,24 +99,27 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 		offsetButtons.setX(getX() + getWidth() / 2 + 13);
 		offsetButtons.setY(notifierOrderButton.getY());
 		offsetButtons.setVisible(locationalOrder);
-		addChild(offsetButtons);
+		offsetButtons.setActive(canEdit);
+		addContent(offsetButtons);
 		
 		setHeaderHeight(55);
 		
 		addUpdateButton = new RTButtonWidget(getX() + (getWidth() - 100) / 2, getY() + getHeaderHeight() + 4, 100, 20, () -> new TranslatableText("Add Update"), (button) -> {
-			setting.get().add(RelativePos.SELF, RelativePos.WEST);
+			updateOrder.add(RelativePos.SELF, RelativePos.WEST);
 			button.visible = false;
 			
-			((RTIMinecraftClient)screen.client).getSettingsManager().onSettingChanged(setting);
+			changeListener.accept(setting);
 		});
-		addUpdateButton.visible = false;
-		addChild(addUpdateButton);
+		addUpdateButton.setVisible(false);
+		addUpdateButton.setActive(canEdit);
+		addContent(addUpdateButton);
 		
-		updateButtonsActive();
-		
-		list = new UpdateOrderListWidget(screen, getX() + 2, getY() + getHeaderHeight(), getWidth() - 4, getHeight() - getHeaderHeight() - 18, category, setting);
+		list = new UpdateOrderListWidget(screen, getX() + 2, getY() + getHeaderHeight(), getWidth() - 4, getHeight() - getHeaderHeight() - 18, setting, updateOrder, changeListener);
 		list.init();
-		addChild(list);
+		if (!canEdit) {
+			list.disableButtons();
+		}
+		addContent(list);
 	}
 	
 	@Override
@@ -129,7 +139,7 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 		addUpdateButton.render(matrices, mouseX, mouseY, delta);
 		list.render(matrices, mouseX, mouseY, delta);
 		
-		if (setting.get().getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL) {
+		if (updateOrder.getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL) {
 			screen.client.textRenderer.drawWithShadow(matrices, new TranslatableText("X:"), offsetButtons.getX() - 10, offsetButtons.getY() + 6, TEXT_COLOR);
 			screen.client.textRenderer.drawWithShadow(matrices, new TranslatableText("Y:"), offsetButtons.getX() + 45, offsetButtons.getY() + 6, TEXT_COLOR);
 			screen.client.textRenderer.drawWithShadow(matrices, new TranslatableText("Z:"), offsetButtons.getX() + 100, offsetButtons.getY() + 6, TEXT_COLOR);
@@ -149,21 +159,17 @@ public class UpdateOrderWindow extends RTWindow implements ISettingGUIElement {
 	}
 	
 	@Override
-	public void onSettingChanged(ISetting setting) {
-		if (this.setting == setting) {
-			notifierOrderButton.updateMessage();
-			offsetButtons.updateButtonLabels();
-			updateButtonsActive();
-			
-			list.init();
-		}
+	protected void onRefresh() {
+		list.saveScrollAmount();
 	}
 	
-	private void updateButtonsActive() {
-		boolean canChangeSettings = ((RTIMinecraftClient)screen.client).getSettingsManager().canChangeSettings();
-		
-		notifierOrderButton.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
-		offsetButtons.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
-		addUpdateButton.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
+	public void disableButtons() {
+		canEdit = false;
+		refresh();
+	}
+	
+	public void enableButtons() {
+		canEdit = true;
+		refresh();
 	}
 }

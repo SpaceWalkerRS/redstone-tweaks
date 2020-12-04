@@ -14,7 +14,7 @@ import redstonetweaks.setting.Tweaks;
 public class TickSchedulerHelper {
 	
 	public static <T> void schedule(WorldAccess world, BlockState state, TickScheduler<T> tickScheduler, BlockPos pos, T object, int delay, TickPriority priority) {
-		if (delay == 0) {
+		if (delay == 0 && world instanceof World) {
 			if (object instanceof Block && !world.isClient()) {
 				state.scheduledTick((ServerWorld)world, pos, world.getRandom());
 			} else if (object instanceof Fluid) {

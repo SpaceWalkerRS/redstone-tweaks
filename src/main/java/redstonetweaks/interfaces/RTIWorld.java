@@ -20,13 +20,17 @@ public interface RTIWorld {
 	
 	public WorldTickHandler getWorldTickHandler();
 	
-	public void addMovedBlockEntity(BlockPos pos, BlockEntity blockEntity);
-	
 	public BlockEventHandler getBlockEventHandler(BlockPos pos);
 	
 	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler);
 	
 	public void removeBlockEventHandler(BlockPos pos);
+	
+	public boolean isTickingBlockEntities();
+	
+	public BlockEntity getMovedBlockEntity();
+	
+	public void setMovedBlockEntity(BlockEntity blockEntity);
 	
 	public void startTickingBlockEntities(boolean startIterating);
 	

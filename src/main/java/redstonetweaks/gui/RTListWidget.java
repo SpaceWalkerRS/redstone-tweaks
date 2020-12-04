@@ -114,13 +114,22 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	}
 	
 	public void init() {
-		children().clear();
+		clearEntries();
+		entryTitleWidth = 0;
+		
 		initList();
-
+		initEntries();
+		
 		setScrollAmount(SAVED_SCROLL_AMOUNTS.getOrDefault(savedScrollAmountKey, 0.0D));
 	}
 	
 	protected abstract void initList();
+	
+	private void initEntries() {
+		for (Entry<E> e : children()) {
+			e.init(getEntryTitleWidth());
+		}
+	}
 	
 	public boolean focusedIsTextField() {
 		E focused = getFocused();
@@ -249,16 +258,17 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		}
 	}
 	
-	public void unfocusTextFields(Entry<E> except) {
+	public void unfocusTextFields(Element except) {
 		for (Entry<E> entry : children()) {
-			if (entry != except) {
-				entry.unfocusTextFields();
-			}
+			entry.unfocusTextFields(except);
 		}
 	}
 	
 	public void filter(String query) {
+		clearEntries();
+		
 		filterEntries(query.toLowerCase());
+		initEntries();
 		
 		setScrollAmount(getScrollAmount());
 	}
@@ -286,13 +296,17 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		
 		public abstract List<? extends RTElement> getChildren();
 		
+		public void init(int titleWidth) {
+			
+		}
+		
 		public void allowHover(boolean allowHover) {
 			getChildren().forEach((element) -> element.allowHover(allowHover));
 		}
 		
 		public abstract void tick();
 		
-		public abstract void unfocusTextFields();
+		public abstract void unfocusTextFields(Element except);
 		
 		public boolean focusedIsTextField() {
 			if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {

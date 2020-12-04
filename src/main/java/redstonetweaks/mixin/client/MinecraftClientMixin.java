@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
 
 import redstonetweaks.ServerInfo;
+import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.hotkeys.HotkeysManager;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.ClientPacketHandler;
@@ -54,6 +55,7 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 		serverInfo.clear();
 		worldTickHandler.onDisconnect();
 		settingsManager.onDisconnect();
+		RTMenuScreen.clearLastSearchQueries();
 	}
 	
 	@Inject(method = "stop", at = @At(value = "HEAD"))

@@ -21,6 +21,7 @@ import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.Tickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.shape.VoxelShape;
@@ -97,15 +98,15 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		return Block.postProcessState(pushedBlock, world, pos);
 	}
 	
-	@Inject(method = "finish", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@Inject(method = "finish", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onFinishInjectAfterSetBlockState(CallbackInfo ci) {
-		placeMovedBlockEntity();
+		prepareMovedBlockEntityPlacement();
 	}
 	
 	@Inject(method = "tick", at = @At(value = "HEAD"))
 	private void onTickInjectAtHead(CallbackInfo ci) {
-		if (movedBlockEntity instanceof PistonBlockEntity) {
-			((PistonBlockEntity)movedBlockEntity).tick();
+		if (movedBlockEntity instanceof Tickable) {
+			((Tickable)movedBlockEntity).tick();
 		}
 	}
 	
@@ -126,9 +127,9 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		return Block.postProcessState(pushedBlock, world, pos);
 	}
 	
-	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.AFTER, ordinal = 1, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 1, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onTickInjectAfterSetBlockState(CallbackInfo ci) {
-		placeMovedBlockEntity();
+		prepareMovedBlockEntityPlacement();
 	}
 	
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5f))
@@ -264,9 +265,12 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		}
 	}
 	
-	private void placeMovedBlockEntity() {
+	private void prepareMovedBlockEntityPlacement() {
 		if (movedBlockEntity != null) {
-			((RTIWorld)world).addMovedBlockEntity(pos, movedBlockEntity);
+			movedBlockEntity.cancelRemoval();
+			movedBlockEntity.setLocation(getWorld(), getPos());
+			
+			((RTIWorld)getWorld()).setMovedBlockEntity(movedBlockEntity);
 		}
 	}
 }

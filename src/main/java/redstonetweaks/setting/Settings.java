@@ -3,6 +3,7 @@ package redstonetweaks.setting;
 import java.util.ArrayList;
 import java.util.List;
 
+import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
 public class Settings {
@@ -62,6 +63,14 @@ public class Settings {
 	
 	public static void unlockAll() {
 		ALL.forEach((setting) -> setting.setLocked(false));
+	}
+	
+	public static void applyPreset(Preset preset) {
+		ALL.forEach((setting) -> setting.applyPreset(preset));
+	}
+	
+	public static void removePreset(Preset preset) {
+		ALL.forEach((setting) -> setting.removePreset(preset));
 	}
 	
 	public static void toDefault() {

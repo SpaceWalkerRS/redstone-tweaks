@@ -30,7 +30,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	
 	@Override
 	public List<? extends Element> children() {
-		return windows.isEmpty() ? contents : windows;
+		return windows.isEmpty() ? getContents() : getWindows();
 	}
 	
 	@Override
@@ -42,22 +42,46 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 		return title;
 	}
 	
+	protected List<RTElement> getContents() {
+		return contents;
+	}
+	
+	protected List<RTWindow> getWindows() {
+		return windows;
+	}
+	
+	protected void clearContents() {
+		getContents().clear();
+	}
+
+	protected void addContent(RTElement content) {
+		getContents().add(content);
+	}
+	
+	private void addWindow(RTWindow window) {
+		getWindows().add(window);
+	}
+	
+	private void removeWindow(RTWindow window) {
+		getWindows().remove(window);
+	}
+	
 	public void init() {
-		contents.clear();
+		clearContents();
 		setFocused(null);
 		
 		initContents();
-		allowHover(windows.isEmpty());
+		allowHover(getWindows().isEmpty());
 	}
 
 	protected abstract void initContents();
 	
 	public void tick() {
 		if (!closedWindows.isEmpty()) {
-			closedWindows.forEach((window) -> windows.remove(window));
+			closedWindows.forEach((window) -> removeWindow(window));
 			closedWindows.clear();
 			
-			if (windows.isEmpty()) {
+			if (getWindows().isEmpty()) {
 				allowHover(true);
 			}
 		}
@@ -84,20 +108,16 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	protected abstract void renderContents(MatrixStack matrices, int mouseX, int mouseY, float delta);
 
 	private void renderWindows(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		windows.forEach((window) -> window.render(matrices, mouseX, mouseY, delta));
-	}
-	
-	protected void addContent(RTElement content) {
-		contents.add(content);
+		getWindows().forEach((window) -> window.render(matrices, mouseX, mouseY, delta));
 	}
 	
 	public void openWindow(RTWindow window) {
-		if (windows.isEmpty() && window != null) {
+		if (getWindows().isEmpty() && window != null) {
 			allowHover(false);
 		}
 		
 		window.init();
-		windows.add(window);
+		addWindow(window);
 	}
 	
 	public void closeWindow(RTWindow window) {
@@ -105,15 +125,19 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	}
 	
 	public boolean closeTopWindow() {
-		if (!windows.isEmpty()) {
+		if (!getWindows().isEmpty()) {
 			closeWindow(windows.get(0));
 			return true;
 		}
 		return false;
 	}
 	
+	protected void refreshWindows() {
+		getWindows().forEach((window) -> window.refresh());
+	}
+	
 	private void allowHover(boolean allowHover) {
-		contents.forEach((element) -> element.allowHover(allowHover));
+		getContents().forEach((element) -> element.allowHover(allowHover));
 	}
 	
 	public abstract void onTabClosed();
@@ -122,7 +146,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 		if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
 			return true;
 		}
-		if (windows.isEmpty()) {
+		if (getWindows().isEmpty()) {
 			return hasFocusedTextField();
 		} else {
 			for (RTWindow window : windows) {

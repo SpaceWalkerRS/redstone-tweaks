@@ -35,7 +35,7 @@ public class Tweaks {
 		public static final BooleanSetting RANDOMIZE_DELAYS = new BooleanSetting("randomizeDelays", "Randomize the delays of all block and fluid ticks that are scheduled.");
 		public static final BooleanSetting RANDOMIZE_TICK_PRIORITIES = new BooleanSetting("randomizeTickPriorities", "Randomize the tick priorities of all block and fluid ticks that are scheduled.");
 		public static final BooleanSetting SHOW_NEIGHBOR_UPDATES = new BooleanSetting("showNeighborUpdates", "When used in combination with showProcessingOrder, neighbor updates become scheduled events. The world tick will be paused until all neighbor updates have been executed. Colored boxes are drawn at the location of each neighbor update. The white box is the notifier position, a yellow box is a block update, a blue box a shape update and a red box a comparator update.");
-		public static final IntegerSetting SHOW_PROCESSING_ORDER = new IntegerSetting("showProcessingOrder", "When enabled, the world tick will be broken down and each of its phases being executed at the given interval of server ticks. Some phases, like those of scheduled ticks, block events and block entities, will break down even further and execute one their actions per interval. Information about the current tick, current world and current phase will be displayed in the top left of the screen.", 0, 1023);
+		public static final IntegerSetting SHOW_PROCESSING_ORDER = new IntegerSetting("showProcessingOrder", "When enabled, the world tick will be broken down and each of its phases executed at the given interval of server ticks. Some phases, like those of scheduled ticks, block events and block entities, will break down even further and execute one their actions per interval. Information about the current tick, current world and current phase will be displayed in the top left of the screen.", 0, 1023);
 	}
 	
 	public static class BugFixes {
@@ -45,8 +45,8 @@ public class Tweaks {
 		
 		public static final BugFixSetting MC54711 = new BugFixSetting("MC-54711", "A hacky fix for the chain bug. This patch only changes behavior of quick off-pulses in repeaters and comparators.");
 		public static final BugFixSetting MC120986 = new BugFixSetting("MC-120986", "While not nearly a complete fix for the bug described in the report, this patch does fix comparators not being updated when pistons move blocks with a comparator output.");
-		public static final BugFixSetting MC136566 = new BugFixSetting("MC-136566", "Fixes blocks not being updated when a moved active observer materializes.");
-		public static final BugFixSetting MC137127 = new BugFixSetting("MC-137127", "Fixes observers not being updated when a moved active observer materializes.");
+		public static final BugFixSetting MC136566 = new BugFixSetting("MC-136566", "Fixes blocks not being updated when a moved active observer is placed.");
+		public static final BugFixSetting MC137127 = new BugFixSetting("MC-137127", "Fixes observers not being updated when a moved active observer is placed.");
 		public static final BugFixSetting MC172213 = new BugFixSetting("MC-172213", "A fix for the so-called \"input bug\", which causes redstone components to lose 1 tick of delay if activated by a player input. To fix this world time is incremented after all dimensions have been ticked.");
 	}
 	
@@ -258,7 +258,7 @@ public class Tweaks {
 		private static final String PACK_NAME = "Heavy Weighted Pressure Plate";
 		private static final SettingsPack HEAVY_WEIGHTED_PRESSURE_PLATE = new SettingsPack(PACK_NAME);
 		
-		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting("blockUpdateOrder", "The order in which neighbors are update when the pressure plate powers or depowers.");
+		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting("blockUpdateOrder", "The order in which neighbors are updated when the pressure plate powers or depowers.");
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting("delayRisingEdge", Settings.Common.DESC_DELAY_RISING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting("delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting("tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE);
@@ -334,7 +334,7 @@ public class Tweaks {
 		private static final String PACK_NAME = "Light Weighted Pressure Plate";
 		private static final SettingsPack LIGHT_WEIGHTED_PRESSURE_PLATE = new SettingsPack(PACK_NAME);
 		
-		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting("blockUpdateOrder", "The order in which neighbors are update when the pressure plate powers or depowers.");
+		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting("blockUpdateOrder", "The order in which neighbors are updated when the pressure plate powers or depowers.");
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting("delayRisingEdge", Settings.Common.DESC_DELAY_RISING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting("delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting("tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE);
@@ -347,7 +347,7 @@ public class Tweaks {
 		private static final String PACK_NAME = "Magenta Glazed Terracotta";
 		private static final SettingsPack MAGENTA_GLAZED_TERRACOTTA = new SettingsPack(PACK_NAME);
 		
-		public static final BooleanSetting IS_POWER_DIODE = new BooleanSetting("isPowerDiode", "When enabled, power can only flow in the direction of the arrow on the top side of the block. Additionally, a redstone wire block on top of the block can only flow in the direction of the arrow on the top side of the block.");
+		public static final BooleanSetting IS_POWER_DIODE = new BooleanSetting("isPowerDiode", "When enabled, power can only flow through the block in the direction of the arrow on the top side of the block. Additionally, a redstone wire block on top of the block can only power in the direction of the arrow on the top side of the block.");
 	}
 	
 	public static class MagmaBlock {

@@ -1,30 +1,37 @@
 package redstonetweaks.gui.setting;
 
+import java.util.function.Consumer;
+
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTWindow;
-import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.ArraySetting;
 import redstonetweaks.setting.types.ISetting;
 
-public class ArraySettingWindow extends RTWindow implements ISettingGUIElement {
+public class ArraySettingWindow<K, E> extends RTWindow {
 	
-	private static final int WIDTH = 230;
+	private static final int WIDTH = 180;
 	private static final int HEIGHT = 185;
 	
-	private final SettingsCategory category;
-	private final ArraySetting<?, ?> setting;
+	private final ArraySetting<K, E> setting;
+	private final E[] array;
+	private final Consumer<ISetting> changeListener;
 	
-	private ArraySettingListWidget list;
+	private ArraySettingListWidget<K, E> list;
 	
-	public ArraySettingWindow(RTMenuScreen screen, SettingsCategory category, ArraySetting<?, ?> setting) {
+	private boolean canEdit;
+	
+	public ArraySettingWindow(RTMenuScreen screen, ArraySetting<K, E> setting, E[] array, Consumer<ISetting> changeListener) {
 		super(screen, new TranslatableText(setting.getName()), (screen.getWidth() - WIDTH) / 2, (screen.getHeight() - HEIGHT) / 2, WIDTH, HEIGHT);
 		
-		this.category = category;
 		this.setting = setting;
+		this.array = array;
+		this.changeListener = changeListener;
+		
+		this.canEdit = true;
 	}
 	
 	@Override
@@ -34,9 +41,12 @@ public class ArraySettingWindow extends RTWindow implements ISettingGUIElement {
 	
 	@Override
 	protected void initContents() {
-		list = new ArraySettingListWidget(screen, getX(), getY() + getHeaderHeight(), getWidth(), getHeight() - getHeaderHeight(), category, setting);
+		list = new ArraySettingListWidget<>(screen, getX(), getY() + getHeaderHeight(), getWidth(), getHeight() - getHeaderHeight(), setting, array, changeListener);
+		if (!canEdit) {
+			list.disableButtons();
+		}
 		list.init();
-		addChild(list);
+		addContent(list);
 	}
 	
 	@Override
@@ -45,19 +55,27 @@ public class ArraySettingWindow extends RTWindow implements ISettingGUIElement {
 	}
 	
 	@Override
-	public void onSettingChanged(ISetting setting) {
-		if (this.setting == setting) {
-			list.onSettingChanged();
-		}
+	public void unfocusTextFields(Element except) {
+		list.unfocusTextFields(except);
 	}
 	
 	@Override
-	public void unfocusTextFields(Element except) {
-		
+	protected void onRefresh() {
+		list.saveScrollAmount();
 	}
 	
 	@Override
 	protected boolean hasFocusedTextField() {
 		return list.focusedIsTextField();
+	}
+	
+	public void disableButtons() {
+		canEdit = false;
+		refresh();
+	}
+	
+	public void enableButtons() {
+		canEdit = true;
+		refresh();
 	}
 }

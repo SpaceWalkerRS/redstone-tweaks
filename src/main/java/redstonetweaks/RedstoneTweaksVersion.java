@@ -39,16 +39,15 @@ public class RedstoneTweaksVersion {
 		return INVALID_VERSION;
 	}
 
-	public static RedstoneTweaksVersion parseVersion(String str) {
-		String[] args = str.split("[.]", 0);
+	public static RedstoneTweaksVersion parseVersion(String string) {
+		String[] args = string.split("[.]", 0);
 		if (args.length == 3) {
 			try {
 				int major = Integer.parseInt(args[0]);
 				int minor = Integer.parseInt(args[1]);
 				int patch = Integer.parseInt(args[2]);
 				
-				if (major >= 0 && minor >= 0 && patch >= 0)
-			        return new RedstoneTweaksVersion(major, minor, patch);
+				return create(major, minor, patch);
 			} catch (NumberFormatException e) {
 				
 		    }

@@ -24,7 +24,7 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 	
 	private final SettingsCategory category;
 	
-	private SettingsListWidget settingsList;
+	private EditSettingsListWidget settingsList;
 	private RTTextFieldWidget searchBox;
 	private RTButtonWidget clearSearchBoxButton;
 	private RTLockButtonWidget lockButton;
@@ -44,7 +44,7 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 	
 	@Override
 	protected void initContents() {
-		settingsList = new SettingsListWidget(screen, category, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - HEADER_HEIGHT - 5);
+		settingsList = new EditSettingsListWidget(screen, category, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - HEADER_HEIGHT - 5);
 		settingsList.init();
 		addContent(settingsList);
 		
@@ -102,7 +102,7 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 	
 	@Override
 	protected boolean hasFocusedTextField() {
-		return settingsList.focusedIsTextField();
+		return getFocused() == searchBox || settingsList.focusedIsTextField();
 	}
 	
 	@Override
@@ -111,9 +111,7 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 		
 		settingsList.onSettingChanged(setting);
 		for (RTWindow window : windows) {
-			if (window instanceof ISettingGUIElement) {
-				((ISettingGUIElement)window).onSettingChanged(setting);
-			}
+			window.refresh();
 		}
 	}
 	
@@ -127,5 +125,9 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 	
 	public SettingsCategory getCategory() {
 		return category;
+	}
+	
+	public static void clearLastSearchQueries() {
+		LAST_SEARCH_QUERIES.clear();
 	}
 }

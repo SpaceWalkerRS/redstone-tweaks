@@ -11,6 +11,7 @@ import java.util.UUID;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
+
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.interfaces.RTIMinecraftServer;
@@ -19,6 +20,7 @@ import redstonetweaks.packet.ResetSettingsPacket;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.SettingPacket;
 import redstonetweaks.packet.SettingsPacket;
+import redstonetweaks.setting.preset.ServerPresetsManager;
 import redstonetweaks.setting.types.ISetting;
 
 public class ServerSettingsManager {
@@ -27,9 +29,11 @@ public class ServerSettingsManager {
 	private static final String SETTINGS_PATH = "settings.txt";
 	
 	private final MinecraftServer server;
+	private final ServerPresetsManager presetsManager;
 	
 	public ServerSettingsManager(MinecraftServer server) {
 		this.server = server;
+		this.presetsManager = new ServerPresetsManager(server, this);
 
 		onStartUp();
 	}
@@ -38,12 +42,17 @@ public class ServerSettingsManager {
 		return server;
 	}
 	
+	public ServerPresetsManager getPresetsManager() {
+		return presetsManager;
+	}
+	
 	private void onStartUp() {
 		Settings.enableAll();
 		loadSettings();
 	}
 	
 	public void onShutdown() {
+		presetsManager.onShutdown();
 		saveSettings();
 	}
 	

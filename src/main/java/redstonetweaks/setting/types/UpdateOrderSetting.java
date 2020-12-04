@@ -1,5 +1,6 @@
 package redstonetweaks.setting.types;
 
+import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.util.Directionality;
 import redstonetweaks.world.common.UpdateOrder;
 
@@ -17,5 +18,10 @@ public class UpdateOrderSetting extends Setting<UpdateOrder> {
 	@Override
 	public void set(UpdateOrder newValue) {
 		super.set(newValue.copy());
+	}
+	
+	@Override
+	public void setPresetValue(Preset preset, UpdateOrder newValue) {
+		super.setPresetValue(preset, newValue.copy());
 	}
 }

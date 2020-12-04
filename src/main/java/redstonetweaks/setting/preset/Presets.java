@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.world.TickPriority;
 
 import redstonetweaks.setting.ServerConfig;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.util.Directionality;
 import redstonetweaks.util.RelativePos;
@@ -16,6 +17,9 @@ public class Presets {
 	
 	public static final List<Preset> ALL = new ArrayList<>();
 	
+	// This preset is used to store values temporarily when editing a preset
+	public static final Preset EDIT = new Preset("EDIT", Preset.Mode.SET, false);
+	
 	public static void register(Preset preset) {
 		ALL.add(preset);
 	}
@@ -24,14 +28,47 @@ public class Presets {
 		return ALL.contains(preset);
 	}
 	
+	public static void remove(Preset preset) {
+		Settings.removePreset(preset);
+		ALL.remove(preset);
+	}
+	
+	public static boolean isNameValid(String name) {
+		return !name.isEmpty() && fromName(name) == null;
+	}
+	
+	public static Preset fromName(String name) {
+		for (Preset preset : ALL) {
+			if (preset.getName().equals(name)) {
+				return preset;
+			}
+		}
+		return null;
+	}
+	
+	public static Preset fromNameOrCreate(String name) {
+		Preset preset = fromName(name);
+		return preset == null ? new Preset(name, "", Preset.Mode.SET, true) : preset;
+	}
+	
 	public static void init() {
 		Default.init();
 		Bedrock.init();
 	}
 	
+	public static void toDefault() {
+		for (int i = ALL.size() - 1; i >= 0; i--) {
+			Preset preset = ALL.get(i);
+			
+			if (preset.isEditable()) {
+				remove(preset);
+			}
+		}
+	}
+	
 	public static class Default {
 		
-		public static final Preset DEFAULT = new Preset("Default", Tweaks.TWEAKS, Preset.Mode.SET, false);
+		public static final Preset DEFAULT = new Preset("Default", "The default values of all settings.", Preset.Mode.SET, false);
 		
 		public static void init() {
 			Presets.register(DEFAULT);
@@ -468,7 +505,7 @@ public class Presets {
 	
 	public static class Bedrock {
 		
-		public static final Preset BEDROCK = new Preset("Bedrock", Tweaks.TWEAKS, Preset.Mode.SET);
+		public static final Preset BEDROCK = new Preset("Bedrock", "Values that enable features or behavior that is present in the Bedrock Edition of Minecraft.", Preset.Mode.SET, false);
 		
 		public static void init() {
 			Presets.register(BEDROCK);

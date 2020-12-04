@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -24,20 +25,21 @@ import redstonetweaks.gui.widget.RTTexturedButtonWidget;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
-import redstonetweaks.setting.types.ArraySetting;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.BugFixSetting;
+import redstonetweaks.setting.types.DirectionToBooleanSetting;
+import redstonetweaks.setting.types.GameModeToBooleanSetting;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.IntegerSetting;
 import redstonetweaks.setting.types.TickPrioritySetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 import redstonetweaks.util.TextFormatting;
 
-public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> implements ISettingGUIElement {
+public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.Entry> implements ISettingGUIElement {
 	
 	private final SettingsCategory category;
 	
-	public SettingsListWidget(RTMenuScreen screen, SettingsCategory category, int x, int y, int width, int height) {
+	public EditSettingsListWidget(RTMenuScreen screen, SettingsCategory category, int x, int y, int width, int height) {
 		super(screen, x, y, width, height, 22, category.getName());
 		
 		this.category = category;
@@ -61,50 +63,30 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 			
 			addEntry(new SeparatorEntry());
 		}
-		
-		for (Entry entry : children()) {
-			entry.init(getEntryTitleWidth());
-		}
 	}
 	
 	@Override
 	protected void filterEntries(String query) {
-		clearEntries();
-		
 		for (SettingsPack pack : category.getSettingsPacks()) {
-			if (pack.getName().toLowerCase().contains(query)) {
-				addEntry(new SettingsPackEntry(pack));
-				
-				for (ISetting setting : pack.getSettings()) {
-					addEntry(new SettingEntry(setting));
+			boolean packMatchesQuery = pack.getName().toLowerCase().contains(query);
+			
+			List<Entry> settingEntries = new ArrayList<>();
+			
+			for (ISetting setting : pack.getSettings()) {
+				if (packMatchesQuery || setting.getName().toLowerCase().contains(query)) {
+					settingEntries.add(new SettingEntry(setting));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
 				}
+			}
+			
+			if (!settingEntries.isEmpty()) {
+				addEntry(new SettingsPackEntry(pack));
+				
+				settingEntries.forEach((entry) -> addEntry(entry));
 				
 				addEntry(new SeparatorEntry());
-			} else {
-				List<Entry> filteredEntries = new ArrayList<>();
-				
-				for (ISetting setting : pack.getSettings()) {
-					if (setting.getName().toLowerCase().contains(query)) {
-						filteredEntries.add(new SettingEntry(setting));
-						
-						updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
-					}
-				}
-				
-				if (filteredEntries.size() > 0) {
-					addEntry(new SettingsPackEntry(pack));
-					
-					children().addAll(filteredEntries);
-					
-					addEntry(new SeparatorEntry());
-				}
 			}
-		}
-		
-		for (Entry entry : children()) {
-			entry.init(getEntryTitleWidth());
 		}
 	}
 	
@@ -144,7 +126,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		}
 		
 		@Override
-		public void unfocusTextFields() {
+		public void unfocusTextFields(Element except) {
 			
 		}
 		
@@ -176,7 +158,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		}
 		
 		@Override
-		public void unfocusTextFields() {
+		public void unfocusTextFields(Element except) {
 			
 		}
 		
@@ -206,13 +188,13 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 				button.toggleLocked();
 				
 				setting.setLocked(button.isLocked());
-				onClientChangeSetting();
+				onClientChangedSetting();
 			});
 			this.children.add(lockButton);
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
 				setting.reset();
-				onClientChangeSetting();
+				onClientChangedSetting();
 			});
 			this.children.add(resetButton);
 			
@@ -246,8 +228,8 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		}
 		
 		@Override
-		public void init(int entryTitleWidth) {
-			buttonPanel.setX(getX() + entryTitleWidth);
+		public void init(int titleWidth) {
+			buttonPanel.setX(getX() + titleWidth);
 			lockButton.setX(buttonPanel.getX() + buttonPanel.getWidth() + 5);
 			resetButton.setX(lockButton.getX() + lockButton.getWidth() + 2);
 			
@@ -260,8 +242,8 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		}
 		
 		@Override
-		public void unfocusTextFields() {
-			buttonPanel.unfocusTextFields(null);
+		public void unfocusTextFields(Element except) {
+			buttonPanel.unfocusTextFields(except);
 		}
 		
 		@Override
@@ -278,10 +260,28 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 		}
 		
 		private void populateButtonPanel() {
-			if (setting instanceof ArraySetting<?, ?>) {
-				ArraySetting<?, ?> aSetting = (ArraySetting<?, ?>)setting;
+			if (setting instanceof DirectionToBooleanSetting) {
+				DirectionToBooleanSetting dSetting = (DirectionToBooleanSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					screen.openWindow(new ArraySettingWindow(screen, category, aSetting));
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, dSetting.get(), (setting) -> onClientChangedSetting());
+					
+					screen.openWindow(window);
+					
+					if (!((RTIMinecraftClient)client).getSettingsManager().canChangeSettings() || category.isLocked() || setting.isLocked()) {
+						window.disableButtons();
+					}
+				})).alwaysActive());
+			} else
+			if (setting instanceof GameModeToBooleanSetting) {
+				GameModeToBooleanSetting gSetting = (GameModeToBooleanSetting)setting;
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, gSetting, gSetting.get(), (setting) -> onClientChangedSetting());
+					
+					screen.openWindow(window);
+					
+					if (!((RTIMinecraftClient)client).getSettingsManager().canChangeSettings() || category.isLocked() || setting.isLocked()) {
+						window.disableButtons();
+					}
 				})).alwaysActive());
 			} else
 			if (setting instanceof BooleanSetting) {
@@ -292,7 +292,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
 					}, (button) -> {
 						bSetting.set(!bSetting.get());
-						onClientChangeSetting();
+						onClientChangedSetting();
 					}));
 					buttonPanel.addButton(new RTTexturedButtonWidget(0, 0, 20, 20, RTTexturedButtonWidget.WIDGETS_LOCATION, 0, 106, 256, 256, 20, (button) -> {
 						saveScrollAmount();
@@ -313,7 +313,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
 					}, (button) -> {
 						bSetting.set(!bSetting.get());
-						onClientChangeSetting();
+						onClientChangedSetting();
 					}));
 				}
 			} else
@@ -325,7 +325,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 						int steps = (int)(slider.getValue() * (iSetting.getRange() + 1));
 						
 						iSetting.set(min + steps);
-						onClientChangeSetting();
+						onClientChangedSetting();
 					}, (slider) -> {
 						double steps = iSetting.get() - iSetting.getMin();
 						slider.setValue(steps / (iSetting.getRange()));
@@ -335,7 +335,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 						textField.setText(iSetting.getValueAsString());
 					}, (text) -> {
 						iSetting.setValueFromString(text);
-						onClientChangeSetting();
+						onClientChangedSetting();
 					}));
 				}
 			} else
@@ -348,7 +348,7 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 					int steps = (int)Math.round((priorities.length - 1) * slider.getValue());
 					
 					tSetting.set(TickPriority.byIndex(min + steps));
-					onClientChangeSetting();
+					onClientChangedSetting();
 				}, (slider) -> {
 					TickPriority[] priorities = TickPriority.values();
 					double steps = tSetting.get().getIndex() - priorities[0].getIndex();
@@ -358,7 +358,13 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 			if (setting instanceof UpdateOrderSetting) {
 				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					screen.openWindow(new UpdateOrderWindow(screen, category, uSetting));
+					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, uSetting.get(), (setting) -> onClientChangedSetting());
+					
+					screen.openWindow(window);
+					
+					if (!((RTIMinecraftClient)client).getSettingsManager().canChangeSettings() || category.isLocked() || setting.isLocked()) {
+						window.disableButtons();
+					}
 				})).alwaysActive());
 			}
 		}
@@ -385,15 +391,12 @@ public class SettingsListWidget extends RTListWidget<SettingsListWidget.Entry> i
 			updateButtonsActive();
 		}
 		
-		private void onClientChangeSetting() {
+		private void onClientChangedSetting() {
 			((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(setting);
 		}
 	}
 	
-	public static abstract class Entry extends RTListWidget.Entry<SettingsListWidget.Entry> {
+	public static abstract class Entry extends RTListWidget.Entry<EditSettingsListWidget.Entry> {
 		
-		public void init(int entryTitleWidth) {
-			
-		}
 	}
 }

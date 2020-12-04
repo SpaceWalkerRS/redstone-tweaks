@@ -1,6 +1,5 @@
 package redstonetweaks.mixin.server;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
@@ -69,8 +67,9 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Shadow @Final protected List<BlockEntity> pendingBlockEntities;
 	@Shadow protected boolean iteratingTickingBlockEntities;
 	
+	private BlockEntity movedBlockEntity;
+	
 	private Iterator<BlockEntity> blockEntitiesIterator;
-	private List<BlockEntity> pendingMovedBlockEntities;
 	private Map<BlockPos, BlockEventHandler> blockEventHandlers;
 	
 	@Shadow public abstract Profiler getProfiler();
@@ -90,7 +89,6 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(MutableWorldProperties properties, RegistryKey<World> registryKey, final DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l, CallbackInfo ci) {
-		pendingMovedBlockEntities = new ArrayList<>();
 		blockEventHandlers = new HashMap<>();
 	}
 	
@@ -132,11 +130,6 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		ci.cancel();
 	}
 	
-	@Inject(method = "tickBlockEntities", at = @At(value = "RETURN"))
-	private void onTickBlockEntitiesInjectAtReturn(CallbackInfo ci) {
-		handlePendingMovedBlockEntities();
-	}
-	
 	@Inject(method = "getReceivedStrongRedstonePower", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetReceivedStrongRedstonePowerInjectAtHead(BlockPos pos, CallbackInfoReturnable<Integer> cir) {
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
@@ -174,23 +167,6 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	}
 	
 	@Override
-	public void addMovedBlockEntity(BlockPos pos, BlockEntity blockEntity) {
-		blockEntity.cancelRemoval();
-		blockEntity.setLocation(world(), pos);
-		
-		if (iteratingTickingBlockEntities) {
-			for (BlockEntity pendingBlockEntity : pendingMovedBlockEntities) {
-				if (pendingBlockEntity.getPos().equals(pos)) {
-					return;
-				}
-			}
-			pendingMovedBlockEntities.add(blockEntity);
-		} else {
-			setMovedBlockEntity(pos, blockEntity);
-		}
-	}
-	
-	@Override
 	public BlockEventHandler getBlockEventHandler(BlockPos pos) {
 		return blockEventHandlers.get(pos);
 	}
@@ -203,6 +179,24 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Override
 	public void removeBlockEventHandler(BlockPos pos) {
 		blockEventHandlers.remove(pos);
+	}
+	
+	@Override
+	public boolean isTickingBlockEntities() {
+		return iteratingTickingBlockEntities;
+	}
+	
+	@Override
+	public BlockEntity getMovedBlockEntity() {
+		BlockEntity blockEntity = movedBlockEntity;
+		movedBlockEntity = null;
+		
+		return blockEntity;
+	}
+	
+	@Override
+	public void setMovedBlockEntity(BlockEntity blockEntity) {
+		movedBlockEntity = blockEntity;
 	}
 	
 	@Override
@@ -249,7 +243,6 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		profiler.push("pendingBlockEntities");
 		
 		handlePendingBlockEntities();
-		handlePendingMovedBlockEntities();
 		
 		profiler.pop();
 	}
@@ -464,33 +457,6 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 			}
 
 			pendingBlockEntities.clear();
-		}
-	}
-	
-	private void handlePendingMovedBlockEntities() {
-		if (!pendingMovedBlockEntities.isEmpty()) {
-			for (BlockEntity blockEntity : pendingMovedBlockEntities) {
-				if (!blockEntity.isRemoved() && !blockEntities.contains(blockEntity)) {
-					BlockPos pos = blockEntity.getPos();
-					
-					setMovedBlockEntity(pos, blockEntity);
-				}
-			}
-			
-			pendingMovedBlockEntities.clear();
-		}
-	}
-	
-	private  void setMovedBlockEntity(BlockPos pos, BlockEntity blockEntity) {
-		Block block = getBlockState(pos).getBlock();
-		
-		if (block instanceof BlockEntityProvider) {
-			// The moved block will have created a new block entity upon being placed
-			// so we first remove this block entity.
-			removeBlockEntity(pos);
-			setBlockEntity(pos, blockEntity);
-			
-			blockEntity.markDirty();
 		}
 	}
 	

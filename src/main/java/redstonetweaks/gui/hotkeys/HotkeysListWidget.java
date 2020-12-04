@@ -3,6 +3,7 @@ package redstonetweaks.gui.hotkeys;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -37,10 +38,6 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 			addEntry(new Entry(keyBinding));
 			
 			updateEntryTitleWidth(client.textRenderer.getWidth(keyBinding.getName()));
-		}
-		
-		for (Entry entry : children()) {
-			entry.init(getEntryTitleWidth());
 		}
 	}
 	
@@ -99,7 +96,7 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 		}
 		
 		@Override
-		public void unfocusTextFields() {
+		public void unfocusTextFields(Element except) {
 			
 		}
 		
@@ -114,8 +111,9 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 			resetButton.render(matrices, mouseX, mouseY, tickDelta);
 		}
 		
-		public void init(int entryTitleWidth) {
-			editButton.setX(getX() + entryTitleWidth);
+		@Override
+		public void init(int titleWidth) {
+			editButton.setX(getX() + titleWidth);
 			resetButton.setX(editButton.getX() + editButton.getWidth() + 5);
 			
 			resetButton.setActive(!keyBinding.isDefault());

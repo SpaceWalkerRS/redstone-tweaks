@@ -2,6 +2,8 @@ package redstonetweaks.setting.types;
 
 import java.util.Arrays;
 
+import redstonetweaks.setting.preset.Preset;
+
 public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
 	public ArraySetting(String name, String description, E[] backupValues) {
@@ -40,6 +42,11 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	@Override
 	public void set(E[] newValue) {
 		super.set(newValue.clone());
+	}
+	
+	@Override
+	public void setPresetValue(Preset preset, E[] newValue) {
+		super.setPresetValue(preset, newValue.clone());
 	}
 	
 	protected abstract E[] getEmptyArray(int size);

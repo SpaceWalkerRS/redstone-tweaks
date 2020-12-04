@@ -87,6 +87,15 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 	}
 	
 	@Override
+	public void setWidth(int width) {
+		super.setWidth(width - 2);
+	}
+	
+	public void setHeight(int height) {
+		this.height = height - 2;
+	}
+	
+	@Override
 	public void updateMessage() {
 		if (!isFocused()) {
 			deaf = true;

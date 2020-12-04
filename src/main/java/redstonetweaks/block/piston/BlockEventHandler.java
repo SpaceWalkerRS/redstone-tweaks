@@ -11,8 +11,6 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
-import net.minecraft.block.PistonExtensionBlock;
-import net.minecraft.block.PistonHeadBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.PistonType;
@@ -25,6 +23,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.RTIPistonHandler;
@@ -86,7 +85,7 @@ public class BlockEventHandler {
 			boolean shouldExtend = lazy ? !extended : PistonHelper.isReceivingPower(world, pos, state, facing, true);
 			
 			if (shouldExtend && (type == 1 || type == 2)) {
-				int flags = Tweaks.Global.DOUBLE_RETRACTION.get() ? 16 : 2;
+				int flags = Tweaks.Global.DOUBLE_RETRACTION.get() ? 18 : 2;
 				world.setBlockState(pos, state.with(Properties.EXTENDED, true), flags);
 				
 				return false;
@@ -111,6 +110,10 @@ public class BlockEventHandler {
 			BlockEntity blockEntity = world.getBlockEntity(headPos);
 			if (blockEntity instanceof PistonBlockEntity) {
 				((PistonBlockEntity)blockEntity).finish();
+				
+				if (!(world.getBlockState(pos).getBlock() instanceof PistonBlock)) {
+					return false;
+				}
 			} else {
 				tryContinueBlockEvent();
 			}
@@ -235,10 +238,10 @@ public class BlockEventHandler {
 				movedStates.add(movedState);
 				movedStatesMap.put(movedPos, movedState);
 				
-				if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get()) {
+				if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get() || Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
 					BlockEntity movedBlockEntity = world.getBlockEntity(movedPos);
 					
-					((RTIPistonHandler)pistonHandler).addMovedBlockEntity(movedBlockEntity);
+					movedBlockEntities.add(movedBlockEntity);
 					
 					if (movedBlockEntity != null) {
 						world.removeBlockEntity(movedPos);
@@ -293,10 +296,10 @@ public class BlockEventHandler {
 				BlockEntity movedBlockEntity = null;
 				boolean isMergingSlabs = false;
 				
-				if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get()) {
+				if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get() || Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
 					movedBlockEntity = movedBlockEntities.get(index);
 				}
-				if (Tweaks.Global.MERGE_SLABS.get()) {
+				if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(movedState)) {
 					SlabType movingType = splitSlabTypes.get(fromPos);
 					if (movingType != null) {
 						SlabType remainingType = SlabHelper.getOppositeType(movingType);
@@ -327,8 +330,8 @@ public class BlockEventHandler {
 		case 1:
 			if (extend) {
 				PistonType pistonType = sticky ? PistonType.STICKY : PistonType.DEFAULT;
-				BlockState pistonHead = Blocks.PISTON_HEAD.getDefaultState().with(PistonHeadBlock.FACING, facing).with(PistonHeadBlock.TYPE, pistonType);
-				BlockState movingPiston = Blocks.MOVING_PISTON.getDefaultState().with(PistonExtensionBlock.FACING, facing).with(PistonExtensionBlock.TYPE, pistonType);
+				BlockState pistonHead = Blocks.PISTON_HEAD.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, pistonType);
+				BlockState movingPiston = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, pistonType);
 				
 				world.setBlockState(headPos, movingPiston, 68);
 				world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(pistonHead, facing, true, true, sticky));
@@ -364,14 +367,9 @@ public class BlockEventHandler {
 				Entry<BlockPos, BlockState> entry = (Entry<BlockPos, BlockState>)leftOverBlocks.next();
 				BlockPos leftOverPos = entry.getKey();
 				BlockState leftOverState = entry.getValue();
+				BlockState newState = Tweaks.Global.MERGE_SLABS.get() ? movedStatesMap.getOrDefault(entry.getKey(), Blocks.AIR.getDefaultState()) : Blocks.AIR.getDefaultState();
 				
 				leftOverState.prepare(world, leftOverPos, 2);
-				BlockState newState;
-				if (Tweaks.Global.MERGE_SLABS.get() && splitSlabTypes.containsKey(leftOverPos)) {
-					newState = movedStatesMap.get(leftOverPos);
-				} else {
-					newState = Blocks.AIR.getDefaultState();
-				}
 				newState.updateNeighbors(world, leftOverPos, 2);
 				newState.prepare(world, leftOverPos, 2);
 			} else {

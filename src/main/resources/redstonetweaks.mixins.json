@@ -64,6 +64,7 @@
 	"server.PistonBlockMixin",
 	"server.PistonExtensionBlockMixin",
 	"server.PistonHandlerMixin",
+	"server.PistonHeadBlockMixin",
 	"server.PoweredRailBlockMixin",
 	"server.PressurePlateBlockMixin",
 	"server.RedstoneBlockMixin",
@@ -96,6 +97,7 @@
 	"server.WallRedstoneTorchBlockMixin",
 	"server.WaterFluidMixin",
 	"server.WeightedPressurePlateBlockMixin",
+	"server.WorldChunkMixin",
 	"server.WorldMixin"
   ],
   "client": [

@@ -27,9 +27,9 @@ public class IntegerSetting extends Setting<Integer> {
 	}
 	
 	@Override
-	public void setPresetValue(Preset preset, Integer value) {
-		if (inRange(value)) {
-			super.setPresetValue(preset, value);
+	public void setPresetValue(Preset preset, Integer newValue) {
+		if (inRange(newValue)) {
+			super.setPresetValue(preset, newValue);
 		}
 	}
 	

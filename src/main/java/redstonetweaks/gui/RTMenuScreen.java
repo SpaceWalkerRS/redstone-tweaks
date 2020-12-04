@@ -22,6 +22,7 @@ import redstonetweaks.hotkeys.RTKeyBinding;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
 public class RTMenuScreen extends Screen {
@@ -218,10 +219,22 @@ public class RTMenuScreen extends Screen {
 		}
 	}
 	
+	public void onPresetChanged(Preset preset) {
+		RTMenuTab selectedTab = getSelectedTab();
+		if (selectedTab instanceof PresetsTab) {
+			((PresetsTab)selectedTab).onPresetChanged(preset);
+		}
+	}
+	
 	public void onHotkeyChanged(RTKeyBinding keyBinding) {
 		RTMenuTab selectedTab = getSelectedTab();
 		if (selectedTab instanceof HotkeysTab) {
 			((HotkeysTab)selectedTab).onHotkeyChanged(keyBinding);
 		}
+	}
+	
+	public static void clearLastSearchQueries() {
+		PresetsTab.clearLastSearchQuery();
+		SettingsTab.clearLastSearchQueries();
 	}
 }

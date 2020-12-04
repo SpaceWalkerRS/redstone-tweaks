@@ -38,4 +38,10 @@ public interface ISetting {
 	
 	public void applyPreset(Preset preset);
 	
+	public void removePreset(Preset preset);
+	
+	public void copyPresetValue(Preset from, Preset to);
+	
+	public boolean hasPreset(Preset preset);
+	
 }
