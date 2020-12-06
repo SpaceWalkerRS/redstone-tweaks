@@ -4,25 +4,21 @@ import redstonetweaks.packet.ServerInfoPacket;
 
 public class ServerInfo {
 	
-	private RedstoneTweaksVersion modVersion;
+	private static RedstoneTweaksVersion modVersion = RedstoneTweaksVersion.INVALID_VERSION;
 	
-	public ServerInfo() {
-		this(RedstoneTweaksVersion.INVALID_VERSION);
+	public static void init() {
+		modVersion = RedstoneTweaks.MOD_VERSION;
 	}
 	
-	public ServerInfo(RedstoneTweaksVersion modVersion) {
-		this.modVersion = modVersion;
-	}
-	
-	public void clear() {
+	public static void clear() {
 		modVersion = RedstoneTweaksVersion.INVALID_VERSION;
 	}
 	
-	public RedstoneTweaksVersion getModVersion() {
+	public static RedstoneTweaksVersion getModVersion() {
 		return modVersion;
 	}
 	
-	public void updateFromPacket(ServerInfoPacket packet) {
+	public static void updateFromPacket(ServerInfoPacket packet) {
 		modVersion = packet.modVersion;
 	}
 }

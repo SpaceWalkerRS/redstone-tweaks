@@ -8,9 +8,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
+
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.interfaces.RTIMinecraftServer;
+import redstonetweaks.packet.PresetPacket;
+import redstonetweaks.packet.PresetsPacket;
+import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.setting.ServerSettingsManager;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
@@ -62,7 +68,14 @@ public class ServerPresetsManager {
 			if ((line = br.readLine()) == null) {
 				return;
 			}
+			if (line.equals("")) {
+				return;
+			}
 			Preset preset = Presets.fromNameOrCreate(line);
+			
+			if (!Presets.isRegistered(preset)) {
+				Presets.register(preset);
+			}
 			
 			if ((line = br.readLine()) == null) {
 				return;
@@ -93,6 +106,14 @@ public class ServerPresetsManager {
 		} catch (IOException e) {
 			
 		}
+	}
+	
+	public void reloadPresets() {
+		loadPresets();
+		
+		
+		
+		updatePresetsOfPlayer(null);
 	}
 	
 	private void savePresets() {
@@ -158,6 +179,28 @@ public class ServerPresetsManager {
 	}
 	
 	private File getPresetFile(Preset preset) {
-		return new File(getPresetsFolder(), preset.getName());
+		return new File(getPresetsFolder(), preset.getName() + ".txt");
+	}
+	
+	public void onPresetPacketReceived(PresetEditor editor) {
+		if (server.isDedicated() || server.isRemote()) {
+			PresetPacket packet = new PresetPacket(editor);
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+		}
+	}
+	
+	public void onPlayerJoined(ServerPlayerEntity player) {
+		updatePresetsOfPlayer(player);
+	}
+	
+	private void updatePresetsOfPlayer(ServerPlayerEntity player) {
+		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
+		PresetsPacket packet = new PresetsPacket(Presets.ALL);
+		
+		if (player == null) {
+			packetHandler.sendPacket(packet);
+		} else {
+			packetHandler.sendPacketToPlayer(packet, player);
+		}
 	}
 }

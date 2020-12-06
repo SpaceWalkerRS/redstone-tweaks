@@ -45,7 +45,7 @@ public abstract class PacketHandler {
 	
 	public abstract void onPacketReceived(PacketByteBuf buffer);
 	
-	public enum PacketType {
+	private enum PacketType {
 		INVALID(0, null),
 		SETTING(1, SettingPacket.class),
 		SETTINGS(2, SettingsPacket.class),
@@ -63,7 +63,9 @@ public abstract class PacketHandler {
 		DO_WORLD_TICKS(14, DoWorldTicksPacket.class),
 		TICK_PAUSE(15, TickPausePacket.class),
 		SERVER_INFO(16, ServerInfoPacket.class),
-		PRESET_PACKET(17, PresetPacket.class);
+		PRESET(17, PresetPacket.class),
+		PRESETS(18, PresetsPacket.class),
+		RELOAD_PRESETS(19, ReloadPresetsPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends RedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;

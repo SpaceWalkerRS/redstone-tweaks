@@ -196,8 +196,8 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		}
 		
 		private boolean descriptionHovered(int mouseX, int mouseY) {
-			int x1 = getX() + getEntryTitleWidth();
-			int x2 = applyButton.getX() - 5;
+			int x1 = getX() + getEntryTitleWidth() + 10;
+			int x2 = applyButton.getX() - 10;
 			int height = client.textRenderer.fontHeight;
 			
 			return mouseX >= x1 && mouseX <= x2 && mouseY % itemHeight >= 0 && mouseY % itemHeight <= height;

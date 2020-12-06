@@ -17,6 +17,7 @@ import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.preset.Preset;
+import redstonetweaks.setting.preset.PresetEditor;
 import redstonetweaks.setting.preset.Presets;
 
 public class PresetsTab extends RTMenuTab {
@@ -33,6 +34,8 @@ public class PresetsTab extends RTMenuTab {
 	
 	private RTTextFieldWidget searchBox;
 	private RTButtonWidget clearSearchBoxButton;
+	
+	private RTButtonWidget reloadPresetsButton;
 	
 	private RTButtonWidget saveButton;
 	private RTButtonWidget cancelButton;
@@ -53,6 +56,13 @@ public class PresetsTab extends RTMenuTab {
 	@Override
 	protected List<RTElement> getContents() {
 		return isEditingPreset() ? presetEditorContent : presetsBrowserContent;
+	}
+	
+	@Override
+	protected void clearContents() {
+		super.clearContents();
+		presetEditorContent.clear();
+		presetsBrowserContent.clear();
 	}
 	
 	@Override
@@ -82,6 +92,12 @@ public class PresetsTab extends RTMenuTab {
 		searchBox.setText(lastSearchQuery);
 		addBrowserContent(searchBox);
 		addEditorContent(searchBox);
+		
+		
+		reloadPresetsButton = new RTButtonWidget(screen.getWidth() - 110, screen.getHeaderHeight(), 100, 20, () -> new TranslatableText("Reload Presets"), (button) -> {
+			((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().reloadPresets();
+		});
+		addBrowserContent(reloadPresetsButton);
 		
 		
 		cancelButton = new RTButtonWidget(screen.getWidth() - 60, screen.getHeaderHeight(), 50, 20, () -> new TranslatableText("Cancel"), (button) -> {
@@ -178,6 +194,8 @@ public class PresetsTab extends RTMenuTab {
 			searchBox.render(matrices, mouseX, mouseY, delta);
 			clearSearchBoxButton.render(matrices, mouseX, mouseY, delta);
 			
+			reloadPresetsButton.render(matrices, mouseX, mouseY, delta);
+			
 			presetsList.render(matrices, mouseX, mouseY, delta);
 		}
 	}
@@ -235,12 +253,12 @@ public class PresetsTab extends RTMenuTab {
 	private void initBrowserContent() {
 		int y = screen.getHeaderHeight();
 		
-		clearSearchBoxButton.setX(screen.getWidth() - clearSearchBoxButton.getWidth() - 10);
+		clearSearchBoxButton.setX(reloadPresetsButton.getX() - clearSearchBoxButton.getWidth() - 5);
 		clearSearchBoxButton.setY(y);
 		
 		searchBox.setX(5);
 		searchBox.setY(y);
-		searchBox.setWidth(clearSearchBoxButton.getX() - 7);
+		searchBox.setWidth(clearSearchBoxButton.getX() - searchBox.getX() - 2);
 		
 		presetsList.init();
 	}
@@ -274,7 +292,7 @@ public class PresetsTab extends RTMenuTab {
 		PresetEditor editor = getPresetEditor();
 		
 		editor.saveChanges();
-		((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().onPresetChanged(editor.getPreset());
+		((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().presetChanged(editor);
 		
 		browsePresets();
 	}
@@ -286,10 +304,7 @@ public class PresetsTab extends RTMenuTab {
 	
 	public void onPresetChanged(Preset preset) {
 		if (isEditingPreset()) {
-			if (getPresetEditor().getPreset() == preset) {
-				settingsList.filter(lastSearchQuery);
-				refreshWindows();
-				
+			if (getPresetEditor().getPreset() == preset || preset == null) {
 				presetChanged = true;
 			}
 		} else {

@@ -41,12 +41,16 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
 	@Override
 	public void set(E[] newValue) {
-		super.set(newValue.clone());
+		if (newValue.length == getSize()) {
+			super.set(newValue.clone());
+		}
 	}
 	
 	@Override
 	public void setPresetValue(Preset preset, E[] newValue) {
-		super.setPresetValue(preset, newValue.clone());
+		if (newValue.length == getSize()) {
+			super.setPresetValue(preset, newValue.clone());
+		}
 	}
 	
 	protected abstract E[] getEmptyArray(int size);
@@ -121,7 +125,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	}
 	
 	public int getSize() {
-		return get().length;
+		return getDefault().length;
 	}
 	
 	private boolean inRange(int index) {

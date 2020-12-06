@@ -12,8 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
-
-import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.ServerInfo;
 import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
@@ -25,7 +23,6 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	
 	@Shadow private int ticks;
 	
-	private ServerInfo serverInfo;
 	private ServerPacketHandler packetHandler;
 	private ServerSettingsManager settingsManager;
 	private ServerWorldTickHandler worldTickHandler;
@@ -34,7 +31,7 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(CallbackInfo ci) {
-		serverInfo = new ServerInfo(RedstoneTweaks.MOD_VERSION);
+		ServerInfo.init();
 		packetHandler = new ServerPacketHandler((MinecraftServer)(Object)this);
 		settingsManager = new ServerSettingsManager((MinecraftServer)(Object)this);
 	}
@@ -54,11 +51,6 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 		worldTickHandler.tick(shouldKeepTicking);
 		
 		return false;
-	}
-	
-	@Override
-	public ServerInfo getServerInfo() {
-		return serverInfo;
 	}
 	
 	@Override

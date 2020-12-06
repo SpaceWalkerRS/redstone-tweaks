@@ -26,7 +26,6 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Shadow public ClientWorld world;
 	
-	private ServerInfo serverInfo;
 	private ClientPacketHandler packetHandler;
 	private ClientSettingsManager settingsManager;
 	private HotkeysManager hotkeysManager;
@@ -36,7 +35,6 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(RunArgs args, CallbackInfo ci) {
-		serverInfo = new ServerInfo();
 		packetHandler = new ClientPacketHandler((MinecraftClient)(Object)this);
 		settingsManager = new ClientSettingsManager((MinecraftClient)(Object)this);
 		hotkeysManager = new HotkeysManager((MinecraftClient)(Object)this);
@@ -52,7 +50,7 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "RETURN"))
 	private void onDisconnect(Screen screen, CallbackInfo ci) {
-		serverInfo.clear();
+		ServerInfo.clear();
 		worldTickHandler.onDisconnect();
 		settingsManager.onDisconnect();
 		RTMenuScreen.clearLastSearchQueries();
@@ -61,11 +59,6 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	@Inject(method = "stop", at = @At(value = "HEAD"))
 	private void onStopInjectAtHead(CallbackInfo ci) {
 		hotkeysManager.saveHotkeys();
-	}
-	
-	@Override
-	public ServerInfo getServerInfo() {
-		return serverInfo;
 	}
 	
 	@Override

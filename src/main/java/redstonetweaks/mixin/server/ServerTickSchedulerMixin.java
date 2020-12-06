@@ -55,7 +55,7 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 				priority = TickPriority.byIndex(index);
 			}
 			
-			addScheduledTick(new ScheduledTick<>(pos, object, world.getTime() + getDelay(delay), priority));
+			addScheduledTick(new ScheduledTick<>(pos, object, world.getTime() + getRandomDelay(delay), priority));
 		}
 		
 		ci.cancel();
@@ -141,7 +141,7 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 		}
 	}
 	
-	private int getDelay(int delay) {
+	private int getRandomDelay(int delay) {
 		int min = 1;
 		int max = 127;
 		

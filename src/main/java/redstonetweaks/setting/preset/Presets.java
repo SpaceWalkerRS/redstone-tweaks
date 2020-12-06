@@ -18,7 +18,7 @@ public class Presets {
 	public static final List<Preset> ALL = new ArrayList<>();
 	
 	// This preset is used to store values temporarily when editing a preset
-	public static final Preset EDIT = new Preset("EDIT", Preset.Mode.SET, false);
+	public static final Preset TEMP = new Preset("TEMP", Preset.Mode.SET, false);
 	
 	public static void register(Preset preset) {
 		ALL.add(preset);
@@ -46,9 +46,18 @@ public class Presets {
 		return null;
 	}
 	
+	public static Preset create(String name, String description, Preset.Mode mode) {
+		return new Preset(name, description, mode, true);
+	}
+	
 	public static Preset fromNameOrCreate(String name) {
+		return fromNameOrCreate(name, "", Preset.Mode.SET);
+	}
+	
+	public static Preset fromNameOrCreate(String name, String description, Preset.Mode mode) {
 		Preset preset = fromName(name);
-		return preset == null ? new Preset(name, "", Preset.Mode.SET, true) : preset;
+		System.out.println(name + "-" + preset);
+		return preset == null ? create(name, description, mode) : preset;
 	}
 	
 	public static void init() {
@@ -60,6 +69,7 @@ public class Presets {
 		for (int i = ALL.size() - 1; i >= 0; i--) {
 			Preset preset = ALL.get(i);
 			
+			// Only the built-in presets aren't editable
 			if (preset.isEditable()) {
 				remove(preset);
 			}

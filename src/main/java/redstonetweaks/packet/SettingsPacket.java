@@ -8,7 +8,6 @@ import net.minecraft.server.MinecraftServer;
 
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
-import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.ISetting;
 
 public class SettingsPacket extends RedstoneTweaksPacket {
@@ -21,20 +20,16 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 		
 	}
 	
-	public SettingsPacket(SettingsCategory category) {
-		List<ISetting> list = category == null ? Settings.ALL : category.getSettings();
-		
+	public SettingsPacket(List<ISetting> list) {
 		count = list.size();
 		settings = new ISetting[count];
 		values = new String[count];
 		
+		int index = 0;
 		for (ISetting setting : list) {
-			if (--count < 0) {
-				break;
-			}
-			
-			settings[count] = setting;
-			values[count] = setting.getAsString();
+			settings[index] = setting;
+			values[index] = setting.getAsString();
+			index++;
 		}
 	}
 	
@@ -42,9 +37,9 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 	public void encode(PacketByteBuf buffer) {
 		buffer.writeInt(count);
 		
-		for (int i = 0; i < count; i++) {
-			buffer.writeString(settings[i].getId());
-			buffer.writeString(values[i]);
+		for (int index = 0; index < count; index++) {
+			buffer.writeString(settings[index].getId());
+			buffer.writeString(values[index]);
 		}
 	}
 	
@@ -54,9 +49,9 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 		settings = new ISetting[count];
 		values = new String[count];
 		
-		for (int i = 0; i < count; i++) {
-			settings[i] = Settings.getSettingFromId(buffer.readString());
-			values[i] = buffer.readString();
+		for (int index = 0; index < count; index++) {
+			settings[index] = Settings.getSettingFromId(buffer.readString());
+			values[index] = buffer.readString();
 		}
 	}
 	
@@ -67,19 +62,16 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		updateSettings();
-		
-		((RTIMinecraftClient)client).getSettingsManager().onSettingsPacketReceived();
-	}
-	
-	private void updateSettings() {
-		for (int i = 0; i < count; i++) {
-			ISetting setting = settings[i];
+		while (count >= 0) {
+			count--;
 			
+			ISetting setting = settings[count];
 			if (setting != null) {
 				setting.setEnabled(true);
-				setting.setFromString(values[i]);
+				setting.setFromString(values[count]);
 			}
 		}
+		
+		((RTIMinecraftClient)client).getSettingsManager().onSettingsPacketReceived();
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import redstonetweaks.setting.preset.Preset;
+import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.setting.types.ISetting;
 
 public class Settings {
@@ -82,6 +83,10 @@ public class Settings {
 	public static void init() {
 		Tweaks.init();
 		ServerConfig.init();
+		
+		Presets.init();
+		
+		toDefault();
 	}
 	
 	public static class Common {

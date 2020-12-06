@@ -51,11 +51,11 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	}
 	
 	protected void clearContents() {
-		getContents().clear();
+		contents.clear();
 	}
 
 	protected void addContent(RTElement content) {
-		getContents().add(content);
+		contents.add(content);
 	}
 	
 	private void addWindow(RTWindow window) {

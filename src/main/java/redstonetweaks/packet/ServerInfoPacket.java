@@ -5,6 +5,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 
 import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.ServerInfo;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 
 public class ServerInfoPacket extends RedstoneTweaksPacket {
@@ -12,11 +13,7 @@ public class ServerInfoPacket extends RedstoneTweaksPacket {
 	public RedstoneTweaksVersion modVersion;
 	
 	public ServerInfoPacket() {
-		this(RedstoneTweaksVersion.INVALID_VERSION);
-	}
-	
-	public ServerInfoPacket(RedstoneTweaksVersion modVersion) {
-		this.modVersion = modVersion;
+		this.modVersion = ServerInfo.getModVersion();
 	}
 	
 	@Override
@@ -38,7 +35,7 @@ public class ServerInfoPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		((RTIMinecraftClient)client).getServerInfo().updateFromPacket(this);
+		ServerInfo.updateFromPacket(this);
 		
 		((RTIMinecraftClient)client).getSettingsManager().onServerInfoUpdated();
 	}

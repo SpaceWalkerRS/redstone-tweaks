@@ -10,11 +10,12 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
+
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTMenuTab;
-import redstonetweaks.interfaces.RTIMinecraftClient;
 
 public class InfoTab extends RTMenuTab {
 	
@@ -36,7 +37,7 @@ public class InfoTab extends RTMenuTab {
 		
 		info.get("Client").add(new TranslatableText("Mod Version: " + RedstoneTweaks.MOD_VERSION));
 		
-		RedstoneTweaksVersion serverVersion = ((RTIMinecraftClient)screen.client).getServerInfo().getModVersion();
+		RedstoneTweaksVersion serverVersion = ServerInfo.getModVersion();
 		if (serverVersion.isValid()) {
 			info.get("Server").add(new TranslatableText("Mod Version: " + serverVersion));
 		} else {

@@ -108,7 +108,7 @@ public abstract class Setting<T> implements ISetting {
 	
 	@Override
 	public String getPresetValueAsString(Preset preset) {
-		return valueToString(getPresetValue(preset));
+		return valueToString(getPresetValueOrDefault(preset));
 	}
 	
 	@Override
@@ -169,6 +169,10 @@ public abstract class Setting<T> implements ISetting {
 	
 	public T getPresetValue(Preset preset) {
 		return presetValues.get(preset);
+	}
+	
+	public T getPresetValueOrDefault(Preset preset) {
+		return presetValues.getOrDefault(preset, getDefault());
 	}
 	
 	public void setPresetValue(Preset preset, T value) {

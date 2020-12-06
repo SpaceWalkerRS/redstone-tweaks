@@ -3,6 +3,7 @@ package redstonetweaks.setting;
 import net.minecraft.client.MinecraftClient;
 
 import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.ResetSettingPacket;
@@ -27,7 +28,7 @@ public class ClientSettingsManager {
 	}
 	
 	public boolean canChangeSettings() {
-		return ((RTIMinecraftClient)client).getServerInfo().getModVersion().isValid() && client.player.hasPermissionLevel(2);
+		return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(2);
 	}
 	
 	public boolean canLockSettings() {
@@ -44,7 +45,7 @@ public class ClientSettingsManager {
 	
 	public void onSettingsChanged(SettingsCategory category) {
 		if (!client.isInSingleplayer() || client.getServer().isRemote()) {
-			SettingsPacket packet = new SettingsPacket(category);
+			SettingsPacket packet = new SettingsPacket(category.getSettings());
 			((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 		}
 		notifyMenuScreenOfSettingChange(null);
@@ -89,7 +90,7 @@ public class ClientSettingsManager {
 	}
 	
 	public void onServerInfoUpdated() {
-		if (((RTIMinecraftClient)client).getServerInfo().getModVersion().equals(RedstoneTweaks.MOD_VERSION)) {
+		if (ServerInfo.getModVersion().equals(RedstoneTweaks.MOD_VERSION)) {
 			Settings.enableAll();
 		}
 	}

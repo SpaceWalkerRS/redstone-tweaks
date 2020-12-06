@@ -34,7 +34,7 @@ public class ServerSettingsManager {
 	public ServerSettingsManager(MinecraftServer server) {
 		this.server = server;
 		this.presetsManager = new ServerPresetsManager(server, this);
-
+		
 		onStartUp();
 	}
 	
@@ -156,12 +156,13 @@ public class ServerSettingsManager {
 		ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerUUID);
 		if (player != null) {
 			updateSettingsOfPlayer(player);
+			presetsManager.onPlayerJoined(player);
 		}
 	}
 	
 	private void updateSettingsOfPlayer(ServerPlayerEntity player) {
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
-		SettingsPacket packet = new SettingsPacket(null);
+		SettingsPacket packet = new SettingsPacket(Settings.ALL);
 		
 		if (player == null) {
 			packetHandler.sendPacket(packet);
