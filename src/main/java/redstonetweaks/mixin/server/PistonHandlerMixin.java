@@ -310,15 +310,11 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		}
 		
 		if (Tweaks.StickyPiston.SUPER_STICKY.get()) {
-			if (state.isOf(Blocks.STICKY_PISTON) && dir == state.get(Properties.FACING)) {
-				return !state.get(Properties.EXTENDED) || (adjacentState.isOf(Blocks.PISTON_HEAD) && dir == adjacentState.get(Properties.FACING));
+			if (state.isOf(Blocks.STICKY_PISTON) && !state.get(Properties.EXTENDED)) {
+				return dir == state.get(Properties.FACING);
 			}
-			if (state.isOf(Blocks.PISTON_HEAD)) {
-				Direction facing = state.get(Properties.FACING);
-				
-				if (dir == facing) {
-					return state.get(Properties.PISTON_TYPE) == PistonType.STICKY;
-				}
+			if (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY) {
+				return dir == state.get(Properties.FACING);
 			}
 		}
 		if (Tweaks.Global.CHAINSTONE.get() && state.isOf(Blocks.CHAIN)) {
@@ -377,7 +373,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		}
 		if (PistonHelper.movableWhenExtended(true)) {
 			if (state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.EXTENDED) && (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() || PistonHelper.isExtended(world, pos, state))) {
-				System.out.println("extending piston!");
 				Direction facing = state.get(Properties.FACING);
 				
 				if (facing == dir) {
