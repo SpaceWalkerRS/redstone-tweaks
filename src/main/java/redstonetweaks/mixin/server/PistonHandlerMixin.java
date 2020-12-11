@@ -298,8 +298,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	// dir is the direction from pos towards adjacentPos
 	private boolean isAdjacentBlockStuck(BlockPos pos, BlockState state, BlockPos adjacentPos, BlockState adjacentState, Direction dir) {
-		System.out.println(state + " pulls " + adjacentState);
-		
 		if (SlabHelper.isSlab(adjacentState) && !PistonHelper.canSlabStickTo(adjacentState, dir.getOpposite()))
 			return false;
 		
@@ -312,8 +310,8 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		}
 		
 		if (Tweaks.StickyPiston.SUPER_STICKY.get()) {
-			if (state.isOf(Blocks.STICKY_PISTON)) {
-				return !state.get(Properties.EXTENDED) && dir == state.get(Properties.FACING);
+			if (state.isOf(Blocks.STICKY_PISTON) && dir == state.get(Properties.FACING)) {
+				return !state.get(Properties.EXTENDED) || (adjacentState.isOf(Blocks.PISTON_HEAD) && dir == adjacentState.get(Properties.FACING));
 			}
 			if (state.isOf(Blocks.PISTON_HEAD)) {
 				Direction facing = state.get(Properties.FACING);
