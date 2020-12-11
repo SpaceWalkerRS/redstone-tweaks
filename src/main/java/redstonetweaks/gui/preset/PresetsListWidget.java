@@ -3,14 +3,15 @@ package redstonetweaks.gui.preset;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
+
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.util.TextFormatting;
@@ -56,7 +57,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.children = new ArrayList<>();
 			
 			this.addButton = new RTButtonWidget((getX() + getWidth() - 80) / 2, 0, 80, 20, () -> new TranslatableText("New Preset"), (button) -> {
-				parent.editPreset(new Preset("", "", Preset.Mode.SET, true));
+				parent.newPreset();
 			});
 			this.children.add(this.addButton);
 		}
@@ -68,11 +69,6 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void tick() {
-			
-		}
-		
-		@Override
-		public void unfocusTextFields(Element except) {
 			
 		}
 		
@@ -104,7 +100,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		public PresetEntry(Preset preset) {
 			this.preset = preset;
-			this.title = new TranslatableText(preset.getName()).formatted(Formatting.UNDERLINE);
+			this.title = new TranslatableText(preset.getName()).formatted(Formatting.UNDERLINE, this.preset.isEditable() ? Formatting.UNDERLINE : Formatting.BOLD);
 			this.tooltip = createTooltip();
 			this.children = new ArrayList<>();
 			
@@ -114,7 +110,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.children.add(this.applyButton);
 			
 			this.duplicateButton = new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText("Duplicate"), (button) -> {
-				this.preset.duplicate();
+				((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().duplicatePreset(this.preset);
 			});
 			this.children.add(this.duplicateButton);
 			
@@ -124,7 +120,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.children.add(this.editButton);
 			
 			this.deleteButton = new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText("Delete"), (button) -> {
-				Presets.remove(this.preset);
+				((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().removePreset(this.preset);
 			});
 			this.children.add(deleteButton);
 		}
@@ -152,11 +148,6 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void tick() {
-			
-		}
-		
-		@Override
-		public void unfocusTextFields(Element except) {
 			
 		}
 		

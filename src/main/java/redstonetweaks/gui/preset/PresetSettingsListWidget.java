@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -101,7 +100,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		if (settingsChanged) {
 			settingsChanged = false;
 			
-			filterEntries(parent.getLastSearchQuery());
+			filter(parent.getLastSearchQuery());
 		}
 		
 		super.tick();
@@ -140,11 +139,6 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		}
 		
 		@Override
-		public void unfocusTextFields(Element except) {
-			
-		}
-		
-		@Override
 		protected boolean hasFocusedTextField() {
 			return false;
 		}
@@ -168,11 +162,6 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		
 		@Override
 		public void tick() {
-			
-		}
-		
-		@Override
-		public void unfocusTextFields(Element except) {
 			
 		}
 		
@@ -232,11 +221,6 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		
 		@Override
 		public void tick() {
-			
-		}
-		
-		@Override
-		public void unfocusTextFields(Element except) {
 			
 		}
 		
@@ -317,8 +301,8 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		}
 		
 		@Override
-		public void unfocusTextFields(Element except) {
-			buttonPanel.unfocusTextFields(except);
+		protected void unfocusTextFields() {
+			buttonPanel.unfocusTextFields(null);
 		}
 		
 		@Override

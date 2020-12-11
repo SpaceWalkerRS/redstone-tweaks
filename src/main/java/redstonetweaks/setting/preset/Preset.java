@@ -1,27 +1,23 @@
 package redstonetweaks.setting.preset;
 
 import redstonetweaks.setting.Settings;
-import redstonetweaks.setting.types.ISetting;
 
 public class Preset {
 	
 	private final boolean editable;
+	private final String savedName;
 	
 	private String name;
-	private String previousName;
 	private String description;
 	private Mode mode;
 	
-	public Preset(String name, Mode mode) {
-		this(name, mode, true);
-	}
-	
-	public Preset(String name, Mode mode, boolean editable) {
-		this(name, "", mode, editable);
-	}
-	
 	public Preset(String name, String description, Mode mode, boolean editable) {
+		this("null", name, description, mode, editable);
+	}
+	
+	public Preset(String savedName, String name, String description, Mode mode, boolean editable) {
 		this.editable = editable;
+		this.savedName = savedName;
 		
 		this.name = name;
 		this.description = description;
@@ -30,23 +26,22 @@ public class Preset {
 	
 	@Override
 	public int hashCode() {
-		return name.hashCode();
+		return savedName.hashCode();
 	}
 	
 	public boolean isEditable() {
 		return editable;
 	}
 	
+	public String getSavedName() {
+		return savedName;
+	}
+	
 	public String getName() {
 		return name;
 	}
 	
-	public String getPreviousName() {
-		return previousName;
-	}
-	
 	public void setName(String name) {
-		this.previousName = this.name;
 		this.name = name;
 	}
 	
@@ -68,15 +63,6 @@ public class Preset {
 	
 	public void apply() {
 		Settings.applyPreset(this);
-	}
-	
-	public void duplicate() {
-		Preset duplicate = new Preset(name + " - copy", description, mode, editable);
-		Presets.register(duplicate);
-		
-		for (ISetting setting : Settings.ALL) {
-			setting.copyPresetValue(this, duplicate);
-		}
 	}
 	
 	public enum Mode {

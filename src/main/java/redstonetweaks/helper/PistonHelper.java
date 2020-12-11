@@ -58,7 +58,7 @@ public class PistonHelper {
 		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(movedState, pistonDir, extending, isSource);
 		
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
-		((RTIPistonBlockEntity)pistonBlockEntity).setMovedBlockEntity(movedBlockEntity);
+		((RTIPistonBlockEntity)pistonBlockEntity).setPushedBlockEntity(movedBlockEntity);
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMergingSlabs(isMergingSlabs);
 		
 		return pistonBlockEntity;
@@ -97,7 +97,18 @@ public class PistonHelper {
 			if (blockEntity instanceof PistonBlockEntity) {
 				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 				
-				return pistonBlockEntity.isExtending() && pistonBlockEntity.isSource();
+				if (pistonBlockEntity.isExtending() && pistonBlockEntity.isSource()) {
+					return true;
+				}
+				
+				// An extending piston could be moving
+				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
+				
+				if (blockEntity instanceof PistonBlockEntity) {
+					pistonBlockEntity = (PistonBlockEntity)blockEntity;
+					
+					return pistonBlockEntity.isExtending() && pistonBlockEntity.isSource();
+				}
 			}
 		}
 		return false;

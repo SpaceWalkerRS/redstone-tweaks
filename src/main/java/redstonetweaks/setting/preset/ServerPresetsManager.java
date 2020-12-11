@@ -16,6 +16,8 @@ import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.packet.PresetPacket;
 import redstonetweaks.packet.PresetsPacket;
+import redstonetweaks.packet.RemovePresetPacket;
+import redstonetweaks.packet.ApplyPresetPacket;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.setting.ServerSettingsManager;
 import redstonetweaks.setting.Settings;
@@ -65,17 +67,13 @@ public class ServerPresetsManager {
 				return;
 			}
 			
-			if ((line = br.readLine()) == null) {
-				return;
+			String name = getPresetNameFromFile(file);
+			Preset preset = Presets.fromName(name);
+			if (preset == null) {
+				preset = new Preset(name, name, "", Preset.Mode.SET, true);
 			}
-			if (line.equals("")) {
-				return;
-			}
-			Preset preset = Presets.fromNameOrCreate(line);
 			
-			if (!Presets.isRegistered(preset)) {
-				Presets.register(preset);
-			}
+			Presets.tryRegister(preset);
 			
 			if ((line = br.readLine()) == null) {
 				return;
@@ -109,14 +107,22 @@ public class ServerPresetsManager {
 	}
 	
 	public void reloadPresets() {
+		savePresets();
 		loadPresets();
-		
-		
 		
 		updatePresetsOfPlayer(null);
 	}
 	
 	private void savePresets() {
+		File directory = getPresetsFolder();
+		
+		for (File file : directory.listFiles()) {
+			if (!file.isDirectory() && Presets.getRemovedPresetFromSavedName(getPresetNameFromFile(file)) != null) {
+				file.delete();
+			}
+		}
+		Presets.REMOVED.clear();
+		
 		for (Preset preset : Presets.ALL) {
 			if (preset.isEditable()) {
 				savePreset(preset);
@@ -139,23 +145,33 @@ public class ServerPresetsManager {
 			bw.write(RedstoneTweaks.SETTINGS_VERSION.toString());
 			bw.newLine();
 			
-			bw.write(preset.getName());
-			bw.newLine();
 			bw.write(preset.getDescription());
 			bw.newLine();
 			bw.write(preset.getMode().toString());
 			bw.newLine();
 			
 			for (ISetting setting : Settings.ALL) {
-				bw.write(setting.getId());
-				bw.write(" = ");
-				bw.write(setting.getValueAsString());
-				
-				bw.newLine();
+				if (setting.hasPreset(preset)) {
+					bw.write(setting.getId());
+					bw.write(" = ");
+					bw.write(setting.getValueAsString());
+					
+					bw.newLine();
+				}
 			}
 		} catch (IOException e) {
 			
 		}
+	}
+	
+	private String getPresetNameFromFile(File file) {
+		String name = file.getName();
+		
+		if (name.length() <= 4) {
+			return "";
+		}
+		
+		return name.substring(0, name.length() - 4);
 	}
 	
 	private File getCacheDir() {
@@ -182,11 +198,48 @@ public class ServerPresetsManager {
 		return new File(getPresetsFolder(), preset.getName() + ".txt");
 	}
 	
-	public void onPresetPacketReceived(PresetEditor editor) {
-		if (server.isDedicated() || server.isRemote()) {
+	public void removePreset(Preset preset) {
+		Presets.remove(preset);
+		
+		RemovePresetPacket packet = new RemovePresetPacket(preset);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+	}
+	
+	public void duplicatePreset(Preset preset) {
+		String name;
+		int i = 0;
+		do {
+			i++;
+			name = preset.getName() + " (" + i + ")";
+		} while (!Presets.isNameValid(name));
+		
+		PresetEditor editor = new PresetEditor(name, preset.getDescription(), preset.getMode());
+		
+		for (ISetting setting : Settings.ALL) {
+			if (setting.hasPreset(preset)) {
+				editor.addSetting(setting);
+				editor.copyPresetValue(setting, preset);
+			}
+		}
+		
+		if (editor.canSave()) {
+			editor.saveChanges();
+			
 			PresetPacket packet = new PresetPacket(editor);
 			((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 		}
+	}
+	
+	public void applyPreset(Preset preset) {
+		preset.apply();
+		
+		ApplyPresetPacket packet = new ApplyPresetPacket(preset);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+	}
+	
+	public void onPresetPacketReceived(PresetEditor editor) {
+		PresetPacket packet = new PresetPacket(editor);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	
 	public void onPlayerJoined(ServerPlayerEntity player) {

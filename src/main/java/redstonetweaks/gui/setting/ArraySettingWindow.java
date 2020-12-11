@@ -2,7 +2,6 @@ package redstonetweaks.gui.setting;
 
 import java.util.function.Consumer;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -42,21 +41,16 @@ public class ArraySettingWindow<K, E> extends RTWindow {
 	@Override
 	protected void initContents() {
 		list = new ArraySettingListWidget<>(screen, getX(), getY() + getHeaderHeight(), getWidth(), getHeight() - getHeaderHeight(), setting, array, changeListener);
+		list.init();
 		if (!canEdit) {
 			list.disableButtons();
 		}
-		list.init();
 		addContent(list);
 	}
 	
 	@Override
 	protected void renderContents(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		list.render(matrices, mouseX, mouseY, delta);
-	}
-	
-	@Override
-	public void unfocusTextFields(Element except) {
-		list.unfocusTextFields(except);
 	}
 	
 	@Override

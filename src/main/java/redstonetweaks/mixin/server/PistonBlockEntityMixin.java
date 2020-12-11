@@ -44,7 +44,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Shadow private BlockState pushedBlock;
 	@Shadow private boolean source;
 	
-	private BlockEntity movedBlockEntity;
+	private BlockEntity pushedBlockEntity;
 	private PistonBlockEntity parentPistonBlockEntity;
 	
 	private boolean isMovedByStickyPiston;
@@ -85,7 +85,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	private void onFinishInjectAtHead(CallbackInfo ci) {
 		if (parentPistonBlockEntity != null) {
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlock(pushedBlock);
-			((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedBlockEntity(movedBlockEntity);
+			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
 			
 			ci.cancel();
 		}
@@ -99,14 +99,14 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Inject(method = "finish", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
-	private void onFinishInjectAfterSetBlockState(CallbackInfo ci) {
+	private void onFinishInjectBeforeSetBlockState(CallbackInfo ci) {
 		prepareMovedBlockEntityPlacement();
 	}
 	
 	@Inject(method = "tick", at = @At(value = "HEAD"))
 	private void onTickInjectAtHead(CallbackInfo ci) {
-		if (movedBlockEntity instanceof Tickable) {
-			((Tickable)movedBlockEntity).tick();
+		if (pushedBlockEntity instanceof Tickable) {
+			((Tickable)pushedBlockEntity).tick();
 		}
 	}
 	
@@ -114,7 +114,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	private void onTickInjectBeforeIsClient(CallbackInfo ci) {
 		if (parentPistonBlockEntity != null) {
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlock(pushedBlock);
-			((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedBlockEntity(movedBlockEntity);
+			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
 			
 			ci.cancel();
 		}
@@ -141,13 +141,21 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Inject(method = "fromTag", at = @At(value = "RETURN"))
 	private void onFromTagInjectAtReturn(BlockState state, CompoundTag tag, CallbackInfo ci) {
 		isMovedByStickyPiston = tag.contains("isMovedByStickyPiston") ? tag.getBoolean("isMovedByStickyPiston") : false;
+		isMergingSlabs = tag.contains("isMergingSlabs") ? tag.getBoolean("isMergingSlabs") : false;
 
-		if (tag.contains("movedBlockEntity")) {
+		if (tag.contains("pushedBlockEntity")) {
 			if (pushedBlock.getBlock().hasBlockEntity()) {
-				movedBlockEntity = ((BlockEntityProvider)pushedBlock.getBlock()).createBlockEntity(world);
+				if (pushedBlock.isOf(Blocks.MOVING_PISTON)) {
+					pushedBlockEntity = new PistonBlockEntity();
+				} else {
+					pushedBlockEntity = ((BlockEntityProvider)pushedBlock.getBlock()).createBlockEntity(world);
+				}
 			}
-			if (movedBlockEntity != null) {
-				movedBlockEntity.fromTag(pushedBlock, tag.getCompound("movedBlockEntity"));
+			if (pushedBlockEntity != null) {
+				pushedBlockEntity.fromTag(pushedBlock, tag.getCompound("pushedBlockEntity"));
+			}
+			if (pushedBlockEntity instanceof PistonBlockEntity) {
+				((RTIPistonBlockEntity)pushedBlockEntity).setParentPistonBlockEntity((PistonBlockEntity)(BlockEntity)this);
 			}
 		}
 	}
@@ -155,9 +163,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Inject(method = "toTag", at = @At(value = "RETURN"))
 	private void onToTagInjectAtReturn(CompoundTag tag, CallbackInfoReturnable<?> cir) {
 		tag.putBoolean("isMovedByStickyPiston", isMovedByStickyPiston);
+		tag.putBoolean("isMergingSlabs", isMergingSlabs);
 		
-		if (movedBlockEntity != null) {
-			tag.put("movedBlockEntity", movedBlockEntity.toTag(new CompoundTag()));
+		if (pushedBlockEntity != null) {
+			tag.put("pushedBlockEntity", pushedBlockEntity.toTag(new CompoundTag()));
 		}
 	}
 	
@@ -179,8 +188,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		this.world = world;
 		this.pos = pos.toImmutable();
 		
-		if (movedBlockEntity != null) {
-			movedBlockEntity.setLocation(getWorld(), getPos());
+		if (pushedBlockEntity != null) {
+			pushedBlockEntity.setLocation(getWorld(), getPos());
 		}
 	}
 	
@@ -188,8 +197,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	public void setPos(BlockPos pos) {
 		this.pos = pos.toImmutable();
 		
-		if (movedBlockEntity != null) {
-			movedBlockEntity.setPos(getPos());
+		if (pushedBlockEntity != null) {
+			pushedBlockEntity.setPos(getPos());
 		}
 	}
 	
@@ -210,18 +219,18 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Override
 	public BlockState getMovedState() {
-		if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity instanceof PistonBlockEntity) {
-			return ((RTIPistonBlockEntity)movedBlockEntity).getMovedState();
+		if (pushedBlock.isOf(Blocks.MOVING_PISTON) && pushedBlockEntity instanceof PistonBlockEntity) {
+			return ((RTIPistonBlockEntity)pushedBlockEntity).getMovedState();
 		}
 		return pushedBlock;
 	}
 	
 	@Override
-	public void setMovedBlockEntity(BlockEntity blockEntity) {
-		movedBlockEntity = blockEntity;
+	public void setPushedBlockEntity(BlockEntity blockEntity) {
+		pushedBlockEntity = blockEntity;
 		
-		if (movedBlockEntity instanceof PistonBlockEntity) {
-			((RTIPistonBlockEntity)movedBlockEntity).setParentPistonBlockEntity((PistonBlockEntity)(Object)this);
+		if (pushedBlockEntity instanceof PistonBlockEntity) {
+			((RTIPistonBlockEntity)pushedBlockEntity).setParentPistonBlockEntity((PistonBlockEntity)(BlockEntity)this);
 		}
 	}
 	
@@ -231,8 +240,16 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
+	public BlockEntity getPushedBlockEntity() {
+		return pushedBlockEntity;
+	}
+	
+	@Override
 	public BlockEntity getMovedBlockEntity() {
-		return movedBlockEntity;
+		if (pushedBlockEntity != null && pushedBlockEntity instanceof PistonBlockEntity) {
+			return ((RTIPistonBlockEntity)pushedBlockEntity).getMovedBlockEntity();
+		}
+		return pushedBlockEntity;
 	}
 	
 	@Override
@@ -266,11 +283,11 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	private void prepareMovedBlockEntityPlacement() {
-		if (movedBlockEntity != null) {
-			movedBlockEntity.cancelRemoval();
-			movedBlockEntity.setLocation(getWorld(), getPos());
+		if (pushedBlockEntity != null) {
+			pushedBlockEntity.cancelRemoval();
+			pushedBlockEntity.setLocation(getWorld(), getPos());
 			
-			((RTIWorld)getWorld()).setMovedBlockEntity(movedBlockEntity);
+			((RTIWorld)getWorld()).setMovedBlockEntity(pushedBlockEntity);
 		}
 	}
 }

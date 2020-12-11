@@ -14,9 +14,11 @@ public interface RTIPistonBlockEntity {
 	
 	public void setPushedBlock(BlockState state);
 	
-	public void setMovedBlockEntity(BlockEntity pushedBlockEntity);
+	public void setPushedBlockEntity(BlockEntity pushedBlockEntity);
 	
 	public void setParentPistonBlockEntity(PistonBlockEntity pistonBlockEntity);
+	
+	public BlockEntity getPushedBlockEntity();
 	
 	public BlockEntity getMovedBlockEntity();
 	

@@ -50,8 +50,8 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 		values = new String[count];
 		
 		for (int index = 0; index < count; index++) {
-			settings[index] = Settings.getSettingFromId(buffer.readString());
-			values[index] = buffer.readString();
+			settings[index] = Settings.getSettingFromId(buffer.readString(MAX_STRING_LENGTH));
+			values[index] = buffer.readString(MAX_STRING_LENGTH);
 		}
 	}
 	

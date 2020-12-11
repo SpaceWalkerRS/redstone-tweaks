@@ -1,16 +1,16 @@
 package redstonetweaks.packet;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
-import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.setting.types.ISetting;
 
 public class PresetsPacket extends RedstoneTweaksPacket {
@@ -54,21 +54,25 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 				continue;
 			}
 			
-			PresetEditor editor = new PresetEditor(preset);
-			Set<ISetting> set = editor.getSettings();
+			List<ISetting> list = new ArrayList<>();
+			for (ISetting setting : Settings.ALL) {
+				if (setting.hasPreset(preset)) {
+					list.add(setting);
+				}
+			}
 			
-			names[presetIndex] = editor.getName();
-			descriptions[presetIndex] = editor.getDescription();
-			modes[presetIndex] = editor.getMode();
+			names[presetIndex] = preset.getName();
+			descriptions[presetIndex] = preset.getDescription();
+			modes[presetIndex] = preset.getMode();
 			
-			int settingsCount = set.size();
+			int settingsCount = list.size();
 			
 			settingsCounts[presetIndex] = settingsCount;
 			settings[presetIndex] = new ISetting[settingsCount];
 			values[presetIndex] = new String[settingsCount];
 			
 			int settingIndex = 0;
-			for (ISetting setting : set) {
+			for (ISetting setting : list) {
 				settings[presetIndex][settingIndex] = setting;
 				values[presetIndex][settingIndex] = setting.getPresetValueAsString(preset);
 				settingIndex++;
@@ -134,22 +138,24 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		for (int presetIndex = 0; presetIndex < presetsCount; presetIndex++) {
-			PresetEditor editor = new PresetEditor(Presets.create(names[presetIndex], descriptions[presetIndex], modes[presetIndex]));
-			
-			int settingsCount = settingsCounts[presetIndex];
-			
-			for (int settingIndex = 0; settingIndex < settingsCount; settingIndex++) {
-				ISetting setting = settings[presetIndex][settingIndex];
+		if (!client.isInSingleplayer()) {
+			for (int presetIndex = 0; presetIndex < presetsCount; presetIndex++) {
+				PresetEditor editor = new PresetEditor(names[presetIndex], descriptions[presetIndex], modes[presetIndex]);
 				
-				if (setting != null) {
-					editor.addSetting(setting);
-					editor.setValueFromString(setting, values[presetIndex][settingIndex]);
+				int settingsCount = settingsCounts[presetIndex];
+				
+				for (int settingIndex = 0; settingIndex < settingsCount; settingIndex++) {
+					ISetting setting = settings[presetIndex][settingIndex];
+					
+					if (setting != null) {
+						editor.addSetting(setting);
+						editor.setValueFromString(setting, values[presetIndex][settingIndex]);
+					}
 				}
-			}
-			
-			if (editor.canSave()) {
-				editor.saveChanges();
+				
+				if (editor.canSave()) {
+					editor.saveChanges();
+				}
 			}
 		}
 		

@@ -30,8 +30,8 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	private final int rowWidth;
 	
 	protected List<Text> currentTooltip;
-	private int entryTitleWidth = 0;
 	private boolean scrolling;
+	private int entryTitleWidth = 0;
 	private String savedScrollAmountKey;
 
 	public RTListWidget(RTMenuScreen screen, int x, int y, int width, int height, int entryHeight, String savedScrollAmountKey) {
@@ -140,7 +140,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 			return focused.focusedIsTextField();
 		}
 	}
-
+	
 	private boolean mouseClick(double mouseX, double mouseY, int button) {
 		updateScrollingState(mouseX, mouseY, button);
 		if (!isMouseOver(mouseX, mouseY)) {
@@ -258,9 +258,11 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		}
 	}
 	
-	public void unfocusTextFields(Element except) {
+	public void unfocusTextFields(Entry<E> except) {
 		for (Entry<E> entry : children()) {
-			entry.unfocusTextFields(except);
+			if (entry != except) {
+				entry.unfocusTextFields();
+			}
 		}
 	}
 	
@@ -306,7 +308,9 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		
 		public abstract void tick();
 		
-		public abstract void unfocusTextFields(Element except);
+		protected void unfocusTextFields() {
+			
+		}
 		
 		public boolean focusedIsTextField() {
 			if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {

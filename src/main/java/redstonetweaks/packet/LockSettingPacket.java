@@ -9,51 +9,51 @@ import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 
-public class SettingPacket extends RedstoneTweaksPacket {
+public class LockSettingPacket extends RedstoneTweaksPacket {
 	
 	public ISetting setting;
-	public String value;
+	public boolean locked;
 	
-	public SettingPacket() {
+	public LockSettingPacket() {
 		
 	}
 	
-	public SettingPacket(ISetting setting) {
-		this(setting, setting.getValueAsString());
+	public LockSettingPacket(ISetting setting) {
+		this(setting, setting.isLocked());
 	}
 	
-	public SettingPacket(ISetting setting, String value) {
+	public LockSettingPacket(ISetting setting, boolean locked) {
 		this.setting = setting;
-		this.value = value;
+		this.locked = locked;
 	}
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
 		buffer.writeString(setting.getId());
-		buffer.writeString(value);
+		buffer.writeBoolean(locked);
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
 		setting = Settings.getSettingFromId(buffer.readString(MAX_STRING_LENGTH));
-		value = buffer.readString(MAX_STRING_LENGTH);
+		locked = buffer.readBoolean();
 	}
 	
 	@Override
 	public void execute(MinecraftServer server) {
 		if (setting != null) {
-			setting.setValueFromString(value);
+			setting.setLocked(locked);
 			
-			((RTIMinecraftServer)server).getSettingsManager().onSettingPacketReceived(setting);
+			((RTIMinecraftServer)server).getSettingsManager().onLockSettingPacketReceived(setting);
 		}
 	}
 	
 	@Override
 	public void execute(MinecraftClient client) {
 		if (setting != null) {
-			setting.setValueFromString(value);
+			setting.setLocked(locked);
 			
-			((RTIMinecraftClient)client).getSettingsManager().onSettingPacketReceived(setting);
+			((RTIMinecraftClient)client).getSettingsManager().onLockSettingPacketReceived(setting);
 		}
 	}
 }

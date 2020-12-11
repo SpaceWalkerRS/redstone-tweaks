@@ -6,7 +6,7 @@ import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
 
-public class ClientPacketHandler extends PacketHandler {
+public class ClientPacketHandler extends AbstractPacketHandler {
 	
 	private MinecraftClient client;
 	

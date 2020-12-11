@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 
 import redstonetweaks.RedstoneTweaks;
 
-public abstract class PacketHandler {
+public abstract class AbstractPacketHandler {
 	
 	public static final Identifier PACKET_IDENTIFIER = new Identifier("redstone_tweaks");
 	
@@ -65,7 +65,12 @@ public abstract class PacketHandler {
 		SERVER_INFO(16, ServerInfoPacket.class),
 		PRESET(17, PresetPacket.class),
 		PRESETS(18, PresetsPacket.class),
-		RELOAD_PRESETS(19, ReloadPresetsPacket.class);
+		RELOAD_PRESETS(19, ReloadPresetsPacket.class),
+		REMOVE_PRESET(20, RemovePresetPacket.class),
+		DUPLICATE_PRESET(21, DuplicatePresetPacket.class),
+		APPLY_PRESET(22, ApplyPresetPacket.class),
+		LOCK_SETTING(23, LockSettingPacket.class),
+		LOCK_CATEGORY(24, LockCategoryPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends RedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;

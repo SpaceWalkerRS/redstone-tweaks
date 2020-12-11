@@ -3,6 +3,7 @@ package redstonetweaks.setting.types;
 import java.util.Arrays;
 
 import redstonetweaks.setting.preset.Preset;
+import redstonetweaks.setting.preset.Presets;
 
 public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
@@ -48,7 +49,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
 	@Override
 	public void setPresetValue(Preset preset, E[] newValue) {
-		if (newValue.length == getSize()) {
+		if (!hasPreset(Presets.Default.DEFAULT) || newValue.length == getSize()) {
 			super.setPresetValue(preset, newValue.clone());
 		}
 	}

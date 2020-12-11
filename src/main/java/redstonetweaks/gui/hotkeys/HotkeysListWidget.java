@@ -3,7 +3,6 @@ package redstonetweaks.gui.hotkeys;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -92,11 +91,6 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 		
 		@Override
 		public void tick() {
-			
-		}
-		
-		@Override
-		public void unfocusTextFields(Element except) {
 			
 		}
 		

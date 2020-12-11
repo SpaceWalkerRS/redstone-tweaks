@@ -2,6 +2,7 @@ package redstonetweaks.gui;
 
 import net.minecraft.client.gui.AbstractParentElement;
 import net.minecraft.client.gui.Element;
+import redstonetweaks.gui.widget.RTTextFieldWidget;
 
 public abstract class RTAbstractParentElement extends AbstractParentElement {
 	
@@ -34,6 +35,12 @@ public abstract class RTAbstractParentElement extends AbstractParentElement {
 		return clicked;
 	}
 	
-	public abstract void unfocusTextFields(Element except);
+	public void unfocusTextFields(Element except) {
+		for (Element el : children()) {
+			if (el != except && el instanceof RTTextFieldWidget) {
+				((RTTextFieldWidget)el).unFocus();
+			}
+		}
+	}
 	
 }

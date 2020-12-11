@@ -70,11 +70,6 @@ public class HotkeysTab extends RTMenuTab {
 	}
 	
 	@Override
-	protected void tickContents() {
-		
-	}
-	
-	@Override
 	protected void initContents() {
 		hotkeysList = new HotkeysListWidget(this, hotkeys, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - 5);
 		hotkeysList.init();
@@ -84,6 +79,17 @@ public class HotkeysTab extends RTMenuTab {
 			hotkeys.resetKeyBindings();
 		});
 		addContent(resetButton);
+	}
+	
+	@Override
+	protected void refreshContents() {
+		hotkeysList.saveScrollAmount();
+		hotkeysList.init();
+	}
+	
+	@Override
+	protected void tickContents() {
+		
 	}
 	
 	@Override

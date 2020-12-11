@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
 
-public class ServerPacketHandler extends PacketHandler {
+public class ServerPacketHandler extends AbstractPacketHandler {
 	
 	private MinecraftServer server;
 	

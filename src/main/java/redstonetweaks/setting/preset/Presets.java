@@ -16,12 +16,16 @@ import redstonetweaks.world.common.UpdateOrder;
 public class Presets {
 	
 	public static final List<Preset> ALL = new ArrayList<>();
-	
-	// This preset is used to store values temporarily when editing a preset
-	public static final Preset TEMP = new Preset("TEMP", Preset.Mode.SET, false);
+	public static final List<Preset> REMOVED = new ArrayList<>();
 	
 	public static void register(Preset preset) {
 		ALL.add(preset);
+	}
+	
+	public static void tryRegister(Preset preset) {
+		if (!isRegistered(preset)) {
+			ALL.add(preset);
+		}
 	}
 	
 	public static boolean isRegistered(Preset preset) {
@@ -31,10 +35,11 @@ public class Presets {
 	public static void remove(Preset preset) {
 		Settings.removePreset(preset);
 		ALL.remove(preset);
+		REMOVED.add(preset);
 	}
 	
 	public static boolean isNameValid(String name) {
-		return !name.isEmpty() && fromName(name) == null;
+		return !name.isEmpty() && !name.equals("null") && fromName(name) == null;
 	}
 	
 	public static Preset fromName(String name) {
@@ -56,8 +61,18 @@ public class Presets {
 	
 	public static Preset fromNameOrCreate(String name, String description, Preset.Mode mode) {
 		Preset preset = fromName(name);
-		System.out.println(name + "-" + preset);
 		return preset == null ? create(name, description, mode) : preset;
+	}
+	
+	public static Preset getRemovedPresetFromSavedName(String savedName) {
+		if (isNameValid(savedName)) {
+			for (Preset preset : REMOVED) {
+				if (preset.getSavedName().equals(savedName)) {
+					return preset;
+				}
+			}
+		}
+		return null;
 	}
 	
 	public static void init() {
@@ -314,6 +329,11 @@ public class Presets {
 			Tweaks.PoweredRail.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.PoweredRail.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
+			Tweaks.Rail.DELAY.setPresetValue(DEFAULT, 0);
+			Tweaks.Rail.QC.setPresetValue(DEFAULT, new Boolean[] {false, false, false, false, false, false});
+			Tweaks.Rail.RANDOMIZE_QC.setPresetValue(DEFAULT, false);
+			Tweaks.Rail.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
+			
 			Tweaks.RedSand.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.DOWN, RelativePos.UP).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.UP, RelativePos.DOWN).
@@ -515,14 +535,37 @@ public class Presets {
 	
 	public static class Bedrock {
 		
-		public static final Preset BEDROCK = new Preset("Bedrock", "Values that enable features or behavior that is present in the Bedrock Edition of Minecraft.", Preset.Mode.SET, false);
+		public static final Preset BEDROCK = new Preset("Bedrock", "Values that enable features or behaviors that are present in the Bedrock Edition of Minecraft.", Preset.Mode.SET, false);
 		
 		public static void init() {
 			Presets.register(BEDROCK);
 			
 			Tweaks.Global.MOVABLE_BLOCK_ENTITIES.setPresetValue(BEDROCK, true);
+			Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.setPresetValue(BEDROCK, true);
+			Tweaks.Global.RANDOMIZE_TICK_PRIORITIES.setPresetValue(BEDROCK, true);
+			
+			Tweaks.Dispenser.QC.setPresetValue(BEDROCK, new Boolean[] {false, false, false, false, false ,false});
+			
+			Tweaks.Dropper.QC.setPresetValue(BEDROCK, new Boolean[] {false, false, false, false, false ,false});
+			
+			Tweaks.NormalPiston.CONNECTS_TO_WIRE.setPresetValue(BEDROCK, true);
+			Tweaks.NormalPiston.DELAY_RISING_EDGE.setPresetValue(BEDROCK, 2);
+			Tweaks.NormalPiston.DELAY_FALLING_EDGE.setPresetValue(BEDROCK, 2);
+			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(BEDROCK, true);
+			Tweaks.NormalPiston.QC.setPresetValue(BEDROCK, new Boolean[] {false, false, false, false, false, false});
+			Tweaks.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(BEDROCK, true);
+			Tweaks.NormalPiston.UPDATE_SELF_WHILE_POWERED.setPresetValue(BEDROCK, true);
 			
 			Tweaks.RedstoneTorch.SOFT_INVERSION.setPresetValue(BEDROCK, true);
+			
+			Tweaks.StickyPiston.CONNECTS_TO_WIRE.setPresetValue(BEDROCK, true);
+			Tweaks.StickyPiston.DELAY_RISING_EDGE.setPresetValue(BEDROCK, 2);
+			Tweaks.StickyPiston.DELAY_FALLING_EDGE.setPresetValue(BEDROCK, 2);
+			Tweaks.StickyPiston.DO_BLOCK_DROPPING.setPresetValue(BEDROCK, false);
+			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(BEDROCK, true);
+			Tweaks.StickyPiston.QC.setPresetValue(BEDROCK, new Boolean[] {false, false, false, false, false, false});
+			Tweaks.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(BEDROCK, true);
+			Tweaks.StickyPiston.UPDATE_SELF_WHILE_POWERED.setPresetValue(BEDROCK, true);
 		}
 	}
 }

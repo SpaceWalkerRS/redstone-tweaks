@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -35,7 +34,7 @@ import redstonetweaks.setting.types.TickPrioritySetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 import redstonetweaks.util.TextFormatting;
 
-public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.Entry> implements ISettingGUIElement {
+public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.Entry> {
 	
 	private final SettingsCategory category;
 	
@@ -90,7 +89,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		}
 	}
 	
-	@Override
 	public void onSettingChanged(ISetting setting) {
 		for (Entry entry : children()) {
 			if (entry instanceof SettingEntry) {
@@ -126,11 +124,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		}
 		
 		@Override
-		public void unfocusTextFields(Element except) {
-			
-		}
-		
-		@Override
 		protected boolean hasFocusedTextField() {
 			return false;
 		}
@@ -154,11 +147,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		
 		@Override
 		public void tick() {
-			
-		}
-		
-		@Override
-		public void unfocusTextFields(Element except) {
 			
 		}
 		
@@ -187,14 +175,12 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.lockButton = new RTLockButtonWidget(0, 0, setting.isLocked(), (button) -> {
 				button.toggleLocked();
 				
-				setting.setLocked(button.isLocked());
-				onClientChangedSetting();
+				((RTIMinecraftClient)client).getSettingsManager().lockSetting(setting, button.isLocked());
 			});
 			this.children.add(lockButton);
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
-				setting.reset();
-				onClientChangedSetting();
+				((RTIMinecraftClient)client).getSettingsManager().resetSetting(setting);
 			});
 			this.children.add(resetButton);
 			
@@ -242,8 +228,8 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		}
 		
 		@Override
-		public void unfocusTextFields(Element except) {
-			buttonPanel.unfocusTextFields(except);
+		protected void unfocusTextFields() {
+			buttonPanel.unfocusTextFields(null);
 		}
 		
 		@Override
@@ -263,7 +249,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof DirectionToBooleanSetting) {
 				DirectionToBooleanSetting dSetting = (DirectionToBooleanSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, dSetting.get(), (setting) -> onClientChangedSetting());
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, dSetting.get(), (setting) -> changeSetting(dSetting, dSetting.getValueAsString()));
 					
 					screen.openWindow(window);
 					
@@ -275,7 +261,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof GameModeToBooleanSetting) {
 				GameModeToBooleanSetting gSetting = (GameModeToBooleanSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, gSetting, gSetting.get(), (setting) -> onClientChangedSetting());
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, gSetting, gSetting.get(), (setting) -> changeSetting(gSetting, gSetting.getValueAsString()));
 					
 					screen.openWindow(window);
 					
@@ -291,8 +277,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 						Formatting formatting = bSetting.get() ? Formatting.GREEN : Formatting.RED;
 						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
 					}, (button) -> {
-						bSetting.set(!bSetting.get());
-						onClientChangedSetting();
+						changeSetting(bSetting, bSetting.valueToString(!bSetting.get()));
 					}));
 					buttonPanel.addButton(new RTTexturedButtonWidget(0, 0, 20, 20, RTTexturedButtonWidget.WIDGETS_LOCATION, 0, 106, 256, 256, 20, (button) -> {
 						saveScrollAmount();
@@ -312,8 +297,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 						Formatting formatting = bSetting.get() ? Formatting.GREEN : Formatting.RED;
 						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
 					}, (button) -> {
-						bSetting.set(!bSetting.get());
-						onClientChangedSetting();
+						changeSetting(bSetting, bSetting.valueToString(!bSetting.get()));
 					}));
 				}
 			} else
@@ -324,8 +308,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 						int min = iSetting.getMin();
 						int steps = (int)(slider.getValue() * (iSetting.getRange() + 1));
 						
-						iSetting.set(min + steps);
-						onClientChangedSetting();
+						changeSetting(iSetting, iSetting.valueToString(min + steps));
 					}, (slider) -> {
 						double steps = iSetting.get() - iSetting.getMin();
 						slider.setValue(steps / (iSetting.getRange()));
@@ -334,8 +317,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					buttonPanel.addButton(new RTTextFieldWidget(client.textRenderer, 0, 0, 100, 20, (textField) -> {
 						textField.setText(iSetting.getValueAsString());
 					}, (text) -> {
-						iSetting.setValueFromString(text);
-						onClientChangedSetting();
+						changeSetting(iSetting, text);
 					}));
 				}
 			} else
@@ -347,8 +329,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					int min = priorities[0].getIndex();
 					int steps = (int)Math.round((priorities.length - 1) * slider.getValue());
 					
-					tSetting.set(TickPriority.byIndex(min + steps));
-					onClientChangedSetting();
+					changeSetting(tSetting, tSetting.valueToString(TickPriority.byIndex(min + steps)));
 				}, (slider) -> {
 					TickPriority[] priorities = TickPriority.values();
 					double steps = tSetting.get().getIndex() - priorities[0].getIndex();
@@ -358,7 +339,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof UpdateOrderSetting) {
 				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, uSetting.get(), (setting) -> onClientChangedSetting());
+					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, uSetting.get(), (setting) -> changeSetting(uSetting, uSetting.getValueAsString()));
 					
 					screen.openWindow(window);
 					
@@ -367,6 +348,10 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					}
 				})).alwaysActive());
 			}
+		}
+		
+		private void changeSetting(ISetting setting, String value) {
+			((RTIMinecraftClient)client).getSettingsManager().changeSetting(setting, value);
 		}
 		
 		private void updateButtonsActive() {
@@ -389,10 +374,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			buttonPanel.updateButtonLabels();
 			
 			updateButtonsActive();
-		}
-		
-		private void onClientChangedSetting() {
-			((RTIMinecraftClient)client).getSettingsManager().onSettingChanged(setting);
 		}
 	}
 	

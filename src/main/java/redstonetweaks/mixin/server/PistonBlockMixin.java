@@ -195,11 +195,11 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Inject(method = "isMovable", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/block/Blocks;PISTON:Lnet/minecraft/block/Block;"))
 	private static void onIsMovedInjectBeforeBlockPiston(BlockState state, World world, BlockPos pos, Direction direction, boolean canBreak, Direction pistonDir, CallbackInfoReturnable<Boolean> cir) {
-		if (PistonHelper.movableWhenExtended(false) && ((state.isOf(Blocks.PISTON) && state.get(Properties.EXTENDED)) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.DEFAULT))) {
+		if (PistonHelper.movableWhenExtended(false) && ((state.isOf(Blocks.PISTON) && state.get(Properties.EXTENDED) && (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() || PistonHelper.isExtended(world, pos, state, state.get(Properties.FACING)))) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.DEFAULT))) {
 			cir.setReturnValue(true);
 			cir.cancel();
 		} else
-		if (PistonHelper.movableWhenExtended(true) && ((state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.EXTENDED)) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY))) {
+		if (PistonHelper.movableWhenExtended(true) && ((state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.EXTENDED) && (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() || PistonHelper.isExtended(world, pos, state, state.get(Properties.FACING)))) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY))) {
 			cir.setReturnValue(true);
 			cir.cancel();
 		}

@@ -11,6 +11,7 @@ import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
+import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.setting.types.ISetting;
 
 public class PresetPacket extends RedstoneTweaksPacket {
@@ -34,16 +35,14 @@ public class PresetPacket extends RedstoneTweaksPacket {
 	}
 	
 	public PresetPacket(PresetEditor editor) {
-		Preset preset = editor.getPreset();
+		previousName = editor.getPreviousName();
+		name = editor.getName();
+		description = editor.getDescription();
+		mode = editor.getMode();
 		
-		Set<ISetting> changed = editor.getSettings();
+		Set<ISetting> changed = editor.getChangedSettings();
 		Set<ISetting> added = editor.getAddedSettings();
 		Set<ISetting> removed = editor.getRemovedSettings();
-		
-		previousName = preset.getPreviousName();
-		name = preset.getName();
-		description = preset.getDescription();
-		mode = preset.getMode();
 		
 		changedCount = changed.size();
 		addedCount = added.size();
@@ -58,13 +57,13 @@ public class PresetPacket extends RedstoneTweaksPacket {
 		int index = 0;
 		for (ISetting setting : changed) {
 			changedSettings[index] = setting;
-			changedValues[index] = setting.getPresetValueAsString(preset);
+			changedValues[index] = editor.getValueAsString(setting);
 			index++;
 		}
 		index = 0;
 		for (ISetting setting : added) {
 			addedSettings[index] = setting;
-			addedValues[index] = setting.getPresetValueAsString(preset);
+			addedValues[index] = editor.getValueAsString(setting);
 			index++;
 		}
 		index = 0;
@@ -110,7 +109,9 @@ public class PresetPacket extends RedstoneTweaksPacket {
 		removedCount = buffer.readInt();
 		
 		changedSettings = new ISetting[changedCount];
-		changedValues = new String[addedCount];
+		changedValues = new String[changedCount];
+		addedSettings = new ISetting[addedCount];
+		addedValues = new String[addedCount];
 		removedSettings = new ISetting[removedCount];
 		
 		for (int index = 0; index < changedCount; index++) {
@@ -128,23 +129,40 @@ public class PresetPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftServer server) {
-		PresetEditor editor = new PresetEditor(previousName, name, description, mode);
+		PresetEditor editor = constructPresetEditor();
 		
-		if (updatePreset(editor)) {
+		if (editor.canSave()) {
+			editor.saveChanges();
+			
 			((RTIMinecraftServer)server).getSettingsManager().getPresetsManager().onPresetPacketReceived(editor);
+		} else {
+			editor.discardChanges();
 		}
 	}
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		PresetEditor editor = new PresetEditor(previousName, name, description, mode);
-		
-		if (updatePreset(editor)) {
-			((RTIMinecraftClient)client).getSettingsManager().getPresetsManager().onPresetPacketReceived(editor);
+		Preset preset;
+		if (!client.isInSingleplayer()) {
+			PresetEditor editor = constructPresetEditor();
+			
+			if (editor.canSave()) {
+				editor.saveChanges();
+			} else {
+				editor.discardChanges();
+			}
+			
+			preset = editor.getPreset();
+		} else {
+			preset = Presets.fromName(name);
 		}
+		
+		((RTIMinecraftClient)client).getSettingsManager().getPresetsManager().onPresetPacketReceived(preset);
 	}
 	
-	private boolean updatePreset(PresetEditor editor) {
+	private PresetEditor constructPresetEditor() {
+		PresetEditor editor = new PresetEditor(previousName, name, description, mode);
+		
 		while (changedCount > 0) {
 			changedCount--;
 			
@@ -172,12 +190,6 @@ public class PresetPacket extends RedstoneTweaksPacket {
 			}
 		}
 		
-		if (editor.canSave()) {
-			editor.saveChanges();
-			
-			return true;
-		}
-		
-		return false;
+		return editor;
 	}
 }

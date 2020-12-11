@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
@@ -148,11 +147,6 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 
 		@Override
 		public void tick() {
-			
-		}
-		
-		@Override
-		public void unfocusTextFields(Element except) {
 			
 		}
 		

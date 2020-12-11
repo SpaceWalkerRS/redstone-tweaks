@@ -49,6 +49,11 @@ public class InfoTab extends RTMenuTab {
 	}
 	
 	@Override
+	protected void refreshContents() {
+		init();
+	}
+	
+	@Override
 	protected void tickContents() {
 		
 	}
@@ -61,9 +66,9 @@ public class InfoTab extends RTMenuTab {
 		for (String category : info.keySet()) {
 			screen.getTextRenderer().draw(matrices, new TranslatableText(category).formatted(Formatting.UNDERLINE), x, y, TEXT_COLOR);
 			
-			for (Text text : info.get(category)) {
+			for (Text line : info.get(category)) {
 				y += 18;
-				screen.getTextRenderer().draw(matrices, text, x, y, TEXT_COLOR);
+				screen.getTextRenderer().draw(matrices, line, x, y, TEXT_COLOR);
 			}
 			
 			y += 30;

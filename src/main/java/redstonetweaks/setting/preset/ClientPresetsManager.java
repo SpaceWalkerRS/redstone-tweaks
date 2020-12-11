@@ -5,8 +5,11 @@ import net.minecraft.client.gui.screen.Screen;
 
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.packet.RemovePresetPacket;
 import redstonetweaks.packet.PresetPacket;
 import redstonetweaks.packet.ReloadPresetsPacket;
+import redstonetweaks.packet.ApplyPresetPacket;
+import redstonetweaks.packet.DuplicatePresetPacket;
 
 public class ClientPresetsManager {
 	
@@ -20,22 +23,35 @@ public class ClientPresetsManager {
 		Presets.toDefault();
 	}
 	
-	public void presetChanged(PresetEditor editor) {
-		if (!client.isInSingleplayer() || client.getServer().isRemote()) {
-			PresetPacket packet = new PresetPacket(editor);
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
-		}
+	public void applyPreset(Preset preset) {
+		ApplyPresetPacket packet = new ApplyPresetPacket(preset);
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+	}
+	
+	public void savePreset(PresetEditor editor) {
+		PresetPacket packet = new PresetPacket(editor);
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+		
+		editor.discardChanges();
 	}
 	
 	public void reloadPresets() {
-		if (!client.isInSingleplayer() || client.getServer().isRemote()) {
-			ReloadPresetsPacket packet = new ReloadPresetsPacket();
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
-		}
+		ReloadPresetsPacket packet = new ReloadPresetsPacket();
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 	}
 	
-	public void onPresetPacketReceived(PresetEditor editor) {
-		notifyMenuScreenOfPresetChange(editor.getPreset());
+	public void removePreset(Preset preset) {
+		RemovePresetPacket packet = new RemovePresetPacket(preset);
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+	}
+	
+	public void duplicatePreset(Preset preset) {
+		DuplicatePresetPacket packet = new DuplicatePresetPacket(preset);
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+	}
+	
+	public void onPresetPacketReceived(Preset preset) {
+		notifyMenuScreenOfPresetChange(preset);
 	}
 	
 	public void onPresetsPacketReceived() {
@@ -46,10 +62,21 @@ public class ClientPresetsManager {
 		notifyMenuScreenOfPresetChange(null);
 	}
 	
+	public void onRemovePresetPacketReceived(Preset preset) {
+		notifyMenuScreenOfPresetChange(preset);
+	}
+	
+	public void onApplyPresetPacketReceived(Preset preset) {
+		Screen screen = client.currentScreen;
+		if (screen instanceof RTMenuScreen) {
+			((RTMenuScreen)screen).onSettingChanged(null);
+		}
+	}
+	
 	private void notifyMenuScreenOfPresetChange(Preset preset) {
 		Screen screen = client.currentScreen;
 		if (screen instanceof RTMenuScreen) {
-			((RTMenuScreen) screen).onPresetChanged(preset);
+			((RTMenuScreen)screen).onPresetChanged(preset);
 		}
 	}
 }

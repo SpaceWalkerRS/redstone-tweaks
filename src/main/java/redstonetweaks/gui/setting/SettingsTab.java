@@ -17,7 +17,7 @@ import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.ISetting;
 
-public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
+public class SettingsTab extends RTMenuTab {
 	
 	private static final int HEADER_HEIGHT = 25;
 	private static final Map<SettingsCategory, String> LAST_SEARCH_QUERIES = new HashMap<>();
@@ -43,6 +43,11 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 	}
 	
 	@Override
+	protected void refreshContents() {
+		settingsList.filter(searchBox.getText());
+	}
+	
+	@Override
 	protected void initContents() {
 		settingsList = new EditSettingsListWidget(screen, category, 0, screen.getHeaderHeight() + HEADER_HEIGHT, screen.getWidth(), screen.getHeight() - screen.getHeaderHeight() - HEADER_HEIGHT - 5);
 		settingsList.init();
@@ -51,16 +56,14 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 		int y = screen.getHeaderHeight();
 		
 		resetButton = new RTButtonWidget(screen.getWidth() - 50, y, 40, 20, () -> new TranslatableText("RESET"), (button) -> {
-			category.resetAll();
-			((RTIMinecraftClient)screen.client).getSettingsManager().onSettingsReset(category);
+			((RTIMinecraftClient)screen.client).getSettingsManager().resetSettings(category);
 		});
 		addContent(resetButton);
 		
 		lockButton = new RTLockButtonWidget(resetButton.getX() - 22, y, category.isLocked(), (button) -> {
 			button.toggleLocked();
 			
-			category.setLocked(button.isLocked());
-			((RTIMinecraftClient)screen.client).getSettingsManager().onSettingsChanged(category);
+			((RTIMinecraftClient)screen.client).getSettingsManager().lockCategory(category, button.isLocked());
 		});
 		addContent(lockButton);
 		
@@ -105,7 +108,6 @@ public class SettingsTab extends RTMenuTab implements ISettingGUIElement {
 		return getFocused() == searchBox || settingsList.focusedIsTextField();
 	}
 	
-	@Override
 	public void onSettingChanged(ISetting setting) {
 		updateButtonsActive();
 		

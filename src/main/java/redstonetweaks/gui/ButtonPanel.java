@@ -58,15 +58,6 @@ public class ButtonPanel extends RTAbstractParentElement implements RTElement {
 		buttons.forEach((button) -> button.allowHover(allowHover));
 	}
 	
-	@Override
-	public void unfocusTextFields(Element except) {
-		for (IAbstractButtonWidget button : buttons) {
-			if (button instanceof RTTextFieldWidget && button != except) {
-				((RTTextFieldWidget)button).unFocus();
-			}
-		}
-	}
-	
 	public int getX() {
 		return x;
 	}

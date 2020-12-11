@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -93,8 +92,8 @@ public class ArraySettingListWidget<K, E> extends RTListWidget<ArraySettingListW
 		}
 		
 		@Override
-		public void unfocusTextFields(Element except) {
-			buttonPanel.unfocusTextFields(except);
+		protected void unfocusTextFields() {
+			buttonPanel.unfocusTextFields(null);
 		}
 		
 		@Override

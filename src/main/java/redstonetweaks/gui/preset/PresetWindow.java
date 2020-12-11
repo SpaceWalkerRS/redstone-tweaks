@@ -60,6 +60,12 @@ public class PresetWindow extends RTWindow {
 			button.updateMessage();
 		});
 		addContent(modeButton);
+		
+		if (!parent.getPresetEditor().isEditable()) {
+			nameField.setActive(false);
+			descriptionField.setActive(false);
+			modeButton.setActive(false);
+		}
 	}
 	
 	@Override

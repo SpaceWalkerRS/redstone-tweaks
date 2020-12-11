@@ -60,8 +60,6 @@ public class RTMenuScreen extends Screen {
 		if (selectedTab.mouseClicked(mouseX, mouseY, button)) {
 			setFocused(selectedTab);
 		} else {
-			selectedTab.unfocusTextFields(null);
-			
 			for (IAbstractButtonWidget tabButton : tabButtons) {
 				if (tabButton.mouseClicked(mouseX, mouseY, button)) {
 					setFocused(tabButton);
@@ -152,6 +150,10 @@ public class RTMenuScreen extends Screen {
 	
 	public TextRenderer getTextRenderer() {
 		return textRenderer;
+	}
+	
+	public void refresh() {
+		getSelectedTab().refreshContents();
 	}
 	
 	private void createTabs() {

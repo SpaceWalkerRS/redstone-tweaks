@@ -19,7 +19,7 @@ import net.minecraft.util.math.BlockPos;
 
 import redstonetweaks.helper.BlockEntityHelper;
 import redstonetweaks.interfaces.RTIMinecraftClient;
-import redstonetweaks.packet.PacketHandler;
+import redstonetweaks.packet.AbstractPacketHandler;
 import redstonetweaks.packet.PlayerJoinedServerPacket;
 
 @Mixin(ClientPlayNetworkHandler.class)
@@ -35,7 +35,7 @@ public class ClientPlayNetworkHandlerMixin {
 	
 	@Inject(method = "onCustomPayload", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/network/packet/s2c/play/CustomPayloadS2CPacket;getChannel()Lnet/minecraft/util/Identifier;"))
 	private void onOnCustomPayloadInjectAfterForceMainThread(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-		if (PacketHandler.PACKET_IDENTIFIER.equals(packet.getChannel())) {
+		if (AbstractPacketHandler.PACKET_IDENTIFIER.equals(packet.getChannel())) {
 			PacketByteBuf buffer = packet.getData();
 			
 			((RTIMinecraftClient)client).getPacketHandler().onPacketReceived(buffer);

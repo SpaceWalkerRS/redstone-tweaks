@@ -3,14 +3,16 @@ package redstonetweaks.setting.preset;
 import java.util.HashSet;
 import java.util.Set;
 
-import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.Setting;
 
 public class PresetEditor {
 	
+	private final Preset TEMP = new Preset("TEMP", "A preset used to temporarily store values while a preset is being edited.", Preset.Mode.SET, true);
+	
 	private final Preset preset;
-	private final Set<ISetting> settings;
+	
+	private final Set<ISetting> changedSettings;
 	private final Set<ISetting> addedSettings;
 	private final Set<ISetting> removedSettings;
 	
@@ -19,26 +21,33 @@ public class PresetEditor {
 	private String description;
 	private Preset.Mode mode;
 	
+	private boolean saved;
+	
 	public PresetEditor(Preset preset) {
-		this(preset, preset.getName(), preset.getName());
+		this(preset, preset.getName(), preset.getName(), preset.getDescription(), preset.getMode());
+	}
+	
+	public PresetEditor(String name, String description, Preset.Mode mode) {
+		this(name, name, description, mode);
 	}
 	
 	public PresetEditor(String previousName, String name, String description, Preset.Mode mode) {
-		this(Presets.fromNameOrCreate(previousName, description, mode), previousName, name);
+		this(Presets.fromNameOrCreate(previousName == null ? name : previousName), previousName, name, description, mode);
 	}
 	
-	private PresetEditor(Preset preset, String previousName, String name) {
+	private PresetEditor(Preset preset, String previousName, String name, String description, Preset.Mode mode) {
 		this.preset = preset;
-		this.settings = new HashSet<>();
+		
+		this.changedSettings = new HashSet<>();
 		this.addedSettings = new HashSet<>();
 		this.removedSettings = new HashSet<>();
 		
 		this.previousName = previousName;
 		this.name = name;
-		this.description = preset.getDescription();
-		this.mode = preset.getMode();
+		this.description = description;
+		this.mode = mode;
 		
-		fetchSettings();
+		this.saved = false;
 	}
 	
 	public Preset getPreset() {
@@ -49,8 +58,8 @@ public class PresetEditor {
 		return preset.isEditable();
 	}
 	
-	public Set<ISetting> getSettings() {
-		return settings;
+	public Set<ISetting> getChangedSettings() {
+		return changedSettings;
 	}
 	
 	public Set<ISetting> getAddedSettings() {
@@ -67,6 +76,10 @@ public class PresetEditor {
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getPreviousName() {
+		return previousName;
 	}
 	
 	public String getDescription() {
@@ -93,51 +106,63 @@ public class PresetEditor {
 		setMode(mode.previous());
 	}
 	
-	private void fetchSettings() {
-		for (ISetting setting : Settings.ALL) {
+	public boolean hasSetting(ISetting setting) {
+		return (setting.hasPreset(preset) && !removedSettings.contains(setting)) || addedSettings.contains(setting);
+	}
+	
+	public void addSetting(ISetting setting) {
+		if (setting.hasPreset(preset)) {
+			removedSettings.remove(setting);
+		} else {
+			addedSettings.add(setting);
+		}
+		setting.copyPresetValue(Presets.Default.DEFAULT, TEMP);
+	}
+	
+	public void removeSetting(ISetting setting) {
+		if (setting.hasPreset(preset)) {
+			removedSettings.add(setting);
+		} else {
+			addedSettings.remove(setting);
+		}
+		setting.removePreset(TEMP);
+	}
+	
+	public <T> T getValue(Setting<T> setting) {
+		return (saved || !setting.hasPreset(TEMP)) ? setting.getPresetValueOrDefault(preset) : setting.getPresetValueOrDefault(TEMP);
+	}
+	
+	public String getValueAsString(ISetting setting) {
+		return (saved || !setting.hasPreset(TEMP)) ? setting.getPresetValueAsString(preset) : setting.getPresetValueAsString(TEMP);
+	}
+	
+	public <T> void setValue(Setting<T> setting, T value) {
+		if (hasSetting(setting)) {
+			setting.setPresetValue(TEMP, value);
+			
 			if (setting.hasPreset(preset)) {
-				settings.add(setting);
-				setting.copyPresetValue(preset, Presets.TEMP);
+				changedSettings.add(setting);
 			}
 		}
 	}
 	
-	public boolean hasSetting(ISetting setting) {
-		return (settings.contains(setting) && !removedSettings.contains(setting)) || addedSettings.contains(setting);
-	}
-	
-	public void addSetting(ISetting setting) {
-		if (!settings.contains(setting) && !removedSettings.remove(setting)) {
-			addedSettings.add(setting);
-		}
-		setting.copyPresetValue(Presets.Default.DEFAULT, Presets.TEMP);
-	}
-	
-	public void removeSetting(ISetting setting) {
-		if (settings.contains(setting) && !addedSettings.remove(setting)) {
-			removedSettings.add(setting);
-			
-		}
-		setting.removePreset(Presets.TEMP);
-	}
-	
-	public <T> T getValue(Setting<T> setting) {
-		return setting.getPresetValueOrDefault(Presets.TEMP);
-	}
-	
-	public String getValueAsString(ISetting setting) {
-		return setting.getPresetValueAsString(Presets.TEMP);
-	}
-	
-	public <T> void setValue(Setting<T> setting, T value) {
-		if (settings.contains(setting) || addedSettings.contains(setting)) {
-			setting.setPresetValue(Presets.TEMP, value);
-		}
-	}
-	
 	public void setValueFromString(ISetting setting, String value) {
-		if (settings.contains(setting) || addedSettings.contains(setting)) {
-			setting.setPresetValueFromString(Presets.TEMP, value);
+		if (hasSetting(setting)) {
+			setting.setPresetValueFromString(TEMP, value);
+			
+			if (setting.hasPreset(preset)) {
+				changedSettings.add(setting);
+			}
+		}
+	}
+	
+	public void copyPresetValue(ISetting setting, Preset preset) {
+		if (hasSetting(setting)) {
+			setting.copyPresetValue(preset, TEMP);
+			
+			if (setting.hasPreset(this.preset)) {
+				changedSettings.add(setting);
+			}
 		}
 	}
 	
@@ -150,27 +175,35 @@ public class PresetEditor {
 		preset.setDescription(description);
 		preset.setMode(mode);
 		
-		if (!Presets.isRegistered(preset)) {
-			Presets.register(preset);
-		}
+		Presets.tryRegister(preset);
 		
-		for (ISetting setting : settings) {
-			setting.copyPresetValue(Presets.TEMP, preset);
-			setting.removePreset(Presets.TEMP);
+		for (ISetting setting : changedSettings) {
+			setting.copyPresetValue(TEMP, preset);
+			setting.removePreset(TEMP);
 		}
 		for (ISetting setting : addedSettings) {
-			setting.copyPresetValue(Presets.TEMP, preset);
-			setting.removePreset(Presets.TEMP);
+			setting.copyPresetValue(TEMP, preset);
+			setting.removePreset(TEMP);
 		}
 		for (ISetting setting : removedSettings) {
 			setting.removePreset(preset);
-			setting.removePreset(Presets.TEMP);
+			setting.removePreset(TEMP);
 		}
+		
+		saved = true;
 	}
 	
 	public void discardChanges() {
-		for (ISetting setting : settings) {
-			setting.removePreset(Presets.TEMP);
+		for (ISetting setting : changedSettings) {
+			setting.removePreset(TEMP);
 		}
+		for (ISetting setting : addedSettings) {
+			setting.removePreset(TEMP);
+		}
+		for (ISetting setting : removedSettings) {
+			setting.removePreset(TEMP);
+		}
+		
+		saved = true;
 	}
 }

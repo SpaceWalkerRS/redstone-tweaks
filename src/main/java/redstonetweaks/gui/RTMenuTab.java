@@ -76,6 +76,13 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 
 	protected abstract void initContents();
 	
+	public void refresh() {
+		refreshContents();
+		refreshWindows();
+	}
+	
+	protected abstract void refreshContents();
+	
 	public void tick() {
 		if (!closedWindows.isEmpty()) {
 			closedWindows.forEach((window) -> removeWindow(window));

@@ -427,6 +427,17 @@ public class Tweaks {
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting("tickPriorityFallingEdge", Settings.Common.DESC_TICK_PRIORITY_FALLING_EDGE);
 	}
 	
+	public static class Rail {
+		
+		private static final String PACK_NAME = "Rail";
+		private static final SettingsPack RAIL = new SettingsPack(PACK_NAME);
+		
+		public static final IntegerSetting DELAY = new IntegerSetting("delay", "Delay before rails update their shape.", 0, Settings.Common.MAX_DELAY);
+		public static final DirectionToBooleanSetting QC = new DirectionToBooleanSetting("quasiConnectivity", Settings.Common.DESC_QC);
+		public static final BooleanSetting RANDOMIZE_QC = new BooleanSetting("randomizeQuasiConnectivity", Settings.Common.DESC_RANDOMIZE_QC);
+		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting("tickPriorityFallingEdge", Settings.Common.DESC_TICK_PRIORITY);
+	}
+	
 	public static class RedSand {
 		
 		private static final String PACK_NAME = "Red Sand";
@@ -957,6 +968,12 @@ public class Tweaks {
 		Settings.register(TWEAKS, PoweredRail.POWERED_RAIL, PoweredRail.RANDOMIZE_QC);
 		Settings.register(TWEAKS, PoweredRail.POWERED_RAIL, PoweredRail.TICK_PRIORITY_RISING_EDGE);
 		Settings.register(TWEAKS, PoweredRail.POWERED_RAIL, PoweredRail.TICK_PRIORITY_FALLING_EDGE);
+		
+		Settings.registerPack(TWEAKS, Rail.RAIL);
+		Settings.register(TWEAKS, Rail.RAIL, Rail.DELAY);
+		Settings.register(TWEAKS, Rail.RAIL, Rail.QC);
+		Settings.register(TWEAKS, Rail.RAIL, Rail.RANDOMIZE_QC);
+		Settings.register(TWEAKS, Rail.RAIL, Rail.TICK_PRIORITY);
 		
 		Settings.registerPack(TWEAKS, RedSand.RED_SAND);
 		Settings.register(TWEAKS, RedSand.RED_SAND, RedSand.BLOCK_UPDATE_ORDER);
