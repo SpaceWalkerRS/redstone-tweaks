@@ -33,6 +33,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	private boolean scrolling;
 	private int entryTitleWidth = 0;
 	private String savedScrollAmountKey;
+	private boolean hoverAllowed;
 
 	public RTListWidget(RTMenuScreen screen, int x, int y, int width, int height, int entryHeight, String savedScrollAmountKey) {
 		super(screen.client, width, height, y, y + height, entryHeight);
@@ -111,6 +112,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	@Override
 	public void allowHover(boolean allowHover) {
 		children().forEach((element) -> element.allowHover(allowHover));
+		hoverAllowed = allowHover;
 	}
 	
 	public void init() {
@@ -223,7 +225,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 				int rowLeft = getRowLeft();
 				
 				E entry = getEntry(index);
-				boolean hovered = isMouseOver(mouseX, mouseY) && Objects.equals(getEntryAtPos(mouseX, mouseY), entry);
+				boolean hovered = hoverAllowed && isMouseOver(mouseX, mouseY) && Objects.equals(getEntryAtPos(mouseX, mouseY), entry);
 				
 				entry.render(matrices, index, rowTop, rowLeft, rowWidth, itemHeight, mouseX, mouseY, hovered, delta);
 			}

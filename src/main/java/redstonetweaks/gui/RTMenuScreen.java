@@ -210,6 +210,10 @@ public class RTMenuScreen extends Screen {
 		getSelectedTab().closeWindow(window);
 	}
 	
+	public boolean hasWindowOpen() {
+		return getSelectedTab().hasWindowOpen();
+	}
+	
 	public boolean focusedIsTextField() {
 		return getSelectedTab().focusedIsTextField();
 	}

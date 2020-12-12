@@ -71,7 +71,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 		setFocused(null);
 		
 		initContents();
-		allowHover(getWindows().isEmpty());
+		allowHover(!hasWindowOpen());
 	}
 
 	protected abstract void initContents();
@@ -88,7 +88,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 			closedWindows.forEach((window) -> removeWindow(window));
 			closedWindows.clear();
 			
-			if (getWindows().isEmpty()) {
+			if (!hasWindowOpen()) {
 				allowHover(true);
 			}
 		}
@@ -119,7 +119,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	}
 	
 	public void openWindow(RTWindow window) {
-		if (getWindows().isEmpty() && window != null) {
+		if (!hasWindowOpen() && window != null) {
 			allowHover(false);
 		}
 		
@@ -132,7 +132,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	}
 	
 	public boolean closeTopWindow() {
-		if (!getWindows().isEmpty()) {
+		if (hasWindowOpen()) {
 			closeWindow(windows.get(0));
 			return true;
 		}
@@ -141,6 +141,10 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	
 	protected void refreshWindows() {
 		getWindows().forEach((window) -> window.refresh());
+	}
+	
+	public boolean hasWindowOpen() {
+		return !getWindows().isEmpty();
 	}
 	
 	private void allowHover(boolean allowHover) {
@@ -153,7 +157,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 		if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
 			return true;
 		}
-		if (getWindows().isEmpty()) {
+		if (!hasWindowOpen()) {
 			return hasFocusedTextField();
 		} else {
 			for (RTWindow window : windows) {
