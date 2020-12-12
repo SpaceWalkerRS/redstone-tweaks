@@ -179,6 +179,8 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		private final List<RTElement> children;
 		private final RTButtonWidget addRemoveButton;
 		
+		private float hoverAnimation;
+		
 		public AddSettingEntry(ISetting setting) {
 			this.setting = setting;
 			this.title = new TranslatableText(setting.getName());
@@ -195,10 +197,19 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 				button.updateMessage();
 			});
 			this.children.add(this.addRemoveButton);
+			
+			this.hoverAnimation = 0.0F;
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			if (hovered) {
+				hoverAnimation = 10.0F - (10.0F - hoverAnimation) / 1.06F;
+			} else {
+				hoverAnimation = hoverAnimation / 1.4F;
+			}
+			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * screen.getWidth() / 10.0F), y + itemHeight - 1, -2146365166, -2146365166);
+			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
 			addRemoveButton.setY(y);
@@ -246,6 +257,8 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		private final ButtonPanel buttonPanel;
 		private final RTButtonWidget removeButton;
 		
+		private float hoverAnimation;
+		
 		public EditSettingEntry(ISetting setting) {
 			this.setting = setting;
 			this.title = new TranslatableText(setting.getName());
@@ -262,10 +275,19 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 				settingsChanged = true;
 			});
 			this.children.add(removeButton);
+			
+			this.hoverAnimation = 0.0F;
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			if (hovered) {
+				hoverAnimation = 10.0F - (10.0F - hoverAnimation) / 1.06F;
+			} else {
+				hoverAnimation = hoverAnimation / 1.4F;
+			}
+			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * screen.getWidth() / 10.0F), y + itemHeight - 1, -2146365166, -2146365166);
+			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
 			buttonPanel.setY(y);
@@ -313,8 +335,8 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		private void populateButtonPanel() {
 			if (setting instanceof DirectionToBooleanSetting) {
 				DirectionToBooleanSetting dSetting = (DirectionToBooleanSetting)setting;
-				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, parent.getPresetEditor().getValue(dSetting), (setting) -> {});
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(parent.getPresetEditor().isEditable() ? "EDIT" : "VIEW"), (button) -> {
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, () -> parent.getPresetEditor().getValue(dSetting), (setting) -> {});
 					
 					screen.openWindow(window);
 					
@@ -325,8 +347,8 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			} else
 			if (setting instanceof GameModeToBooleanSetting) {
 				GameModeToBooleanSetting gSetting = (GameModeToBooleanSetting)setting;
-				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, gSetting, parent.getPresetEditor().getValue(gSetting), (setting) -> {});
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(parent.getPresetEditor().isEditable() ? "EDIT" : "VIEW"), (button) -> {
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, gSetting, () -> parent.getPresetEditor().getValue(gSetting), (setting) -> {});
 					
 					screen.openWindow(window);
 					
@@ -383,7 +405,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			} else
 			if (setting instanceof UpdateOrderSetting) {
 				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
-				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(parent.getPresetEditor().isEditable() ? "EDIT" : "VIEW"), (button) -> {
 					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, parent.getPresetEditor().getValue(uSetting), (setting) -> {});
 					
 					screen.openWindow(window);

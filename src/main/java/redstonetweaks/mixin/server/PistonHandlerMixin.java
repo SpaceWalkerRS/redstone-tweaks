@@ -313,8 +313,8 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			if (state.isOf(Blocks.STICKY_PISTON) && !state.get(Properties.EXTENDED)) {
 				return dir == state.get(Properties.FACING);
 			}
-			if (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY) {
-				return dir == state.get(Properties.FACING);
+			if (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY && dir == state.get(Properties.FACING)) {
+				return true;
 			}
 		}
 		if (Tweaks.Global.CHAINSTONE.get() && state.isOf(Blocks.CHAIN)) {

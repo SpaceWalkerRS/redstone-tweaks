@@ -1,6 +1,7 @@
 package redstonetweaks.gui.setting;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
@@ -16,18 +17,18 @@ public class ArraySettingWindow<K, E> extends RTWindow {
 	private static final int HEIGHT = 185;
 	
 	private final ArraySetting<K, E> setting;
-	private final E[] array;
+	private final Supplier<E[]> arraySupplier;
 	private final Consumer<ISetting> changeListener;
 	
 	private ArraySettingListWidget<K, E> list;
 	
 	private boolean canEdit;
 	
-	public ArraySettingWindow(RTMenuScreen screen, ArraySetting<K, E> setting, E[] array, Consumer<ISetting> changeListener) {
+	public ArraySettingWindow(RTMenuScreen screen, ArraySetting<K, E> setting, Supplier<E[]> arraySupplier, Consumer<ISetting> changeListener) {
 		super(screen, new TranslatableText(setting.getName()), (screen.getWidth() - WIDTH) / 2, (screen.getHeight() - HEIGHT) / 2, WIDTH, HEIGHT);
 		
 		this.setting = setting;
-		this.array = array;
+		this.arraySupplier = arraySupplier;
 		this.changeListener = changeListener;
 		
 		this.canEdit = true;
@@ -40,7 +41,7 @@ public class ArraySettingWindow<K, E> extends RTWindow {
 	
 	@Override
 	protected void initContents() {
-		list = new ArraySettingListWidget<>(screen, getX(), getY() + getHeaderHeight(), getWidth(), getHeight() - getHeaderHeight(), setting, array, changeListener);
+		list = new ArraySettingListWidget<>(screen, getX(), getY() + getHeaderHeight(), getWidth(), getHeight() - getHeaderHeight(), setting, arraySupplier.get(), changeListener);
 		list.init();
 		if (!canEdit) {
 			list.disableButtons();

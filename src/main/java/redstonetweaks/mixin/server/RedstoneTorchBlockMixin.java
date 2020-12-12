@@ -36,12 +36,6 @@ public abstract class RedstoneTorchBlockMixin {
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract boolean shouldUnpower(World world, BlockPos pos, BlockState state);
 	
-	@Inject(method = "onBlockAdded", cancellable = true, at = @At(value = "HEAD"))
-	private void onOnBlockAddedInjectAtHead(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo ci) {
-		updateNeighbors(world, pos);
-		ci.cancel();
-	}
-	
 	@Inject(method = "onStateReplaced", cancellable = true, at = @At(value = "HEAD"))
 	private void onOnStateReplacedInjectAtHead(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved, CallbackInfo ci) {
 		if (!moved) {
@@ -118,6 +112,7 @@ public abstract class RedstoneTorchBlockMixin {
 	}
 	
 	private void updateNeighbors(World world, BlockPos pos) {
+		System.out.println("update neighbors of torch");
 		((RTIWorld)world).dispatchBlockUpdates(pos, null, (RedstoneTorchBlock)(Object)this, Tweaks.RedstoneTorch.BLOCK_UPDATE_ORDER.get());
 	}
 }

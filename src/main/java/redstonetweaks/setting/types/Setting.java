@@ -154,7 +154,12 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	public T getDefault() {
-		return presetValues.getOrDefault(Presets.Default.DEFAULT, backupValue);
+		T value = presetValues.get(Presets.Default.DEFAULT);
+		if (value == null) {
+			System.out.println("WARNING: the setting " + getId() + " does not have a default value!");
+			return backupValue;
+		}
+		return value;
 	}
 	
 	public String valueToString(T value) {

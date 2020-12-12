@@ -113,6 +113,8 @@ public class ArraySettingListWidget<K, E> extends RTListWidget<ArraySettingListW
 					Formatting color = bArray[index] ? Formatting.GREEN : Formatting.RED;
 					return new TranslatableText(setting.elementToString(array[index])).formatted(color);
 				}, (button) -> {
+					//System.out.println(array);
+					//System.out.println(bArray);
 					bArray[index] = !bArray[index];
 					changeListener.accept(setting);
 				}));

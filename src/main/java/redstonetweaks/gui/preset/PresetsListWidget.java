@@ -98,6 +98,8 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		private boolean trimmedDescription;
 		private String description;
 		
+		private float hoverAnimation;
+		
 		public PresetEntry(Preset preset) {
 			this.preset = preset;
 			this.title = new TranslatableText(preset.getName()).formatted(Formatting.UNDERLINE, this.preset.isEditable() ? Formatting.UNDERLINE : Formatting.BOLD);
@@ -114,7 +116,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			});
 			this.children.add(this.duplicateButton);
 			
-			this.editButton = new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText("Edit"), (button) -> {
+			this.editButton = new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText(this.preset.isEditable() ? "Edit" : "View"), (button) -> {
 				parent.editPreset(this.preset);
 			});
 			this.children.add(this.editButton);
@@ -123,6 +125,8 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 				((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().removePreset(this.preset);
 			});
 			this.children.add(deleteButton);
+			
+			this.hoverAnimation = 0.0F;
 		}
 		
 		@Override
@@ -158,6 +162,13 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			if (hovered) {
+				hoverAnimation = 10.0F - (10.0F - hoverAnimation) / 1.06F;
+			} else {
+				hoverAnimation = hoverAnimation / 1.4F;
+			}
+			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * screen.getWidth() / 10.0F), y + entryHeight - 1, -2146365166, -2146365166);
+			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			client.textRenderer.draw(matrices, description, x + getEntryTitleWidth() + 5, y + itemHeight / 2 - 5, TEXT_COLOR);
 			

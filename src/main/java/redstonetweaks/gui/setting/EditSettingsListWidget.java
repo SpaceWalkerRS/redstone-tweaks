@@ -166,6 +166,8 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		private final RTLockButtonWidget lockButton;
 		private final RTButtonWidget resetButton;
 		
+		private float hoverAnimation;
+		
 		public SettingEntry(ISetting setting) {
 			this.setting = setting;
 			this.title = new TranslatableText(setting.getName());
@@ -187,11 +189,20 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.buttonPanel = new ButtonPanel();
 			this.populateButtonPanel();
 			this.children.add(buttonPanel);
+			
+			this.hoverAnimation = 0.0F;
 		}
 		
 		// use hovered to render tooltip
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			if (hovered) {
+				hoverAnimation = 10.0F - (10.0F - hoverAnimation) / 1.06F;
+			} else {
+				hoverAnimation = hoverAnimation / 1.4F;
+			}
+			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * screen.getWidth() / 10.0F), y + itemHeight - 1, -2146365166, -2146365166);
+			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
 			buttonPanel.setY(y);
@@ -249,7 +260,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof DirectionToBooleanSetting) {
 				DirectionToBooleanSetting dSetting = (DirectionToBooleanSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, dSetting.get(), (setting) -> changeSetting(dSetting, dSetting.getValueAsString()));
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, () -> dSetting.get(), (setting) -> changeSetting(dSetting, dSetting.getValueAsString()));
 					
 					screen.openWindow(window);
 					
@@ -261,7 +272,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof GameModeToBooleanSetting) {
 				GameModeToBooleanSetting gSetting = (GameModeToBooleanSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, gSetting, gSetting.get(), (setting) -> changeSetting(gSetting, gSetting.getValueAsString()));
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, gSetting, () -> gSetting.get(), (setting) -> changeSetting(gSetting, gSetting.getValueAsString()));
 					
 					screen.openWindow(window);
 					

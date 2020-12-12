@@ -25,6 +25,7 @@ import redstonetweaks.world.client.TickInfoLabelRenderer;
 public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Shadow public ClientWorld world;
+	@Shadow private static int currentFps;
 	
 	private ClientPacketHandler packetHandler;
 	private ClientSettingsManager settingsManager;
@@ -89,5 +90,10 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	@Override
 	public TickInfoLabelRenderer getTickInfoLabelRenderer() {
 		return tickInfoLabelRenderer;
+	}
+	
+	@Override
+	public int getCurrentFps() {
+		return currentFps;
 	}
 }
