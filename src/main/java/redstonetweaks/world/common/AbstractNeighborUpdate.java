@@ -12,15 +12,15 @@ import redstonetweaks.util.RelativePos;
 public class AbstractNeighborUpdate {
 	
 	private Mode mode;
-	private RelativePos updatePos;
 	private RelativePos notifierPos;
+	private RelativePos updatePos;
 	
 	private BlockPos hashPos;
 	
-	public AbstractNeighborUpdate(Mode mode, RelativePos updatePos, RelativePos notifierPos) {
+	public AbstractNeighborUpdate(Mode mode, RelativePos notifierPos, RelativePos updatePos) {
 		this.mode = mode;
-		this.updatePos = updatePos;
 		this.notifierPos = notifierPos;
+		this.updatePos = updatePos;
 	}
 	
 	@Override
@@ -28,7 +28,7 @@ public class AbstractNeighborUpdate {
 		if (other instanceof AbstractNeighborUpdate) {
 			AbstractNeighborUpdate update = (AbstractNeighborUpdate)other;
 			
-			return update.mode == mode && update.updatePos.equals(updatePos) && update.notifierPos.equals(notifierPos);
+			return update.mode == mode && update.notifierPos == notifierPos && update.updatePos == updatePos;
 		}
 		return false;
 	}
@@ -40,18 +40,22 @@ public class AbstractNeighborUpdate {
 	
 	@Override
 	public String toString() {
-		return mode + ":" + updatePos + ":" + notifierPos;
+		return mode + ":" + notifierPos + ":" + updatePos;
 	}
 	
 	public static AbstractNeighborUpdate parseRelativeNeighborUpdate(String string) {
 		String[] args = string.split(":");
 		int index = 0;
 		
-		return new AbstractNeighborUpdate(Mode.valueOf(args[index++]), RelativePos.valueOf(args[index++]), RelativePos.valueOf(args[index++]));
+		Mode mode = Mode.valueOf(args[index++]);
+		RelativePos not = RelativePos.valueOf(args[index++]);
+		RelativePos up = RelativePos.valueOf(args[index++]);
+		
+		return new AbstractNeighborUpdate(mode, not, up);
 	}
 	
 	public AbstractNeighborUpdate copy() {
-		return new AbstractNeighborUpdate(mode, updatePos, notifierPos);
+		return new AbstractNeighborUpdate(mode, notifierPos, updatePos);
 	}
 	
 	public Mode getMode() {
@@ -62,20 +66,20 @@ public class AbstractNeighborUpdate {
 		this.mode = mode;
 	}
 	
-	public RelativePos getUpdatePos() {
-		return updatePos;
-	}
-	
-	public void setUpdatePos(RelativePos updatePos) {
-		this.updatePos = updatePos;
-	}
-	
 	public RelativePos getNotifierPos() {
 		return notifierPos;
 	}
 	
 	public void setNotifierPos(RelativePos notifierPos) {
 		this.notifierPos = notifierPos;
+	}
+	
+	public RelativePos getUpdatePos() {
+		return updatePos;
+	}
+	
+	public void setUpdatePos(RelativePos updatePos) {
+		this.updatePos = updatePos;
 	}
 	
 	public void setHashPos(BlockPos pos, Direction sourceFacing, int offsetX, int offsetY, int offsetZ) {

@@ -167,7 +167,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			} else {
 				hoverAnimation = hoverAnimation / 1.4F;
 			}
-			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * screen.getWidth() / 10.0F), y + entryHeight - 1, -2146365166, -2146365166);
+			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * getScrollbarPositionX() / 10.0F), y + entryHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			client.textRenderer.draw(matrices, description, x + getEntryTitleWidth() + 5, y + itemHeight / 2 - 5, TEXT_COLOR);

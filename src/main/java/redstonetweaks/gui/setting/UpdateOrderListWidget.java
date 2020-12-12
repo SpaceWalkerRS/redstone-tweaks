@@ -80,6 +80,7 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				updateOrderChanged = true;
 				
 				changeListener.accept(setting);
+				button.updateMessage();
 			});
 			this.modeButton.setActive(!updateOrder.modeLocked());
 			this.children.add(modeButton);
@@ -93,6 +94,7 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				}
 				
 				changeListener.accept(setting);
+				button.updateMessage();
 			}));
 			if (update.getMode() != AbstractNeighborUpdate.Mode.NEIGHBORS) {
 				this.buttonPanel1.addButton(new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText(update.getUpdatePos().getName()), (button) -> {
@@ -105,6 +107,7 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 					}
 					
 					changeListener.accept(setting);
+					button.updateMessage();
 				}));
 			}
 			this.children.add(buttonPanel1);
@@ -122,6 +125,7 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				updateOrderChanged = true;
 				
 				changeListener.accept(setting);
+				button.updateMessage();
 			}));
 			this.buttonPanel2.addButton(new RTButtonWidget(0, 0, 20, 20, () -> new TranslatableText("-"), (button) -> {
 				if (Screen.hasShiftDown()) {
@@ -132,6 +136,7 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				updateOrderChanged = true;
 				
 				changeListener.accept(setting);
+				button.updateMessage();
 			}));
 			this.children.add(buttonPanel2);
 			

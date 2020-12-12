@@ -112,6 +112,8 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		boolean extended = type != 0;
 		boolean lazy = extended ? PistonHelper.lazyFallingEdge(sticky) : PistonHelper.lazyRisingEdge(sticky);
 		return lazy ? !extended : PistonHelper.isReceivingPower(world, pos, state, direction, true);
+		
+		
 	}
 	
 	@ModifyArg(method = "onSyncedBlockEvent", index = 2, at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
@@ -121,8 +123,8 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	// If the piston is powered but unable to extend and the forceUpdatePoweredPistons setting
 	// is enabled, a block tick should be scheduled in the next tick.
-	@Inject(method = "onSyncedBlockEvent", at = @At(value = "RETURN", ordinal = 1))
-	private void onOnSyncedBlockEventInjectAtReturn1(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Float> cir) {
+	@Inject(method = "onSyncedBlockEvent", at = @At(value = "RETURN", ordinal = 2))
+	private void onOnSyncedBlockEventInjectAtReturn2(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Float> cir) {
 		if (PistonHelper.updateSelfWhilePowered(sticky)) {
 			world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, PistonHelper.tickPriorityRisingEdge(sticky));
 		}

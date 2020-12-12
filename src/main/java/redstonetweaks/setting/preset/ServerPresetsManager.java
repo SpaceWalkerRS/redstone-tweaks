@@ -95,6 +95,7 @@ public class ServerPresetsManager {
 					
 					ISetting setting = Settings.getSettingFromId(args[0]);
 					if (setting != null) {
+						System.out.println("loading preset " + preset.getName() + " to setting " + setting.getId());
 						setting.setPresetValueFromString(preset, args[1]);
 					}
 				} catch (Exception e) {

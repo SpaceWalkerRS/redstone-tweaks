@@ -117,6 +117,7 @@ public class ArraySettingListWidget<K, E> extends RTListWidget<ArraySettingListW
 					//System.out.println(bArray);
 					bArray[index] = !bArray[index];
 					changeListener.accept(setting);
+					button.updateMessage();
 				}));
 			}
 		}

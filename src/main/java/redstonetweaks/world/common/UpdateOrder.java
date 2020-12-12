@@ -106,7 +106,7 @@ public class UpdateOrder {
 		order.setOffset(offsetX, offsetY, offsetZ);
 		
 		String[] updates = args[index++].split(",");
-		for (int i = 0; i < args.length; i++) {
+		for (int i = 0; i < updates.length; i++) {
 			order.add(AbstractNeighborUpdate.parseRelativeNeighborUpdate(updates[i]));
 		}
 		
@@ -183,7 +183,7 @@ public class UpdateOrder {
 	}
 	
 	public void insert(int index, AbstractNeighborUpdate.Mode mode, RelativePos notifier, RelativePos update) {
-		insert(index, new AbstractNeighborUpdate(mode, update, notifier));
+		insert(index, new AbstractNeighborUpdate(mode, notifier, update));
 	}
 	
 	public void insert(int index, AbstractNeighborUpdate update) {
