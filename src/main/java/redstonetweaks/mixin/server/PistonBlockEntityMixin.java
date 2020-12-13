@@ -229,9 +229,11 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	public void setPushedBlockEntity(BlockEntity blockEntity) {
 		pushedBlockEntity = blockEntity;
 		
-		pushedBlockEntity.setLocation(getWorld(), getPos());
-		if (pushedBlockEntity instanceof PistonBlockEntity) {
-			((RTIPistonBlockEntity)pushedBlockEntity).setParentPistonBlockEntity((PistonBlockEntity)(BlockEntity)this);
+		if (pushedBlockEntity != null) {
+			pushedBlockEntity.setLocation(getWorld(), getPos());
+			if (pushedBlockEntity instanceof PistonBlockEntity) {
+				((RTIPistonBlockEntity)pushedBlockEntity).setParentPistonBlockEntity((PistonBlockEntity)(BlockEntity)this);
+			}
 		}
 	}
 	
