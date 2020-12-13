@@ -55,6 +55,7 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 		worldTickHandler.onDisconnect();
 		settingsManager.onDisconnect();
 		RTMenuScreen.clearLastSearchQueries();
+		RTMenuScreen.resetLastOpenedTabIndex();
 	}
 	
 	@Inject(method = "stop", at = @At(value = "HEAD"))

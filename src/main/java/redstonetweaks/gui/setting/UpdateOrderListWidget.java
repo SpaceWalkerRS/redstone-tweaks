@@ -26,8 +26,6 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 	private final UpdateOrder updateOrder;
 	private final Consumer<ISetting> changeListener;
 	
-	private boolean updateOrderChanged;
-	
 	public UpdateOrderListWidget(RTMenuScreen screen, int x, int y, int width, int height, UpdateOrderSetting setting, UpdateOrder updateOrder, Consumer<ISetting> changeListener) {
 		super(screen, x, y, width, height, 22, setting.getId());
 		
@@ -38,10 +36,7 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 	
 	@Override
 	public void tick() {
-		if (updateOrderChanged) {
-			init();
-			updateOrderChanged = false;
-		}
+		
 	}
 	
 	@Override
@@ -77,7 +72,6 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 			
 			this.modeButton = new RTButtonWidget(0, 0, 140, 20, () -> new TranslatableText("Mode: " + update.getMode().getName()), (button) -> {
 				update.setMode(update.getMode().next());
-				updateOrderChanged = true;
 				
 				changeListener.accept(setting);
 				button.updateMessage();
@@ -122,7 +116,6 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				} else {
 					updateOrder.insert(index + 1, RelativePos.SELF, RelativePos.WEST);
 				}
-				updateOrderChanged = true;
 				
 				changeListener.accept(setting);
 				button.updateMessage();
@@ -133,7 +126,6 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				} else {
 					updateOrder.remove(index);
 				}
-				updateOrderChanged = true;
 				
 				changeListener.accept(setting);
 				button.updateMessage();

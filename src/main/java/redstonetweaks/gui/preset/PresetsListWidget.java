@@ -106,22 +106,22 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.tooltip = createTooltip();
 			this.children = new ArrayList<>();
 			
-			this.applyButton = new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText("Apply"), (button) -> {
+			this.applyButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("Apply"), (button) -> {
 				this.preset.apply();
 			});
 			this.children.add(this.applyButton);
 			
-			this.duplicateButton = new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText("Duplicate"), (button) -> {
+			this.duplicateButton = new RTButtonWidget(0, 0, 60, 20, () -> new TranslatableText("Duplicate"), (button) -> {
 				((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().duplicatePreset(this.preset);
 			});
 			this.children.add(this.duplicateButton);
 			
-			this.editButton = new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText(this.preset.isEditable() ? "Edit" : "View"), (button) -> {
+			this.editButton = new RTButtonWidget(0, 0, 34, 20, () -> new TranslatableText(this.preset.isEditable() ? "Edit" : "View"), (button) -> {
 				parent.editPreset(this.preset);
 			});
 			this.children.add(this.editButton);
 			
-			this.deleteButton = new RTButtonWidget(0, 0, 50, 20, () -> new TranslatableText("Delete"), (button) -> {
+			this.deleteButton = new RTButtonWidget(0, 0, 45, 20, () -> new TranslatableText("Delete"), (button) -> {
 				((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().removePreset(this.preset);
 			});
 			this.children.add(deleteButton);
@@ -136,10 +136,10 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void init(int titleWidth) {
-			deleteButton.setX(getX() + getWidth() - 60);
-			editButton.setX(deleteButton.getX() - 52);
-			duplicateButton.setX(editButton.getX() - 52);
-			applyButton.setX(duplicateButton.getX() - 55);
+			deleteButton.setX(getX() + getWidth() - deleteButton.getWidth() - 10);
+			editButton.setX(deleteButton.getX() - editButton.getWidth() - 2);
+			duplicateButton.setX(editButton.getX() - duplicateButton.getWidth() - 2);
+			applyButton.setX(duplicateButton.getX() - applyButton.getWidth() - 5);
 			
 			int width = applyButton.getX() - getX() - titleWidth - 20;
 			description = TextFormatting.prettyTrimToWidth(preset.getDescription(), width, client.textRenderer);

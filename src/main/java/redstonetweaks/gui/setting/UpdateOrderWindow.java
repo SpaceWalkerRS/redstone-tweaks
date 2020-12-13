@@ -1,6 +1,7 @@
 package redstonetweaks.gui.setting;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
@@ -22,28 +23,35 @@ public class UpdateOrderWindow extends RTWindow {
 	private static final int HEIGHT = 230;
 	
 	private final UpdateOrderSetting setting;
-	private final UpdateOrder updateOrder;
+	private final Supplier<UpdateOrder> updateOrderSupplier;
 	private final Consumer<ISetting> changeListener;
 	
+	private UpdateOrder updateOrder;
 	private UpdateOrderListWidget list;
 	private RTButtonWidget notifierOrderButton;
 	private ButtonPanel offsetButtons;
 	private RTButtonWidget addUpdateButton;
 	
+	private boolean updateOrderChanged;
 	private boolean canEdit;
 	
-	public UpdateOrderWindow(RTMenuScreen screen, UpdateOrderSetting setting, UpdateOrder updateOrder, Consumer<ISetting> changeListener) {
+	public UpdateOrderWindow(RTMenuScreen screen, UpdateOrderSetting setting, Supplier<UpdateOrder> updateOrderSupplier, Consumer<ISetting> changeListener) {
 		super(screen, new TranslatableText("Update Order"), (screen.getWidth() - WIDTH) / 2, (screen.getHeight() - HEIGHT) / 2, WIDTH, HEIGHT);
 		
 		this.setting = setting;
-		this.updateOrder = updateOrder;
-		this.changeListener = changeListener;
+		this.updateOrderSupplier = updateOrderSupplier;
+		this.changeListener = (updateOrderSetting) -> {
+			updateOrderChanged = true;
+			changeListener.accept(updateOrderSetting);
+		};
 		
 		this.canEdit = true;
 	}
 	
 	@Override
 	protected void initContents() {
+		updateOrder = updateOrderSupplier.get();
+		
 		notifierOrderButton = new RTButtonWidget(getX() + 32, getY() + 30, 140, 20, () -> new TranslatableText("Notifier Order: " + updateOrder.getNotifierOrder().getName()), (button) -> {
 			updateOrder.cycleNotifierOrder();
 			
@@ -51,6 +59,7 @@ public class UpdateOrderWindow extends RTWindow {
 			offsetButtons.setVisible(locationalOrder);
 			
 			changeListener.accept(setting);
+			button.updateMessage();
 		});
 		notifierOrderButton.setActive(canEdit);
 		addContent(notifierOrderButton);
@@ -63,9 +72,11 @@ public class UpdateOrderWindow extends RTWindow {
 		}, (text) -> {
 			try {
 				int newOffset = Integer.parseInt(text);
-				updateOrder.setOffsetX(newOffset);
-				
-				changeListener.accept(setting);
+				if (updateOrder.getOffsetX() != newOffset) {
+					updateOrder.setOffsetX(newOffset);
+					
+					changeListener.accept(setting);
+				}
 			} catch (Exception e) {
 				
 			}
@@ -76,9 +87,11 @@ public class UpdateOrderWindow extends RTWindow {
 			try {
 				int newOffset = Integer.parseInt(text);
 				if (Math.abs(newOffset) < 256) {
-					updateOrder.setOffsetY(newOffset);
-					
-					changeListener.accept(setting);
+					if (updateOrder.getOffsetY() != newOffset) {
+						updateOrder.setOffsetY(newOffset);
+						
+						changeListener.accept(setting);
+					}
 				}
 			} catch (Exception e) {
 				
@@ -89,9 +102,11 @@ public class UpdateOrderWindow extends RTWindow {
 		}, (text) -> {
 			try {
 				int newOffset = Integer.parseInt(text);
-				updateOrder.setOffsetZ(newOffset);
-				
-				changeListener.accept(setting);
+				if (updateOrder.getOffsetZ() != newOffset) {
+					updateOrder.setOffsetZ(newOffset);
+					
+					changeListener.accept(setting);
+				}
 			} catch (Exception e) {
 				
 			}
@@ -124,6 +139,12 @@ public class UpdateOrderWindow extends RTWindow {
 	
 	@Override
 	protected void tickContents() {
+		if (updateOrderChanged) {
+			System.out.println("e");
+			updateOrderChanged = false;
+			refresh();
+		}
+		
 		if (list.children().isEmpty()) {
 			addUpdateButton.setVisible(true);
 		}

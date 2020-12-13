@@ -293,6 +293,8 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	
 	public static abstract class Entry<E extends RTListWidget.Entry<E>> extends ElementListWidget.Entry<E> {
 		
+		protected float hoverAnimation;
+		
 		@Override
 		public List<? extends Element> children() {
 			return getChildren();

@@ -193,7 +193,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.hoverAnimation = 0.0F;
 		}
 		
-		// use hovered to render tooltip
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			if (hovered) {
@@ -350,7 +349,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof UpdateOrderSetting) {
 				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, uSetting.get(), (setting) -> changeSetting(uSetting, uSetting.getValueAsString()));
+					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, () -> uSetting.get(), (setting) -> changeSetting(uSetting, uSetting.getValueAsString()));
 					
 					screen.openWindow(window);
 					

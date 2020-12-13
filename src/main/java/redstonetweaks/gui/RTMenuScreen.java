@@ -30,6 +30,8 @@ public class RTMenuScreen extends Screen {
 	private static final int TITLE_MARGIN = 8;
 	private static final int TITLE_HEIGHT = 15;
 	
+	private static int lastOpenedTabIndex = 0;
+	
 	public final MinecraftClient client;
 	private final List<RTMenuTab> tabs;
 	private final List<IAbstractButtonWidget> tabButtons;
@@ -120,7 +122,7 @@ public class RTMenuScreen extends Screen {
 		createTabs();
 		createTabButtons();
 		
-		selectedTabIndex = 0;
+		selectedTabIndex = lastOpenedTabIndex;
 		getSelectedTab().init();
 		tabButtons.get(selectedTabIndex).setActive(false);
 	}
@@ -199,6 +201,7 @@ public class RTMenuScreen extends Screen {
 		
 		getSelectedTab().onTabClosed();
 		selectedTabIndex = newIndex;
+		lastOpenedTabIndex = newIndex;
 		getSelectedTab().init();
 	}
 	
@@ -237,6 +240,10 @@ public class RTMenuScreen extends Screen {
 		if (selectedTab instanceof HotkeysTab) {
 			((HotkeysTab)selectedTab).onHotkeyChanged(keyBinding);
 		}
+	}
+	
+	public static void resetLastOpenedTabIndex() {
+		lastOpenedTabIndex = 0;
 	}
 	
 	public static void clearLastSearchQueries() {

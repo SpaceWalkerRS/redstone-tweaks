@@ -406,7 +406,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			if (setting instanceof UpdateOrderSetting) {
 				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(parent.getPresetEditor().isEditable() ? "EDIT" : "VIEW"), (button) -> {
-					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, parent.getPresetEditor().getValue(uSetting), (setting) -> {});
+					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, () -> parent.getPresetEditor().getValue(uSetting), (setting) -> {});
 					
 					screen.openWindow(window);
 					
