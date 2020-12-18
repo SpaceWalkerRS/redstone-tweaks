@@ -22,8 +22,12 @@ public class WorldChunkMixin {
 	
 	@Shadow @Final private World world;
 	
+	private BlockEntity movedBlockEntity;
+	
 	@Redirect(method = "setBlockState", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onBlockAdded(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Z)V")), at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/WorldChunk;getBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/chunk/WorldChunk$CreationType;)Lnet/minecraft/block/entity/BlockEntity;"))
 	private BlockEntity onSetBlockStateRedirectGetBlockEntity(WorldChunk chunk, BlockPos blockPos, WorldChunk.CreationType creationType, BlockPos pos, BlockState state, boolean moved) {
+		movedBlockEntity = ((RTIWorld)world).fetchMovedBlockEntity();
+		
 		BlockEntity e = ((RTIWorld)world).isTickingBlockEntities() ? world.getBlockEntity(pos) : chunk.getBlockEntity(pos, creationType);
 		System.out.println(e);
 		return e;
@@ -31,14 +35,21 @@ public class WorldChunkMixin {
 	
 	@Redirect(method = "setBlockState", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockEntityProvider;createBlockEntity(Lnet/minecraft/world/BlockView;)Lnet/minecraft/block/entity/BlockEntity;"))
 	private BlockEntity onSetBlockStateRedirectCreateBlockEntity(BlockEntityProvider block, BlockView world, BlockPos pos, BlockState state, boolean moved) {
-		BlockEntity movedBlockEntity = ((RTIWorld)this.world).getMovedBlockEntity();
+		BlockEntity movedBlockEntity = fetchMovedBlockEntity();
 		System.out.println(movedBlockEntity);
 		return movedBlockEntity == null ? block.createBlockEntity(world) : movedBlockEntity;
 	}
 	
 	@Redirect(method = "createBlockEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockEntityProvider;createBlockEntity(Lnet/minecraft/world/BlockView;)Lnet/minecraft/block/entity/BlockEntity;"))
 	private BlockEntity onCreateBlockEntityRedirectCreateBlockEntity(BlockEntityProvider block, BlockView blockView) {
-		BlockEntity blockEntity = ((RTIWorld)world).getMovedBlockEntity();
+		BlockEntity blockEntity = fetchMovedBlockEntity();
 		return blockEntity == null ? block.createBlockEntity(world) : blockEntity;
+	}
+	
+	private BlockEntity fetchMovedBlockEntity() {
+		BlockEntity blockEntity = movedBlockEntity;
+		movedBlockEntity = null;
+		
+		return blockEntity;
 	}
 }

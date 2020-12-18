@@ -257,11 +257,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Inject(method = "isMovable", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/block/Blocks;PISTON:Lnet/minecraft/block/Block;"))
 	private static void onIsMovedInjectBeforeBlockPiston(BlockState state, World world, BlockPos pos, Direction direction, boolean canBreak, Direction pistonDir, CallbackInfoReturnable<Boolean> cir) {
-		if (PistonHelper.movableWhenExtended(false) && ((state.isOf(Blocks.PISTON) && state.get(Properties.EXTENDED) && (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() || PistonHelper.isExtended(world, pos, state, state.get(Properties.FACING)))) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.DEFAULT))) {
-			cir.setReturnValue(true);
-			cir.cancel();
-		} else
-		if (PistonHelper.movableWhenExtended(true) && ((state.isOf(Blocks.STICKY_PISTON) && state.get(Properties.EXTENDED) && (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() || PistonHelper.isExtended(world, pos, state, state.get(Properties.FACING)))) || (state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY))) {
+		if (PistonHelper.isMovablePiston(world, pos, state, true) || PistonHelper.isMovablePiston(world, pos, state, false)) {
 			cir.setReturnValue(true);
 			cir.cancel();
 		} else
@@ -508,7 +504,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		
 		if (shouldExtend && !isExtended) {
 			if (!PistonHelper.isExtending(world, pos, state, facing)) {
-				if (new PistonHandler(world, pos, facing, true).calculatePush() || new PistonHandler(world, pos, facing.getOpposite(), true).calculatePush()) {
+				if (new PistonHandler(world, pos, facing, true).calculatePush() || (PistonHelper.canMoveSelf(sticky) && new PistonHandler(world, pos, facing.getOpposite(), true).calculatePush())) {
 					if (activationDelay == 0 || onScheduledTick) {
 						world.addSyncedBlockEvent(pos, state.getBlock(), 0, facing.getId());
 					} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {

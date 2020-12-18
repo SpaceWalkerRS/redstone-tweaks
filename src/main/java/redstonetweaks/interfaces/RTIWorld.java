@@ -30,7 +30,7 @@ public interface RTIWorld {
 	
 	public boolean isTickingBlockEntities();
 	
-	public BlockEntity getMovedBlockEntity();
+	public BlockEntity fetchMovedBlockEntity();
 	
 	public void setMovedBlockEntity(BlockEntity blockEntity);
 	

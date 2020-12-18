@@ -68,8 +68,36 @@ public class PistonHelper {
 		return pistonBlockEntity;
 	}
 	
+	public static boolean isPiston(BlockState state, boolean sticky) {
+		return state.getBlock() instanceof PistonBlock && isSticky(state) == sticky;
+	}
+	
 	public static boolean isSticky(BlockState state) {
 		return state.isOf(Blocks.STICKY_PISTON);
+	}
+	
+	public static boolean isPistonHead(BlockState state, boolean sticky) {
+		return state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == (sticky ? PistonType.STICKY : PistonType.DEFAULT);
+	}
+	
+	public static boolean isMovablePiston(World world, BlockPos pos, BlockState state, boolean sticky) {
+		if (!movableWhenExtended(sticky)) {
+			return isPiston(state, sticky) && !state.get(Properties.EXTENDED) && !isExtending(world, pos, state, state.get(Properties.FACING));
+		}
+		if (isPiston(state, sticky)) {
+			return state.get(Properties.EXTENDED) && (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() || isExtended(world, pos, state));
+		}
+		if (isPistonHead(state, sticky)) {
+			if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
+				return true;
+			}
+			
+			Direction facing = state.get(Properties.FACING);
+			BlockState behindState = world.getBlockState(pos.offset(facing.getOpposite()));
+			
+			return behindState.isAir() || (isPiston(behindState, sticky) && behindState.get(Properties.FACING) == facing);
+		}
+		return false;
 	}
 	
 	public static boolean isExtended(World world, BlockPos pos, BlockState state) {

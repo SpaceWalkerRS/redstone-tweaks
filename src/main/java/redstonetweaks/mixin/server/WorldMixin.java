@@ -201,7 +201,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	}
 	
 	@Override
-	public BlockEntity getMovedBlockEntity() {
+	public BlockEntity fetchMovedBlockEntity() {
 		System.out.println("getting moved block entity " + movedBlockEntity);
 		BlockEntity blockEntity = movedBlockEntity;
 		movedBlockEntity = null;
