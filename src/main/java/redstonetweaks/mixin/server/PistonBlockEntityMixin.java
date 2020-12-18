@@ -86,6 +86,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (parentPistonBlockEntity != null) {
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlock(pushedBlock);
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
+			((RTIPistonBlockEntity)parentPistonBlockEntity).setIsMergingSlabs(isMergingSlabs());
+			if (pushedBlockEntity instanceof PistonBlockEntity) {
+				((RTIPistonBlockEntity)pushedBlockEntity).setParentPistonBlockEntity(parentPistonBlockEntity);
+			}
 			
 			ci.cancel();
 		}
@@ -115,6 +119,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (parentPistonBlockEntity != null) {
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlock(pushedBlock);
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
+			((RTIPistonBlockEntity)parentPistonBlockEntity).setIsMergingSlabs(isMergingSlabs());
+			if (pushedBlockEntity instanceof PistonBlockEntity) {
+				((RTIPistonBlockEntity)pushedBlockEntity).setParentPistonBlockEntity(parentPistonBlockEntity);
+			}
 			
 			ci.cancel();
 		}
@@ -250,7 +258,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Override
 	public BlockEntity getMovedBlockEntity() {
 		if (pushedBlockEntity != null && pushedBlockEntity instanceof PistonBlockEntity) {
-			return ((RTIPistonBlockEntity)pushedBlockEntity).getMovedBlockEntity();
+			BlockEntity movedBlockEntity = ((RTIPistonBlockEntity)pushedBlockEntity).getMovedBlockEntity();
+			if (movedBlockEntity != null) {
+				return movedBlockEntity;
+			}
 		}
 		return pushedBlockEntity;
 	}
@@ -289,6 +300,9 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (pushedBlockEntity != null) {
 			pushedBlockEntity.cancelRemoval();
 			pushedBlockEntity.setLocation(getWorld(), getPos());
+			if (pushedBlockEntity instanceof PistonBlockEntity) {
+				((RTIPistonBlockEntity)pushedBlockEntity).setParentPistonBlockEntity(null);
+			}
 			
 			((RTIWorld)getWorld()).setMovedBlockEntity(pushedBlockEntity);
 		}

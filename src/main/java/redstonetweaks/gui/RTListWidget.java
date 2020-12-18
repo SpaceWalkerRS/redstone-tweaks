@@ -43,6 +43,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		this.rowWidth = width - 10;
 		
 		this.savedScrollAmountKey = savedScrollAmountKey;
+		this.hoverAllowed = true;
 	}
 	
 	@Override
@@ -225,6 +226,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 				int rowLeft = getRowLeft();
 				
 				E entry = getEntry(index);
+				
 				boolean hovered = hoverAllowed && isMouseOver(mouseX, mouseY) && Objects.equals(getEntryAtPos(mouseX, mouseY), entry);
 				
 				entry.render(matrices, index, rowTop, rowLeft, rowWidth, itemHeight, mouseX, mouseY, hovered, delta);

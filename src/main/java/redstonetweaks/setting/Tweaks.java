@@ -20,14 +20,14 @@ public class Tweaks {
 		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting("blockUpdateOrder", "The order in which the world emits block updates to the neighbors of a block.");
 		public static final UpdateOrderSetting COMPARATOR_UPDATE_ORDER = new UpdateOrderSetting("comparatorUpdateOrder", "The order in which the world emits comparator updates to the neighbors of a block.");
 		public static final UpdateOrderSetting SHAPE_UPDATE_ORDER = new UpdateOrderSetting("shapeUpdateOrder", "The order in which the world emits shape updates to the neighbors of a block.");
-		public static final BooleanSetting CHAINSTONE = new BooleanSetting("chainstone", "Inspired by the carpet mod rule of the same name, this setting makes connected chain blocks stick to each other and any blocks they anchored to. But be careful! A chain will only move as a whole if it is anchored at both ends.");
+		public static final BooleanSetting CHAINSTONE = new BooleanSetting("chainstone", "Inspired by the carpet mod rule of the same name, this setting makes connected chain blocks stick to each other and any blocks they are anchored to. But be careful! A chain will only move as a whole if it is anchored at both ends.");
 		public static final IntegerSetting DELAY_MULTIPLIER = new IntegerSetting("delayMultiplier", "The delay of all scheduled ticks will be multiplied by this value. When set to 0 all scheduled ticks will be executed instantaneously.", 0, 127);
 		public static final BooleanSetting DO_BLOCK_UPDATES = new BooleanSetting("doBlockUpdates", "Allow worlds to dispatch block updates.");
 		public static final BooleanSetting DO_COMPARATOR_UPDATES = new BooleanSetting("doComparatorUpdates", "Allow worlds to dispatch comparator updates.");
 		public static final BooleanSetting DO_SHAPE_UPDATES = new BooleanSetting("doShapeUpdates", "Allow worlds to dispatch shape updates.");
 		public static final BooleanSetting DOUBLE_RETRACTION = new BooleanSetting("doubleRetraction", "A re-implementation of behavior that was present in 1.3-1.8, known as \"Jeb retraction\" or \"instant double retraction\". It creates a very narrow window where unpowered pistons can be moved.");
-		public static final BooleanSetting INSTANT_BLOCK_EVENTS = new BooleanSetting("instantBlockEvents", "Execute block events at the moment they are scheduled.");
-		public static final BooleanSetting MERGE_SLABS = new BooleanSetting("mergeSlabs", "Allow half slabs of the same type to be pushed together and merge into a double slab block. Additionally, sticky surfaces can only move half slabs when making physical contact with the slab. This allows half slabs to be split when one half is pulled but not the other.");
+		public static final BooleanSetting INSTANT_BLOCK_EVENTS = new BooleanSetting("instantBlockEvents", "Execute block events instantaneously rather than queueing them.");
+		public static final BooleanSetting MERGE_SLABS = new BooleanSetting("mergeSlabs", "Allow half slabs of the same type to be pushed together and merge into a double slab block. Additionally, sticky surfaces can only move half slabs when making physical contact with the slab. This allows double slabs to be split when one half is pulled but not the other.");
 		public static final BooleanSetting MOVABLE_BLOCK_ENTITIES = new BooleanSetting("movableBlockEntities", "Allow blocks with block entities to be moved by pistons.");
 		public static final BooleanSetting MOVABLE_MOVING_BLOCKS = new BooleanSetting("movableMovingBlocks", "Allow moving blocks to be moved by pistons.");
 		public static final IntegerSetting POWER_MAX = new IntegerSetting("maxPower", "The maximum power output of analogue components like redstone wire, comparators, weighted pressure plates, etc.", 0, Settings.Common.MAX_POWER);
@@ -253,6 +253,14 @@ public class Tweaks {
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting("tickPriority", Settings.Common.DESC_TICK_PRIORITY);
 	}
 	
+	public static class HayBale {
+		
+		private static final String PACK_NAME = "Hay Bale";
+		private static final SettingsPack HAY_BALE = new SettingsPack(PACK_NAME);
+		
+		public static final BooleanSetting PARTIALLY_MOVABLE = new BooleanSetting("partiallyMovable", "When enabled, hay bales are only movable along the axis they are aligned with.");
+	}
+	
 	public static class HeavyWeightedPressurePlate {
 		
 		private static final String PACK_NAME = "Heavy Weighted Pressure Plate";
@@ -364,6 +372,7 @@ public class Tweaks {
 		private static final String PACK_NAME = "Normal Piston";
 		private static final SettingsPack NORMAL_PISTON = new SettingsPack(PACK_NAME);
 		
+		public static final BooleanSetting CAN_MOVE_SELF = new BooleanSetting("canMoveSelf", "When enabled, normal pistons will try to push themselves backwards when trying to push an immovable structure.");
 		public static final BooleanSetting CONNECTS_TO_WIRE = new BooleanSetting("connectsToWire", "When enabled, normal pistons connect to redstone wire.");
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting("delayRisingEdge", "Delay in ticks before extending.", 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting("delayFallingEdge", "Delay in ticks before retracting", 0, Settings.Common.MAX_DELAY);
@@ -502,7 +511,7 @@ public class Tweaks {
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting("lazyFallingEdge", Settings.Common.DESC_LAZY_FALLING_EDGE);
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting("weakPower", Settings.Common.DESC_POWER_WEAK, 0, Settings.Common.MAX_POWER);
 		public static final IntegerSetting POWER_STRONG = new IntegerSetting("strongPower", Settings.Common.DESC_POWER_STRONG, 0, Settings.Common.MAX_POWER);
-		public static final BooleanSetting SOFT_INVERSION = new BooleanSetting("softInversion", "An implementation of behavior present in the Bedrock Edition known as \"soft inversion\". It causes a redstone torche attached to a piston to depower when that piston is powered.");
+		public static final BooleanSetting SOFT_INVERSION = new BooleanSetting("softInversion", "An implementation of behavior present in Bedrock Edition known as \"soft inversion\". It causes any redstone torch attached to a piston to depower when that piston is powered.");
 		public static final TickPrioritySetting TICK_PRIORITY_BURNOUT = new TickPrioritySetting("tickPriorityBurnout", "The tick priority of the tick scheduled when a redstone torch burns out.");
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting("tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE);
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting("tickPriorityFallingEdge", Settings.Common.DESC_TICK_PRIORITY_FALLING_EDGE);
@@ -568,6 +577,7 @@ public class Tweaks {
 		private static final String PACK_NAME = "Sticky Piston";
 		private static final SettingsPack STICKY_PISTON = new SettingsPack(PACK_NAME);
 		
+		public static final BooleanSetting CAN_MOVE_SELF = new BooleanSetting("canMoveSelf", "When enabled, sticky pistons will try to push themselves backwards when trying to push an immovable structure or pull themselves forwards when trying to pull an immovable structure.");
 		public static final BooleanSetting CONNECTS_TO_WIRE = new BooleanSetting("connectsToWire", "When enabled, sticky pistons connect to redstone wire.");
 		public static final BooleanSetting DO_BLOCK_DROPPING = new BooleanSetting("doBlockDropping", "When enabled, sticky pistons drop their block when given a short pulse (less than or equal to their speed).");
 		public static final BooleanSetting FAST_BLOCK_DROPPING = new BooleanSetting("fastBlockDropping", "When enabled and doBlockDropping is also enabled, a sticky piston will instantly place the block it is dropping.");
@@ -860,6 +870,9 @@ public class Tweaks {
 		Settings.register(TWEAKS, GravityBlock.GRAVITY_BLOCK, GravityBlock.DELAY);
 		Settings.register(TWEAKS, GravityBlock.GRAVITY_BLOCK, GravityBlock.TICK_PRIORITY);
 		
+		Settings.registerPack(TWEAKS, HayBale.HAY_BALE);
+		Settings.register(TWEAKS, HayBale.HAY_BALE, HayBale.PARTIALLY_MOVABLE);
+		
 		Settings.registerPack(TWEAKS, HeavyWeightedPressurePlate.HEAVY_WEIGHTED_PRESSURE_PLATE);
 		Settings.register(TWEAKS, HeavyWeightedPressurePlate.HEAVY_WEIGHTED_PRESSURE_PLATE, HeavyWeightedPressurePlate.BLOCK_UPDATE_ORDER);
 		Settings.register(TWEAKS, HeavyWeightedPressurePlate.HEAVY_WEIGHTED_PRESSURE_PLATE, HeavyWeightedPressurePlate.DELAY_RISING_EDGE);
@@ -922,6 +935,7 @@ public class Tweaks {
 		Settings.register(TWEAKS, MagmaBlock.MAGMA_BLOCK, MagmaBlock.TICK_PRIORITY);
 		
 		Settings.registerPack(TWEAKS, NormalPiston.NORMAL_PISTON);
+		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.CAN_MOVE_SELF);
 		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.CONNECTS_TO_WIRE);
 		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.DELAY_RISING_EDGE);
 		Settings.register(TWEAKS, NormalPiston.NORMAL_PISTON, NormalPiston.DELAY_FALLING_EDGE);
@@ -1051,6 +1065,7 @@ public class Tweaks {
 		Settings.register(TWEAKS, Stairs.STAIRS, Stairs.FULL_FACES_ARE_SOLID);
 		
 		Settings.registerPack(TWEAKS, StickyPiston.STICKY_PISTON);
+		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.CAN_MOVE_SELF);
 		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.CONNECTS_TO_WIRE);
 		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.DO_BLOCK_DROPPING);
 		Settings.register(TWEAKS, StickyPiston.STICKY_PISTON, StickyPiston.FAST_BLOCK_DROPPING);

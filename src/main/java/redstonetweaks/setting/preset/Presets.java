@@ -33,9 +33,20 @@ public class Presets {
 	}
 	
 	public static void remove(Preset preset) {
-		Settings.removePreset(preset);
 		ALL.remove(preset);
 		REMOVED.add(preset);
+	}
+	
+	public static void unremove(Preset preset) {
+		REMOVED.remove(preset);
+		tryRegister(preset);
+	}
+	
+	public static void cleanUp() {
+		for (Preset preset : REMOVED) {
+			Settings.removePreset(preset);
+		}
+		REMOVED.clear();
 	}
 	
 	public static boolean isNameValid(String name) {
@@ -62,6 +73,15 @@ public class Presets {
 	public static Preset fromNameOrCreate(String name, String description, Preset.Mode mode) {
 		Preset preset = fromName(name);
 		return preset == null ? create(name, description, mode) : preset;
+	}
+	
+	public static Preset getRemovedPresetFromName(String name) {
+		for (Preset preset : REMOVED) {
+			if (preset.getName().equals(name)) {
+				return preset;
+			}
+		}
+		return null;
 	}
 	
 	public static Preset getRemovedPresetFromSavedName(String savedName) {
@@ -93,6 +113,7 @@ public class Presets {
 				remove(preset);
 			}
 		}
+		cleanUp();
 	}
 	
 	public static class Default {
@@ -223,6 +244,8 @@ public class Presets {
 			Tweaks.FrostedIce.DELAY_MAX.setPresetValue(DEFAULT, 40);
 			Tweaks.FrostedIce.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
+			Tweaks.HayBale.PARTIALLY_MOVABLE.setPresetValue(DEFAULT, false);
+			
 			Tweaks.GrassPath.DELAY.setPresetValue(DEFAULT, 1);
 			Tweaks.GrassPath.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
@@ -287,6 +310,7 @@ public class Presets {
 			Tweaks.MagmaBlock.DELAY.setPresetValue(DEFAULT, 20);
 			Tweaks.MagmaBlock.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
+			Tweaks.NormalPiston.CAN_MOVE_SELF.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.CONNECTS_TO_WIRE.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
 			Tweaks.NormalPiston.DELAY_FALLING_EDGE.setPresetValue(DEFAULT, 0);
@@ -436,6 +460,7 @@ public class Presets {
 			
 			Tweaks.Stairs.FULL_FACES_ARE_SOLID.setPresetValue(DEFAULT, false);
 			
+			Tweaks.StickyPiston.CAN_MOVE_SELF.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.CONNECTS_TO_WIRE.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.DO_BLOCK_DROPPING.setPresetValue(DEFAULT, true);
 			Tweaks.StickyPiston.FAST_BLOCK_DROPPING.setPresetValue(DEFAULT, true);
@@ -532,14 +557,19 @@ public class Presets {
 			Tweaks.WoodenPressurePlate.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
 			
-			ServerConfig.Tweaks.EDIT_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
-			ServerConfig.Tweaks.LOCK_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
+			ServerConfig.Settings.EDIT_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
+			ServerConfig.Settings.LOCK_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
+			ServerConfig.Settings.EDIT_GAME_MODES.setPresetValue(DEFAULT, new Boolean[] {false, true, false, true});
+			ServerConfig.Settings.LOCK_GAME_MODES.setPresetValue(DEFAULT, new Boolean[] {false, true, false, true});
+			
+			ServerConfig.Presets.EDIT_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
+			ServerConfig.Presets.EDIT_GAME_MODES.setPresetValue(DEFAULT, new Boolean[] {false, true, false, true});
 		}
 	}
 	
 	public static class Bedrock {
 		
-		public static final Preset BEDROCK = new Preset("Bedrock", "Values that enable features or behaviors that are present in the Bedrock Edition of Minecraft.", Preset.Mode.SET, false);
+		public static final Preset BEDROCK = new Preset("Bedrock", "Features or behaviors that are present in the Bedrock Edition of Minecraft.", Preset.Mode.SET, false);
 		
 		public static void init() {
 			Presets.register(BEDROCK);
@@ -579,7 +609,7 @@ public class Presets {
 	
 	public static class Debugging {
 		
-		public static final Preset DEBUGGING = new Preset("Debugging", "Enables debugging tools.", Preset.Mode.SET, false);
+		public static final Preset DEBUGGING = new Preset("Debugging", "Debugging tools.", Preset.Mode.SET, false);
 		
 		public static void init() {
 			Presets.register(DEBUGGING);
@@ -593,7 +623,7 @@ public class Presets {
 	
 	public static class Heaven {
 		
-		public static final Preset HEAVEN = new Preset("Heaven", "Enables bug fixes, quality of life changes and cool new features to make your redstoning experience a bliss.", Preset.Mode.SET, false);
+		public static final Preset HEAVEN = new Preset("Heaven", "Bug fixes, quality of life changes and cool new features to make your redstoning experience a bliss.", Preset.Mode.SET, false);
 		
 		public static void init() {
 			Presets.register(HEAVEN);
@@ -623,6 +653,8 @@ public class Presets {
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.FRONT, RelativePos.RIGHT).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.FRONT, RelativePos.DOWN).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.FRONT, RelativePos.UP));
+			
+			Tweaks.HayBale.PARTIALLY_MOVABLE.setPresetValue(HEAVEN, true);
 			
 			Tweaks.MagentaGlazedTerracotta.IS_POWER_DIODE.setPresetValue(HEAVEN, true);
 			
@@ -797,12 +829,16 @@ public class Presets {
 			Tweaks.Global.MOVABLE_BLOCK_ENTITIES.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.Global.MOVABLE_MOVING_BLOCKS.setPresetValue(PISTON_MADNESS, true);
 			
+			Tweaks.HayBale.PARTIALLY_MOVABLE.setPresetValue(PISTON_MADNESS, true);
+			
+			Tweaks.NormalPiston.CAN_MOVE_SELF.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.CONNECTS_TO_WIRE.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(PISTON_MADNESS, false);
 			Tweaks.NormalPiston.MOVABLE_WHEN_EXTENDED.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.PUSH_LIMIT.setPresetValue(PISTON_MADNESS, 100);
 			Tweaks.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(PISTON_MADNESS, true);
 			
+			Tweaks.StickyPiston.CAN_MOVE_SELF.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.CONNECTS_TO_WIRE.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(PISTON_MADNESS, false);
 			Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.setPresetValue(PISTON_MADNESS, true);

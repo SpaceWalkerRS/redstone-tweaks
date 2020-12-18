@@ -24,12 +24,15 @@ public class WorldChunkMixin {
 	
 	@Redirect(method = "setBlockState", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onBlockAdded(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Z)V")), at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/WorldChunk;getBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/chunk/WorldChunk$CreationType;)Lnet/minecraft/block/entity/BlockEntity;"))
 	private BlockEntity onSetBlockStateRedirectGetBlockEntity(WorldChunk chunk, BlockPos blockPos, WorldChunk.CreationType creationType, BlockPos pos, BlockState state, boolean moved) {
-		return ((RTIWorld)world).isTickingBlockEntities() ? world.getBlockEntity(pos) : chunk.getBlockEntity(pos, creationType);
+		BlockEntity e = ((RTIWorld)world).isTickingBlockEntities() ? world.getBlockEntity(pos) : chunk.getBlockEntity(pos, creationType);
+		System.out.println(e);
+		return e;
 	}
 	
 	@Redirect(method = "setBlockState", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockEntityProvider;createBlockEntity(Lnet/minecraft/world/BlockView;)Lnet/minecraft/block/entity/BlockEntity;"))
 	private BlockEntity onSetBlockStateRedirectCreateBlockEntity(BlockEntityProvider block, BlockView world, BlockPos pos, BlockState state, boolean moved) {
 		BlockEntity movedBlockEntity = ((RTIWorld)this.world).getMovedBlockEntity();
+		System.out.println(movedBlockEntity);
 		return movedBlockEntity == null ? block.createBlockEntity(world) : movedBlockEntity;
 	}
 	

@@ -225,6 +225,8 @@ public class RTMenuScreen extends Screen {
 		RTMenuTab selectedTab = getSelectedTab();
 		if (selectedTab instanceof SettingsTab) {
 			((SettingsTab)selectedTab).onSettingChanged(setting);
+		} else if (selectedTab instanceof PresetsTab) {
+			((PresetsTab)selectedTab).onSettingChanged();
 		}
 	}
 	

@@ -130,6 +130,15 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		ci.cancel();
 	}
 	
+	@Inject(method = "addSyncedBlockEvent", at = @At(value = "RETURN"))
+	private void onAddSyncedBlockEventInjectAtReturn(BlockPos pos, Block block, int type, int data, CallbackInfo ci) {
+		// When the world is ticking step by step the block event handler is removed
+		// by the unfinished event
+		if (immediateNeighborUpdates()) {
+			removeBlockEventHandler(pos);
+		}
+	}
+	
 	@Inject(method = "getReceivedStrongRedstonePower", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetReceivedStrongRedstonePowerInjectAtHead(BlockPos pos, CallbackInfoReturnable<Integer> cir) {
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
@@ -172,6 +181,11 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	}
 	
 	@Override
+	public boolean hasBlockEventHandler(BlockPos pos) {
+		return blockEventHandlers.containsKey(pos);
+	}
+	
+	@Override
 	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler) {
 		return blockEventHandlers.putIfAbsent(blockEventHandler.getPos(), blockEventHandler) == null;
 	}
@@ -188,6 +202,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Override
 	public BlockEntity getMovedBlockEntity() {
+		System.out.println("getting moved block entity " + movedBlockEntity);
 		BlockEntity blockEntity = movedBlockEntity;
 		movedBlockEntity = null;
 		

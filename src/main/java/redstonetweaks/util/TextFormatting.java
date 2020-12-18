@@ -7,8 +7,8 @@ import net.minecraft.text.TranslatableText;
 public class TextFormatting {
 	
 	public static final String DEFAULT_LINE_BREAK_SEPARATOR = "\n";
-	public static final int DEFAULT_LINE_LENGTH = 75;
-	public static final int DEFAULT_LINE_WIDTH = 100;
+	public static final int DEFAULT_LINE_LENGTH = 55;
+	public static final int DEFAULT_LINE_WIDTH = 150;
 	
 	public static String insertLineBreaks(String text) {
 		return insertLineBreaks(text, DEFAULT_LINE_BREAK_SEPARATOR, DEFAULT_LINE_LENGTH);
@@ -18,8 +18,14 @@ public class TextFormatting {
 		int index = lineLength;
 		
 		while (index < text.length()) {
-			while (text.charAt(index) != ' ') {
-				index--;
+			int space = index;
+			while (space > index - lineLength && text.charAt(space) != ' ') {
+				space--;
+			}
+			if (text.charAt(space) == ' ') {
+				index = space;
+			} else {
+				text = text.substring(0, index - 1) + "-" + text.substring(index, text.length());
 			}
 			
 			text = text.substring(0, index) + separator + text.substring(index + 1, text.length());
@@ -52,8 +58,14 @@ public class TextFormatting {
 			if (font.getWidth(subString) < lineWidth) {
 				end++;
 			} else {
-				while (text.charAt(end) != ' ') {
-					end--;
+				int space = end;
+				while (space > start && text.charAt(space) != ' ') {
+					space--;
+				}
+				if (text.charAt(space) == ' ') {
+					end = space;
+				} else {
+					text = text.substring(0, end - 1) + "-" + text.substring(end, text.length());
 				}
 				
 				text = text.substring(0, end) + separator + text.substring(end + 1, text.length());

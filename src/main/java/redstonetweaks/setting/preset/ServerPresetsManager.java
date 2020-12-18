@@ -95,7 +95,6 @@ public class ServerPresetsManager {
 					
 					ISetting setting = Settings.getSettingFromId(args[0]);
 					if (setting != null) {
-						System.out.println("loading preset " + preset.getName() + " to setting " + setting.getId());
 						setting.setPresetValueFromString(preset, args[1]);
 					}
 				} catch (Exception e) {
@@ -122,7 +121,7 @@ public class ServerPresetsManager {
 				file.delete();
 			}
 		}
-		Presets.REMOVED.clear();
+		Presets.cleanUp();
 		
 		for (Preset preset : Presets.ALL) {
 			if (preset.isEditable()) {
@@ -202,7 +201,14 @@ public class ServerPresetsManager {
 	public void removePreset(Preset preset) {
 		Presets.remove(preset);
 		
-		RemovePresetPacket packet = new RemovePresetPacket(preset);
+		RemovePresetPacket packet = new RemovePresetPacket(preset, RemovePresetPacket.REMOVE);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+	}
+	
+	public void unremovePreset(Preset preset) {
+		Presets.unremove(preset);
+		
+		RemovePresetPacket packet = new RemovePresetPacket(preset, RemovePresetPacket.PUT_BACK);
 		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	

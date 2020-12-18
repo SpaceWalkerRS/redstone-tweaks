@@ -66,6 +66,16 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 		return y;
 	}
 	
+	public void setX(int x) {
+		this.x = x;
+		this.closeButton.setX(x + 5);
+	}
+	
+	public void setY(int y) {
+		this.y = y;
+		this.closeButton.setY(y + 5);
+	}
+	
 	@Override
 	public int getWidth() {
 		return width;
@@ -74,6 +84,14 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	@Override
 	public int getHeight() {
 		return height;
+	}
+	
+	public void setWidth(int width) {
+		this.width = width;
+	}
+	
+	public void setHeight(int height) {
+		this.height = height;
 	}
 	
 	@Override
@@ -109,7 +127,7 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		drawBackgroundTextureBelow(matrices, getY(), mouseX, mouseY, delta);
 		
-		drawCenteredText(matrices, screen.getTextRenderer(), getTitle(), getX() + getWidth() / 2, getY() + TITLE_MARGIN, 16777215);
+		drawCenteredText(matrices, screen.getTextRenderer(), getTitle(), getX() + getWidth() / 2, getY() + TITLE_MARGIN, TEXT_COLOR);
 		closeButton.render(matrices, mouseX, mouseY, delta);
 		renderContents(matrices, mouseX, mouseY, delta);
 	}

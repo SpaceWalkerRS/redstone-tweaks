@@ -140,7 +140,6 @@ public class UpdateOrderWindow extends RTWindow {
 	@Override
 	protected void tickContents() {
 		if (updateOrderChanged) {
-			System.out.println("e");
 			updateOrderChanged = false;
 			refresh();
 		}

@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.block.AbstractBlock.AbstractBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SideShapeType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
@@ -29,22 +30,20 @@ public abstract class AbstractBlockStateMixin {
 		}
 	}
 	
-	@Inject(method = "isSideSolidFullSquare", cancellable = true, at = @At(value = "RETURN"))
-	private void onIsSideSolidFullSquareInjectAtReturn(BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+	@Inject(method = "isSideSolid", cancellable = true, at = @At(value = "RETURN"))
+	private void onIsSideSolidInjectAtReturn(BlockView world, BlockPos pos, Direction direction, SideShapeType shapeType, CallbackInfoReturnable<Boolean> cir) {
 		if (!cir.getReturnValue()) {
 			boolean isSolid = false;
 			
 			if (BlockHelper.isRigidPistonBase(world, pos, (BlockState)(Object)this)) {
 				isSolid = true;
 			} else
-			if (BlockHelper.isStationarySlab(world, pos, (BlockState)(Object)this, direction)) {
+			if (BlockHelper.isSplitSlab(world, pos, (BlockState)(Object)this, direction)) {
 				isSolid = true;
 			}
 			
-			if (isSolid) {
-				cir.setReturnValue(true);
-				cir.cancel();
-			}
+			cir.setReturnValue(isSolid);
+			cir.cancel();
 		}
 	}
 

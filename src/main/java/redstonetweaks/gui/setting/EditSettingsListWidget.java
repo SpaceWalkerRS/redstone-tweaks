@@ -11,7 +11,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.world.TickPriority;
-
+import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
@@ -22,6 +22,7 @@ import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.gui.widget.RTTexturedButtonWidget;
 import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
@@ -87,6 +88,20 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 				addEntry(new SeparatorEntry());
 			}
 		}
+	}
+	
+	public boolean canChangeSettings() {
+		if (category == ServerConfig.SERVER_CONFIG) {
+			return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(2);
+		}
+		return ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
+	}
+	
+	public boolean canLockSettings() {
+		if (category == ServerConfig.SERVER_CONFIG) {
+			return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(2);
+		}
+		return ((RTIMinecraftClient)client).getSettingsManager().canLockSettings();
 	}
 	
 	public void onSettingChanged(ISetting setting) {
@@ -166,7 +181,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		private final RTLockButtonWidget lockButton;
 		private final RTButtonWidget resetButton;
 		
-		private float hoverAnimation;
+		private double hoverAnimation;
 		
 		public SettingEntry(ISetting setting) {
 			this.setting = setting;
@@ -190,17 +205,18 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.populateButtonPanel();
 			this.children.add(buttonPanel);
 			
-			this.hoverAnimation = 0.0F;
+			this.hoverAnimation = 0.0D;
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			double speed = 60.0D / ((RTIMinecraftClient)client).getCurrentFps();
 			if (hovered) {
-				hoverAnimation = 10.0F - (10.0F - hoverAnimation) / 1.06F;
+				hoverAnimation = 1.0D - (1.0D - hoverAnimation) / Math.pow(1.2D, speed);
 			} else {
-				hoverAnimation = hoverAnimation / 1.4F;
+				hoverAnimation = hoverAnimation / Math.pow(2, speed);
 			}
-			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * screen.getWidth() / 10.0F), y + itemHeight - 1, -2146365166, -2146365166);
+			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
@@ -365,8 +381,8 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		}
 		
 		private void updateButtonsActive() {
-			boolean canChangeSettings = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
-			boolean canLockSettings = ((RTIMinecraftClient)client).getSettingsManager().canLockSettings();
+			boolean canChangeSettings = canChangeSettings();
+			boolean canLockSettings = canLockSettings();
 			
 			buttonPanel.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
 			lockButton.setActive(canLockSettings && !category.isLocked());

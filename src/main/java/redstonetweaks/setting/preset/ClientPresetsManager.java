@@ -2,10 +2,11 @@ package redstonetweaks.setting.preset;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-
+import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.packet.RemovePresetPacket;
+import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.packet.PresetPacket;
 import redstonetweaks.packet.ReloadPresetsPacket;
 import redstonetweaks.packet.ApplyPresetPacket;
@@ -21,6 +22,10 @@ public class ClientPresetsManager {
 	
 	public void onDisconnect() {
 		Presets.toDefault();
+	}
+	
+	public boolean canEditPresets() {
+		return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(ServerConfig.Presets.EDIT_PERMISSION_LEVEL.get()) && ServerConfig.Presets.EDIT_GAME_MODES.get(client.interactionManager.getCurrentGameMode());
 	}
 	
 	public void applyPreset(Preset preset) {
@@ -41,7 +46,12 @@ public class ClientPresetsManager {
 	}
 	
 	public void removePreset(Preset preset) {
-		RemovePresetPacket packet = new RemovePresetPacket(preset);
+		RemovePresetPacket packet = new RemovePresetPacket(preset, RemovePresetPacket.REMOVE);
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+	}
+	
+	public void unremovePreset(Preset preset) {
+		RemovePresetPacket packet = new RemovePresetPacket(preset, RemovePresetPacket.PUT_BACK);
 		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 	}
 	

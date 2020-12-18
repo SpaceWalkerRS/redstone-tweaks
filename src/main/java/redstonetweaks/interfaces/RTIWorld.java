@@ -22,6 +22,8 @@ public interface RTIWorld {
 	
 	public BlockEventHandler getBlockEventHandler(BlockPos pos);
 	
+	public boolean hasBlockEventHandler(BlockPos pos);
+	
 	public boolean addBlockEventHandler(BlockEventHandler blockEventHandler);
 	
 	public void removeBlockEventHandler(BlockPos pos);

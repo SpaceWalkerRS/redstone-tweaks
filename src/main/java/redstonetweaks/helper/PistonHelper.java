@@ -61,6 +61,10 @@ public class PistonHelper {
 		((RTIPistonBlockEntity)pistonBlockEntity).setPushedBlockEntity(movedBlockEntity);
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMergingSlabs(isMergingSlabs);
 		
+		if (isMergingSlabs) {
+			System.out.println("is merging slabs!");
+		}
+		
 		return pistonBlockEntity;
 	}
 	
@@ -90,7 +94,6 @@ public class PistonHelper {
 	public static boolean isExtending(World world, BlockPos pos, BlockState state, Direction facing) {
 		BlockPos frontPos = pos.offset(facing);
 		BlockState frontState = world.getBlockState(frontPos);
-		
 		if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
 			BlockEntity blockEntity = world.getBlockEntity(frontPos);
 			
@@ -203,6 +206,10 @@ public class PistonHelper {
 	
 	public static boolean randQC(BlockState state) {
 		return isSticky(state) ? Tweaks.StickyPiston.RANDOMIZE_QC.get() : Tweaks.NormalPiston.RANDOMIZE_QC.get();
+	}
+	
+	public static boolean canMoveSelf(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.CAN_MOVE_SELF.get() : Tweaks.NormalPiston.CAN_MOVE_SELF.get();
 	}
 	
 	public static boolean connectsToWire(boolean sticky) {

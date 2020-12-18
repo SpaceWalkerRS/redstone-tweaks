@@ -112,7 +112,6 @@ public abstract class RedstoneTorchBlockMixin {
 	}
 	
 	private void updateNeighbors(World world, BlockPos pos) {
-		System.out.println("update neighbors of torch");
 		((RTIWorld)world).dispatchBlockUpdates(pos, null, (RedstoneTorchBlock)(Object)this, Tweaks.RedstoneTorch.BLOCK_UPDATE_ORDER.get());
 	}
 }

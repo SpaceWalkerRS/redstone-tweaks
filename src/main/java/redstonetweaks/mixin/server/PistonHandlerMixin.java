@@ -92,9 +92,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			mergedSlabTypes = new HashMap<>();
 			splitSlabTypes = new HashMap<>();
 		}
-		if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get() || Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
-			movedBlockEntities = new ArrayList<>();
-		}
+		movedBlockEntities = new ArrayList<>();
 	}
 	
 	@Override

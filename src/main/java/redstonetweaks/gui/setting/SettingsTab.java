@@ -118,8 +118,8 @@ public class SettingsTab extends RTMenuTab {
 	}
 	
 	public void updateButtonsActive() {
-		boolean canChangeSettings = ((RTIMinecraftClient)screen.client).getSettingsManager().canChangeSettings();
-		boolean canLockSettings = ((RTIMinecraftClient)screen.client).getSettingsManager().canLockSettings();
+		boolean canChangeSettings = settingsList.canChangeSettings();
+		boolean canLockSettings = settingsList.canLockSettings();
 		
 		lockButton.setActive(canLockSettings);
 		resetButton.setActive(canChangeSettings && !category.isLocked());

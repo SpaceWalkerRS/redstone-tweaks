@@ -9,6 +9,7 @@ import net.minecraft.util.Formatting;
 import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 
@@ -61,11 +62,7 @@ public class PresetWindow extends RTWindow {
 		});
 		addContent(modeButton);
 		
-		if (!parent.getPresetEditor().isEditable()) {
-			nameField.setActive(false);
-			descriptionField.setActive(false);
-			modeButton.setActive(false);
-		}
+		updateButtonsActive();
 	}
 	
 	@Override
@@ -109,5 +106,14 @@ public class PresetWindow extends RTWindow {
 		if (descriptionField != except) {
 			descriptionField.unFocus();
 		}
+	}
+	
+	public void updateButtonsActive() {
+		boolean canEditPresets = ((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().canEditPresets();
+		boolean editable = parent.getPresetEditor().isEditable();
+		
+		nameField.setActive(canEditPresets && editable);
+		descriptionField.setActive(canEditPresets && editable);
+		modeButton.setActive(canEditPresets && editable);
 	}
 }

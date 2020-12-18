@@ -5,13 +5,14 @@ import java.util.List;
 
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTMenuTab;
+import redstonetweaks.gui.RTWindow;
+import redstonetweaks.gui.WarningWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.interfaces.RTIMinecraftClient;
@@ -20,7 +21,6 @@ import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
 import redstonetweaks.setting.preset.Presets;
-import redstonetweaks.util.TextFormatting;
 
 public class PresetsTab extends RTMenuTab {
 	
@@ -42,12 +42,11 @@ public class PresetsTab extends RTMenuTab {
 	private RTButtonWidget saveButton;
 	private RTButtonWidget cancelButton;
 	private RTButtonWidget propertiesButton;
+	private RTButtonWidget warningButton;
 	private RTButtonWidget[] categoryButtons;
 	private RTButtonWidget toggleListButton;
 	
 	private int selectedCategoryIndex;
-	private boolean presetChanged;
-	private Text[] presetChangedWarning;
 	
 	public PresetsTab(RTMenuScreen screen) {
 		super(screen, new TranslatableText("Presets"));
@@ -119,10 +118,15 @@ public class PresetsTab extends RTMenuTab {
 		});
 		addEditorContent(saveButton);
 		
-		propertiesButton = new RTButtonWidget(5, saveButton.getY(), 100, 20, () -> new TranslatableText("Properties"), (button) -> {
+		propertiesButton = new RTButtonWidget(saveButton.getX() - 105, saveButton.getY(), 100, 20, () -> new TranslatableText("Properties"), (button) -> {
 			screen.openWindow(new PresetWindow(this));
 		});
 		addEditorContent(propertiesButton);
+		
+		warningButton = new RTButtonWidget(Math.min(propertiesButton.getX() - 85, (screen.getWidth() - 80) / 2), propertiesButton.getY(), 80, 20, () -> new TranslatableText("WARNING").formatted(Formatting.RED), (button) -> {
+			screen.openWindow(new WarningWindow(this, "Someone else has made changes to this preset that will not show up until you close the editor. If you save your changes you might overwrite some of their changes!", 300));
+		});
+		addEditorContent(warningButton);
 		
 		categoryButtons = new RTButtonWidget[Settings.CATEGORIES.size()];
 		for (int i = 0; i < categoryButtons.length; i++) {
@@ -161,20 +165,15 @@ public class PresetsTab extends RTMenuTab {
 		});
 		addEditorContent(toggleListButton);
 		
-		int width = saveButton.getX() - (propertiesButton.getX() + propertiesButton.getWidth());
-		int buffer = 10;
-		String[] text = TextFormatting.getAsLines(screen.getTextRenderer(), "WARNING: changes have been made to this preset that will not show up until you close the editor!", width - 2 * buffer);
-		presetChangedWarning = new Text[text.length];
-		for (int index = 0; index < text.length; index++) {
-			presetChangedWarning[index] = new TranslatableText(text[index]);
-		}
-		
 		
 		if (isEditingPreset()) {
 			initEditorContent();
 		} else {
 			initBrowserContent();
 		}
+		
+		
+		updateButtonsActive();
 	}
 	
 	@Override
@@ -198,22 +197,13 @@ public class PresetsTab extends RTMenuTab {
 	@Override
 	protected void renderContents(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		if (isEditingPreset()) {
-			drawBackGround(matrices);
-			
-			if (presetChanged) {
-				int x = propertiesButton.getX() + propertiesButton.getWidth() + 10;
-				int y = propertiesButton.getY() + 10 - 20 * (presetChangedWarning.length / 2);
-				
-				for (Text line : presetChangedWarning) {
-					screen.client.textRenderer.drawWithShadow(matrices, line, x, y, Formatting.RED.getColorValue());
-					y += 20;
-				}
-			}
+			screen.client.textRenderer.drawWithShadow(matrices, getPresetEditor().getName(), 6, propertiesButton.getY() + 6, TEXT_COLOR);
 			
 			searchBox.render(matrices, mouseX, mouseY, delta);
 			clearSearchBoxButton.render(matrices, mouseX, mouseY, delta);
 			toggleListButton.render(matrices, mouseX, mouseY, delta);
 			
+			warningButton.render(matrices, mouseX, mouseY, delta);
 			propertiesButton.render(matrices, mouseX, mouseY, delta);
 			saveButton.render(matrices, mouseX, mouseY, delta);
 			cancelButton.render(matrices, mouseX, mouseY, delta);
@@ -276,7 +266,6 @@ public class PresetsTab extends RTMenuTab {
 	
 	public void browsePresets() {
 		presetEditor = null;
-		presetChanged = false;
 		
 		initBrowserContent();
 	}
@@ -312,9 +301,20 @@ public class PresetsTab extends RTMenuTab {
 		searchBox.setY(y);
 		searchBox.setWidth(clearSearchBoxButton.getX() - searchBox.getX() - 2);
 		
-		saveButton.setActive(getPresetEditor().isEditable());
+		warningButton.setVisible(false);
 		
 		settingsList.init();
+		settingsList.setListMode(false);
+	}
+	
+	public void updateButtonsActive() {
+		boolean canEditPresets = ((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().canEditPresets();
+		boolean editable = isEditingPreset() ? getPresetEditor().isEditable() : false;
+		
+		reloadPresetsButton.setActive(canEditPresets);
+		
+		saveButton.setActive(canEditPresets && editable);
+		toggleListButton.setActive(canEditPresets && editable);
 	}
 	
 	public SettingsCategory getSelectedCategory() {
@@ -337,18 +337,35 @@ public class PresetsTab extends RTMenuTab {
 		browsePresets();
 	}
 	
-	private void drawBackGround(MatrixStack matrices) {
-		int y = screen.getHeaderHeight() + 22;
-		fillGradient(matrices, 0, y, screen.getWidth(), screen.getHeight(), -2146365166, -2146365166);
-	}
-	
 	public void onPresetChanged(Preset preset) {
 		if (isEditingPreset()) {
 			if (getPresetEditor().getPreset() == preset || preset == null) {
-				presetChanged = true;
+				warningButton.setVisible(true);
 			}
 		} else {
 			presetsList.filter(searchBox.getText());
+			
+			refreshWindows();
+		}
+	}
+	
+	public void onSettingChanged() {
+		if (isEditingPreset()) {
+			settingsList.updateButtonsActive();
+			
+			for (RTWindow window : getWindows()) {
+				if (window instanceof PresetWindow) {
+					((PresetWindow)window).updateButtonsActive();
+				}
+			}
+		} else {
+			presetsList.updateButtonsActive();
+			
+			for (RTWindow window : getWindows()) {
+				if (window instanceof RemovedPresetsWindow) {
+					((RemovedPresetsWindow)window).updateButtonsActive();
+				}
+			}
 		}
 	}
 }

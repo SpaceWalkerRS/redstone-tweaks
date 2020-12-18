@@ -29,11 +29,11 @@ public class ClientSettingsManager {
 	}
 	
 	public boolean canChangeSettings() {
-		return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(2);
+		return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(ServerConfig.Settings.EDIT_PERMISSION_LEVEL.get()) && ServerConfig.Settings.EDIT_GAME_MODES.get(client.interactionManager.getCurrentGameMode());
 	}
 	
 	public boolean canLockSettings() {
-		return canChangeSettings();
+		return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(ServerConfig.Settings.LOCK_PERMISSION_LEVEL.get()) && ServerConfig.Settings.LOCK_GAME_MODES.get(client.interactionManager.getCurrentGameMode());
 	}
 	
 	public void changeSetting(ISetting setting, String value) {

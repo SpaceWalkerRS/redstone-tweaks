@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
@@ -145,11 +146,6 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 		}
 	}
 	
-	@Redirect(method = "processSyncedBlockEvents", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;isEmpty()Z"))
-	private boolean onProcessSyncedblockEventsRedirectIsEmpty(ObjectLinkedOpenHashSet<BlockEvent> set) {
-		return set.isEmpty();
-	}
-	
 	@Redirect(method = "processSyncedBlockEvents", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;removeFirst()Ljava/lang/Object;"))
 	private Object onProcessSyncedBlockEventsRedirectRemoveFirst(ObjectLinkedOpenHashSet<BlockEvent> set) {
 		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
@@ -170,6 +166,15 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 		
 		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.clear();
+		}
+	}
+	
+	@Inject(method = "processBlockEvent", at = @At(value = "RETURN"))
+	private void onProcessBlockEventInjectAtReturn(BlockEvent event, CallbackInfoReturnable<Boolean> cir) {
+		// When the world is ticking step by step the block event handler is removed
+		// by the unfinished event
+		if (((RTIWorld)this).immediateNeighborUpdates()) {
+			((RTIWorld)this).removeBlockEventHandler(event.getPos());
 		}
 	}
 	

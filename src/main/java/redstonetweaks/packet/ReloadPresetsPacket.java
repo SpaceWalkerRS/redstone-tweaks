@@ -26,6 +26,7 @@ public class ReloadPresetsPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftServer server) {
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(this);
 		((RTIMinecraftServer)server).getSettingsManager().getPresetsManager().reloadPresets();
 	}
 	

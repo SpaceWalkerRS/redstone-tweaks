@@ -18,6 +18,7 @@ import redstonetweaks.gui.setting.UpdateOrderWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
+import redstonetweaks.interfaces.RTIMinecraftClient;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
@@ -111,8 +112,18 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 	}
 	
 	public void toggleList() {
-		addSettingsMode = !addSettingsMode;
+		setListMode(!addSettingsMode);
+	}
+	
+	public void setListMode(boolean add) {
+		addSettingsMode = add;
 		init();
+	}
+	
+	public void updateButtonsActive() {
+		for (Entry e : children()) {
+			e.updateButtonsActive();
+		}
 	}
 	
 	public class SettingsPackEntry extends Entry {
@@ -179,7 +190,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		private final List<RTElement> children;
 		private final RTButtonWidget addRemoveButton;
 		
-		private float hoverAnimation;
+		private double hoverAnimation;
 		
 		public AddSettingEntry(ISetting setting) {
 			this.setting = setting;
@@ -187,7 +198,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			this.tooltip = createTooltip(this.setting);
 			this.children = new ArrayList<>();
 			
-			this.addRemoveButton = new RTButtonWidget(0, 0, 20, 20, () -> new TranslatableText(parent.getPresetEditor().hasSetting(this.setting) ? "-" : "+"), (button) -> {
+			this.addRemoveButton = new RTButtonWidget(0, 0, 20, 20, () -> parent.getPresetEditor().hasSetting(this.setting) ? new TranslatableText("-").formatted(Formatting.RED) : new TranslatableText("+").formatted(Formatting.GREEN), (button) -> {
 				if (parent.getPresetEditor().hasSetting(this.setting)) {
 					parent.getPresetEditor().removeSetting(this.setting);
 				} else {
@@ -198,17 +209,18 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			});
 			this.children.add(this.addRemoveButton);
 			
-			this.hoverAnimation = 0.0F;
+			this.hoverAnimation = 0.0D;
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			double speed = 60.0D / ((RTIMinecraftClient)client).getCurrentFps();
 			if (hovered) {
-				hoverAnimation = 10.0F - (10.0F - hoverAnimation) / 1.06F;
+				hoverAnimation = 1.0D - (1.0D - hoverAnimation) / Math.pow(1.2D, speed);
 			} else {
-				hoverAnimation = hoverAnimation / 1.4F;
+				hoverAnimation = hoverAnimation / Math.pow(2, speed);
 			}
-			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * screen.getWidth() / 10.0F), y + itemHeight - 1, -2146365166, -2146365166);
+			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
@@ -228,6 +240,8 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		@Override
 		public void init(int entryTitleWidth) {
 			addRemoveButton.setX(getX() + entryTitleWidth + 5);
+			
+			updateButtonsActive();
 		}
 		
 		@Override
@@ -246,6 +260,13 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			
 			return mouseX >= getX() && mouseX <= getX() + width + 5 && mouseY % itemHeight >= 0 && mouseY % itemHeight <= height;
 		}
+		
+		@Override
+		public void updateButtonsActive() {
+			boolean canEditSettings = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
+			
+			addRemoveButton.setActive(canEditSettings);
+		}
 	}
 	
 	public class EditSettingEntry extends Entry {
@@ -257,7 +278,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		private final ButtonPanel buttonPanel;
 		private final RTButtonWidget removeButton;
 		
-		private float hoverAnimation;
+		private double hoverAnimation;
 		
 		public EditSettingEntry(ISetting setting) {
 			this.setting = setting;
@@ -276,17 +297,18 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			});
 			this.children.add(removeButton);
 			
-			this.hoverAnimation = 0.0F;
+			this.hoverAnimation = 0.0D;
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			double speed = 60.0D / ((RTIMinecraftClient)client).getCurrentFps();
 			if (hovered) {
-				hoverAnimation = 10.0F - (10.0F - hoverAnimation) / 1.06F;
+				hoverAnimation = 1.0D - (1.0D - hoverAnimation) / Math.pow(1.2D, speed);
 			} else {
-				hoverAnimation = hoverAnimation / 1.4F;
+				hoverAnimation = hoverAnimation / Math.pow(2, speed);
 			}
-			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * screen.getWidth() / 10.0F), y + itemHeight - 1, -2146365166, -2146365166);
+			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
@@ -311,10 +333,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			buttonPanel.setX(getX() + entryTitleWidth);
 			removeButton.setX(buttonPanel.getX() + buttonPanel.getWidth() + 5);
 			
-			if (!parent.getPresetEditor().isEditable()) {
-				buttonPanel.setActive(false);
-				removeButton.setActive(false);
-			}
+			updateButtonsActive();
 		}
 		
 		@Override
@@ -423,6 +442,15 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			
 			return mouseX >= getX() && mouseX <= getX() + width + 5 && mouseY % itemHeight >= 0 && mouseY % itemHeight <= height;
 		}
+		
+		@Override
+		public void updateButtonsActive() {
+			boolean canEditSettings = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
+			
+			buttonPanel.setActive(canEditSettings);
+			buttonPanel.updateButtonLabels();
+			removeButton.setActive(canEditSettings);
+		}
 	}
 	
 	public static abstract class Entry extends RTListWidget.Entry<PresetSettingsListWidget.Entry> {
@@ -433,6 +461,10 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 				tooltip.add(new TranslatableText(line));
 			}
 			return tooltip;
+		}
+		
+		public void updateButtonsActive() {
+			
 		}
 	}
 }
