@@ -380,7 +380,7 @@ public class BlockEventHandler {
 					}
 				}
 				
-				((RTIWorld)world).setMovedBlockEntity(PistonHelper.createPistonBlockEntity(movedState, movedBlockEntity, facing, extend, false, sticky, isMergingSlabs));
+				((RTIWorld)world).queueBlockEntityPlacement(PistonHelper.createPistonBlockEntity(movedState, movedBlockEntity, facing, extend, false, sticky, isMergingSlabs));
 				world.setBlockState(toPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing), 68);
 				
 				movedStatesMap.remove(toPos);

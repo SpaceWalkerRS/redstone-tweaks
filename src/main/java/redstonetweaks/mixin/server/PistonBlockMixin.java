@@ -366,14 +366,11 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			}
 		}
 		
-		BlockEntity e = PistonHelper.createPistonBlockEntity(movedState, movedBlockEntity, pistonDir, extend, false, sticky, isMergingSlabs);
-		System.out.println("setting " + e);
-		((RTIWorld)world).setMovedBlockEntity(e);
+		((RTIWorld)world).queueBlockEntityPlacement(PistonHelper.createPistonBlockEntity(movedState, movedBlockEntity, pistonDir, extend, false, sticky, isMergingSlabs));
 	}
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))
 	private void onMoveRedirectSetBlockEntity0(World world, BlockPos pos, BlockEntity blockEntity) {
-		System.out.println("after setblockstate " + world.getBlockEntity(pos));
 		// Replaced by above inject
 	}
 	

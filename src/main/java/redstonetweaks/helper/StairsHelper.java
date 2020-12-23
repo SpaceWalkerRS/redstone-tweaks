@@ -1,12 +1,17 @@
 package redstonetweaks.helper;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import redstonetweaks.setting.Tweaks;
 
 public class StairsHelper {
+	
+	public static boolean isStairs(BlockState state) {
+		return state.getBlock() instanceof StairsBlock;
+	}
 	
 	public static int getReceivedStrongRedstonePower(World world, BlockPos pos, BlockState state) {
 		int power = 0;

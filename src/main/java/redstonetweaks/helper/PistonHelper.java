@@ -54,22 +54,22 @@ public class PistonHelper {
 		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, pistonDir, extending, isSource, isMovedByStickyPiston, false);
 	}
 	
-	public static PistonBlockEntity createPistonBlockEntity(BlockState movedState, BlockEntity movedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs) {
-		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(movedState, pistonDir, extending, isSource);
+	public static PistonBlockEntity createPistonBlockEntity(BlockState movedBlockState, BlockEntity movedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs) {
+		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(movedBlockState, pistonDir, extending, isSource);
 		
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
 		((RTIPistonBlockEntity)pistonBlockEntity).setPushedBlockEntity(movedBlockEntity);
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMergingSlabs(isMergingSlabs);
 		
-		if (isMergingSlabs) {
-			System.out.println("is merging slabs!");
-		}
-		
 		return pistonBlockEntity;
 	}
 	
 	public static boolean isPiston(BlockState state, boolean sticky) {
-		return state.getBlock() instanceof PistonBlock && isSticky(state) == sticky;
+		return isPiston(state) && isSticky(state) == sticky;
+	}
+	
+	public static boolean isPiston(BlockState state) {
+		return state.getBlock() instanceof PistonBlock;
 	}
 	
 	public static boolean isSticky(BlockState state) {
@@ -85,6 +85,7 @@ public class PistonHelper {
 			return isPiston(state, sticky) && !state.get(Properties.EXTENDED) && !isExtending(world, pos, state, state.get(Properties.FACING));
 		}
 		if (isPiston(state, sticky)) {
+			// isExtended makes sure the piston is not extending
 			return state.get(Properties.EXTENDED) && (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() || isExtended(world, pos, state));
 		}
 		if (isPistonHead(state, sticky)) {
@@ -95,7 +96,7 @@ public class PistonHelper {
 			Direction facing = state.get(Properties.FACING);
 			BlockState behindState = world.getBlockState(pos.offset(facing.getOpposite()));
 			
-			return behindState.isAir() || (isPiston(behindState, sticky) && behindState.get(Properties.FACING) == facing);
+			return !isPiston(behindState) || (isSticky(behindState) == sticky && behindState.get(Properties.FACING) == facing);
 		}
 		return false;
 	}
@@ -106,6 +107,7 @@ public class PistonHelper {
 	
 	public static boolean isExtended(World world, BlockPos pos, BlockState state, Direction facing) {
 		boolean isExtended = state.get(Properties.EXTENDED) && !isExtending(world, pos, state, facing);
+		
 		if (!isExtended && Tweaks.Global.DOUBLE_RETRACTION.get()) {
 			BlockState frontState = world.getBlockState(pos.offset(facing));
 			isExtended = frontState.isOf(Blocks.PISTON_HEAD) && frontState.get(Properties.FACING) == facing;
@@ -122,6 +124,7 @@ public class PistonHelper {
 	public static boolean isExtending(World world, BlockPos pos, BlockState state, Direction facing) {
 		BlockPos frontPos = pos.offset(facing);
 		BlockState frontState = world.getBlockState(frontPos);
+		
 		if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
 			BlockEntity blockEntity = world.getBlockEntity(frontPos);
 			
@@ -132,7 +135,7 @@ public class PistonHelper {
 					return true;
 				}
 				
-				// An extending piston could be moving
+				// An extending piston could be being moved
 				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
 				
 				if (blockEntity instanceof PistonBlockEntity) {
@@ -142,6 +145,7 @@ public class PistonHelper {
 				}
 			}
 		}
+		
 		return false;
 	}
 	
@@ -155,9 +159,7 @@ public class PistonHelper {
 				return true;
 			}
 		}
-		if (world.isEmittingRedstonePower(pos, Direction.DOWN)) {
-			return true;
-		}
+		
 		return WorldHelper.isQCPowered(world, pos, state, onBlockEvent, getQC(state), randQC(state));
 	}
 	

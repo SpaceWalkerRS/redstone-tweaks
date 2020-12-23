@@ -20,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.PistonBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -44,6 +43,7 @@ import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
 
 import redstonetweaks.block.piston.BlockEventHandler;
+import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.StairsHelper;
 import redstonetweaks.interfaces.RTIMinecraftServer;
 import redstonetweaks.interfaces.RTIServerWorld;
@@ -51,10 +51,10 @@ import redstonetweaks.interfaces.RTIWorld;
 import redstonetweaks.packet.TickBlockEntityPacket;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.util.RelativePos;
+import redstonetweaks.world.common.AbstractNeighborUpdate;
 import redstonetweaks.world.common.BlockUpdate;
 import redstonetweaks.world.common.ComparatorUpdate;
 import redstonetweaks.world.common.NeighborUpdate;
-import redstonetweaks.world.common.AbstractNeighborUpdate;
 import redstonetweaks.world.common.ShapeUpdate;
 import redstonetweaks.world.common.UpdateOrder;
 
@@ -67,7 +67,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Shadow @Final protected List<BlockEntity> pendingBlockEntities;
 	@Shadow protected boolean iteratingTickingBlockEntities;
 	
-	private BlockEntity movedBlockEntity;
+	private BlockEntity queuedBlockEntity;
 	
 	private Iterator<BlockEntity> blockEntitiesIterator;
 	private Map<BlockPos, BlockEventHandler> blockEventHandlers;
@@ -99,10 +99,11 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		if (!world.isClient() && ((RTIWorld)world).getWorldTickHandler().inWorldTick()) {
 			BlockState state = world.getBlockState(pos);
 			
-			if (state.getBlock() instanceof PistonBlock || state.isOf(Blocks.PISTON_HEAD)) {
+			if (PistonHelper.isPiston(state) || state.isOf(Blocks.PISTON_HEAD)) {
 				return;
 			}
 		}
+		
 		world.syncWorldEvent(eventId, pos, data);
 	}
 	
@@ -143,6 +144,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	private void onGetReceivedStrongRedstonePowerInjectAtHead(BlockPos pos, CallbackInfoReturnable<Integer> cir) {
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
 			BlockState state = getBlockState(pos);
+			
 			if (state.getBlock() instanceof StairsBlock) {
 				cir.setReturnValue(StairsHelper.getReceivedStrongRedstonePower(world(), pos, state));
 				cir.cancel();
@@ -157,16 +159,13 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Redirect(method = "getEmittedRedstonePower", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onGetEmittedRedstonePowerRedirectIsSolidBlock(BlockState state, BlockView world, BlockPos pos1, BlockPos pos, Direction direction) {
-		if (Tweaks.MagentaGlazedTerracotta.IS_POWER_DIODE.get()) {
-			if (state.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
-				return state.get(Properties.HORIZONTAL_FACING) == direction;
-			}
+		if (Tweaks.MagentaGlazedTerracotta.IS_POWER_DIODE.get() && state.isOf(Blocks.MAGENTA_GLAZED_TERRACOTTA)) {
+			return state.get(Properties.HORIZONTAL_FACING) == direction;
 		}
-		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
-			if (state.getBlock() instanceof StairsBlock) {
-				return state.isSideSolidFullSquare(world, pos, direction.getOpposite());
-			}
+		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get() && StairsHelper.isStairs(state)) {
+			return state.isSideSolidFullSquare(world, pos, direction.getOpposite());
 		}
+		
 		return state.isSolidBlock(world, pos);
 	}
 	
@@ -201,17 +200,16 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	}
 	
 	@Override
-	public BlockEntity fetchMovedBlockEntity() {
-		System.out.println("getting moved block entity " + movedBlockEntity);
-		BlockEntity blockEntity = movedBlockEntity;
-		movedBlockEntity = null;
+	public BlockEntity fetchQueuedBlockEntity() {
+		BlockEntity blockEntity = queuedBlockEntity;
+		queuedBlockEntity = null;
 		
 		return blockEntity;
 	}
 	
 	@Override
-	public void setMovedBlockEntity(BlockEntity blockEntity) {
-		movedBlockEntity = blockEntity;
+	public void queueBlockEntityPlacement(BlockEntity blockEntity) {
+		queuedBlockEntity = blockEntity;
 	}
 	
 	@Override

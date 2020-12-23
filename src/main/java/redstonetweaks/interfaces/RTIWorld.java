@@ -30,9 +30,9 @@ public interface RTIWorld {
 	
 	public boolean isTickingBlockEntities();
 	
-	public BlockEntity fetchMovedBlockEntity();
+	public BlockEntity fetchQueuedBlockEntity();
 	
-	public void setMovedBlockEntity(BlockEntity blockEntity);
+	public void queueBlockEntityPlacement(BlockEntity blockEntity);
 	
 	public void startTickingBlockEntities(boolean startIterating);
 	

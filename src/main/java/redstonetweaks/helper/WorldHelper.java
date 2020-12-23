@@ -15,11 +15,9 @@ public class WorldHelper {
 	
 	public static boolean isQCPowered(World world, BlockPos pos, BlockState state, boolean forceCheck, DirectionToBooleanSetting qc, boolean randQC) {
 		for (Direction dir : Direction.values()) {
-			if (qc.get(dir)) {
-				if (forceCheck || !randQC || world.getRandom().nextBoolean()) {
-					if (world.isReceivingRedstonePower(pos.offset(dir))) {
-						return true;
-					}
+			if (qc.get(dir) && (forceCheck || !randQC || world.getRandom().nextBoolean())) {
+				if (world.isReceivingRedstonePower(pos.offset(dir))) {
+					return true;
 				}
 			}
 		}
