@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
-import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(TripwireHookBlock.class)

@@ -2,10 +2,12 @@ package redstonetweaks.setting.types;
 
 import net.minecraft.world.TickPriority;
 
+import redstonetweaks.setting.SettingsPack;
+
 public class TickPrioritySetting extends Setting<TickPriority> {
 	
-	public TickPrioritySetting(String name, String description) {
-		super(name, description, TickPriority.NORMAL);
+	public TickPrioritySetting(SettingsPack pack, String name, String description) {
+		super(pack, name, description, TickPriority.NORMAL);
 	}
 	
 	@Override

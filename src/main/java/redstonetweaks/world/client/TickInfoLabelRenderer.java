@@ -4,10 +4,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
-
-import redstonetweaks.packet.TaskSyncPacket;
-import redstonetweaks.packet.WorldSyncPacket;
-import redstonetweaks.packet.WorldTimeSyncPacket;
+import redstonetweaks.packet.types.TaskSyncPacket;
+import redstonetweaks.packet.types.WorldSyncPacket;
+import redstonetweaks.packet.types.WorldTimeSyncPacket;
 import redstonetweaks.world.common.WorldTickHandler.Task;
 
 public class TickInfoLabelRenderer extends DrawableHelper {

@@ -29,11 +29,11 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
+import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
-import redstonetweaks.interfaces.RTIPistonBlockEntity;
-import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
+import redstonetweaks.mixinterfaces.RTIWorld;
 
 @Mixin(PistonBlockEntity.class)
 public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIPistonBlockEntity {
@@ -49,6 +49,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	private boolean isMovedByStickyPiston;
 	private boolean isMergingSlabs;
+	private boolean sourceIsMoving;
 	
 	public PistonBlockEntityMixin(BlockEntityType<?> type) {
 		super(type);
@@ -64,6 +65,12 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			cir.setReturnValue(MathHelper.clamp(lastProgress + 0.2F / speed, 0, speed));
 			cir.cancel();
 		}
+	}
+	
+	@Redirect(method = "getAmountExtended", at = @At(value = "FIELD", target = "Lnet/minecraft/block/entity/PistonBlockEntity;extending:Z"))
+	private boolean onGetAmountExtendedRedirectExtending(PistonBlockEntity pistonBlockEntity, float tickDelta) {
+		// When a piston is pulling itself forwards, it should animate as though extending
+		return extending || sourceIsMoving;
 	}
 	
 	@Redirect(method = "pushEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/block/entity/PistonBlockEntity;pushedBlock:Lnet/minecraft/block/BlockState;"))
@@ -86,7 +93,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (parentPistonBlockEntity != null) {
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlock(pushedBlock);
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
-			((RTIPistonBlockEntity)parentPistonBlockEntity).setIsMergingSlabs(isMergingSlabs());
+			((RTIPistonBlockEntity)parentPistonBlockEntity).setIsMergingSlabs(isMergingSlabs);
+			((RTIPistonBlockEntity)parentPistonBlockEntity).setSourceIsMoving(sourceIsMoving);
 			
 			ci.cancel();
 		}
@@ -99,6 +107,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Inject(method = "finish", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onFinishInjectBeforeSetBlockState(CallbackInfo ci) {
+		if (pushedBlock.isOf(Blocks.MOVING_PISTON)) {
+			world.setBlockState(pos, Blocks.AIR.getDefaultState(), 16);
+		}
+		
 		prepareMovedBlockEntityPlacement();
 	}
 	
@@ -114,7 +126,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (parentPistonBlockEntity != null) {
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlock(pushedBlock);
 			((RTIPistonBlockEntity)parentPistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
-			((RTIPistonBlockEntity)parentPistonBlockEntity).setIsMergingSlabs(isMergingSlabs());
+			((RTIPistonBlockEntity)parentPistonBlockEntity).setIsMergingSlabs(isMergingSlabs);
+			((RTIPistonBlockEntity)parentPistonBlockEntity).setSourceIsMoving(sourceIsMoving);
 			
 			ci.cancel();
 		}
@@ -127,12 +140,26 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 1, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onTickInjectBeforeSetBlockState(CallbackInfo ci) {
-		// This is need because the client otherwise doesn't place the moved block entity
-		if (world.isClient() && pushedBlock.isOf(Blocks.MOVING_PISTON)) {
+		if (pushedBlock.isOf(Blocks.MOVING_PISTON)) {
 			world.setBlockState(pos, Blocks.AIR.getDefaultState(), 16);
 		}
 		
 		prepareMovedBlockEntityPlacement();
+		
+	}
+	
+	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.AFTER, ordinal = 1, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private void onTickInjectAfterSetBlockState(CallbackInfo ci) {
+		// When a piston pushes itself backwards a short piston arm is placed so the rod does not poke out
+		// of the back of the piston base. When the extension is finished the long arm needs to be placed.
+		if (sourceIsMoving && extending) {
+			BlockPos headPos = pos.offset(pushedBlock.get(Properties.FACING));
+			BlockState pistonHead = world.getBlockState(headPos);
+			
+			if (PistonHelper.isPistonHead(pistonHead)) {
+				world.setBlockState(headPos, pistonHead.with(Properties.SHORT, false), 18);
+			}
+		}
 	}
 	
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5f))
@@ -145,6 +172,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	private void onFromTagInjectAtReturn(BlockState state, CompoundTag tag, CallbackInfo ci) {
 		isMovedByStickyPiston = tag.contains("isMovedByStickyPiston") ? tag.getBoolean("isMovedByStickyPiston") : false;
 		isMergingSlabs = tag.contains("isMergingSlabs") ? tag.getBoolean("isMergingSlabs") : false;
+		sourceIsMoving = tag.contains("sourceIsMoving") ? tag.getBoolean("sourceIsMoving") : false;
 
 		if (tag.contains("pushedBlockEntity")) {
 			if (pushedBlock.getBlock().hasBlockEntity()) {
@@ -155,6 +183,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 				}
 			}
 			if (pushedBlockEntity != null) {
+				pushedBlockEntity.setLocation(world, pos);
 				pushedBlockEntity.fromTag(pushedBlock, tag.getCompound("pushedBlockEntity"));
 			}
 			if (pushedBlockEntity instanceof PistonBlockEntity) {
@@ -167,6 +196,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	private void onToTagInjectAtReturn(CompoundTag tag, CallbackInfoReturnable<?> cir) {
 		tag.putBoolean("isMovedByStickyPiston", isMovedByStickyPiston);
 		tag.putBoolean("isMergingSlabs", isMergingSlabs);
+		tag.putBoolean("sourceIsMoving", sourceIsMoving);
 		
 		if (pushedBlockEntity != null) {
 			tag.put("pushedBlockEntity", pushedBlockEntity.toTag(new CompoundTag()));
@@ -272,6 +302,16 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
+	public void setSourceIsMoving(boolean sourceIsMoving) {
+		this.sourceIsMoving = source && sourceIsMoving;
+	}
+	
+	@Override
+	public boolean sourceIsMoving() {
+		return sourceIsMoving;
+	}
+	
+	@Override
 	public void finishSource() {
 		if (source) {
 			// We have to set source to false so that the pushed block is not replaced by air
@@ -282,7 +322,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	private int getSpeed() {
-		return extending ? PistonHelper.speedRisingEdge(isMovedByStickyPiston) : PistonHelper.speedFallingEdge(isMovedByStickyPiston);
+		return extending ? PistonSettings.speedRisingEdge(isMovedByStickyPiston) : PistonSettings.speedFallingEdge(isMovedByStickyPiston);
 	}
 	
 	private BlockState mergeSlabs() {

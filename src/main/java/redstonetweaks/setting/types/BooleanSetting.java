@@ -1,9 +1,11 @@
 package redstonetweaks.setting.types;
 
+import redstonetweaks.setting.SettingsPack;
+
 public class BooleanSetting extends Setting<Boolean> {
 	
-	public BooleanSetting(String name, String description) {
-		super(name, description, false);
+	public BooleanSetting(SettingsPack pack, String name, String description) {
+		super(pack, name, description, false);
 	}
 	
 	@Override

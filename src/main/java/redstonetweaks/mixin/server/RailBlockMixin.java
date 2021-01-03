@@ -14,9 +14,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
-
-import redstonetweaks.interfaces.RTIRail;
-import redstonetweaks.interfaces.RTIRailPlacementHelper;
+import redstonetweaks.mixinterfaces.RTIRail;
+import redstonetweaks.mixinterfaces.RTIRailPlacementHelper;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 

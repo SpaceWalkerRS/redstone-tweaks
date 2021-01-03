@@ -1,38 +1,39 @@
 package redstonetweaks.setting;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import redstonetweaks.setting.types.ISetting;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class SettingsCategory {
 	
 	private final String name;
-	private final List<ISetting> settings;
-	private final List<SettingsPack> settingsPacks;
+	private final Map<String, SettingsPack> packs;
 	
 	private boolean locked;
 	
 	public SettingsCategory(String name) {
-		this(name, new ArrayList<>(), new ArrayList<>());
+		this.name = name;
+		this.packs = new LinkedHashMap<>();
 	}
 	
-	public SettingsCategory(String name, List<ISetting> settings, List<SettingsPack> packs) {
-		this.name = name;
-		this.settings = settings;
-		this.settingsPacks = packs;
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof SettingsCategory) {
+			return name.equals(((SettingsCategory)other).name);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return name.hashCode();
 	}
 	
 	public String getName() {
 		return name;
 	}
 	
-	public List<ISetting> getSettings() {
-		return settings;
-	}
-	
-	public List<SettingsPack> getSettingsPacks() {
-		return settingsPacks;
+	public Map<String, SettingsPack> getPacks() {
+		return packs;
 	}
 	
 	public boolean isLocked() {
@@ -44,6 +45,6 @@ public class SettingsCategory {
 	}
 	
 	public void resetAll() {
-		settings.forEach((setting) -> setting.reset());
+		packs.forEach((packName, pack) -> pack.getSettings().forEach((settingName, setting) -> setting.reset()));
 	}
 }

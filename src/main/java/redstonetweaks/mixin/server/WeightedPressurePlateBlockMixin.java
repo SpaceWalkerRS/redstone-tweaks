@@ -25,7 +25,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 
 import redstonetweaks.block.PowerBlockEntity;
-import redstonetweaks.interfaces.RTIPressurePlate;
+import redstonetweaks.mixinterfaces.RTIPressurePlate;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.UpdateOrder;
 

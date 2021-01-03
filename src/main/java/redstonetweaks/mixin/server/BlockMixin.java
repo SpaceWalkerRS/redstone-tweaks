@@ -8,17 +8,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 
 import redstonetweaks.helper.BlockHelper;
+import redstonetweaks.mixinterfaces.RTIBlock;
 
 @Mixin(Block.class)
-public class BlockMixin {
+public class BlockMixin implements RTIBlock {
 	
-	@Inject(method = "hasTopRim", cancellable =  true, at = @At(value = "RETURN"))
+	@Inject(method = "hasTopRim", cancellable =  true, at = @At(value = "HEAD"))
 	private static void onHasTopTimInjectAtReturn(BlockView world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (!cir.getReturnValueZ()) {
-			cir.setReturnValue(BlockHelper.isRigidPistonBase(world, pos, world.getBlockState(pos)));
+		if (BlockHelper.isRigidPistonBase(world, pos, world.getBlockState(pos))) {
+			cir.setReturnValue(true);
 			cir.cancel();
 		}
+	}
+	
+	@Override
+	public boolean continueAction(World world, BlockPos pos, int type) {
+		return false;
 	}
 }

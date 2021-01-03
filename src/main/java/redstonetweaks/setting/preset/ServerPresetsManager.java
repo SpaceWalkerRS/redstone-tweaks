@@ -13,12 +13,12 @@ import net.minecraft.util.WorldSavePath;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.interfaces.RTIMinecraftServer;
-import redstonetweaks.packet.PresetPacket;
-import redstonetweaks.packet.PresetsPacket;
-import redstonetweaks.packet.RemovePresetPacket;
-import redstonetweaks.packet.ApplyPresetPacket;
+import redstonetweaks.mixinterfaces.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
+import redstonetweaks.packet.types.ApplyPresetPacket;
+import redstonetweaks.packet.types.PresetPacket;
+import redstonetweaks.packet.types.PresetsPacket;
+import redstonetweaks.packet.types.RemovePresetPacket;
 import redstonetweaks.setting.ServerSettingsManager;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
@@ -150,7 +150,7 @@ public class ServerPresetsManager {
 			bw.write(preset.getMode().toString());
 			bw.newLine();
 			
-			for (ISetting setting : Settings.ALL) {
+			for (ISetting setting : Settings.ALL.values()) {
 				if (setting.hasPreset(preset)) {
 					bw.write(setting.getId());
 					bw.write(" = ");
@@ -222,7 +222,7 @@ public class ServerPresetsManager {
 		
 		PresetEditor editor = new PresetEditor(name, preset.getDescription(), preset.getMode());
 		
-		for (ISetting setting : Settings.ALL) {
+		for (ISetting setting : Settings.ALL.values()) {
 			if (setting.hasPreset(preset)) {
 				editor.addSetting(setting);
 				editor.copyPresetValue(setting, preset);
@@ -256,7 +256,6 @@ public class ServerPresetsManager {
 	private void updatePresetsOfPlayer(ServerPlayerEntity player) {
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
 		PresetsPacket packet = new PresetsPacket(Presets.ALL);
-		
 		if (player == null) {
 			packetHandler.sendPacket(packet);
 		} else {

@@ -15,8 +15,8 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.InputUtil.Key;
 
 import redstonetweaks.gui.RTMenuScreen;
-import redstonetweaks.interfaces.RTIMinecraftClient;
-import redstonetweaks.packet.TickPausePacket;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.packet.types.TickPausePacket;
 
 public class HotkeysManager {
 	

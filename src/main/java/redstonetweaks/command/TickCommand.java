@@ -7,7 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
-import redstonetweaks.interfaces.RTIMinecraftServer;
+import redstonetweaks.mixinterfaces.RTIMinecraftServer;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 public class TickCommand {

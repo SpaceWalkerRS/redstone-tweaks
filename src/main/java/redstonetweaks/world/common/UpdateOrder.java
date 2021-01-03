@@ -16,7 +16,7 @@ public class UpdateOrder {
 	
 	private final Directionality directionality;
 	private final AbstractNeighborUpdate.Mode defaultMode;
-	private final boolean modeLocked;
+	private final boolean forceDefaultMode;
 	
 	private int offsetX;
 	private int offsetY;
@@ -28,11 +28,11 @@ public class UpdateOrder {
 		this(directionality, notifierOrder, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, false);
 	}
 	
-	public UpdateOrder(Directionality directionality, NotifierOrder notifierOrder, AbstractNeighborUpdate.Mode defaultMode, boolean modeLocked) {
+	public UpdateOrder(Directionality directionality, NotifierOrder notifierOrder, AbstractNeighborUpdate.Mode defaultMode, boolean forceDefaultMode) {
 		this.directionality = directionality;
 		this.notifierOrder = notifierOrder;
 		this.defaultMode = defaultMode;
-		this.modeLocked = modeLocked;
+		this.forceDefaultMode = forceDefaultMode;
 		this.neighborUpdates = new ArrayList<>();
 		this.offsetX = 0;
 		this.offsetY = 0;
@@ -46,7 +46,7 @@ public class UpdateOrder {
 			
 			if (order.directionality != directionality
 				|| order.defaultMode != defaultMode
-				|| order.modeLocked != modeLocked
+				|| order.forceDefaultMode != forceDefaultMode
 				|| order.notifierOrder != notifierOrder
 				|| order.offsetX != offsetX
 				|| order.offsetY != offsetY
@@ -74,7 +74,7 @@ public class UpdateOrder {
 		
 		string += directionality + ";";
 		string += defaultMode + ";";
-		string += modeLocked + ";";
+		string += forceDefaultMode + ";";
 		
 		string += offsetX + ";";
 		string += offsetY + ";";
@@ -114,7 +114,7 @@ public class UpdateOrder {
 	}
 
 	public UpdateOrder copy() {
-		UpdateOrder copy = new UpdateOrder(directionality, notifierOrder, defaultMode, modeLocked);
+		UpdateOrder copy = new UpdateOrder(directionality, notifierOrder, defaultMode, forceDefaultMode);
 		
 		for (AbstractNeighborUpdate update : neighborUpdates) {
 			copy.add(update.copy());
@@ -128,8 +128,8 @@ public class UpdateOrder {
 		return directionality;
 	}
 	
-	public boolean modeLocked() {
-		return modeLocked;
+	public boolean forceDefaultMode() {
+		return forceDefaultMode;
 	}
 	
 	public int getOffsetX() {
@@ -269,7 +269,7 @@ public class UpdateOrder {
 	
 	public enum NotifierOrder {
 		
-		NORMAL(0, "Normal"),
+		SEQUENTIAL(0, "Sequential"),
 		LOCATIONAL(1, "Locational"),
 		RANDOM(2, "Random");
 		
@@ -299,7 +299,7 @@ public class UpdateOrder {
 			if (index >= 0 && index < ORDERS.length) {
 				return ORDERS[index];
 			}
-			return NORMAL;
+			return SEQUENTIAL;
 		}
 		
 		public String getName() {

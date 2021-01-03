@@ -49,14 +49,15 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.timer.Timer;
-
-import redstonetweaks.interfaces.RTIMinecraftServer;
-import redstonetweaks.interfaces.RTIWorld;
-import redstonetweaks.interfaces.RTIServerWorld;
+import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.mixinterfaces.RTIServerWorld;
+import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.WorldTickHandler;
+import redstonetweaks.world.common.WorldTickOptions;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;
-import redstonetweaks.world.server.ServerUnfinishedEventScheduler;
+import redstonetweaks.world.server.ServerIncompleteActionScheduler;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 @Mixin(ServerWorld.class)
@@ -76,7 +77,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Shadow boolean inEntityTick;
 	
 	private ServerNeighborUpdateScheduler serverNeighborUpdateScheduler;
-	private ServerUnfinishedEventScheduler unfinishedEventScheduler;
+	private ServerIncompleteActionScheduler unfinishedEventScheduler;
 	private boolean isProcessingBlockEvents = false;
 	private ArrayList<BlockEvent> blockEventList;
 	
@@ -99,7 +100,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> registryKey, DimensionType dimensionType, WorldGenerationProgressListener worldGenerationProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<Spawner> list, boolean bl2, CallbackInfo ci) {
 		serverNeighborUpdateScheduler = new ServerNeighborUpdateScheduler((ServerWorld)(Object)this);
-		unfinishedEventScheduler = new ServerUnfinishedEventScheduler((ServerWorld)(Object)this);
+		unfinishedEventScheduler = new ServerIncompleteActionScheduler((ServerWorld)(Object)this);
 		blockEventList = new ArrayList<>();
 	}
 	
@@ -205,8 +206,18 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	}
 	
 	@Override
-	public boolean isProcessingBlockEvents() {
-		return isProcessingBlockEvents;
+	public boolean hasBlockEvent(BlockPos pos, int... types) {
+		for (BlockEvent event : syncedBlockEventQueue) {
+			if (event.getPos().equals(pos)) {
+				for (int type : types) {
+					if (event.getType() == type) {
+						return true;
+					}
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 	@Override
@@ -215,14 +226,14 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	}
 	
 	@Override
-	public ServerUnfinishedEventScheduler getUnfinishedEventScheduler() {
+	public ServerIncompleteActionScheduler getUnfinishedEventScheduler() {
 		return unfinishedEventScheduler;
 	}
 	
 	@Override
 	public boolean normalWorldTicks() {
 		ServerWorldTickHandler worldTickHandler = ((RTIMinecraftServer)getServer()).getWorldTickHandler();
-		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Tweaks.Global.SHOW_PROCESSING_ORDER.get() > 0);
+		return worldTickHandler.doWorldTicks() && (!(worldTickHandler.tickInProgress() || Tweaks.Global.WORLD_TICK_OPTIONS.get().getMode() == WorldTickOptions.Mode.STEP_BY_STEP) || WorldHelper.stepByStepFilter(this));
 	}
 	
 	@Override

@@ -21,7 +21,7 @@ import redstonetweaks.gui.widget.RTLockButtonWidget;
 import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.gui.widget.RTTexturedButtonWidget;
-import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
@@ -33,6 +33,7 @@ import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.IntegerSetting;
 import redstonetweaks.setting.types.TickPrioritySetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
+import redstonetweaks.setting.types.WorldTickOptionsSetting;
 import redstonetweaks.util.TextFormatting;
 
 public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.Entry> {
@@ -52,10 +53,10 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	
 	@Override
 	protected void initList() {
-		for (SettingsPack pack : category.getSettingsPacks()) {
+		for (SettingsPack pack : category.getPacks().values()) {
 			addEntry(new SettingsPackEntry(pack));
 			
-			for (ISetting setting : pack.getSettings()) {
+			for (ISetting setting : pack.getSettings().values()) {
 				addEntry(new SettingEntry(setting));
 				
 				updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
@@ -67,12 +68,12 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	
 	@Override
 	protected void filterEntries(String query) {
-		for (SettingsPack pack : category.getSettingsPacks()) {
+		for (SettingsPack pack : category.getPacks().values()) {
 			boolean packMatchesQuery = pack.getName().toLowerCase().contains(query);
 			
 			List<Entry> settingEntries = new ArrayList<>();
 			
-			for (ISetting setting : pack.getSettings()) {
+			for (ISetting setting : pack.getSettings().values()) {
 				if (packMatchesQuery || setting.getName().toLowerCase().contains(query)) {
 					settingEntries.add(new SettingEntry(setting));
 					
@@ -366,6 +367,18 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
 					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, () -> uSetting.get(), (setting) -> changeSetting(uSetting, uSetting.getValueAsString()));
+					
+					screen.openWindow(window);
+					
+					if (!((RTIMinecraftClient)client).getSettingsManager().canChangeSettings() || category.isLocked() || setting.isLocked()) {
+						window.disableButtons();
+					}
+				})).alwaysActive());
+			} else
+			if (setting instanceof WorldTickOptionsSetting) {
+				WorldTickOptionsSetting wSetting = (WorldTickOptionsSetting)setting;
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
+					WorldTickOptionsWindow window = new WorldTickOptionsWindow(screen, wSetting, () -> wSetting.get(), (setting) -> changeSetting(wSetting, wSetting.getValueAsString()));
 					
 					screen.openWindow(window);
 					

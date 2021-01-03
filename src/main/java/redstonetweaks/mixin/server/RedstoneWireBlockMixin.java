@@ -34,9 +34,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.block.PowerBlockEntity;
-import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.RedstoneWireHelper;
-import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.ShapeUpdate;
 
@@ -185,7 +185,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	@Inject(method = "connectsTo(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;)Z", cancellable = true, at = @At(value = "HEAD"))
 	private static void onConnectsToInjectAtHead(BlockState state, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (state.getBlock() instanceof PistonBlock) {
-			cir.setReturnValue(PistonHelper.connectsToWire(state.isOf(Blocks.STICKY_PISTON)) && direction != null && state.get(Properties.FACING) != direction.getOpposite());
+			cir.setReturnValue(PistonSettings.connectsToWire(state.isOf(Blocks.STICKY_PISTON)) && direction != null && state.get(Properties.FACING) != direction.getOpposite());
 			cir.cancel();
 		}
 	}
@@ -287,7 +287,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				if (pistonBlockEntity.isSource() && !pistonBlockEntity.isExtending()) {
 					BlockState pushedBlock = pistonBlockEntity.getPushedBlock();
 					
-					return PistonHelper.connectsToWire(pushedBlock.isOf(Blocks.STICKY_PISTON));
+					return PistonSettings.connectsToWire(pushedBlock.isOf(Blocks.STICKY_PISTON));
 				}
 			}
 			

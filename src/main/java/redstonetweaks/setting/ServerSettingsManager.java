@@ -14,14 +14,14 @@ import net.minecraft.util.WorldSavePath;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.interfaces.RTIMinecraftServer;
-import redstonetweaks.packet.LockCategoryPacket;
-import redstonetweaks.packet.LockSettingPacket;
-import redstonetweaks.packet.ResetSettingPacket;
-import redstonetweaks.packet.ResetSettingsPacket;
+import redstonetweaks.mixinterfaces.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
-import redstonetweaks.packet.SettingPacket;
-import redstonetweaks.packet.SettingsPacket;
+import redstonetweaks.packet.types.LockCategoryPacket;
+import redstonetweaks.packet.types.LockSettingPacket;
+import redstonetweaks.packet.types.ResetSettingPacket;
+import redstonetweaks.packet.types.ResetSettingsPacket;
+import redstonetweaks.packet.types.SettingPacket;
+import redstonetweaks.packet.types.SettingsPacket;
 import redstonetweaks.setting.preset.ServerPresetsManager;
 import redstonetweaks.setting.types.ISetting;
 
@@ -107,7 +107,7 @@ public class ServerSettingsManager {
 			bw.write(RedstoneTweaks.SETTINGS_VERSION.toString());
 			bw.newLine();
 			
-			for (ISetting setting : Settings.ALL) {
+			for (ISetting setting : Settings.ALL.values()) {
 				bw.write(setting.getId());
 				bw.write(" = ");
 				bw.write(setting.getAsString());
@@ -170,7 +170,7 @@ public class ServerSettingsManager {
 	
 	private void updateSettingsOfPlayer(ServerPlayerEntity player) {
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
-		SettingsPacket packet = new SettingsPacket(Settings.ALL);
+		SettingsPacket packet = new SettingsPacket(Settings.ALL.values());
 		
 		if (player == null) {
 			packetHandler.sendPacket(packet);

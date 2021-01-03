@@ -9,17 +9,42 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
 import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.packet.types.ApplyPresetPacket;
+import redstonetweaks.packet.types.DoWorldTicksPacket;
+import redstonetweaks.packet.types.DuplicatePresetPacket;
+import redstonetweaks.packet.types.IncompleteBlockActionPacket;
+import redstonetweaks.packet.types.LockCategoryPacket;
+import redstonetweaks.packet.types.LockSettingPacket;
+import redstonetweaks.packet.types.NeighborUpdateSchedulerPacket;
+import redstonetweaks.packet.types.NeighborUpdateVisualizerPacket;
+import redstonetweaks.packet.types.OpenMenuPacket;
+import redstonetweaks.packet.types.PlayerJoinedServerPacket;
+import redstonetweaks.packet.types.PresetPacket;
+import redstonetweaks.packet.types.PresetsPacket;
+import redstonetweaks.packet.types.RedstoneTweaksPacket;
+import redstonetweaks.packet.types.ReloadPresetsPacket;
+import redstonetweaks.packet.types.RemovePresetPacket;
+import redstonetweaks.packet.types.ResetSettingPacket;
+import redstonetweaks.packet.types.ResetSettingsPacket;
+import redstonetweaks.packet.types.ServerInfoPacket;
+import redstonetweaks.packet.types.SettingPacket;
+import redstonetweaks.packet.types.SettingsPacket;
+import redstonetweaks.packet.types.TaskSyncPacket;
+import redstonetweaks.packet.types.TickBlockEntityPacket;
+import redstonetweaks.packet.types.TickPausePacket;
+import redstonetweaks.packet.types.TickStatusPacket;
+import redstonetweaks.packet.types.WorldSyncPacket;
+import redstonetweaks.packet.types.WorldTimeSyncPacket;
 
 public abstract class AbstractPacketHandler {
 	
-	public static final Identifier PACKET_IDENTIFIER = new Identifier("redstone_tweaks");
+	public static final Identifier PACKET_IDENTIFIER = new Identifier("redstonetweaks");
 	
-	public Packet<?> encodePacket(RedstoneTweaksPacket packet) {
+	protected Packet<?> encodePacket(RedstoneTweaksPacket packet) {
 		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 		
-		buffer.writeByte(RedstoneTweaks.PACKET_PROTOCOL.major);
-		buffer.writeByte(RedstoneTweaks.PACKET_PROTOCOL.minor);
-		buffer.writeByte(RedstoneTweaks.PACKET_PROTOCOL.patch);
+		buffer.writeString(RedstoneTweaks.PACKET_PROTOCOL.toString());
 		
 		PacketType packetType = PacketType.fromPacket(packet);
 		if (packetType == PacketType.INVALID) {
@@ -31,9 +56,9 @@ public abstract class AbstractPacketHandler {
 		return toCustomPayloadPacket(buffer);
 	}
 	
-	public abstract Packet<?> toCustomPayloadPacket(PacketByteBuf buffer);
+	protected abstract Packet<?> toCustomPayloadPacket(PacketByteBuf buffer);
 	
-	public RedstoneTweaksPacket decodePacket(PacketByteBuf buffer) throws InstantiationException, IllegalAccessException {
+	protected RedstoneTweaksPacket decodePacket(PacketByteBuf buffer) throws InstantiationException, IllegalAccessException {
 		PacketType type = PacketType.fromIndex(buffer.readByte());
 		RedstoneTweaksPacket packet = type.getClazz().newInstance();
 		
@@ -43,7 +68,19 @@ public abstract class AbstractPacketHandler {
 	
 	public abstract void sendPacket(RedstoneTweaksPacket redstoneTweaksPacket);
 	
-	public abstract void onPacketReceived(PacketByteBuf buffer);
+	public void onPacketReceived(PacketByteBuf buffer) {
+		RedstoneTweaksVersion packetProtocol = RedstoneTweaksVersion.parseVersion(buffer.readString(32767));
+		
+		if (RedstoneTweaks.PACKET_PROTOCOL.equals(packetProtocol)) {
+			try {
+				execute(decodePacket(buffer));
+			} catch (Exception e) {
+				
+			}
+		}
+	}
+	
+	protected abstract void execute(RedstoneTweaksPacket packet);
 	
 	private enum PacketType {
 		INVALID(0, null),
@@ -55,7 +92,7 @@ public abstract class AbstractPacketHandler {
 		NEIGHBOR_UPDATE_SCHEDULER(6, NeighborUpdateSchedulerPacket.class),
 		WORLD_SYNC(7, WorldSyncPacket.class),
 		TASK_SYNC(8, TaskSyncPacket.class),
-		UNFINISHED_EVENT(9, UnfinishedEventPacket.class),
+		UNFINISHED_EVENT(9, IncompleteBlockActionPacket.class),
 		WORLD_TIME_SYNC(10, WorldTimeSyncPacket.class),
 		TICK_STATUS(11, TickStatusPacket.class),
 		TICK_BLOCK_ENTITY(12, TickBlockEntityPacket.class),
@@ -70,7 +107,8 @@ public abstract class AbstractPacketHandler {
 		DUPLICATE_PRESET(21, DuplicatePresetPacket.class),
 		APPLY_PRESET(22, ApplyPresetPacket.class),
 		LOCK_SETTING(23, LockSettingPacket.class),
-		LOCK_CATEGORY(24, LockCategoryPacket.class);
+		LOCK_CATEGORY(24, LockCategoryPacket.class),
+		OPEN_MENU(25, OpenMenuPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends RedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;
@@ -96,14 +134,12 @@ public abstract class AbstractPacketHandler {
 		public static PacketType fromIndex(int index) {
 			if (index > 0 && index < PACKET_TYPES.length) {
 				return PACKET_TYPES[index];
-			} else {
-				return INVALID;
 			}
+			return INVALID;
 		}
 		
 		public static PacketType fromPacket(RedstoneTweaksPacket packet) {
-			PacketType type = PACKET_TO_TYPE.get(packet.getClass());
-			return type == null ? INVALID : type;
+			return PACKET_TO_TYPE.getOrDefault(packet.getClass(), INVALID);
 		}
 		
 		public int getIndex() {

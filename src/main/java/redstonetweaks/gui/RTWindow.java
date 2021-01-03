@@ -26,6 +26,7 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	public final RTMenuScreen screen;
 	private final Text title;
 	private final List<RTElement> contents;
+	private final RTButtonWidget closeButton;
 	
 	private int x;
 	private int y;
@@ -33,12 +34,13 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	private int height;
 	private int headerHeight;
 	
-	private RTButtonWidget closeButton;
-	
 	public RTWindow(RTMenuScreen screen, Text title, int x, int y, int width, int height) {
 		this.screen = screen;
 		this.title = title;
 		this.contents = new ArrayList<>();
+		this.closeButton = new RTButtonWidget(x + 5, y + 5, 20, 20, () -> new TranslatableText("x"), (button) -> {
+			close();
+		});
 		
 		this.x = x;
 		this.y = y;
@@ -106,9 +108,8 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	public void init() {
 		contents.clear();
 		
-		closeButton = new RTButtonWidget(x + 5, y + 5, 20, 20, () -> new TranslatableText("x"), (button) -> {
-			close();
-		});
+		closeButton.setX(getX() + 5);
+		closeButton.setY(getY() + 5);
 		contents.add(closeButton);
 		
 		setHeaderHeight(TITLE_MARGIN + 30);
@@ -125,11 +126,16 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	protected abstract void tickContents();
 	
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		drawBackgroundTextureBelow(matrices, getY(), mouseX, mouseY, delta);
+		drawBackground(matrices, mouseX, mouseY, delta);
 		
 		drawCenteredText(matrices, screen.getTextRenderer(), getTitle(), getX() + getWidth() / 2, getY() + TITLE_MARGIN, TEXT_COLOR);
 		closeButton.render(matrices, mouseX, mouseY, delta);
+		
 		renderContents(matrices, mouseX, mouseY, delta);
+	}
+	
+	private void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		this.drawBackgroundTextureBelow(matrices, getY(), mouseX, mouseY, delta);
 	}
 	
 	protected void drawBackgroundTextureBelow(MatrixStack matrices, int cuttoffY, int mouseX, int mouseY, float delta) {

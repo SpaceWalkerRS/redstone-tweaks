@@ -3,12 +3,14 @@ package redstonetweaks.setting.types;
 import java.util.HashMap;
 import java.util.Map;
 
+import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 
 public abstract class Setting<T> implements ISetting {
 	
-	private String id;
+	private final SettingsPack pack;
+	private final String id;
 	private final String name;
 	private final String description;
 	private final T backupValue;
@@ -18,7 +20,9 @@ public abstract class Setting<T> implements ISetting {
 	private boolean locked;
 	private T value;
 	
-	public Setting(String name, String description, T backupValue) {
+	public Setting(SettingsPack pack, String name, String description, T backupValue) {
+		this.pack = pack;
+		this.id = pack.getCategory().getName() + "/" + pack.getName() + "/" + name;
 		this.name = name;
 		this.description = description;
 		this.backupValue = backupValue;
@@ -30,15 +34,26 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	@Override
-	public String getId() {
-		return id;
+	public boolean equals(Object other) {
+		if (other instanceof Setting<?>) {
+			return id.equals(((Setting<?>)other).id);
+		}
+		return false;
 	}
 	
 	@Override
-	public void setId(String id) {
-		if (this.id == null) {
-			this.id = id;
-		}
+	public int hashCode() {
+		return id.hashCode();
+	}
+	
+	@Override
+	public SettingsPack getPack() {
+		return pack;
+	}
+	
+	@Override
+	public String getId() {
+		return id;
 	}
 	
 	@Override
@@ -83,7 +98,7 @@ public abstract class Setting<T> implements ISetting {
 	
 	@Override
 	public String getAsString() {
-		return (isLocked() ? '1' : '0') + getValueAsString();
+		return (isLocked() ? "1" : "0") + getValueAsString();
 	}
 	
 	@Override
@@ -176,6 +191,8 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	public void setPresetValue(Preset preset, T value) {
-		presetValues.put(preset, value);
+		if (preset.isEditable() || !hasPreset(preset)) {
+			presetValues.put(preset, value);
+		}
 	}
 }

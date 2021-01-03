@@ -76,7 +76,7 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 				changeListener.accept(setting);
 				button.updateMessage();
 			});
-			this.modeButton.setActive(!updateOrder.modeLocked());
+			this.modeButton.setActive(!updateOrder.forceDefaultMode());
 			this.children.add(modeButton);
 			
 			this.buttonPanel1 = new ButtonPanel();

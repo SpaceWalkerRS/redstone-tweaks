@@ -2,12 +2,12 @@ package redstonetweaks.world.client;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import redstonetweaks.interfaces.RTIWorld;
-import redstonetweaks.packet.DoWorldTicksPacket;
-import redstonetweaks.packet.TaskSyncPacket;
-import redstonetweaks.packet.TickBlockEntityPacket;
-import redstonetweaks.packet.TickStatusPacket;
-import redstonetweaks.packet.WorldSyncPacket;
+import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.packet.types.DoWorldTicksPacket;
+import redstonetweaks.packet.types.TaskSyncPacket;
+import redstonetweaks.packet.types.TickBlockEntityPacket;
+import redstonetweaks.packet.types.TickStatusPacket;
+import redstonetweaks.packet.types.WorldSyncPacket;
 import redstonetweaks.world.common.WorldTickHandler;
 
 public class ClientWorldTickHandler extends WorldTickHandler {

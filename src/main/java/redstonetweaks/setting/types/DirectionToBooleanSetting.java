@@ -2,10 +2,12 @@ package redstonetweaks.setting.types;
 
 import net.minecraft.util.math.Direction;
 
+import redstonetweaks.setting.SettingsPack;
+
 public class DirectionToBooleanSetting extends ArraySetting<Direction, Boolean> {
 	
-	public DirectionToBooleanSetting(String name, String description) {
-		super(name, description, new Boolean[] {false});
+	public DirectionToBooleanSetting(SettingsPack pack, String name, String description) {
+		super(pack, name, description, new Boolean[] {false});
 	}
 	
 	@Override

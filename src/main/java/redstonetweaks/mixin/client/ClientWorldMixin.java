@@ -18,15 +18,15 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
-
-import redstonetweaks.interfaces.RTIMinecraftClient;
-import redstonetweaks.interfaces.RTIClientWorld;
-import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.mixinterfaces.RTIClientWorld;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
 import redstonetweaks.world.client.ClientUnfinishedEventScheduler;
 import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.common.WorldTickHandler;
+import redstonetweaks.world.common.WorldTickOptions;
 
 @Mixin(ClientWorld.class)
 public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
@@ -67,7 +67,7 @@ public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
 	@Override
 	public boolean normalWorldTicks() {
 		ClientWorldTickHandler worldTickHandler = ((RTIMinecraftClient)client).getWorldTickHandler();
-		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Tweaks.Global.SHOW_PROCESSING_ORDER.get() > 0);
+		return worldTickHandler.doWorldTicks() && !(worldTickHandler.tickInProgress() || Tweaks.Global.WORLD_TICK_OPTIONS.get().getMode() == WorldTickOptions.Mode.STEP_BY_STEP);
 	}
 	
 	@Override

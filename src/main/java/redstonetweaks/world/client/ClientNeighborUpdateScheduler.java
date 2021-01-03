@@ -1,9 +1,9 @@
 package redstonetweaks.world.client;
 
-import redstonetweaks.packet.NeighborUpdateSchedulerPacket;
-import redstonetweaks.world.common.NeighborUpdateScheduler;
+import redstonetweaks.packet.types.NeighborUpdateSchedulerPacket;
+import redstonetweaks.world.common.INeighborUpdateScheduler;
 
-public class ClientNeighborUpdateScheduler extends NeighborUpdateScheduler {
+public class ClientNeighborUpdateScheduler implements INeighborUpdateScheduler {
 	
 	public boolean hasScheduledNeighborUpdates = false;
 	

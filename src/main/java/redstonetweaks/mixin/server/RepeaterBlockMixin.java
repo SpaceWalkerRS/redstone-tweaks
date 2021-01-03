@@ -12,8 +12,8 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import redstonetweaks.interfaces.RTIRedstoneDiode;
-import redstonetweaks.interfaces.RTIServerTickScheduler;
+import redstonetweaks.mixinterfaces.RTIRedstoneDiode;
+import redstonetweaks.mixinterfaces.RTIServerTickScheduler;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(RepeaterBlock.class)

@@ -1,9 +1,11 @@
 package redstonetweaks.setting.types;
 
+import redstonetweaks.setting.SettingsPack;
+
 public class BugFixSetting extends BooleanSetting {
 	
-	public BugFixSetting(String name, String description) {
-		super(name, description);
+	public BugFixSetting(SettingsPack pack, String name, String description) {
+		super(pack, name, description);
 	}
 	
 	public String getBugReportURL() {

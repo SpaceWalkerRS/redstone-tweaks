@@ -1,6 +1,6 @@
 package redstonetweaks;
 
-import redstonetweaks.packet.ServerInfoPacket;
+import redstonetweaks.packet.types.ServerInfoPacket;
 
 public class ServerInfo {
 	

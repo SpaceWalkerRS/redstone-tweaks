@@ -26,9 +26,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
-
-import redstonetweaks.interfaces.RTIRedstoneDiode;
-import redstonetweaks.interfaces.RTIServerTickScheduler;
+import redstonetweaks.mixinterfaces.RTIRedstoneDiode;
+import redstonetweaks.mixinterfaces.RTIServerTickScheduler;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(ComparatorBlock.class)

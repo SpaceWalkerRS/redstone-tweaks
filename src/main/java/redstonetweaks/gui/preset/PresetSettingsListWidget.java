@@ -15,10 +15,11 @@ import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.setting.ArraySettingWindow;
 import redstonetweaks.gui.setting.UpdateOrderWindow;
+import redstonetweaks.gui.setting.WorldTickOptionsWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
-import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
@@ -27,6 +28,7 @@ import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.IntegerSetting;
 import redstonetweaks.setting.types.TickPrioritySetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
+import redstonetweaks.setting.types.WorldTickOptionsSetting;
 import redstonetweaks.util.TextFormatting;
 
 public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWidget.Entry> {
@@ -50,10 +52,10 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 	
 	@Override
 	protected void initList() {
-		for (SettingsPack pack : parent.getSelectedCategory().getSettingsPacks()) {
+		for (SettingsPack pack : parent.getSelectedCategory().getPacks().values()) {
 			List<Entry> settingEntries = new ArrayList<>();
 			
-			for (ISetting setting : pack.getSettings()) {
+			for (ISetting setting : pack.getSettings().values()) {
 				if (addSettingsMode || parent.getPresetEditor().hasSetting(setting)) {
 					settingEntries.add(addSettingsMode ? new AddSettingEntry(setting) : new EditSettingEntry(setting));
 					
@@ -73,13 +75,13 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 	
 	@Override
 	protected void filterEntries(String query) {
-		for (SettingsPack pack : parent.getSelectedCategory().getSettingsPacks()) {
+		for (SettingsPack pack : parent.getSelectedCategory().getPacks().values()) {
 			boolean packMatchesQuery = pack.getName().toLowerCase().contains(query);
 			
 			List<Entry> settingEntries = new ArrayList<>();
 			
-			for (ISetting setting : pack.getSettings()) {
-				if (addSettingsMode || (parent.getPresetEditor().hasSetting(setting) && (packMatchesQuery || setting.getName().toLowerCase().contains(query)))) {
+			for (ISetting setting : pack.getSettings().values()) {
+				if ((addSettingsMode || parent.getPresetEditor().hasSetting(setting)) && (packMatchesQuery || setting.getName().toLowerCase().contains(query))) {
 					settingEntries.add(addSettingsMode ? new AddSettingEntry(setting) : new EditSettingEntry(setting));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
@@ -433,6 +435,18 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 						window.disableButtons();
 					}
 				})).alwaysActive());
+			} else
+			if (setting instanceof WorldTickOptionsSetting) {
+				WorldTickOptionsSetting wSetting = (WorldTickOptionsSetting)setting;
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(parent.getPresetEditor().isEditable() ? "EDIT" : "VIEW"), (button) -> {
+					WorldTickOptionsWindow window = new WorldTickOptionsWindow(screen, wSetting, () -> parent.getPresetEditor().getValue(wSetting), (setting) -> {});
+					
+					screen.openWindow(window);
+					
+					if (!parent.getPresetEditor().isEditable()) {
+						window.disableButtons();
+					}
+				})).alwaysActive());
 			}
 		}
 		
@@ -446,10 +460,11 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		@Override
 		public void updateButtonsActive() {
 			boolean canEditSettings = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
+			boolean editable = parent.getPresetEditor().isEditable();
 			
-			buttonPanel.setActive(canEditSettings);
+			buttonPanel.setActive(canEditSettings && editable);
 			buttonPanel.updateButtonLabels();
-			removeButton.setActive(canEditSettings);
+			removeButton.setActive(canEditSettings && editable);
 		}
 	}
 	

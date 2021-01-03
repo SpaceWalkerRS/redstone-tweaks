@@ -5,12 +5,12 @@ import net.minecraft.client.MinecraftClient;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTMenuScreen;
-import redstonetweaks.interfaces.RTIMinecraftClient;
-import redstonetweaks.packet.LockCategoryPacket;
-import redstonetweaks.packet.LockSettingPacket;
-import redstonetweaks.packet.ResetSettingPacket;
-import redstonetweaks.packet.ResetSettingsPacket;
-import redstonetweaks.packet.SettingPacket;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.packet.types.LockCategoryPacket;
+import redstonetweaks.packet.types.LockSettingPacket;
+import redstonetweaks.packet.types.ResetSettingPacket;
+import redstonetweaks.packet.types.ResetSettingsPacket;
+import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.setting.preset.ClientPresetsManager;
 import redstonetweaks.setting.types.ISetting;
 

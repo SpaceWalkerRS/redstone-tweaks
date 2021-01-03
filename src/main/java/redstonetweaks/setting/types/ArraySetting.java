@@ -2,13 +2,14 @@ package redstonetweaks.setting.types;
 
 import java.util.Arrays;
 
+import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 
 public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
-	public ArraySetting(String name, String description, E[] backupValues) {
-		super(name, description, backupValues);
+	public ArraySetting(SettingsPack pack, String name, String description, E[] backupValues) {
+		super(pack, name, description, backupValues);
 	}
 	
 	@Override

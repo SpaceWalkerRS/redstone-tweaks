@@ -28,12 +28,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 
 import redstonetweaks.helper.RedstoneWireHelper;
-import redstonetweaks.interfaces.RTIBlock;
-import redstonetweaks.interfaces.RTIRedstoneDiode;
-import redstonetweaks.interfaces.RTIServerWorld;
-import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.mixinterfaces.RTIBlock;
+import redstonetweaks.mixinterfaces.RTIRedstoneDiode;
+import redstonetweaks.mixinterfaces.RTIServerWorld;
+import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
-import redstonetweaks.world.common.UnfinishedEvent.Source;
 import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(AbstractRedstoneGateBlock.class)
@@ -58,7 +58,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 				if (((RTIWorld)world).immediateNeighborUpdates()) {
 					scheduleTickOnScheduledTick(world, pos, newState, random);
 				} else {
-					((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, newState, pos, 0);
+					((RTIServerWorld)world).getUnfinishedEventScheduler().scheduleBlockAction(pos, 0, state.getBlock());
 				}
 			}
 		}
@@ -138,9 +138,9 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	}
 	
 	@Override
-	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
+	public boolean continueAction(World world, BlockPos pos, int type) {
 		if (type == 0) {
-			scheduleTickOnScheduledTick((ServerWorld)world, pos, state, world.getRandom());
+			scheduleTickOnScheduledTick((ServerWorld)world, pos, world.getBlockState(pos), world.getRandom());
 		}
 		
 		return false;
@@ -149,12 +149,8 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	private void scheduleTickOnScheduledTick(ServerWorld world, BlockPos pos, BlockState state, Random random) {
 		boolean powered = state.get(Properties.POWERED);
 		int delay = powered ? Tweaks.Repeater.DELAY_FALLING_EDGE.get() : Tweaks.Repeater.DELAY_RISING_EDGE.get();
+		TickPriority priority = powered ? Tweaks.Repeater.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 		
-		if (delay == 0) {
-			scheduledTick(state, world, pos, random);
-		} else { 
-			TickPriority priority = powered ? Tweaks.Repeater.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.Repeater.TICK_PRIORITY_RISING_EDGE.get();
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), getUpdateDelayInternal(state), priority);
-		}
+		TickSchedulerHelper.schedule(world, state, world.getBlockTickScheduler(), pos, state.getBlock(), delay, priority);
 	}
 }

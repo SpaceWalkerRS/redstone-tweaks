@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
@@ -15,7 +16,7 @@ import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.WarningWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
-import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.preset.Preset;
@@ -47,6 +48,7 @@ public class PresetsTab extends RTMenuTab {
 	private RTButtonWidget toggleListButton;
 	
 	private int selectedCategoryIndex;
+	private SettingsCategory selectedCategory;
 	
 	public PresetsTab(RTMenuScreen screen) {
 		super(screen, new TranslatableText("Presets"));
@@ -124,28 +126,26 @@ public class PresetsTab extends RTMenuTab {
 		addEditorContent(propertiesButton);
 		
 		warningButton = new RTButtonWidget(Math.min(propertiesButton.getX() - 85, (screen.getWidth() - 80) / 2), propertiesButton.getY(), 80, 20, () -> new TranslatableText("WARNING").formatted(Formatting.RED), (button) -> {
-			screen.openWindow(new WarningWindow(this, "Someone else has made changes to this preset that will not show up until you close the editor. If you save your changes you might overwrite some of their changes!", 300));
+			screen.openWindow(new WarningWindow(screen, "Someone else has made changes to this preset that will not show up until you close the editor. If you save your changes you might overwrite some of their changes!", 300));
 		});
 		addEditorContent(warningButton);
 		
 		categoryButtons = new RTButtonWidget[Settings.CATEGORIES.size()];
-		for (int i = 0; i < categoryButtons.length; i++) {
-			RTButtonWidget previousButton = i > 0 ? categoryButtons[i - 1] : null;
+		int i = 0;
+		int x = 5;
+		int y = propertiesButton.getY() + 22;
+		for (SettingsCategory category : Settings.CATEGORIES.values()) {
 			int index = i;
 			
-			String text = Settings.CATEGORIES.get(index).getName();
-			int x = index > 0 ? previousButton.getX() + previousButton.getWidth() + 5 : 5;
-			int y = index > 0 ? previousButton.getY() : propertiesButton.getY() + 25;
+			Text text = new TranslatableText(category.getName());
 			int width = screen.getTextRenderer().getWidth(text) + 10;
-			if (x + width > screen.getWidth() - 10) {
-				x = 5;
-				y += 22;
-			}
 			
-			categoryButtons[index] = new RTButtonWidget(x, y, width, 20, () -> new TranslatableText(text), (button) -> {
+			categoryButtons[index] = new RTButtonWidget(x, y, width, 20, () -> text, (button) -> {
 				categoryButtons[selectedCategoryIndex].setActive(true);
 				button.setActive(false);
+				
 				selectedCategoryIndex = index;
+				selectedCategory = category;
 				
 				settingsList.init();
 				searchBox.setText("");
@@ -153,10 +153,17 @@ public class PresetsTab extends RTMenuTab {
 			
 			addEditorContent(categoryButtons[index]);
 			
-			if (index == 0) {
-				categoryButtons[index].setActive(false);
+			x += width + 5;
+			if (x > screen.getWidth() - 10) {
+				x = 5;
+				y += 22;
 			}
+			
+			i++;
 		}
+		selectedCategoryIndex = 0;
+		selectedCategory = Settings.CATEGORIES.values().iterator().next();
+		categoryButtons[selectedCategoryIndex].setActive(false);
 		
 		toggleListButton = new RTButtonWidget(screen.getWidth() - 90, categoryButtons[categoryButtons.length - 1].getY() + 25, 80, 20, () -> new TranslatableText(settingsList.addSettingsMode() ? "Edit Settings" : "Add Settings"), (button) -> {
 			settingsList.toggleList();
@@ -171,9 +178,6 @@ public class PresetsTab extends RTMenuTab {
 		} else {
 			initBrowserContent();
 		}
-		
-		
-		updateButtonsActive();
 	}
 	
 	@Override
@@ -287,8 +291,11 @@ public class PresetsTab extends RTMenuTab {
 		searchBox.setX(5);
 		searchBox.setY(y);
 		searchBox.setWidth(clearSearchBoxButton.getX() - searchBox.getX() - 2);
+		searchBox.setText("");
 		
 		presetsList.init();
+		
+		updateButtonsActive();
 	}
 	
 	private void initEditorContent() {
@@ -300,11 +307,16 @@ public class PresetsTab extends RTMenuTab {
 		searchBox.setX(5);
 		searchBox.setY(y);
 		searchBox.setWidth(clearSearchBoxButton.getX() - searchBox.getX() - 2);
+		searchBox.setText("");
 		
 		warningButton.setVisible(false);
 		
 		settingsList.init();
 		settingsList.setListMode(false);
+		
+		toggleListButton.updateMessage();
+		
+		updateButtonsActive();
 	}
 	
 	public void updateButtonsActive() {
@@ -318,7 +330,7 @@ public class PresetsTab extends RTMenuTab {
 	}
 	
 	public SettingsCategory getSelectedCategory() {
-		return Settings.CATEGORIES.get(selectedCategoryIndex);
+		return selectedCategory;
 	}
 	
 	public String getLastSearchQuery() {

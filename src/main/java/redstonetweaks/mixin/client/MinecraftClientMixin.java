@@ -14,7 +14,7 @@ import net.minecraft.client.world.ClientWorld;
 import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.hotkeys.HotkeysManager;
-import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.setting.ClientSettingsManager;
 import redstonetweaks.world.client.ClientWorldTickHandler;

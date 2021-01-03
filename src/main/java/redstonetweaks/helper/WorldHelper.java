@@ -4,8 +4,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
+import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
+import redstonetweaks.world.common.WorldTickOptions;
 
 public class WorldHelper {
 	
@@ -23,5 +24,9 @@ public class WorldHelper {
 		}
 		
 		return false;
+	}
+	
+	public static boolean stepByStepFilter(World world) {
+		return Tweaks.Global.WORLD_TICK_OPTIONS.get().getDimensionFilter() == WorldTickOptions.DimensionFilter.ACTIVE && world.getPlayers().isEmpty();
 	}
 }

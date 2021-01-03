@@ -23,6 +23,10 @@ public class NeighborUpdate {
 		return type;
 	}
 	
+	public boolean is(UpdateType type) {
+		return this.type == type;
+	}
+	
 	public BlockPos getUpdatePos() {
 		return updatePos;
 	}

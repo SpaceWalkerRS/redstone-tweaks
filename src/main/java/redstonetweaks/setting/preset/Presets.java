@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.world.TickPriority;
-
+import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.Directionality;
 import redstonetweaks.util.RelativePos;
 import redstonetweaks.world.common.AbstractNeighborUpdate;
 import redstonetweaks.world.common.UpdateOrder;
+import redstonetweaks.world.common.WorldTickOptions;
 
 public class Presets {
 	
@@ -120,22 +122,22 @@ public class Presets {
 		
 		public static final Preset DEFAULT = new Preset("Default", "The default values of all settings.", Preset.Mode.SET, false);
 		
-		public static void init() {
+		private static void init() {
 			Presets.register(DEFAULT);
 			
-			Tweaks.Global.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
+			Tweaks.Global.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
 					add(RelativePos.SELF, RelativePos.WEST).
 					add(RelativePos.SELF, RelativePos.EAST).
 					add(RelativePos.SELF, RelativePos.DOWN).
 					add(RelativePos.SELF, RelativePos.UP).
 					add(RelativePos.SELF, RelativePos.NORTH).
 					add(RelativePos.SELF, RelativePos.SOUTH));
-			Tweaks.Global.COMPARATOR_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
+			Tweaks.Global.COMPARATOR_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
 					add(RelativePos.SELF, RelativePos.WEST).
 					add(RelativePos.SELF, RelativePos.EAST).
 					add(RelativePos.SELF, RelativePos.NORTH).
 					add(RelativePos.SELF, RelativePos.SOUTH));
-			Tweaks.Global.SHAPE_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
+			Tweaks.Global.SHAPE_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
 					add(RelativePos.SELF, RelativePos.WEST).
 					add(RelativePos.SELF, RelativePos.EAST).
 					add(RelativePos.SELF, RelativePos.NORTH).
@@ -157,7 +159,7 @@ public class Presets {
 			Tweaks.Global.RANDOMIZE_DELAYS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.RANDOMIZE_TICK_PRIORITIES.setPresetValue(DEFAULT, false);
 			Tweaks.Global.SHOW_NEIGHBOR_UPDATES.setPresetValue(DEFAULT, false);
-			Tweaks.Global.SHOW_PROCESSING_ORDER.setPresetValue(DEFAULT, 0);
+			Tweaks.Global.WORLD_TICK_OPTIONS.setPresetValue(DEFAULT, new WorldTickOptions());
 			
 			Tweaks.BugFixes.MC54711.setPresetValue(DEFAULT, false);
 			Tweaks.BugFixes.MC120986.setPresetValue(DEFAULT, false);
@@ -195,7 +197,7 @@ public class Presets {
 			Tweaks.CommandBlock.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
 			Tweaks.Comparator.ADDITION_MODE.setPresetValue(DEFAULT, false);
-			Tweaks.Comparator.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.Comparator.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.FRONT).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.FRONT, RelativePos.BACK));
 			Tweaks.Comparator.DELAY.setPresetValue(DEFAULT, 2);
@@ -244,7 +246,7 @@ public class Presets {
 			Tweaks.FrostedIce.DELAY_MAX.setPresetValue(DEFAULT, 40);
 			Tweaks.FrostedIce.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.HayBale.PARTIALLY_MOVABLE.setPresetValue(DEFAULT, false);
+			Tweaks.HayBale.DIRECTIONALLY_MOVABLE.setPresetValue(DEFAULT, false);
 			
 			Tweaks.GrassPath.DELAY.setPresetValue(DEFAULT, 1);
 			Tweaks.GrassPath.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
@@ -252,7 +254,7 @@ public class Presets {
 			Tweaks.GravityBlock.DELAY.setPresetValue(DEFAULT, 2);
 			Tweaks.GravityBlock.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.HeavyWeightedPressurePlate.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.HeavyWeightedPressurePlate.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.DOWN, RelativePos.WEST));
 			Tweaks.HeavyWeightedPressurePlate.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -286,7 +288,7 @@ public class Presets {
 			Tweaks.Lectern.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.Lectern.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.Lever.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.Lever.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.FRONT, RelativePos.WEST));
 			Tweaks.Lever.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -296,7 +298,7 @@ public class Presets {
 			Tweaks.Lever.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.Lever.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.LightWeightedPressurePlate.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.LightWeightedPressurePlate.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.DOWN, RelativePos.WEST));
 			Tweaks.LightWeightedPressurePlate.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -319,6 +321,7 @@ public class Presets {
 			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(DEFAULT, true);
 			Tweaks.NormalPiston.LAZY_RISING_EDGE.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.LAZY_FALLING_EDGE.setPresetValue(DEFAULT, false);
+			Tweaks.NormalPiston.LOOSE_HEAD.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.MOVABLE_WHEN_EXTENDED.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.PUSH_LIMIT.setPresetValue(DEFAULT, 12);
 			Tweaks.NormalPiston.QC.setPresetValue(DEFAULT, new Boolean[] {false, true, false, false, false, false});
@@ -328,7 +331,7 @@ public class Presets {
 			Tweaks.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.NormalPiston.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
-			Tweaks.NormalPiston.UPDATE_SELF_WHILE_POWERED.setPresetValue(DEFAULT, false);
+			Tweaks.NormalPiston.UPDATE_SELF.setPresetValue(DEFAULT, false);
 			
 			Tweaks.NoteBlock.DELAY.setPresetValue(DEFAULT, 0);
 			Tweaks.NoteBlock.LAZY.setPresetValue(DEFAULT, false);
@@ -336,7 +339,7 @@ public class Presets {
 			Tweaks.NoteBlock.RANDOMIZE_QC.setPresetValue(DEFAULT, false);
 			Tweaks.NoteBlock.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.Observer.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.Observer.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.FRONT).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.FRONT, RelativePos.BACK));
 			Tweaks.Observer.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 2);
@@ -362,7 +365,7 @@ public class Presets {
 			Tweaks.Rail.RANDOMIZE_QC.setPresetValue(DEFAULT, false);
 			Tweaks.Rail.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.RedSand.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.RedSand.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.WEST, RelativePos.EAST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.EAST, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.NORTH, RelativePos.SOUTH).
@@ -373,7 +376,7 @@ public class Presets {
 			Tweaks.RedSand.POWER_WEAK.setPresetValue(DEFAULT, 0);
 			Tweaks.RedSand.POWER_STRONG.setPresetValue(DEFAULT, 0);
 			
-			Tweaks.RedstoneBlock.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.RedstoneBlock.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.WEST, RelativePos.EAST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.EAST, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.NORTH, RelativePos.SOUTH).
@@ -392,7 +395,7 @@ public class Presets {
 			Tweaks.RedstoneLamp.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.RedstoneLamp.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.RedstoneOre.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.RedstoneOre.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.WEST, RelativePos.EAST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.EAST, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.NORTH, RelativePos.SOUTH).
@@ -405,7 +408,7 @@ public class Presets {
 			Tweaks.RedstoneOre.POWER_STRONG.setPresetValue(DEFAULT, 0);
 			Tweaks.RedstoneOre.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.RedstoneTorch.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.RedstoneTorch.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.DOWN, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.UP, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.NORTH, RelativePos.WEST).
@@ -439,7 +442,7 @@ public class Presets {
 			Tweaks.RedstoneWire.SLABS_ALLOW_UP_CONNECTION.setPresetValue(DEFAULT, true);
 			Tweaks.RedstoneWire.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.Repeater.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.Repeater.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.FRONT).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.FRONT, RelativePos.BACK));
 			Tweaks.Repeater.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 2);
@@ -464,13 +467,16 @@ public class Presets {
 			Tweaks.StickyPiston.CONNECTS_TO_WIRE.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.DO_BLOCK_DROPPING.setPresetValue(DEFAULT, true);
 			Tweaks.StickyPiston.FAST_BLOCK_DROPPING.setPresetValue(DEFAULT, true);
+			Tweaks.StickyPiston.SUPER_BLOCK_DROPPING.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
 			Tweaks.StickyPiston.DELAY_FALLING_EDGE.setPresetValue(DEFAULT, 0);
 			Tweaks.StickyPiston.HEAD_UPDATES_ON_EXTENSION.setPresetValue(DEFAULT, true);
+			Tweaks.StickyPiston.HEAD_UPDATES_WHEN_PULLING.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(DEFAULT, true);
 			Tweaks.StickyPiston.LAZY_RISING_EDGE.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.LAZY_FALLING_EDGE.setPresetValue(DEFAULT, false);
+			Tweaks.StickyPiston.LOOSE_HEAD.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.PUSH_LIMIT.setPresetValue(DEFAULT, 12);
 			Tweaks.StickyPiston.QC.setPresetValue(DEFAULT, new Boolean[] {false, true, false, false, false, false});
@@ -481,9 +487,9 @@ public class Presets {
 			Tweaks.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.StickyPiston.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
-			Tweaks.StickyPiston.UPDATE_SELF_WHILE_POWERED.setPresetValue(DEFAULT, false);
+			Tweaks.StickyPiston.UPDATE_SELF.setPresetValue(DEFAULT, false);
 			
-			Tweaks.StoneButton.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.StoneButton.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.FRONT, RelativePos.WEST));
 			Tweaks.StoneButton.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -493,7 +499,7 @@ public class Presets {
 			Tweaks.StoneButton.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.StoneButton.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.StonePressurePlate.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.StonePressurePlate.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.DOWN, RelativePos.WEST));
 			Tweaks.StonePressurePlate.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -520,7 +526,7 @@ public class Presets {
 			Tweaks.Tripwire.DELAY.setPresetValue(DEFAULT, 10);
 			Tweaks.Tripwire.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.TripwireHook.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.TripwireHook.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.FRONT, RelativePos.WEST));
 			Tweaks.TripwireHook.DELAY.setPresetValue(DEFAULT, 10);
@@ -536,7 +542,7 @@ public class Presets {
 			
 			Tweaks.WhiteConcretePowder.IS_SOLID.setPresetValue(DEFAULT, true);
 			
-			Tweaks.WoodenButton.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.WoodenButton.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.FRONT, RelativePos.WEST));
 			Tweaks.WoodenButton.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -546,7 +552,7 @@ public class Presets {
 			Tweaks.WoodenButton.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.WoodenButton.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.WoodenPressurePlate.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.WoodenPressurePlate.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.DOWN, RelativePos.WEST));
 			Tweaks.WoodenPressurePlate.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -564,6 +570,14 @@ public class Presets {
 			
 			ServerConfig.Presets.EDIT_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
 			ServerConfig.Presets.EDIT_GAME_MODES.setPresetValue(DEFAULT, new Boolean[] {false, true, false, true});
+			
+			
+			// Check if every setting has a default value, otherwise log a warning
+			for (ISetting setting : Settings.ALL.values()) {
+				if (!setting.hasPreset(DEFAULT)) {
+					RedstoneTweaks.LOGGER.warn(setting.getClass() + " " + setting.getId() + " does not have a default value!");
+				}
+			}
 		}
 	}
 	
@@ -571,7 +585,7 @@ public class Presets {
 		
 		public static final Preset BEDROCK = new Preset("Bedrock", "Features or behaviors that are present in the Bedrock Edition of Minecraft.", Preset.Mode.SET, false);
 		
-		public static void init() {
+		private static void init() {
 			Presets.register(BEDROCK);
 			
 			Tweaks.Global.MOVABLE_BLOCK_ENTITIES.setPresetValue(BEDROCK, true);
@@ -586,11 +600,14 @@ public class Presets {
 			Tweaks.NormalPiston.DELAY_RISING_EDGE.setPresetValue(BEDROCK, 2);
 			Tweaks.NormalPiston.DELAY_FALLING_EDGE.setPresetValue(BEDROCK, 2);
 			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(BEDROCK, true);
+			Tweaks.NormalPiston.LAZY_RISING_EDGE.setPresetValue(BEDROCK, true);
 			Tweaks.NormalPiston.QC.setPresetValue(BEDROCK, new Boolean[] {false, false, false, false, false, false});
 			Tweaks.NormalPiston.SPEED_RISING_EDGE.setPresetValue(BEDROCK, 2);
 			Tweaks.NormalPiston.SPEED_FALLING_EDGE.setPresetValue(BEDROCK, 2);
 			Tweaks.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(BEDROCK, true);
-			Tweaks.NormalPiston.UPDATE_SELF_WHILE_POWERED.setPresetValue(BEDROCK, true);
+			Tweaks.NormalPiston.UPDATE_SELF.setPresetValue(BEDROCK, true);
+			
+			Tweaks.Observer.DELAY_RISING_EDGE.setPresetValue(BEDROCK, 6);
 			
 			Tweaks.RedstoneTorch.SOFT_INVERSION.setPresetValue(BEDROCK, true);
 			
@@ -599,11 +616,12 @@ public class Presets {
 			Tweaks.StickyPiston.DELAY_FALLING_EDGE.setPresetValue(BEDROCK, 2);
 			Tweaks.StickyPiston.DO_BLOCK_DROPPING.setPresetValue(BEDROCK, false);
 			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(BEDROCK, true);
+			Tweaks.StickyPiston.LAZY_RISING_EDGE.setPresetValue(BEDROCK, true);
 			Tweaks.StickyPiston.QC.setPresetValue(BEDROCK, new Boolean[] {false, false, false, false, false, false});
 			Tweaks.StickyPiston.SPEED_RISING_EDGE.setPresetValue(BEDROCK, 2);
 			Tweaks.StickyPiston.SPEED_FALLING_EDGE.setPresetValue(BEDROCK, 2);
 			Tweaks.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(BEDROCK, true);
-			Tweaks.StickyPiston.UPDATE_SELF_WHILE_POWERED.setPresetValue(BEDROCK, true);
+			Tweaks.StickyPiston.UPDATE_SELF.setPresetValue(BEDROCK, true);
 		}
 	}
 	
@@ -611,11 +629,11 @@ public class Presets {
 		
 		public static final Preset DEBUGGING = new Preset("Debugging", "Debugging tools.", Preset.Mode.SET, false);
 		
-		public static void init() {
+		private static void init() {
 			Presets.register(DEBUGGING);
 			
 			Tweaks.Global.SHOW_NEIGHBOR_UPDATES.setPresetValue(DEBUGGING, true);
-			Tweaks.Global.SHOW_PROCESSING_ORDER.setPresetValue(DEBUGGING, 1);
+			Tweaks.Global.WORLD_TICK_OPTIONS.setPresetValue(DEBUGGING, new WorldTickOptions(WorldTickOptions.Mode.STEP_BY_STEP, WorldTickOptions.DimensionFilter.ACTIVE, 1));
 			
 			Tweaks.Barrier.IS_MOVABLE.setPresetValue(DEBUGGING, true);
 		}
@@ -625,10 +643,10 @@ public class Presets {
 		
 		public static final Preset HEAVEN = new Preset("Heaven", "Bug fixes, quality of life changes and cool new features to make your redstoning experience a bliss.", Preset.Mode.SET, false);
 		
-		public static void init() {
+		private static void init() {
 			Presets.register(HEAVEN);
 			
-			Tweaks.Global.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
+			Tweaks.Global.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
 					add(RelativePos.SELF, RelativePos.WEST).
 					add(RelativePos.SELF, RelativePos.EAST).
 					add(RelativePos.SELF, RelativePos.NORTH).
@@ -646,7 +664,7 @@ public class Presets {
 			Tweaks.BugFixes.MC137127.setPresetValue(HEAVEN, true);
 			Tweaks.BugFixes.MC172213.setPresetValue(HEAVEN, true);
 			
-			Tweaks.Comparator.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.Comparator.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.FRONT).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.FRONT, RelativePos.FRONT).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.FRONT, RelativePos.LEFT).
@@ -654,7 +672,7 @@ public class Presets {
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.FRONT, RelativePos.DOWN).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.FRONT, RelativePos.UP));
 			
-			Tweaks.HayBale.PARTIALLY_MOVABLE.setPresetValue(HEAVEN, true);
+			Tweaks.HayBale.DIRECTIONALLY_MOVABLE.setPresetValue(HEAVEN, true);
 			
 			Tweaks.MagentaGlazedTerracotta.IS_POWER_DIODE.setPresetValue(HEAVEN, true);
 			
@@ -667,7 +685,7 @@ public class Presets {
 			Tweaks.RedstoneOre.CONNECTS_TO_WIRE.setPresetValue(HEAVEN, true);
 			Tweaks.RedstoneOre.POWER_WEAK.setPresetValue(HEAVEN, 1);
 			
-			Tweaks.RedstoneTorch.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.RedstoneTorch.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.WEST, RelativePos.EAST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.EAST, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.NORTH, RelativePos.SOUTH).
@@ -676,7 +694,7 @@ public class Presets {
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.UP, RelativePos.DOWN));
 			Tweaks.RedstoneTorch.SOFT_INVERSION.setPresetValue(HEAVEN, true);
 			
-			Tweaks.RedstoneWire.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.RedstoneWire.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.WEST, RelativePos.EAST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.EAST, RelativePos.WEST).
@@ -687,7 +705,7 @@ public class Presets {
 			Tweaks.RedstoneWire.INVERT_FLOW_ON_GLASS.setPresetValue(HEAVEN, true);
 			Tweaks.RedstoneWire.SLABS_ALLOW_UP_CONNECTION.setPresetValue(HEAVEN, false);
 			
-			Tweaks.Repeater.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.NORMAL).
+			Tweaks.Repeater.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.HORIZONTAL, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.FRONT).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.FRONT, RelativePos.FRONT).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.FRONT, RelativePos.LEFT).
@@ -708,7 +726,7 @@ public class Presets {
 		
 		public static final Preset HELL = new Preset("Hell", "The worst redstoning experience imaginable. Apply at your own risk.", Preset.Mode.SET, false);
 		
-		public static void init() {
+		private static void init() {
 			Presets.register(HELL);
 			
 			Tweaks.Global.BLOCK_UPDATE_ORDER.setPresetValue(HELL, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.RANDOM, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
@@ -768,6 +786,7 @@ public class Presets {
 			Tweaks.NormalPiston.DELAY_RISING_EDGE.setPresetValue(HELL, 2);
 			Tweaks.NormalPiston.DELAY_FALLING_EDGE.setPresetValue(HELL, 2);
 			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(HELL, true);
+			Tweaks.NormalPiston.LOOSE_HEAD.setPresetValue(HELL, true);
 			Tweaks.NormalPiston.PUSH_LIMIT.setPresetValue(HELL, 7);
 			Tweaks.NormalPiston.QC.setPresetValue(HELL, new Boolean[] {true, true, true, true, true, true});
 			Tweaks.NormalPiston.RANDOMIZE_QC.setPresetValue(HELL, true);
@@ -803,6 +822,7 @@ public class Presets {
 			Tweaks.StickyPiston.DELAY_FALLING_EDGE.setPresetValue(HELL, 2);
 			Tweaks.StickyPiston.DO_BLOCK_DROPPING.setPresetValue(HELL, false);
 			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(HELL, true);
+			Tweaks.StickyPiston.LOOSE_HEAD.setPresetValue(HELL, true);
 			Tweaks.StickyPiston.PUSH_LIMIT.setPresetValue(HELL, 7);
 			Tweaks.StickyPiston.QC.setPresetValue(HELL, new Boolean[] {true, true, true, true, true, true});
 			Tweaks.StickyPiston.RANDOMIZE_QC.setPresetValue(HELL, true);
@@ -820,7 +840,7 @@ public class Presets {
 		
 		public static final Preset PISTON_MADNESS = new Preset("Piston Madness", "Pistons as you've never seen them before! Sometimes in a good way, sometimes in a weird way...", Preset.Mode.SET, false);
 		
-		public static void init() {
+		private static void init() {
 			Presets.register(PISTON_MADNESS);
 			
 			Tweaks.Global.CHAINSTONE.setPresetValue(PISTON_MADNESS, true);
@@ -829,22 +849,30 @@ public class Presets {
 			Tweaks.Global.MOVABLE_BLOCK_ENTITIES.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.Global.MOVABLE_MOVING_BLOCKS.setPresetValue(PISTON_MADNESS, true);
 			
-			Tweaks.HayBale.PARTIALLY_MOVABLE.setPresetValue(PISTON_MADNESS, true);
+			Tweaks.Barrier.IS_MOVABLE.setPresetValue(PISTON_MADNESS, true);
+			
+			Tweaks.HayBale.DIRECTIONALLY_MOVABLE.setPresetValue(PISTON_MADNESS, true);
 			
 			Tweaks.NormalPiston.CAN_MOVE_SELF.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.CONNECTS_TO_WIRE.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(PISTON_MADNESS, false);
+			Tweaks.NormalPiston.LOOSE_HEAD.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.MOVABLE_WHEN_EXTENDED.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.PUSH_LIMIT.setPresetValue(PISTON_MADNESS, 100);
 			Tweaks.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(PISTON_MADNESS, true);
+			Tweaks.NormalPiston.UPDATE_SELF.setPresetValue(PISTON_MADNESS, true);
 			
 			Tweaks.StickyPiston.CAN_MOVE_SELF.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.CONNECTS_TO_WIRE.setPresetValue(PISTON_MADNESS, true);
+			Tweaks.StickyPiston.SUPER_BLOCK_DROPPING.setPresetValue(PISTON_MADNESS, true);
+			Tweaks.StickyPiston.HEAD_UPDATES_WHEN_PULLING.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(PISTON_MADNESS, false);
+			Tweaks.StickyPiston.LOOSE_HEAD.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.PUSH_LIMIT.setPresetValue(PISTON_MADNESS, 100);
 			Tweaks.StickyPiston.SUPER_STICKY.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(PISTON_MADNESS, true);
+			Tweaks.StickyPiston.UPDATE_SELF.setPresetValue(PISTON_MADNESS, true);
 		}
 	}
 }

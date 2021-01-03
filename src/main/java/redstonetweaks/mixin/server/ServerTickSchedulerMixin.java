@@ -27,7 +27,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ScheduledTick;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
-import redstonetweaks.interfaces.RTIServerTickScheduler;
+import redstonetweaks.mixinterfaces.RTIServerTickScheduler;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(ServerTickScheduler.class)

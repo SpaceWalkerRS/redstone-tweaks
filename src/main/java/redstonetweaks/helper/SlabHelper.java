@@ -27,7 +27,7 @@ public class SlabHelper {
 	}
 	
 	public static boolean isSlab(Block block) {
-		return (block instanceof SlabBlock);
+		return block instanceof SlabBlock;
 	}
 	
 	public static SlabType getTypeFromDirection(Direction dir) {

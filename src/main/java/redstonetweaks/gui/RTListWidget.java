@@ -150,6 +150,7 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 			return false;
 		} else {
 			E entry = getEntryAtPos(mouseX, mouseY);
+			
 			if (entry != null) {
 				if (entry.mouseClicked(mouseX, mouseY, button)) {
 					setFocused(entry);
@@ -217,7 +218,6 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	
 	private void renderList(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		int itemCount = getItemCount();
-
 		for (int index = 0; index < itemCount; ++index) {
 			int rowTop = getRowTop(index);
 			

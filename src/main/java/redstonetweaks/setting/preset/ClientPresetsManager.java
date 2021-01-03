@@ -4,13 +4,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTMenuScreen;
-import redstonetweaks.interfaces.RTIMinecraftClient;
-import redstonetweaks.packet.RemovePresetPacket;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.packet.types.ApplyPresetPacket;
+import redstonetweaks.packet.types.DuplicatePresetPacket;
+import redstonetweaks.packet.types.PresetPacket;
+import redstonetweaks.packet.types.ReloadPresetsPacket;
+import redstonetweaks.packet.types.RemovePresetPacket;
 import redstonetweaks.setting.ServerConfig;
-import redstonetweaks.packet.PresetPacket;
-import redstonetweaks.packet.ReloadPresetsPacket;
-import redstonetweaks.packet.ApplyPresetPacket;
-import redstonetweaks.packet.DuplicatePresetPacket;
 
 public class ClientPresetsManager {
 	

@@ -2,56 +2,121 @@ package redstonetweaks;
 
 public class RedstoneTweaksVersion {
 	
-	public static final RedstoneTweaksVersion INVALID_VERSION = new RedstoneTweaksVersion(-1, -1, -1);
+	public static final RedstoneTweaksVersion INVALID_VERSION = new RedstoneTweaksVersion(Type.INVALID, -1, -1, -1, -1);
+	
+	public final Type type;
 	
 	public final int major;
 	public final int minor;
 	public final int patch;
 	
-	public RedstoneTweaksVersion(int major, int minor, int patch) {
+	public final int snapshot;
+	
+	private RedstoneTweaksVersion(Type type, int major, int minor, int patch, int snapshot) {
+		this.type =  type;
+		
 		this.major = major;
 		this.minor = minor;
 		this.patch = patch;
+		
+		this.snapshot = snapshot;
 	}
 	
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof RedstoneTweaksVersion) {
 			RedstoneTweaksVersion version = (RedstoneTweaksVersion)other;
-			return this.major == version.major && this.minor == version.minor && this.patch == version.patch;
+			return version.type == type && version.major == major && version.minor == minor && version.patch == patch && version.snapshot == snapshot;
 		}
 		return false;
 	}
 	
 	@Override
 	public String toString() {
-		return major + "." + minor + "." + patch;
+		return isValid() ? ("v" + major + "." + minor + "." + patch + (type == Type.SNAPSHOT ? "-pre" + snapshot : "")) : "INVALID";
 	}
 	
 	public boolean isValid() {
 		return !this.equals(INVALID_VERSION);
 	}
 	
-	public static RedstoneTweaksVersion create(int major, int minor, int patch) {
-		if (major >= 0 && minor >= 0 && patch >= 0) {
-			return new RedstoneTweaksVersion(major, minor, patch);
+	public boolean isNewerThan(RedstoneTweaksVersion version) {
+		if (major < version.major || minor < version.minor || patch < version.patch) {
+			return false;
+		}
+		if (major > version.major || minor > version.minor || patch > version.patch) {
+			return true;
+		}
+		if (type == version.type) {
+			return type == Type.SNAPSHOT && snapshot > version.snapshot;
+		}
+		return type == Type.RELEASE;
+	}
+	
+	public static RedstoneTweaksVersion createRelease(int major, int minor, int patch) {
+		return create(Type.RELEASE, major, minor, patch, 0);
+	}
+	
+	public static RedstoneTweaksVersion createSnapshot(int major, int minor, int patch, int snapshot) {
+		return create(Type.SNAPSHOT, major, minor, patch, snapshot);
+	}
+	
+	public static RedstoneTweaksVersion create(Type type, int major, int minor, int patch, int snapshot) {
+		if (type != Type.INVALID && major >= 0 && minor >= 0 && patch >= 0 && snapshot >= 0) {
+			return new RedstoneTweaksVersion(type, major, minor, patch, snapshot);
 		}
 		return INVALID_VERSION;
 	}
-
+	
 	public static RedstoneTweaksVersion parseVersion(String string) {
-		String[] args = string.split("[.]", 0);
-		if (args.length == 3) {
+		Type type = Type.INVALID;
+		int major = -1;
+		int minor = -1;
+		int patch = -1;
+		int snapshot = -1;
+		
+		String[] args = string.split("-pre");
+		
+		switch (args.length) {
+		case 1:
+			type = Type.RELEASE;
+			snapshot = 0;
+			
+			break;
+		case 2:
+			type = Type.SNAPSHOT;
 			try {
-				int major = Integer.parseInt(args[0]);
-				int minor = Integer.parseInt(args[1]);
-				int patch = Integer.parseInt(args[2]);
-				
-				return create(major, minor, patch);
+				snapshot = Integer.parseInt(args[1]);
 			} catch (NumberFormatException e) {
 				
-		    }
+			}
+			
+			break;
+		default:
+			return INVALID_VERSION;
 		}
-		return INVALID_VERSION;
+		
+		String[] version = args[0].split("v");
+		version = version[version.length - 1].split("[.]");
+		
+		if (version.length == 3) {
+			try {
+				major = Integer.parseInt(version[0]);
+				minor = Integer.parseInt(version[1]);
+				patch = Integer.parseInt(version[2]);
+			} catch (NumberFormatException e) {
+				
+			}
+		}
+		
+		return create(type, major, minor, patch, snapshot);
+	}
+	
+	public enum Type {
+		
+		INVALID,
+		RELEASE,
+		SNAPSHOT;
+		
 	}
 }

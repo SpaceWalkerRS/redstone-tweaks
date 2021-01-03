@@ -1,12 +1,13 @@
 package redstonetweaks.setting.types;
 
+import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 
 public interface ISetting {
 	
 	public String getId();
 	
-	public void setId(String id);
+	public SettingsPack getPack();
 	
 	public String getName();
 	

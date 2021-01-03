@@ -11,8 +11,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import redstonetweaks.interfaces.RTIPistonBlockEntity;
+import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
 
 @Mixin(BlockEntity.class)
 public class BlockEntityMixin {

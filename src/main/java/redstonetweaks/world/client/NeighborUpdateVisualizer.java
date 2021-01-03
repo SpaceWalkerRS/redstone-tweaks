@@ -13,7 +13,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
-import redstonetweaks.packet.NeighborUpdateVisualizerPacket;
+import redstonetweaks.packet.types.NeighborUpdateVisualizerPacket;
 import redstonetweaks.util.UpdateType;
 
 public class NeighborUpdateVisualizer {
@@ -64,8 +64,8 @@ public class NeighborUpdateVisualizer {
 		matrices.push();
 
 		Camera camera = client.gameRenderer.getCamera();
-		Vec3d cp = camera.getPos();
-		matrices.translate(-cp.x, -cp.y, -cp.z);
+		Vec3d cameraPos = camera.getPos();
+		matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder builder = tessellator.getBuffer();
@@ -75,6 +75,7 @@ public class NeighborUpdateVisualizer {
 		if (sourcePos != null) {
 			drawFancyBoxOutline(builder, matrices, sourcePos, SOURCE_RED, SOURCE_GREEN, SOURCE_BLUE, SOURCE_ALPHA);
 		}
+		
 		tessellator.draw();
 		
 		RenderSystem.enableCull();
@@ -87,8 +88,8 @@ public class NeighborUpdateVisualizer {
 		if (pos != null) {
 			drawBox(builder, matrices, pos, getRed(), getGreen(), getBlue(), getAlpha());
 		}
+		
 		tessellator.draw();
-
 
 		matrices.pop();
 		

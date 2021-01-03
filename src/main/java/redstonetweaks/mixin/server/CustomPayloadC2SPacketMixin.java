@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.util.Identifier;
-import redstonetweaks.interfaces.RTICustomPayloadC2SPacket;
+import redstonetweaks.mixinterfaces.RTICustomPayloadC2SPacket;
 
 @Mixin(CustomPayloadC2SPacket.class)
 public class CustomPayloadC2SPacketMixin implements RTICustomPayloadC2SPacket {

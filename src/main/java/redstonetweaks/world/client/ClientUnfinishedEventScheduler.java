@@ -1,26 +1,26 @@
 package redstonetweaks.world.client;
 
 import net.minecraft.client.world.ClientWorld;
+import redstonetweaks.packet.types.IncompleteBlockActionPacket;
+import redstonetweaks.world.common.IIncompleteActionScheduler;
+import redstonetweaks.world.common.IncompleteBlockAction;
 
-import redstonetweaks.packet.UnfinishedEventPacket;
-import redstonetweaks.world.common.UnfinishedEvent;
-import redstonetweaks.world.common.UnfinishedEventScheduler;
-
-public class ClientUnfinishedEventScheduler extends UnfinishedEventScheduler {
+public class ClientUnfinishedEventScheduler implements IIncompleteActionScheduler {
+	
+	private final ClientWorld world;
 	
 	public boolean hasScheduledEvents;
 	
 	public ClientUnfinishedEventScheduler(ClientWorld world) {
-		super(world);
+		this.world = world;
 	}
 	
 	@Override
-	public boolean hasScheduledEvents() {
-		return hasScheduledEvents || super.hasScheduledEvents();
+	public boolean hasScheduledActions() {
+		return hasScheduledEvents;
 	}
 	
-	public void onUnfinishedEventPacketReceived(UnfinishedEventPacket packet) {
-		UnfinishedEvent event = new UnfinishedEvent(packet.source, packet.pos, packet.block.getDefaultState(), packet.type);
-		continueEvent(event);
+	public void onUnfinishedEventPacketReceived(IncompleteBlockActionPacket packet) {
+		new IncompleteBlockAction(packet.pos, packet.type, packet.block).tryContinue(world);
 	}
 }

@@ -27,7 +27,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(RedstoneTorchBlock.class)
@@ -53,9 +53,8 @@ public abstract class RedstoneTorchBlockMixin {
 	private void shouldUnpower(World world, BlockPos pos, BlockState state, CallbackInfoReturnable<Boolean> cir) {
 		BlockPos blockPos = pos.down();
 		
-		// If the softInversion setting is enabled,
-		// return true if the torch is attached to a piston that is
-		// receiving redstone power.
+		// If the softInversion setting is enabled, return true if the torch is attached to
+		// a piston that is receiving redstone power.
 		if (Tweaks.RedstoneTorch.SOFT_INVERSION.get()) {
 			BlockState blockState = world.getBlockState(blockPos);
 			

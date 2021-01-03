@@ -1,5 +1,6 @@
 package redstonetweaks.setting.types;
 
+import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 
 public class IntegerSetting extends Setting<Integer> {
@@ -7,8 +8,8 @@ public class IntegerSetting extends Setting<Integer> {
 	private int minValue;
 	private int maxValue;
 	
-	public IntegerSetting(String name, String description, int minValue, int maxValue) {
-		super(name, description, 0);
+	public IntegerSetting(SettingsPack pack, String name, String description, int minValue, int maxValue) {
+		super(pack, name, description, 0);
 		
 		this.minValue = minValue;
 		this.maxValue = maxValue;

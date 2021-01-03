@@ -2,10 +2,12 @@ package redstonetweaks.setting.types;
 
 import net.minecraft.world.GameMode;
 
+import redstonetweaks.setting.SettingsPack;
+
 public class GameModeToBooleanSetting extends ArraySetting<GameMode, Boolean> {
 	
-	public GameModeToBooleanSetting(String name, String description) {
-		super(name, description, new Boolean[GameMode.values().length]);
+	public GameModeToBooleanSetting(SettingsPack pack, String name, String description) {
+		super(pack, name, description, new Boolean[GameMode.values().length]);
 	}
 	
 	@Override

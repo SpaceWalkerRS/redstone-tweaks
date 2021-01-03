@@ -18,9 +18,9 @@ import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import net.minecraft.util.math.BlockPos;
 
 import redstonetweaks.helper.BlockEntityHelper;
-import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.packet.AbstractPacketHandler;
-import redstonetweaks.packet.PlayerJoinedServerPacket;
+import redstonetweaks.packet.types.PlayerJoinedServerPacket;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {

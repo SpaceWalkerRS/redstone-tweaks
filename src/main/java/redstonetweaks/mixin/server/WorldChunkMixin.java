@@ -11,12 +11,15 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
-
-import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(WorldChunk.class)
 public abstract class WorldChunkMixin {
@@ -27,6 +30,14 @@ public abstract class WorldChunkMixin {
 	@Shadow public abstract BlockEntity getBlockEntity(BlockPos pos, WorldChunk.CreationType creationType);
 	@Shadow public abstract void removeBlockEntity(BlockPos pos);
 	@Shadow protected abstract BlockEntity createBlockEntity(BlockPos pos);
+	
+	@Inject(method = "setBlockState", at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 0, target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
+	private void onSetBlockStateInjectBeforeGetBlock0(BlockPos pos, BlockState state, boolean moved, CallbackInfoReturnable<BlockState> cir) {
+		if (moved && Tweaks.Global.INSTANT_BLOCK_EVENTS.get() && !world.isClient() && !state.isAir() && !state.isOf(Blocks.MOVING_PISTON)) {
+			BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
+			((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
+		}
+	}
 	
 	@Inject(method = "setBlockState", at = @At(value = "FIELD", shift = Shift.BEFORE, ordinal = 1, target = "Lnet/minecraft/world/World;isClient:Z"))
 	private void onSetBlockStateInjectBeforeIsClient1(BlockPos pos, BlockState state, boolean moved, CallbackInfoReturnable<BlockState> cir) {

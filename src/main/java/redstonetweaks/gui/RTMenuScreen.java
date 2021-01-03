@@ -19,7 +19,7 @@ import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.hotkeys.RTKeyBinding;
-import redstonetweaks.interfaces.RTIMinecraftClient;
+import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.preset.Preset;
@@ -159,7 +159,7 @@ public class RTMenuScreen extends Screen {
 	}
 	
 	private void createTabs() {
-		for (SettingsCategory category : Settings.CATEGORIES) {
+		for (SettingsCategory category : Settings.CATEGORIES.values()) {
 			tabs.add(new SettingsTab(this, category));
 		}
 		tabs.add(new PresetsTab(this));

@@ -23,8 +23,8 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import redstonetweaks.block.PowerBlockEntity;
-import redstonetweaks.interfaces.RTIPressurePlate;
-import redstonetweaks.interfaces.RTIWorld;
+import redstonetweaks.mixinterfaces.RTIPressurePlate;
+import redstonetweaks.mixinterfaces.RTIWorld;
 
 @Mixin(AbstractPressurePlateBlock.class)
 public abstract class AbstractPressurePlateBlockMixin extends Block {

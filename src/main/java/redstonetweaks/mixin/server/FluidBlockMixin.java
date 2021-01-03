@@ -16,7 +16,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.interfaces.RTIFluid;
+import redstonetweaks.mixinterfaces.RTIFluid;
 
 @Mixin(FluidBlock.class)
 public class FluidBlockMixin {

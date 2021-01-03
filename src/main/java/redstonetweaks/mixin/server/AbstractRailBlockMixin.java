@@ -10,7 +10,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.interfaces.RTIRail;
+import redstonetweaks.mixinterfaces.RTIRail;
 
 @Mixin(AbstractRailBlock.class)
 public class AbstractRailBlockMixin {
@@ -19,8 +19,7 @@ public class AbstractRailBlockMixin {
 	private boolean onUpdateBlockStateRedirectIsReceivingRedstonePower(World world1, BlockPos blockPos, World world, BlockPos pos, BlockState state, boolean forceUpdate) {
 		if (state.isOf(Blocks.RAIL)) {
 			return WorldHelper.isPowered(world, pos, state, false, ((RTIRail)this).getQC(), ((RTIRail)this).randQC());
-		} else {
-			return world.isReceivingRedstonePower(pos);
 		}
+		return world.isReceivingRedstonePower(pos);
 	}
 }

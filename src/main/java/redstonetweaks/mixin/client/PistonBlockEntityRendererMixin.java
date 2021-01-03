@@ -1,72 +1,113 @@
 package redstonetweaks.mixin.client;
 
-import java.util.Random;
-
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.block.enums.PistonType;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.render.block.BlockModelRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.PistonBlockEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
+import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
-import redstonetweaks.interfaces.RTIPistonBlockEntity;
+import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
 
 @Mixin(PistonBlockEntityRenderer.class)
-public class PistonBlockEntityRendererMixin {
+public abstract class PistonBlockEntityRendererMixin {
 	
-	// Moved piston heads should always render with the long arm
-	@ModifyConstant(method = "render", constant = @Constant(floatValue = 0.5f))
-	private float onRenderModifyFloat1(float oldValue, PistonBlockEntity pistonBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
-		return pistonBlockEntity.isSource() ? oldValue : -1.0f;
-	}
+	@Shadow protected abstract void method_3575(BlockPos pos, BlockState state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, World world, boolean cull, int overlay);
 	
-	@Inject(method = "render", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/client/render/block/entity/PistonBlockEntityRenderer;method_3575(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/world/World;ZI)V"))
-	private void onRenderInjectAfterMethod_3575(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, int overlay, CallbackInfo ci) {
-		BlockEntity movedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getPushedBlockEntity();
+	@Inject(method = "render", cancellable = true, at = @At(value = "HEAD"))
+	private void onRenderInjectAtHead(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, int overlay, CallbackInfo ci) {
+		World world = pistonBlockEntity.getWorld();
+		BlockState pushedState = pistonBlockEntity.getPushedBlock();
+		BlockEntity pushedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getPushedBlockEntity();
 		
-		if (movedBlockEntity != null) {
-			BlockEntityRenderer<BlockEntity> blockEntityRenderer = BlockEntityRenderDispatcher.INSTANCE.get(movedBlockEntity);
+		if (world == null || pushedState.isAir()) {
+			return;
+		}
+		
+		BlockModelRenderer.enableBrightnessCache();
+		
+		matrixStack.push();
+		matrixStack.translate(pistonBlockEntity.getRenderOffsetX(tickDelta), pistonBlockEntity.getRenderOffsetY(tickDelta), pistonBlockEntity.getRenderOffsetZ(tickDelta));
+		
+		Direction dir = pistonBlockEntity.getMovementDirection().getOpposite();
+		BlockPos toPos = pistonBlockEntity.getPos();
+		BlockPos fromPos = toPos.offset(dir);
+		
+		if (pistonBlockEntity.isSource()) {
+			boolean isExtending = pistonBlockEntity.isExtending();
+			boolean sourceIsMoving = ((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving();
 			
-			if (blockEntityRenderer != null) {
-				blockEntityRenderer.render(movedBlockEntity, tickDelta, matrixStack, vertexConsumerProvider, light, overlay);
+			boolean renderHead = true;
+			
+			if (sourceIsMoving) {
+				// Render a piston base that is pushing itself backwards or pulling itself forward
+				method_3575(fromPos, pushedState.with(Properties.EXTENDED, true), matrixStack, vertexConsumerProvider, world, false, overlay);
+				
+				// Undo the offset so the piston head is rendered stationary
+				matrixStack.pop();
+				matrixStack.push();
+				
+				if (isExtending) {
+					if (PistonHelper.isPistonHead(world.getBlockState(fromPos), PistonHelper.isSticky(pushedState), dir)) {
+						matrixStack.translate(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ());
+					} else {
+						renderHead = false;
+					}
+				}
+			}
+			
+			if (renderHead) {
+				PistonType pistonType = PistonHelper.isPistonHead(pushedState) ? pushedState.get(Properties.PISTON_TYPE) : (PistonHelper.isPiston(pushedState, true) ? PistonType.STICKY : PistonType.DEFAULT);
+				Direction facing = pushedState.get(Properties.FACING);
+				boolean shortArm = isExtending ? pistonBlockEntity.getProgress(tickDelta) <= 0.5F : pistonBlockEntity.getProgress(tickDelta) >= 0.5F;
+				
+				BlockState pistonHead = Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, pistonType).with(Properties.FACING, facing).with(Properties.SHORT, shortArm);
+				
+				method_3575(fromPos, pistonHead, matrixStack, vertexConsumerProvider, world, false, overlay);
+			}
+			
+			if (!isExtending && !sourceIsMoving) {
+				// Undo the offset so the base is rendered stationary
+				matrixStack.pop();
+				matrixStack.push();
+				
+				method_3575(toPos, pushedState.with(Properties.EXTENDED, true), matrixStack, vertexConsumerProvider, world, false, overlay);
+			}
+		} else {
+			method_3575(fromPos, pushedState, matrixStack, vertexConsumerProvider, world, false, overlay);
+			
+			if (pushedBlockEntity != null) {
+				BlockEntityRenderDispatcher.INSTANCE.render(pushedBlockEntity, tickDelta, matrixStack, vertexConsumerProvider);
+			}
+			
+			if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs() && SlabHelper.isSlab(pushedState)) {
+				// Undo the offset to render the slab that is merged into as stationary
+				matrixStack.pop();
+				matrixStack.push();
+				
+				method_3575(toPos, pushedState.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(pushedState.get(Properties.SLAB_TYPE))), matrixStack, vertexConsumerProvider, world, false, overlay);
 			}
 		}
 		
-		BlockState pushedBlock = pistonBlockEntity.getPushedBlock();
-		if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs() && SlabHelper.isSlab(pushedBlock)) {
-			// Undo the offset
-			matrixStack.pop();
-			
-			BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();
-			
-			World world = pistonBlockEntity.getWorld();
-			BlockPos pos = pistonBlockEntity.getPos();
-			BlockState state = pushedBlock.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(pushedBlock.get(Properties.SLAB_TYPE)));
-			VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(state));
-			Random random = world.getRandom();
-			
-			blockRenderManager.renderBlock(state, pos, world, matrixStack, vertexConsumer, true, random);
-			
-			// Push a new entry onto the stack
-			matrixStack.push();
-		}
+		matrixStack.pop();
+		
+		BlockModelRenderer.disableBrightnessCache();
+		
+		ci.cancel();
 	}
 }

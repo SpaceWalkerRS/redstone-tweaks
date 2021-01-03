@@ -8,19 +8,22 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameRules;
-import redstonetweaks.interfaces.RTIMinecraftServer;
-import redstonetweaks.interfaces.RTIWorld;
-import redstonetweaks.interfaces.RTIServerWorld;
-import redstonetweaks.interfaces.RTIServerTickScheduler;
-import redstonetweaks.interfaces.RTIServerChunkManager;
-import redstonetweaks.packet.TaskSyncPacket;
-import redstonetweaks.packet.TickPausePacket;
-import redstonetweaks.packet.TickStatusPacket;
-import redstonetweaks.packet.WorldSyncPacket;
-import redstonetweaks.packet.DoWorldTicksPacket;
-import redstonetweaks.packet.WorldTimeSyncPacket;
+
+import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.mixinterfaces.RTIServerChunkManager;
+import redstonetweaks.mixinterfaces.RTIServerTickScheduler;
+import redstonetweaks.mixinterfaces.RTIServerWorld;
+import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.packet.types.DoWorldTicksPacket;
+import redstonetweaks.packet.types.TaskSyncPacket;
+import redstonetweaks.packet.types.TickPausePacket;
+import redstonetweaks.packet.types.TickStatusPacket;
+import redstonetweaks.packet.types.WorldSyncPacket;
+import redstonetweaks.packet.types.WorldTimeSyncPacket;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.WorldTickHandler;
+import redstonetweaks.world.common.WorldTickOptions;
 
 public class ServerWorldTickHandler extends WorldTickHandler {
 	
@@ -55,10 +58,10 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	
 	public void tick(BooleanSupplier shouldKeepTicking) {
 		if (doWorldTicks()) {
-			int interval = Tweaks.Global.SHOW_PROCESSING_ORDER.get();
+			boolean stepByStep = Tweaks.Global.WORLD_TICK_OPTIONS.get().getMode() == WorldTickOptions.Mode.STEP_BY_STEP;
 			
-			if (interval > 0 || tickInProgress()) {
-				if (interval == 0 || server.getTicks() % interval == 0) {
+			if (stepByStep || tickInProgress()) {
+				if (!stepByStep || server.getTicks() % Tweaks.Global.WORLD_TICK_OPTIONS.get().getInterval() == 0) {
 					tickStepByStep(shouldKeepTicking);
 				}
 				broadcastChunkData();
@@ -80,11 +83,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 				server.getPlayerManager().sendToDimension(new WorldTimeUpdateS2CPacket(world.getTime(), world.getTimeOfDay(), world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)), world.getRegistryKey());
 			}
 			
-			inWorldTick = true;
-			
-			world.tick(shouldKeepTicking);
-			
-			inWorldTick = false;
+			tickWorldNormally(world, shouldKeepTicking);
 		}
 		if (Tweaks.BugFixes.MC172213.get()) {
 			for (ServerWorld world : server.getWorlds()) {
@@ -93,6 +92,14 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		}
 		
 		ticks--;
+	}
+	
+	private void tickWorldNormally(ServerWorld world, BooleanSupplier shouldKeepTicking) {
+		inWorldTick = true;
+		
+		world.tick(shouldKeepTicking);
+		
+		inWorldTick = false;
 	}
 	
 	private void tickStepByStep(BooleanSupplier shouldKeepTicking) {
@@ -106,14 +113,20 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			startTick();
 			break;
 		case TICKING_WORLDS:
-			if (currentWorld != null) {
-				inWorldTick = true;
-				
-				tickWorld(shouldKeepTicking);
-				
-				inWorldTick = false;
-			} else {
+			if (currentWorld == null) {
 				shouldUpdateStatus = true;
+			} else {
+				if (WorldHelper.stepByStepFilter(currentWorld)) {
+					tickWorldNormally((ServerWorld)currentWorld, shouldKeepTicking);
+					
+					switchWorld();
+				} else {
+					inWorldTick = true;
+					
+					tickWorld(shouldKeepTicking);
+					
+					inWorldTick = false;
+				}
 			}
 			break;
 		case END_TICK:
@@ -157,10 +170,10 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	
 	private void tickWorld(BooleanSupplier shouldKeepTicking) {
 		ServerNeighborUpdateScheduler neighborUpdateScheduler = ((RTIServerWorld)currentWorld).getNeighborUpdateScheduler();
-		ServerUnfinishedEventScheduler unfinishedEventScheduler = ((RTIServerWorld)currentWorld).getUnfinishedEventScheduler();
+		ServerIncompleteActionScheduler unfinishedEventScheduler = ((RTIServerWorld)currentWorld).getUnfinishedEventScheduler();
 		
 		boolean hasNeighborUpdates = neighborUpdateScheduler.hasScheduledNeighborUpdates();
-		boolean hasScheduledEvents = unfinishedEventScheduler.hasScheduledEvents();
+		boolean hasScheduledEvents = unfinishedEventScheduler.hasScheduledActions();
 		
 		neighborUpdateScheduler.tick();
 		if (hasNeighborUpdates) {

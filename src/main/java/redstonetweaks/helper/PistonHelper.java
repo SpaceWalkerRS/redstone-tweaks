@@ -18,12 +18,11 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
-import redstonetweaks.interfaces.RTIPistonBlockEntity;
+import redstonetweaks.block.piston.PistonSettings;
+import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
 import redstonetweaks.setting.Tweaks;
-import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 public class PistonHelper {
 	
@@ -36,36 +35,43 @@ public class PistonHelper {
 		Blocks.END_PORTAL
 	);
 	
-	// Notify clients of any pistons that are about to be "double retracted"
-	public static void prepareDoubleRetraction(World world, BlockPos pos, BlockState state) {
-		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
-			if (state.getBlock() instanceof PistonBlock && !state.get(Properties.EXTENDED)) {
-				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
-				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
-			}
-		}
-	}
-	
 	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
 		return createPistonBlockEntity(pushedBlockState, null, pistonDir, extending, isSource, isMovedByStickyPiston);
 	}
 	
 	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
-		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, pistonDir, extending, isSource, isMovedByStickyPiston, false);
+		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, pistonDir, extending, isSource, isMovedByStickyPiston, false, false);
 	}
 	
-	public static PistonBlockEntity createPistonBlockEntity(BlockState movedBlockState, BlockEntity movedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs) {
-		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(movedBlockState, pistonDir, extending, isSource);
+	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean sourceIsMoving) {
+		return createPistonBlockEntity(pushedBlockState, null, pistonDir, extending, isSource, isMovedByStickyPiston, false, sourceIsMoving);
+	}
+	
+	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs) {
+		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, pistonDir, extending, isSource, isMovedByStickyPiston, isMergingSlabs, false);
+	}
+	
+	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs, boolean sourceIsMoving) {
+		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlockState, pistonDir, extending, isSource);
 		
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
-		((RTIPistonBlockEntity)pistonBlockEntity).setPushedBlockEntity(movedBlockEntity);
+		((RTIPistonBlockEntity)pistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
 		((RTIPistonBlockEntity)pistonBlockEntity).setIsMergingSlabs(isMergingSlabs);
+		((RTIPistonBlockEntity)pistonBlockEntity).setSourceIsMoving(sourceIsMoving);
 		
 		return pistonBlockEntity;
 	}
 	
+	public static boolean isPiston(BlockState state, boolean sticky, Direction facing) {
+		return isPiston(state, sticky) && state.get(Properties.FACING) == facing;
+	}
+	
 	public static boolean isPiston(BlockState state, boolean sticky) {
 		return isPiston(state) && isSticky(state) == sticky;
+	}
+	
+	public static boolean isPiston(BlockState state, Direction facing) {
+		return isPiston(state) && state.get(Properties.FACING) == facing;
 	}
 	
 	public static boolean isPiston(BlockState state) {
@@ -76,77 +82,179 @@ public class PistonHelper {
 		return state.isOf(Blocks.STICKY_PISTON);
 	}
 	
-	public static boolean isPistonHead(BlockState state, boolean sticky) {
-		return state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == (sticky ? PistonType.STICKY : PistonType.DEFAULT);
+	public static boolean isPistonHead(BlockState state, boolean sticky, Direction facing) {
+		return isPistonHead(state, sticky) && state.get(Properties.FACING) == facing;
 	}
 	
-	public static boolean isMovablePiston(World world, BlockPos pos, BlockState state, boolean sticky) {
-		if (!movableWhenExtended(sticky)) {
-			return isPiston(state, sticky) && !state.get(Properties.EXTENDED) && !isExtending(world, pos, state, state.get(Properties.FACING));
-		}
-		if (isPiston(state, sticky)) {
-			// isExtended makes sure the piston is not extending
-			return state.get(Properties.EXTENDED) && (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() || isExtended(world, pos, state));
-		}
-		if (isPistonHead(state, sticky)) {
-			if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
-				return true;
+	public static boolean isPistonHead(BlockState state, boolean sticky) {
+		return isPistonHead(state) && isStickyHead(state) == sticky;
+	}
+	
+	public static boolean isPistonHead(BlockState state, Direction facing) {
+		return isPistonHead(state) && state.get(Properties.FACING) == facing;
+	}
+	
+	public static boolean isPistonHead(BlockState state) {
+		return state.isOf(Blocks.PISTON_HEAD);
+	}
+	
+	public static boolean isStickyHead(BlockState state) {
+		return state.get(Properties.PISTON_TYPE) == PistonType.STICKY;
+	}
+	
+	public static boolean isMovedPiston(World world, BlockPos pos, BlockState state, boolean sticky, Direction facing) {
+		if (state.isOf(Blocks.MOVING_PISTON)) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if (blockEntity instanceof PistonBlockEntity) {
+				return isPiston(((RTIPistonBlockEntity)blockEntity).getMovedState(), sticky, facing);
 			}
-			
-			Direction facing = state.get(Properties.FACING);
-			BlockState behindState = world.getBlockState(pos.offset(facing.getOpposite()));
-			
-			return !isPiston(behindState) || (isSticky(behindState) == sticky && behindState.get(Properties.FACING) == facing);
 		}
+		
 		return false;
 	}
 	
-	public static boolean isExtended(World world, BlockPos pos, BlockState state) {
-		return isExtended(world, pos, state, state.get(Properties.FACING));
-	}
-	
-	public static boolean isExtended(World world, BlockPos pos, BlockState state, Direction facing) {
-		boolean isExtended = state.get(Properties.EXTENDED) && !isExtending(world, pos, state, facing);
-		
-		if (!isExtended && Tweaks.Global.DOUBLE_RETRACTION.get()) {
-			BlockState frontState = world.getBlockState(pos.offset(facing));
-			isExtended = frontState.isOf(Blocks.PISTON_HEAD) && frontState.get(Properties.FACING) == facing;
+	public static boolean isMovedPistonHead(World world, BlockPos pos, BlockState state, boolean sticky, Direction facing) {
+		if (state.isOf(Blocks.MOVING_PISTON)) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if (blockEntity instanceof PistonBlockEntity) {
+				return isPistonHead(((RTIPistonBlockEntity)blockEntity).getMovedState(), sticky, facing);
+			}
 		}
 		
-		return isExtended;
+		return false;
 	}
 	
-	// The base of an extending piston is a piston block with the EXTENDED property set to true,
-	// the same as an extended piston. So to determine whether the piston is extending, we need
-	// to look at the block in front of the piston. If that block is a moving block that is
-	// extending and facing the same direction as the piston, then we can conclude that the piston
-	// is extending.
-	public static boolean isExtending(World world, BlockPos pos, BlockState state, Direction facing) {
-		BlockPos frontPos = pos.offset(facing);
-		BlockState frontState = world.getBlockState(frontPos);
+	// Do not use to check if piston is movable!
+	public static boolean isExtended(World world, BlockPos pos, BlockState state) {
+		return isExtended(world, pos, state, true);
+	}
+	
+	// Do not use to check if piston is movable!
+	public static boolean isExtended(World world, BlockPos pos, BlockState state, boolean checkExtending) {
+		if (checkExtending && isExtending(world, pos, state)) {
+			return false;
+		}
+		return state.get(Properties.EXTENDED);
+	}
+	
+	public static boolean isExtending(World world, BlockPos pos, BlockState state) {
+		Direction facing = state.get(Properties.FACING);
+		BlockPos headPos = pos.offset(facing);
+		BlockState pistonHead = world.getBlockState(headPos);
 		
-		if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
-			BlockEntity blockEntity = world.getBlockEntity(frontPos);
+		return isExtendingPistonHead(world, headPos, pistonHead, isSticky(state), facing);
+	}
+	
+	public static boolean isExtendingPistonHead(World world, BlockPos pos,BlockState state) {
+		return isExtendingPistonHead(world, pos, state, null, null);
+	}
+
+	public static boolean isExtendingPistonHead(World world, BlockPos pos,BlockState state, Boolean sticky, Direction facing) {
+		if (state.isOf(Blocks.MOVING_PISTON)) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
 				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 				
-				if (pistonBlockEntity.isExtending() && pistonBlockEntity.isSource()) {
+				if (pistonBlockEntity.isSource() && pistonBlockEntity.isExtending() && !((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving() && (sticky == null || sticky == ((RTIPistonBlockEntity)pistonBlockEntity).isMovedByStickyPiston()) && (facing == null || facing == pistonBlockEntity.getFacing())) {
 					return true;
 				}
 				
-				// An extending piston could be being moved
 				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
 				
 				if (blockEntity instanceof PistonBlockEntity) {
 					pistonBlockEntity = (PistonBlockEntity)blockEntity;
 					
-					return pistonBlockEntity.isExtending() && pistonBlockEntity.isSource();
+					return pistonBlockEntity.isSource() && pistonBlockEntity.isExtending() && !((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving() && (sticky == null || sticky == ((RTIPistonBlockEntity)pistonBlockEntity).isMovedByStickyPiston()) && (facing == null || facing == pistonBlockEntity.getFacing());
 				}
 			}
 		}
 		
 		return false;
+	}
+	
+	public static boolean isExtendingBackwards(World world, BlockPos pos,BlockState state, Direction facing) {
+		if (state.isOf(Blocks.MOVING_PISTON) && state.get(Properties.FACING) == facing) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if (blockEntity instanceof PistonBlockEntity) {
+				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+				
+				if (pistonBlockEntity.isSource() && pistonBlockEntity.isExtending() && ((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving()) {
+					return true;
+				}
+				
+				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
+				
+				if (blockEntity instanceof PistonBlockEntity) {
+					pistonBlockEntity = (PistonBlockEntity)blockEntity;
+					
+					return pistonBlockEntity.isSource() && pistonBlockEntity.isExtending() && ((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving();
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	public static boolean isPushingBlock(World world, BlockPos pos, BlockState state, Direction dir) {
+		if (state.isOf(Blocks.MOVING_PISTON)) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if (blockEntity instanceof PistonBlockEntity) {
+				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+				
+				return pistonBlockEntity.isExtending() && pistonBlockEntity.getFacing() == dir;
+			}
+		}
+		
+		return false;
+	}
+	
+	public static boolean isMovablePiston(World world, BlockPos pos, BlockState state, boolean sticky) {
+		if (isPiston(state, sticky)) {
+			if (!state.get(Properties.EXTENDED)) {
+				return true;
+			}
+			if (PistonSettings.movableWhenExtended(sticky)) {
+				if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() || PistonSettings.looseHead(sticky)) {
+					return true;
+				}
+				
+				Direction facing = state.get(Properties.FACING);
+				BlockPos headPos = pos.offset(facing);
+				BlockState pistonHead = world.getBlockState(headPos);
+				
+				return !isMovedPistonHead(world, headPos, pistonHead, sticky, facing);
+			}
+		}
+		if (isPistonHead(state, sticky)) {
+			if (PistonSettings.looseHead(sticky)) {
+				return true;
+			}
+			if (PistonSettings.movableWhenExtended(sticky)) {
+				if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
+					return true;
+				}
+				
+				Direction facing = state.get(Properties.FACING);
+				BlockPos basePos = pos.offset(facing.getOpposite());
+				BlockState pistonBase = world.getBlockState(basePos);
+				
+				return !isMovedPiston(world, basePos, pistonBase, sticky, facing) && (!PistonSettings.canMoveSelf(sticky) || !isExtendingBackwards(world, basePos, pistonBase, facing));
+			}
+		}
+		
+		return false;
+	}
+	
+	public static boolean hasPistonHead(World world, BlockPos pos, boolean sticky, Direction facing) {
+		BlockPos headPos = pos.offset(facing);
+		BlockState pistonHead = world.getBlockState(headPos);
+		
+		return isPistonHead(pistonHead, sticky, facing) || isExtendingPistonHead(world, headPos, pistonHead, sticky, facing);
 	}
 	
 	public static boolean isReceivingPower(World world, BlockPos pos, BlockState state, Direction facing) {
@@ -160,7 +268,9 @@ public class PistonHelper {
 			}
 		}
 		
-		return WorldHelper.isQCPowered(world, pos, state, onBlockEvent, getQC(state), randQC(state));
+		boolean sticky = isSticky(state);
+		
+		return WorldHelper.isQCPowered(world, pos, state, onBlockEvent, PistonSettings.getQC(sticky), PistonSettings.randQC(sticky));
 	}
 	
 	public static boolean canMoveBlockEntityOf(Block block) {
@@ -174,7 +284,7 @@ public class PistonHelper {
 	}
 	
 	public static float adjustSoundPitch(float pitch, boolean extending, boolean sticky) {
-		int speed = extending ? speedRisingEdge(sticky) : speedFallingEdge(sticky);
+		int speed = extending ? PistonSettings.speedRisingEdge(sticky) : PistonSettings.speedFallingEdge(sticky);
 		
 		return speed == 0 ? Float.POSITIVE_INFINITY : pitch * (2.0F / speed);
 	}
@@ -183,10 +293,10 @@ public class PistonHelper {
 		if (redstonetweaks.setting.Tweaks.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER)) {
 			return PistonBehavior.NORMAL;
 		}
-		if (movableWhenExtended(false) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.DEFAULT) {
+		if (isPiston(state) && (!state.get(Properties.EXTENDED) || PistonSettings.movableWhenExtended(isSticky(state)))) {
 			return PistonBehavior.NORMAL;
 		}
-		if (movableWhenExtended(true) && state.isOf(Blocks.PISTON_HEAD) && state.get(Properties.PISTON_TYPE) == PistonType.STICKY) {
+		if (isPistonHead(state) && (PistonSettings.movableWhenExtended(isStickyHead(state)) || PistonSettings.looseHead(isStickyHead(state)))) {
 			return PistonBehavior.NORMAL;
 		}
 		if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() && state.isOf(Blocks.MOVING_PISTON)) {
@@ -194,6 +304,12 @@ public class PistonHelper {
 		}
 		
 		return state.getPistonBehavior();
+	}
+	
+	// Check if a piston can pull the block towards it or itself towards the block
+	public static boolean canPull(BlockState state) {
+		PistonBehavior behavior = getPistonBehavior(state);
+		return behavior != PistonBehavior.PUSH_ONLY && behavior != PistonBehavior.DESTROY;
 	}
 	
 	public static boolean canSlabStickTo(BlockState state, Direction dir) {
@@ -221,80 +337,46 @@ public class PistonHelper {
 		
 		return state;
 	}
-	
-	public static boolean doBlockDropping() {
-		return Tweaks.StickyPiston.DO_BLOCK_DROPPING.get();
+
+	public static void tryBreakPistonHead(World world, BlockPos headPos, boolean sticky, Direction facing) {
+		tryRemovePistonHead(world, headPos, sticky, facing, true);
 	}
 	
-	public static boolean fastBlockDropping() {
-		return doBlockDropping() && Tweaks.StickyPiston.FAST_BLOCK_DROPPING.get();
+	public static void tryRemovePistonHead(World world, BlockPos headPos, boolean sticky, Direction facing, boolean updateNeighbors) {
+		BlockState pistonHead = world.getBlockState(headPos);
+		
+		if (isPistonHead(pistonHead, sticky, facing) || isExtendingPistonHead(world, headPos, pistonHead, sticky, facing)) {
+			if (updateNeighbors) {
+				world.removeBlock(headPos, false);
+			} else {
+				world.setBlockState(headPos, Blocks.AIR.getDefaultState(), 18);
+			}
+		}
+	}
+
+	// Notify clients of any pistons that are about to be "double retracted"
+	public static void prepareDoubleRetraction(World world, BlockPos pos, BlockState state) {
+		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
+			if (isPiston(state) && !state.get(Properties.EXTENDED)) {
+				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
+				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
+			}
+		}
 	}
 	
-	public static DirectionToBooleanSetting getQC(BlockState state) {
-		return isSticky(state) ? Tweaks.StickyPiston.QC : Tweaks.NormalPiston.QC;
-	}
-	
-	public static boolean randQC(BlockState state) {
-		return isSticky(state) ? Tweaks.StickyPiston.RANDOMIZE_QC.get() : Tweaks.NormalPiston.RANDOMIZE_QC.get();
-	}
-	
-	public static boolean canMoveSelf(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.CAN_MOVE_SELF.get() : Tweaks.NormalPiston.CAN_MOVE_SELF.get();
-	}
-	
-	public static boolean connectsToWire(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.CONNECTS_TO_WIRE.get() : Tweaks.NormalPiston.CONNECTS_TO_WIRE.get();
-	}
-	
-	public static int delayRisingEdge(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.DELAY_RISING_EDGE.get() : Tweaks.NormalPiston.DELAY_RISING_EDGE.get();
-	}
-	
-	public static int delayFallingEdge(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.DELAY_FALLING_EDGE.get() : Tweaks.NormalPiston.DELAY_FALLING_EDGE.get();
-	}
-	
-	public static boolean ignoreUpdatesWhileExtending(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_EXTENDING.get() : Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_EXTENDING.get();
-	}
-	
-	public static boolean ignoreUpdatesWhileRetracting(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_RETRACTING.get() : Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_RETRACTING.get();
-	}
-	
-	public static boolean lazyRisingEdge(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.LAZY_RISING_EDGE.get() : Tweaks.NormalPiston.LAZY_RISING_EDGE.get();
-	}
-	
-	public static boolean lazyFallingEdge(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.LAZY_FALLING_EDGE.get() : Tweaks.NormalPiston.LAZY_FALLING_EDGE.get();
-	}
-	
-	public static boolean movableWhenExtended(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.get() : Tweaks.NormalPiston.MOVABLE_WHEN_EXTENDED.get();
-	}
-	
-	public static int speedRisingEdge(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.SPEED_RISING_EDGE.get() : Tweaks.NormalPiston.SPEED_RISING_EDGE.get();
-	}
-	
-	public static int speedFallingEdge(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.SPEED_FALLING_EDGE.get() : Tweaks.NormalPiston.SPEED_FALLING_EDGE.get();
-	}
-	
-	public static boolean headUpdatesOnExtension(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.HEAD_UPDATES_ON_EXTENSION.get() : Tweaks.NormalPiston.HEAD_UPDATES_ON_EXTENSION.get();
-	}
-	
-	public static TickPriority tickPriorityRisingEdge(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.TICK_PRIORITY_RISING_EDGE.get() : Tweaks.NormalPiston.TICK_PRIORITY_RISING_EDGE.get();
-	}
-	
-	public static TickPriority tickPriorityFallingEdge(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.NormalPiston.TICK_PRIORITY_FALLING_EDGE.get();
-	}
-	
-	public static boolean updateSelfWhilePowered(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.UPDATE_SELF_WHILE_POWERED.get() : Tweaks.NormalPiston.UPDATE_SELF_WHILE_POWERED.get();
+	// This fixes some cases of pistons disappearing on clients
+	public static BlockState cancelDoubleRetraction(World world, BlockPos pos, BlockState state) {
+		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
+			if (isPiston(state) && !state.get(Properties.EXTENDED)) {
+				state = state.with(Properties.EXTENDED, true);
+				
+				world.setBlockState(pos, state, 16);
+				
+				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
+				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
+			}
+		}
+		
+		return state;
 	}
 }

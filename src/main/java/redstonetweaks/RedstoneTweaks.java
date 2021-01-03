@@ -1,5 +1,8 @@
 package redstonetweaks;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
@@ -11,9 +14,11 @@ import redstonetweaks.setting.preset.Presets;
 
 public class RedstoneTweaks implements ModInitializer {
 	
-	public static final RedstoneTweaksVersion MOD_VERSION = RedstoneTweaksVersion.create(0, 9, 0);
-	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.create(1, 0, 1);
-	public static final RedstoneTweaksVersion SETTINGS_VERSION = RedstoneTweaksVersion.create(1, 2, 0);
+	public static final Logger LOGGER = LogManager.getLogger();
+	
+	public static final RedstoneTweaksVersion MOD_VERSION = RedstoneTweaksVersion.createSnapshot(0, 9, 0, 1);
+	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.createRelease(1, 0, 2);
+	public static final RedstoneTweaksVersion SETTINGS_VERSION = RedstoneTweaksVersion.createRelease(1, 2, 1);
 	
 	public static BlockEntityType<PowerBlockEntity> POWER_BLOCK_ENTITY_TYPE;
 	
@@ -24,6 +29,6 @@ public class RedstoneTweaks implements ModInitializer {
 		Settings.init();
 		Presets.init();
 		
-		System.out.println("Initialized Redstone Tweaks " + MOD_VERSION);
+		LOGGER.info("Initialized Redstone Tweaks " + MOD_VERSION);
 	}
 }

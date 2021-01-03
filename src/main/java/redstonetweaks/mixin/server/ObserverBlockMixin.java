@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ObserverBlock;
 import net.minecraft.server.world.ServerTickScheduler;
@@ -24,12 +25,12 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.interfaces.RTIBlock;
-import redstonetweaks.interfaces.RTIWorld;
-import redstonetweaks.interfaces.RTIServerWorld;
+import redstonetweaks.mixinterfaces.RTIBlock;
+import redstonetweaks.mixinterfaces.RTIServerWorld;
+import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
-import redstonetweaks.world.common.UnfinishedEvent.Source;
 
 @Mixin(ObserverBlock.class)
 public abstract class ObserverBlockMixin implements RTIBlock {
@@ -43,10 +44,21 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 		TickSchedulerHelper.schedule(world, world.getBlockState(pos), tickScheduler, pos, block, Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
 	}
 	
-	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/ObserverBlock;updateNeighbors(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
-	private void onScheduledTickInjectBeforeUpdateNeighbors(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
+	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private void onScheduledTickInjectAfterSetBlockState0(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		if (!((RTIWorld)world).immediateNeighborUpdates()) {
-			((RTIServerWorld)world).getUnfinishedEventScheduler().schedule(Source.BLOCK, state, pos, 0);
+			((RTIServerWorld)world).getUnfinishedEventScheduler().scheduleBlockAction(pos, 0, (Block)(Object)this);
+			
+			ci.cancel();
+		}
+	}
+	
+	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", ordinal = 1, shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private void onScheduledTickInjectAfterSetBlockState1(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
+		if (!((RTIWorld)world).immediateNeighborUpdates()) {
+			((RTIServerWorld)world).getUnfinishedEventScheduler().scheduleBlockAction(pos, 1, (Block)(Object)this);
+			
+			ci.cancel();
 		}
 	}
 	
@@ -65,8 +77,8 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 	}
 	
 	@Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onScheduleTickRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T object, int oldDelay) {
-		tickScheduler.schedule(pos, object, Tweaks.Observer.DELAY_RISING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_RISING_EDGE.get());
+	private <T> void onScheduleTickRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay) {
+		tickScheduler.schedule(pos, block, Tweaks.Observer.DELAY_RISING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_RISING_EDGE.get());
 	}
 	
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
@@ -86,12 +98,9 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 		return Tweaks.Observer.POWER_WEAK.get();
 	}
 	
-	// To fix MC-136566 (https://bugs.mojang.com/browse/MC-136566)
-	// and MC-137127 (https://bugs.mojang.com/browse/MC-137127)
-	// we change the flags argument given to the setBlockState call.
-	// Enabling the 1 flag makes sure neighboring blocks are updated,
-	// fixing MC-136566. Disabling the 16 flag makes sure neighboring
-	// observers are updated, fixing MC-137127.
+	// To fix MC-136566 (https://bugs.mojang.com/browse/MC-136566) and MC-137127 (https://bugs.mojang.com/browse/MC-137127)
+	// we change the flags argument given to the setBlockState call. Enabling the 1 flag makes sure neighboring blocks are
+	// updated, fixing MC-136566. Disabling the 16 flag makes sure neighboring observers are updated, fixing MC-137127.
 	@ModifyConstant(method = "onBlockAdded", constant = @Constant(intValue = 18))
 	private int onBlockAddedFlags(int flags) {
 		if (Tweaks.BugFixes.MC136566.get()) {
@@ -104,13 +113,13 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 	}
 
 	@Override
-	public boolean continueEvent(World world, BlockState state, BlockPos pos, int type) {
+	public boolean continueAction(World world, BlockPos pos, int type) {
 		if (type == 0) {
-			if (state.get(Properties.POWERED)) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
-			}
+			updateNeighbors(world, pos, world.getBlockState(pos));
+		} else if (type == 1) {
+			TickSchedulerHelper.schedule(world, world.getBlockState(pos), world.getBlockTickScheduler(), pos, (Block)(Object)this, Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
 			
-			updateNeighbors(world, pos, state);
+			updateNeighbors(world, pos, world.getBlockState(pos));
 		}
 		
 		return false;

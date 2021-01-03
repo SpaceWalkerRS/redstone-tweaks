@@ -1,76 +1,73 @@
 package redstonetweaks.setting;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
 public class Settings {
 	
-	public static final List<ISetting> ALL = new ArrayList<>();
-	public static final List<SettingsCategory> CATEGORIES = new ArrayList<>();
+	public static final Map<String, ISetting> ALL = new HashMap<>();
+	public static final Map<String, SettingsCategory> CATEGORIES = new LinkedHashMap<>();
 	
-	public static void registerCategory(SettingsCategory category) {
-		CATEGORIES.add(category);
+	public static void register(SettingsCategory category) {
+		if (CATEGORIES.putIfAbsent(category.getName(), category) != null) {
+			RedstoneTweaks.LOGGER.warn("SettingsCategory " + category.getName() + " could not be registered, as a category with that name already exists");
+		}
 	}
 	
-	public static void registerPack(SettingsCategory category, SettingsPack pack) {
-		category.getSettingsPacks().add(pack);
+	public static void register(SettingsPack pack) {
+		if (pack.getCategory().getPacks().putIfAbsent(pack.getName(), pack) != null) {
+			RedstoneTweaks.LOGGER.warn("SettingsPack " + pack.getName() + " could not be registered, as a pack with that name already exists in SettingsCategory " + pack.getCategory().getName());
+		}
 	}
 	
-	public static void register(SettingsCategory category, SettingsPack pack, ISetting setting) {
-		setting.setId(category.getName() + '/' + pack.getName() + '/' + setting.getName());
-		
-		ALL.add(setting);
-		category.getSettings().add(setting);
-		pack.getSettings().add(setting);
+	public static void register(ISetting setting) {
+		if (setting.getPack().getSettings().putIfAbsent(setting.getName(), setting) != null) {
+			RedstoneTweaks.LOGGER.warn(setting.getClass() + " " + setting.getName() + " could not be registered, as a setting with that name already exists in SettingsPack " + setting.getPack().getName() + " in SettingsCategory " + setting.getPack().getCategory().getName());
+		} else
+		if (ALL.putIfAbsent(setting.getId(), setting) != null) {
+			RedstoneTweaks.LOGGER.warn(setting.getClass() + " " + setting.getName() + " could not be registered, as a setting with that name already exists");
+		}
 	}
 	
 	public static SettingsCategory getCategoryFromName(String name) {
-		for (SettingsCategory category : CATEGORIES) {
-			if (category.getName().equals(name)) {
-				return category;
-			}
-		}
-		return null;
+		return CATEGORIES.get(name);
 	}
 	
 	public static ISetting getSettingFromId(String id) {
-		for (ISetting setting : ALL) {
-			if (setting.getId().equals(id)) {
-				return setting;
-			}
-		}
-		return null;
+		return ALL.get(id);
 	}
 	
 	public static void resetAll() {
-		ALL.forEach((setting) -> setting.reset());
+		ALL.forEach((name, setting) -> setting.reset());
 	}
 	
 	public static void enableAll() {
-		ALL.forEach((setting) -> setting.setEnabled(true));
+		ALL.forEach((name, setting) -> setting.setEnabled(true));
 	}
 	
 	public static void disableAll() {
-		ALL.forEach((setting) -> setting.setEnabled(false));
+		ALL.forEach((name, setting) -> setting.setEnabled(false));
 	}
 	
 	public static void lockAll() {
-		ALL.forEach((setting) -> setting.setLocked(true));
+		ALL.forEach((name, setting) -> setting.setLocked(true));
 	}
 	
 	public static void unlockAll() {
-		ALL.forEach((setting) -> setting.setLocked(false));
+		ALL.forEach((name, setting) -> setting.setLocked(false));
 	}
 	
 	public static void applyPreset(Preset preset) {
-		ALL.forEach((setting) -> setting.applyPreset(preset));
+		ALL.forEach((name, setting) -> setting.applyPreset(preset));
 	}
 	
 	public static void removePreset(Preset preset) {
-		ALL.forEach((setting) -> setting.removePreset(preset));
+		ALL.forEach((name, setting) -> setting.removePreset(preset));
 	}
 	
 	public static void toDefault() {

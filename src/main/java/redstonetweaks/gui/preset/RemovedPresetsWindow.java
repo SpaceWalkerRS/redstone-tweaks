@@ -36,6 +36,8 @@ public class RemovedPresetsWindow extends RTWindow {
 	@Override
 	protected void renderContents(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		list.render(matrices, mouseX, mouseY, delta);
+		
+		drawBackgroundTextureBelow(matrices, list.getY() + list.getHeight() + 5, mouseX, mouseY, delta);
 	}
 	
 	@Override

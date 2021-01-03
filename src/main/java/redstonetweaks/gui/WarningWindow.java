@@ -8,23 +8,23 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
-import redstonetweaks.gui.preset.PresetsTab;
+
 import redstonetweaks.util.TextFormatting;
 
 public class WarningWindow extends RTWindow {
 	
 	private final List<Text> warning;
 	
-	public WarningWindow(PresetsTab parent, String text, int width) {
-		super(parent.screen, new TranslatableText("WARNING").formatted(Formatting.RED), (parent.screen.getWidth() - width) / 2, 0, width, 0);
+	public WarningWindow(RTMenuScreen screen, String text, int width) {
+		super(screen, new TranslatableText("WARNING").formatted(Formatting.RED), (screen.getWidth() - width) / 2, 0, width, 0);
 		
 		this.warning = new ArrayList<>();
-		for (String line : TextFormatting.getAsLines(parent.screen.getTextRenderer(), text, width - 30)) {
+		for (String line : TextFormatting.getAsLines(screen.getTextRenderer(), text, width - 50)) {
 			warning.add(new TranslatableText(line));
 		}
 		
 		this.setHeight(45 + this.warning.size() * 14);
-		this.setY((parent.screen.getHeight() + parent.screen.getHeaderHeight() - this.getHeight()) / 2);
+		this.setY((screen.getHeight() + screen.getHeaderHeight() - this.getHeight()) / 2);
 	}
 	
 	@Override
