@@ -479,7 +479,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	}
 	
 	private void tryDetachPistonHead(BlockPos pos, BlockState state) {
-		if (PistonHelper.isPiston(state) && state.get(Properties.EXTENDED) && PistonSettings.looseHead(PistonHelper.isSticky(state))) {
+		if (PistonHelper.isPiston(state) && !state.get(Properties.EXTENDED) && PistonSettings.looseHead(PistonHelper.isSticky(state))) {
 			Direction facing = state.get(Properties.FACING);
 			
 			if (facing.getAxis() == motionDirection.getAxis()) {
