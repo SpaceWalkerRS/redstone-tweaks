@@ -69,7 +69,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	@Shadow protected abstract void setMovedBlocks(int from, int to);
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
-	private void onInitInjectAtReturn(World world, BlockPos pos, Direction pistonDir, boolean retracted, CallbackInfo ci) {
+	private void onInitInjectAtReturn(World world, BlockPos pos, Direction pistonDir, boolean extending, CallbackInfo ci) {
 		BlockState state = world.getBlockState(posFrom);
 		
 		if (state.isOf(Blocks.STICKY_PISTON)) {
@@ -143,13 +143,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			// and the piston head is not detached
 			detachedPistonHeads.remove(pos);
 		} else if (pulledFrom == motionDirection && (!retracted || !pos.equals(posTo))) {
-			if (PistonHelper.isPiston(movedState) && PistonSettings.looseHead(PistonHelper.isSticky(movedState))) {
-				Direction facing = movedState.get(Properties.FACING);
-				
-				if (facing.getAxis() == motionDirection.getAxis()) {
-					detachedPistonHeads.put(pos, facing == motionDirection);
-				}
-			}
+			tryDetachPistonHead(pos, movedState);
 		}
 		
 		if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(movedBlock)) {
@@ -204,6 +198,10 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			isAdjacentBlockStuck = false;
 		} else {
 			isAdjacentBlockStuck = isAdjacentBlockStuck(blockPos, blockState, behindPos, behindState, motionDirection.getOpposite());
+			
+			if (isAdjacentBlockStuck) {
+				tryDetachPistonHead(behindPos, behindState);
+			}
 			
 			if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(behindState)) {
 				if (motionDirection.getAxis().isVertical() && !movedBlocks.contains(behindPos)) {
@@ -478,6 +476,16 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			}
 		}
 		return false;
+	}
+	
+	private void tryDetachPistonHead(BlockPos pos, BlockState state) {
+		if (PistonHelper.isPiston(state) && state.get(Properties.EXTENDED) && PistonSettings.looseHead(PistonHelper.isSticky(state))) {
+			Direction facing = state.get(Properties.FACING);
+			
+			if (facing.getAxis() == motionDirection.getAxis()) {
+				detachedPistonHeads.put(pos, facing == motionDirection);
+			}
+		}
 	}
 	
 	@Override
