@@ -571,6 +571,7 @@ public class Presets {
 			ServerConfig.Presets.EDIT_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
 			ServerConfig.Presets.EDIT_GAME_MODES.setPresetValue(DEFAULT, new Boolean[] {false, true, false, true});
 			
+			ServerConfig.TickCommand.PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
 			
 			// Check if every setting has a default value, otherwise log a warning
 			for (ISetting setting : Settings.ALL.values()) {

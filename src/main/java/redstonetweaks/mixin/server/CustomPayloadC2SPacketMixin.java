@@ -15,12 +15,12 @@ public class CustomPayloadC2SPacketMixin implements RTICustomPayloadC2SPacket {
 	@Shadow private PacketByteBuf data;
 	
 	@Override
-	public Identifier getChannel() {
+	public Identifier getPacketChannel() {
 		return channel;
 	}
 
 	@Override
-	public PacketByteBuf getData() {
+	public PacketByteBuf getPacketData() {
 		return new PacketByteBuf(data);
 	}
 }

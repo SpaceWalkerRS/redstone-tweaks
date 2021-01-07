@@ -10,12 +10,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
-
-import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.hotkeys.HotkeysManager;
 import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.packet.ClientPacketHandler;
+import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.ClientSettingsManager;
 import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.client.NeighborUpdateVisualizer;

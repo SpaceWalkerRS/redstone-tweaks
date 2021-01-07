@@ -3,7 +3,6 @@ package redstonetweaks.setting;
 import net.minecraft.client.MinecraftClient;
 
 import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.packet.types.LockCategoryPacket;
@@ -11,6 +10,7 @@ import redstonetweaks.packet.types.LockSettingPacket;
 import redstonetweaks.packet.types.ResetSettingPacket;
 import redstonetweaks.packet.types.ResetSettingsPacket;
 import redstonetweaks.packet.types.SettingPacket;
+import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.preset.ClientPresetsManager;
 import redstonetweaks.setting.types.ISetting;
 

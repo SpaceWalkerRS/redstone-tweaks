@@ -5,8 +5,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.ServerInfo;
 import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.server.ServerInfo;
 
 public class ServerInfoPacket extends RedstoneTweaksPacket {
 	

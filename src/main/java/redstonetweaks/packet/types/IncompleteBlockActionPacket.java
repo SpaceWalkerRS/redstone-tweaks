@@ -46,6 +46,6 @@ public class IncompleteBlockActionPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((RTIClientWorld)client.world).getUnfinishedEventScheduler().onUnfinishedEventPacketReceived(this);
+		((RTIClientWorld)client.world).getIncompleteActionScheduler().onIncompleteActionPacketReceived(this);
 	}
 }

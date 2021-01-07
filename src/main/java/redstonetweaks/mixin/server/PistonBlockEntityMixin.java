@@ -338,7 +338,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 				((RTIPistonBlockEntity)pushedBlockEntity).setParentPistonBlockEntity(null);
 			}
 			
-			((RTIWorld)world).queueBlockEntityPlacement(pushedBlockEntity);
+			((RTIWorld)world).queueBlockEntityPlacement(pos, pushedBlockEntity);
 		}
 	}
 }

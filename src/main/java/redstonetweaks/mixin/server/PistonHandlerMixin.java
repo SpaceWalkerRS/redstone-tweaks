@@ -55,7 +55,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 
 	private boolean sticky = false;
 	private BlockPos headPos;
-	private boolean hasHead;
 	private Set<BlockPos> anchoredChains;
 	// A map of positions where a piston head detaches from the piston base, mapped to a boolean
 	// which is true if the piston head moves out, false if the piston base moves out
@@ -67,6 +66,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	private Map<BlockPos, SlabType> splitSlabTypes;
 	
 	@Shadow protected abstract boolean tryMove(BlockPos pos, Direction dir);
+	@Shadow protected abstract void setMovedBlocks(int from, int to);
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(World world, BlockPos pos, Direction pistonDir, boolean retracted, CallbackInfo ci) {
@@ -84,13 +84,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		}
 		
 		headPos = posFrom.offset(pistonDir);
-		if (retracted) {
-			hasHead = false;
-		} else {
-			BlockState pistonHead = world.getBlockState(headPos);
-			Direction facing = state.get(Properties.FACING);
-			hasHead = PistonHelper.isPistonHead(pistonHead, sticky, facing) || PistonHelper.isExtendingPistonHead(world, headPos, pistonHead, sticky, facing);
-		}
 		
 		anchoredChains = new HashSet<>();
 		mergedSlabTypes = new HashMap<>();
@@ -110,14 +103,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		cir.cancel();
 	}
 	
-	@Inject(method = "calculatePush", cancellable = true, at = @At(value = "HEAD"))
-	private void onCalculatePushInjectAtHead(CallbackInfoReturnable<Boolean> cir) {
-		if (!retracted && PistonSettings.looseHead(sticky) && !hasHead) {
-			cir.setReturnValue(true);
-			cir.cancel();
-		}
-	}
-	
 	@Redirect(method = "calculatePush", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;isMovable(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;ZLnet/minecraft/util/math/Direction;)Z"))
 	private boolean onCalculatePushRedirectIsMovable(BlockState state, World world, BlockPos blockPos, Direction direction, boolean canBreak, Direction pistonDir) {
 		return PistonBlock.isMovable(state, world, blockPos, direction, canBreak, pistonDir) && (retracted || !SlabHelper.isSlab(state) || PistonHelper.canSlabStickTo(state, direction));
@@ -135,12 +120,12 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	@Redirect(method = "tryMove", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/util/math/BlockPos;equals(Ljava/lang/Object;)Z"))
 	private boolean onTryMoveRedirectBlockPosEquals0(BlockPos pos, Object obj) {
-		return pos.equals(posFrom) || (hasHead && pos.equals(headPos));
+		return isPistonPos(pos);
 	}
 	
 	@Redirect(method = "tryMove", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/util/math/BlockPos;equals(Ljava/lang/Object;)Z"))
 	private boolean onTryMoveRedirectBlockPosEquals1(BlockPos pos, Object obj) {
-		return pos.equals(posFrom) || (hasHead && pos.equals(headPos));
+		return isPistonPos(pos);
 	}
 	
 	private boolean alreadyMoved;
@@ -149,16 +134,25 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	private void onTryMoveInjectBeforeListContains(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState movedState, Block movedBlock) {
 		alreadyMoved = movedBlocks.contains(pos);
 		
-		if (alreadyMoved && dir.getAxis() != motionDirection.getAxis()) {
+		// Usually the direction given is the opposite of the side from which the block is pulled along,
+		// but when tryMove is called inside calculatePush for a retraction event, it is not
+		Direction pulledFrom = (pos == posTo && !retracted) ? dir : dir.getOpposite();
+		
+		if (alreadyMoved) {
 			// If the piston is now pulled along from a different side the base moves as well
 			// and the piston head is not detached
 			detachedPistonHeads.remove(pos);
+		} else if (pulledFrom == motionDirection && (!retracted || !pos.equals(posTo))) {
+			if (PistonHelper.isPiston(movedState) && PistonSettings.looseHead(PistonHelper.isSticky(movedState))) {
+				Direction facing = movedState.get(Properties.FACING);
+				
+				if (facing.getAxis() == motionDirection.getAxis()) {
+					detachedPistonHeads.put(pos, facing == motionDirection);
+				}
+			}
 		}
+		
 		if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(movedBlock)) {
-			// Usually the direction given is the opposite of the side from which the block is pulled along,
-			// but when tryMove is called inside calculatePush for a retraction event, it is not
-			Direction pulledFrom = (pos == posTo && !retracted) ? dir : dir.getOpposite();
-			
 			if (alreadyMoved) {
 				SlabType movedType = splitSlabTypes.get(pos);
 				
@@ -206,24 +200,19 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		BlockPos blockPos = behindPos.offset(motionDirection);
 		BlockState blockState = PistonHelper.getStateToMove(world, blockPos);
 		
-		isAdjacentBlockStuck = !behindState.isAir() && isAdjacentBlockStuck(blockPos, blockState, behindPos, behindState, motionDirection.getOpposite());
-		
-		if (!isAdjacentBlockStuck && (distance > 1 || (dir == motionDirection && !retracted))) {
-			if (PistonHelper.isPiston(blockState) && !blockState.get(Properties.EXTENDED) && PistonSettings.looseHead(PistonHelper.isSticky(blockState))) {
-				Direction facing = blockState.get(Properties.FACING);
-				
-				if (facing.getAxis() == motionDirection.getAxis()) {
-					detachedPistonHeads.put(blockPos, facing == motionDirection);
-				}
-			}
-		} else
-		if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(behindState)) {
-			if (motionDirection.getAxis().isVertical() && !movedBlocks.contains(behindPos)) {
-				trySplitDoubleSlab(behindPos, behindState, SlabHelper.getTypeFromDirection(motionDirection));
-			}
+		if (detachedPistonHeads.containsKey(blockPos)) {
+			isAdjacentBlockStuck = false;
+		} else {
+			isAdjacentBlockStuck = isAdjacentBlockStuck(blockPos, blockState, behindPos, behindState, motionDirection.getOpposite());
 			
-			// If the slab is pulled in the direction of the movement, it cannot be merged into!
-			mergedSlabTypes.remove(behindPos);
+			if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(behindState)) {
+				if (motionDirection.getAxis().isVertical() && !movedBlocks.contains(behindPos)) {
+					trySplitDoubleSlab(behindPos, behindState, SlabHelper.getTypeFromDirection(motionDirection));
+				}
+				
+				// If the slab is pulled in the direction of the movement, it cannot be merged into!
+				mergedSlabTypes.remove(behindPos);
+			}
 		}
 	}
 
@@ -235,30 +224,32 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	@Redirect(method = "tryMove", at = @At(value = "INVOKE", target = "Ljava/util/List;indexOf(Ljava/lang/Object;)I"))
 	private int onTryMoveRedirectIndexOf(List<Object> list, Object pos) {
 		if (Tweaks.Global.MERGE_SLABS.get() && splitSlabTypes.remove(pos) != null) {
+			// If a half slab is pushed that was previously the remaining part of a splitting double slab
+			// then that double slab will no longer split and/or merge. 
+			// We then also remove it from the movedBlocks list so it can push blocks in front of it
+			
 			mergedSlabTypes.remove(pos);
 			list.remove(pos);
 			
 			return -1;
 		}
+		
 		return list.indexOf(pos);
 	}
 	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 2, shift = Shift.BEFORE, target = "Lnet/minecraft/block/PistonBlock;isMovable(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;ZLnet/minecraft/util/math/Direction;)Z"))
 	private void onTryMoveInjectBeforeIsMovable(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int j, int distance, BlockPos frontPos) {
-		if (frontPos.equals(posFrom) || (hasHead && frontPos.equals(headPos))) {
-			cir.setReturnValue(!retracted);
+		if (!retracted && frontPos.equals(headPos)) {
+			cir.setReturnValue(true);
 			cir.cancel();
 		}
 	}
 	
-	@Redirect(method = "tryMove", at = @At(value = "INVOKE", ordinal = 2, target = "Lnet/minecraft/util/math/BlockPos;equals(Ljava/lang/Object;)Z"))
-	private boolean onTryMoveRedirectBlockPosEquals2(BlockPos pos, Object obj) {
-		// Replaced by above inject
-		return false;
-	}
-	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
 	private void onTryMoveInjectBeforeGetPistonBehavior(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int j, int distance, BlockPos frontPos) {
+		// If the piston is pushed the head does not detach
+		detachedPistonHeads.remove(frontPos);
+		
 		if (Tweaks.Global.MERGE_SLABS.get()) {
 			// We break out of the loop to prevent the front block from being added to the movedBlocks list multiple times
 			boolean breakLoop = alreadyMoved;
@@ -321,6 +312,10 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		return false;
 	}
 	
+	private boolean isPistonPos(BlockPos pos) {
+		return pos.equals(posFrom) || (!retracted && pos.equals(headPos));
+	}
+	
 	private static boolean isPotentiallySticky(BlockState state) {
 		return isPotentiallySticky(state.getBlock());
 	}
@@ -350,6 +345,9 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	// dir is the direction from pos towards adjacentPos
 	private boolean isAdjacentBlockStuck(BlockPos pos, BlockState state, BlockPos adjacentPos, BlockState adjacentState, Direction dir) {
+		if (adjacentState.isAir()) {
+			return false;
+		}
 		if (SlabHelper.isSlab(adjacentState) && !PistonHelper.canSlabStickTo(adjacentState, dir.getOpposite()))
 			return false;
 		
@@ -480,5 +478,128 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public List<BlockPos> getMovingStructure() {
+		movedBlocks.clear();
+		
+		BlockPos initPos = posFrom.offset(pistonDirection, retracted ? 2 : 1);
+		
+		tryBuildStructure(initPos, motionDirection);
+		for (int i = 0; i < movedBlocks.size(); i++) {
+			BlockPos movingPos = movedBlocks.get(i);
+			BlockState movingState = getMovingState(movingPos);
+			
+			if (isPotentiallySticky(movingState.getBlock())) {
+				tryExpandStructure(movingPos, movingState);
+			}
+		}
+		
+		return movedBlocks;
+	}
+	
+	private void tryBuildStructure(BlockPos pos, Direction dir) {
+		if (pos.equals(posFrom) || (retracted && pos.equals(headPos)) || movedBlocks.contains(pos)) {
+			return;
+		}
+		
+		BlockState movingState = getMovingState(pos);
+		
+		if (movingState == null || !PistonBlock.isMovable(movingState, world, pos, motionDirection, false, dir)) {
+			return;
+		}
+		
+		int behindDistance = 1;
+		BlockPos pullingPos = pos;
+		
+		while (isPotentiallySticky(movingState.getBlock())) {
+			BlockPos behindPos = pos.offset(motionDirection.getOpposite(), behindDistance);
+			
+			BlockState pullingState = movingState;
+			movingState = getMovingState(behindPos);
+			
+			if (movingState == null || !PistonBlock.isMovable(movingState, world, behindPos, motionDirection, false, pistonDirection) || !isAdjacentBlockStuck(pullingPos, pullingState, behindPos, movingState, motionDirection.getOpposite())) {
+				break;
+			}
+			
+			behindDistance++;
+			pullingPos = behindPos;
+		}
+		
+		for (int i = behindDistance - 1; i >= 0; i--) {
+			movedBlocks.add(pos.offset(motionDirection.getOpposite(), i));
+		}
+		
+		int frontDistance = 1;
+		
+		while (true) {
+			BlockPos frontPos = pos.offset(motionDirection, frontDistance);
+			
+			int index = movedBlocks.indexOf(frontPos);
+			
+			if (index > -1) {
+				setMovedBlocks(behindDistance, index);
+				
+				for (int i = 0; i <= index + behindDistance; i++) {
+					BlockPos movingPos = movedBlocks.get(i);
+					movingState = getMovingState(movingPos);
+					
+					if (isPotentiallySticky(movingState.getBlock())) {
+						tryExpandStructure(movingPos, movingState);
+					}
+				}
+				
+				return;
+			}
+			
+			movingState = getMovingState(frontPos);
+			
+			if (movingState == null || !PistonBlock.isMovable(movingState, world, frontPos, motionDirection, true, motionDirection)) {
+				return;
+			}
+			
+			movedBlocks.add(frontPos);
+			
+			behindDistance++;
+			frontDistance++;
+		}
+	}
+	
+	private void tryExpandStructure(BlockPos pos, BlockState state) {
+		for (Direction dir : Direction.values()) {
+			if (dir.getAxis() == motionDirection.getAxis()) {
+				continue;
+			}
+			
+			BlockPos adjacentPos = pos.offset(dir);
+			BlockState adjacentState = getMovingState(adjacentPos);
+			
+			if (adjacentState != null && isAdjacentBlockStuck(pos, state, adjacentPos, adjacentState, dir)) {
+				tryBuildStructure(adjacentPos, dir);
+			}
+		}
+	}
+	
+	private BlockState getMovingState(BlockPos pos) {
+		BlockState state = world.getBlockState(pos);
+		
+		if (!state.isOf(Blocks.MOVING_PISTON)) {
+			return null;
+		}
+		
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		
+		if (!(blockEntity instanceof PistonBlockEntity)) {
+			return null;
+		}
+		
+		PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+		
+		if (pistonBlockEntity.isExtending() != retracted || pistonBlockEntity.getFacing() != pistonDirection) {
+			return null;
+		}
+		
+		return ((RTIPistonBlockEntity)pistonBlockEntity).getMovedState();
 	}
 }

@@ -1,4 +1,4 @@
-package redstonetweaks.block;
+package redstonetweaks.block.entity;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;

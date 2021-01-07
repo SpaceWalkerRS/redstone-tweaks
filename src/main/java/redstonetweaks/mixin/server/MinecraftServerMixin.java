@@ -12,10 +12,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
-
-import redstonetweaks.ServerInfo;
 import redstonetweaks.mixinterfaces.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
+import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.ServerSettingsManager;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 

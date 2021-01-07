@@ -77,7 +77,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Shadow boolean inEntityTick;
 	
 	private ServerNeighborUpdateScheduler serverNeighborUpdateScheduler;
-	private ServerIncompleteActionScheduler unfinishedEventScheduler;
+	private ServerIncompleteActionScheduler incompleteActionScheduler;
 	private boolean isProcessingBlockEvents = false;
 	private ArrayList<BlockEvent> blockEventList;
 	
@@ -100,7 +100,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> registryKey, DimensionType dimensionType, WorldGenerationProgressListener worldGenerationProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<Spawner> list, boolean bl2, CallbackInfo ci) {
 		serverNeighborUpdateScheduler = new ServerNeighborUpdateScheduler((ServerWorld)(Object)this);
-		unfinishedEventScheduler = new ServerIncompleteActionScheduler((ServerWorld)(Object)this);
+		incompleteActionScheduler = new ServerIncompleteActionScheduler((ServerWorld)(Object)this);
 		blockEventList = new ArrayList<>();
 	}
 	
@@ -226,8 +226,8 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	}
 	
 	@Override
-	public ServerIncompleteActionScheduler getUnfinishedEventScheduler() {
-		return unfinishedEventScheduler;
+	public ServerIncompleteActionScheduler getIncompleteActionScheduler() {
+		return incompleteActionScheduler;
 	}
 	
 	@Override

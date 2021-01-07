@@ -9,6 +9,7 @@ import net.minecraft.block.PistonExtensionBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.PistonType;
+import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -17,6 +18,7 @@ import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
+import redstonetweaks.mixinterfaces.RTIPistonHandler;
 
 @Mixin(PistonExtensionBlock.class)
 public class PistonExtensionBlockMixin extends Block {
@@ -47,19 +49,25 @@ public class PistonExtensionBlockMixin extends Block {
 					((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
 					
 					if (PistonHelper.isSticky(pushedState) && PistonSettings.fastBlockDropping()) {
-						BlockPos frontPos = pos.offset(facing);
-						BlockState frontState = world.getBlockState(frontPos);
-						
-						if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
-							blockEntity = world.getBlockEntity(frontPos);
+						if (PistonSettings.superBlockDropping()) {
+							PistonHandler pistonHandler = new PistonHandler(world, pos, facing, false);
 							
-							if (blockEntity instanceof PistonBlockEntity) {
-								pistonBlockEntity = ((PistonBlockEntity)blockEntity);
+							for (BlockPos blockPos : ((RTIPistonHandler)pistonHandler).getMovingStructure()) {
+								blockEntity = world.getBlockEntity(blockPos);
 								
-								if (pistonBlockEntity.isSource()) {
-									((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
-								} else {
-									pistonBlockEntity.finish();
+								if (blockEntity instanceof PistonBlockEntity) {
+									((PistonBlockEntity)blockEntity).finish();
+								}
+							}
+						} else {
+							BlockPos frontPos = pos.offset(facing);
+							BlockState frontState = world.getBlockState(frontPos);
+							
+							if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
+								blockEntity = world.getBlockEntity(frontPos);
+								
+								if (blockEntity instanceof PistonBlockEntity) {
+									((PistonBlockEntity)blockEntity).finish();
 								}
 							}
 						}

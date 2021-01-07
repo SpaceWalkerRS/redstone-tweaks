@@ -47,7 +47,7 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onScheduledTickInjectAfterSetBlockState0(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		if (!((RTIWorld)world).immediateNeighborUpdates()) {
-			((RTIServerWorld)world).getUnfinishedEventScheduler().scheduleBlockAction(pos, 0, (Block)(Object)this);
+			((RTIServerWorld)world).getIncompleteActionScheduler().scheduleBlockAction(pos, 0, (Block)(Object)this);
 			
 			ci.cancel();
 		}
@@ -56,7 +56,7 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", ordinal = 1, shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onScheduledTickInjectAfterSetBlockState1(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		if (!((RTIWorld)world).immediateNeighborUpdates()) {
-			((RTIServerWorld)world).getUnfinishedEventScheduler().scheduleBlockAction(pos, 1, (Block)(Object)this);
+			((RTIServerWorld)world).getIncompleteActionScheduler().scheduleBlockAction(pos, 1, (Block)(Object)this);
 			
 			ci.cancel();
 		}

@@ -5,22 +5,22 @@ import redstonetweaks.packet.types.IncompleteBlockActionPacket;
 import redstonetweaks.world.common.IIncompleteActionScheduler;
 import redstonetweaks.world.common.IncompleteBlockAction;
 
-public class ClientUnfinishedEventScheduler implements IIncompleteActionScheduler {
+public class ClientIncompleteActionScheduler implements IIncompleteActionScheduler {
 	
 	private final ClientWorld world;
 	
-	public boolean hasScheduledEvents;
+	public boolean hasScheduledActions;
 	
-	public ClientUnfinishedEventScheduler(ClientWorld world) {
+	public ClientIncompleteActionScheduler(ClientWorld world) {
 		this.world = world;
 	}
 	
 	@Override
 	public boolean hasScheduledActions() {
-		return hasScheduledEvents;
+		return hasScheduledActions;
 	}
 	
-	public void onUnfinishedEventPacketReceived(IncompleteBlockActionPacket packet) {
+	public void onIncompleteActionPacketReceived(IncompleteBlockActionPacket packet) {
 		new IncompleteBlockAction(packet.pos, packet.type, packet.block).tryContinue(world);
 	}
 }

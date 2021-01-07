@@ -170,7 +170,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	
 	private void tickWorld(BooleanSupplier shouldKeepTicking) {
 		ServerNeighborUpdateScheduler neighborUpdateScheduler = ((RTIServerWorld)currentWorld).getNeighborUpdateScheduler();
-		ServerIncompleteActionScheduler unfinishedEventScheduler = ((RTIServerWorld)currentWorld).getUnfinishedEventScheduler();
+		ServerIncompleteActionScheduler unfinishedEventScheduler = ((RTIServerWorld)currentWorld).getIncompleteActionScheduler();
 		
 		boolean hasNeighborUpdates = neighborUpdateScheduler.hasScheduledNeighborUpdates();
 		boolean hasScheduledEvents = unfinishedEventScheduler.hasScheduledActions();

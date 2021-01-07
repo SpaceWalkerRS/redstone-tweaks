@@ -20,7 +20,7 @@ import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.util.math.BlockPos;
 
 import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.block.PowerBlockEntity;
+import redstonetweaks.block.entity.PowerBlockEntity;
 
 @Mixin(DebugHud.class)
 public class DebugHudMixin {

@@ -7,8 +7,7 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.util.registry.Registry;
-
-import redstonetweaks.block.PowerBlockEntity;
+import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.preset.Presets;
 

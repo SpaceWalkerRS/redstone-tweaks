@@ -23,8 +23,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
-
-import redstonetweaks.block.PowerBlockEntity;
+import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(TargetBlock.class)

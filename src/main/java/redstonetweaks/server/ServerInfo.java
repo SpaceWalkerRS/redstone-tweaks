@@ -1,5 +1,7 @@
-package redstonetweaks;
+package redstonetweaks.server;
 
+import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.packet.types.ServerInfoPacket;
 
 public class ServerInfo {

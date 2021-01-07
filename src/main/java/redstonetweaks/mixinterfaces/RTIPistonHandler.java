@@ -17,4 +17,6 @@ public interface RTIPistonHandler {
 	
 	public Map<BlockPos, SlabType> getSplitSlabTypes();
 	
+	public List<BlockPos> getMovingStructure();
+	
 }

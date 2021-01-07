@@ -67,7 +67,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Shadow @Final protected List<BlockEntity> pendingBlockEntities;
 	@Shadow protected boolean iteratingTickingBlockEntities;
 	
-	private BlockEntity queuedBlockEntity;
+	private Map<BlockPos, BlockEntity> queuedBlockEntities;
 	
 	private Iterator<BlockEntity> blockEntitiesIterator;
 	private Map<BlockPos, BlockEventHandler> blockEventHandlers;
@@ -90,6 +90,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(MutableWorldProperties properties, RegistryKey<World> registryKey, final DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l, CallbackInfo ci) {
 		blockEventHandlers = new HashMap<>();
+		queuedBlockEntities = new HashMap<>();
 	}
 	
 	// Don't display breaking particles if the block that is broken is a piston (head)
@@ -200,16 +201,13 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	}
 	
 	@Override
-	public BlockEntity fetchQueuedBlockEntity() {
-		BlockEntity blockEntity = queuedBlockEntity;
-		queuedBlockEntity = null;
-		
-		return blockEntity;
+	public BlockEntity fetchQueuedBlockEntity(BlockPos pos) {
+		return queuedBlockEntities.remove(pos);
 	}
 	
 	@Override
-	public void queueBlockEntityPlacement(BlockEntity blockEntity) {
-		queuedBlockEntity = blockEntity;
+	public void queueBlockEntityPlacement(BlockPos pos, BlockEntity blockEntity) {
+		queuedBlockEntities.put(pos, blockEntity);
 	}
 	
 	@Override

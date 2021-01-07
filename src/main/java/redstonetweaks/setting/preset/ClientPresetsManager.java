@@ -2,7 +2,6 @@ package redstonetweaks.setting.preset;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.packet.types.ApplyPresetPacket;
@@ -10,6 +9,7 @@ import redstonetweaks.packet.types.DuplicatePresetPacket;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.ReloadPresetsPacket;
 import redstonetweaks.packet.types.RemovePresetPacket;
+import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.ServerConfig;
 
 public class ClientPresetsManager {

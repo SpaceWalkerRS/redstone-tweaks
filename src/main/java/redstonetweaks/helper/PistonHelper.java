@@ -36,19 +36,7 @@ public class PistonHelper {
 	);
 	
 	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
-		return createPistonBlockEntity(pushedBlockState, null, pistonDir, extending, isSource, isMovedByStickyPiston);
-	}
-	
-	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
-		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, pistonDir, extending, isSource, isMovedByStickyPiston, false, false);
-	}
-	
-	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean sourceIsMoving) {
-		return createPistonBlockEntity(pushedBlockState, null, pistonDir, extending, isSource, isMovedByStickyPiston, false, sourceIsMoving);
-	}
-	
-	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs) {
-		return createPistonBlockEntity(pushedBlockState, pushedBlockEntity, pistonDir, extending, isSource, isMovedByStickyPiston, isMergingSlabs, false);
+		return createPistonBlockEntity(pushedBlockState, null, pistonDir, extending, isSource, isMovedByStickyPiston, false ,false);
 	}
 	
 	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs, boolean sourceIsMoving) {
@@ -213,6 +201,10 @@ public class PistonHelper {
 		return false;
 	}
 	
+	public static boolean isMovablePiston(World world, BlockPos pos, BlockState state) {
+		return isMovablePiston(world, pos, state, true) || isMovablePiston(world, pos, state, false);
+	}
+	
 	public static boolean isMovablePiston(World world, BlockPos pos, BlockState state, boolean sticky) {
 		if (isPiston(state, sticky)) {
 			if (!state.get(Properties.EXTENDED)) {
@@ -338,22 +330,6 @@ public class PistonHelper {
 		return state;
 	}
 
-	public static void tryBreakPistonHead(World world, BlockPos headPos, boolean sticky, Direction facing) {
-		tryRemovePistonHead(world, headPos, sticky, facing, true);
-	}
-	
-	public static void tryRemovePistonHead(World world, BlockPos headPos, boolean sticky, Direction facing, boolean updateNeighbors) {
-		BlockState pistonHead = world.getBlockState(headPos);
-		
-		if (isPistonHead(pistonHead, sticky, facing) || isExtendingPistonHead(world, headPos, pistonHead, sticky, facing)) {
-			if (updateNeighbors) {
-				world.removeBlock(headPos, false);
-			} else {
-				world.setBlockState(headPos, Blocks.AIR.getDefaultState(), 18);
-			}
-		}
-	}
-
 	// Notify clients of any pistons that are about to be "double retracted"
 	public static void prepareDoubleRetraction(World world, BlockPos pos, BlockState state) {
 		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
@@ -365,18 +341,14 @@ public class PistonHelper {
 	}
 	
 	// This fixes some cases of pistons disappearing on clients
-	public static BlockState cancelDoubleRetraction(World world, BlockPos pos, BlockState state) {
+	public static void cancelDoubleRetraction(World world, BlockPos pos, BlockState state) {
 		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
 			if (isPiston(state) && !state.get(Properties.EXTENDED)) {
-				state = state.with(Properties.EXTENDED, true);
-				
-				world.setBlockState(pos, state, 16);
+				world.setBlockState(pos, state.with(Properties.EXTENDED, true), 16);
 				
 				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
 				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
 			}
 		}
-		
-		return state;
 	}
 }

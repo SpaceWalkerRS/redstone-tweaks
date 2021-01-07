@@ -22,7 +22,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
-import redstonetweaks.block.PowerBlockEntity;
+import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.mixinterfaces.RTIPressurePlate;
 import redstonetweaks.mixinterfaces.RTIWorld;
 

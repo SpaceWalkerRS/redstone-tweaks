@@ -26,8 +26,10 @@ public class RedstoneTweaksVersion {
 	public boolean equals(Object other) {
 		if (other instanceof RedstoneTweaksVersion) {
 			RedstoneTweaksVersion version = (RedstoneTweaksVersion)other;
-			return version.type == type && version.major == major && version.minor == minor && version.patch == patch && version.snapshot == snapshot;
+			
+			return type == version.type && major == version.major && minor == version.minor && patch == version.patch && snapshot == version.snapshot;
 		}
+		
 		return false;
 	}
 	
@@ -37,20 +39,27 @@ public class RedstoneTweaksVersion {
 	}
 	
 	public boolean isValid() {
-		return !this.equals(INVALID_VERSION);
+		return this != INVALID_VERSION;
 	}
 	
 	public boolean isNewerThan(RedstoneTweaksVersion version) {
-		if (major < version.major || minor < version.minor || patch < version.patch) {
-			return false;
+		if (major == version.major) {
+			if (minor == version.minor) {
+				if (patch == version.patch) {
+					if (type == version.type) {
+						return type == Type.SNAPSHOT && snapshot > version.snapshot;
+					}
+					
+					return type == Type.RELEASE;
+				}
+				
+				return patch > version.patch;
+			}
+			
+			return minor > version.minor;
 		}
-		if (major > version.major || minor > version.minor || patch > version.patch) {
-			return true;
-		}
-		if (type == version.type) {
-			return type == Type.SNAPSHOT && snapshot > version.snapshot;
-		}
-		return type == Type.RELEASE;
+		
+		return major > version.major;
 	}
 	
 	public static RedstoneTweaksVersion createRelease(int major, int minor, int patch) {

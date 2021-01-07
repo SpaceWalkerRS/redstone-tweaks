@@ -8,6 +8,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 public class TickCommand {
@@ -15,19 +16,19 @@ public class TickCommand {
 	public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
 		LiteralArgumentBuilder<ServerCommandSource> builder = CommandManager.
 			literal("tick").
-			requires(context -> {return context.hasPermissionLevel(2);}).
+			requires(context -> context.hasPermissionLevel(ServerConfig.TickCommand.PERMISSION_LEVEL.get())).
 			then(CommandManager.
 				literal("pause").
-				executes(context -> {return pause(context.getSource());})).
+				executes(context -> pause(context.getSource()))).
 			then(CommandManager.
 				literal("resume").
-				executes(context -> {return resume(context.getSource());})).
+				executes(context -> resume(context.getSource()))).
 			then(CommandManager.
 				literal("advance").
-				executes(context -> {return advance(context.getSource(), 1);}).
+				executes(context -> advance(context.getSource(), 1)).
 				then(CommandManager.
 					argument("count", IntegerArgumentType.integer(1, 1023)).
-					executes(context -> {return advance(context.getSource(), IntegerArgumentType.getInteger(context, "count"));})));
+					executes(context -> advance(context.getSource(), IntegerArgumentType.getInteger(context, "count")))));
 		
 		dispatcher.register(builder);
 	}

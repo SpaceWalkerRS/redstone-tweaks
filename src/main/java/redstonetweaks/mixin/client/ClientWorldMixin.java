@@ -23,7 +23,7 @@ import redstonetweaks.mixinterfaces.RTIMinecraftClient;
 import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
-import redstonetweaks.world.client.ClientUnfinishedEventScheduler;
+import redstonetweaks.world.client.ClientIncompleteActionScheduler;
 import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.common.WorldTickHandler;
 import redstonetweaks.world.common.WorldTickOptions;
@@ -34,12 +34,12 @@ public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
 	@Shadow @Final private MinecraftClient client;
 	
 	private ClientNeighborUpdateScheduler neighborUpdateScheduler;
-	private ClientUnfinishedEventScheduler unfinishedEventScheduler;
+	private ClientIncompleteActionScheduler incompleteActionScheduler;
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(ClientPlayNetworkHandler clientPlayNetworkHandler, ClientWorld.Properties properties, RegistryKey<World> registryKey, DimensionType dimensionType, int i, Supplier<Profiler> supplier, WorldRenderer worldRenderer, boolean bl, long l, CallbackInfo ci) {
 		neighborUpdateScheduler = new ClientNeighborUpdateScheduler();
-		unfinishedEventScheduler = new ClientUnfinishedEventScheduler((ClientWorld)(Object)this);
+		incompleteActionScheduler = new ClientIncompleteActionScheduler((ClientWorld)(Object)this);
 	}
 	
 	@Redirect(method = "tickEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;tickBlockEntities()V"))
@@ -60,8 +60,8 @@ public abstract class ClientWorldMixin implements RTIWorld, RTIClientWorld {
 	}
 
 	@Override
-	public ClientUnfinishedEventScheduler getUnfinishedEventScheduler() {
-		return unfinishedEventScheduler;
+	public ClientIncompleteActionScheduler getIncompleteActionScheduler() {
+		return incompleteActionScheduler;
 	}
 	
 	@Override

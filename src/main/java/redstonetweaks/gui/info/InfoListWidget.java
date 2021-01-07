@@ -13,12 +13,12 @@ import net.minecraft.util.Util;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.ServerInfo;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTexturedButtonWidget;
+import redstonetweaks.server.ServerInfo;
 import redstonetweaks.util.TextFormatting;
 
 public class InfoListWidget extends RTListWidget<InfoListWidget.Entry> {

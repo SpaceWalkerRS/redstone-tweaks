@@ -16,7 +16,7 @@ public interface RTIServerWorld  {
 	
 	public ServerNeighborUpdateScheduler getNeighborUpdateScheduler();
 	
-	public ServerIncompleteActionScheduler getUnfinishedEventScheduler();
+	public ServerIncompleteActionScheduler getIncompleteActionScheduler();
 	
 	public void processWeather();
 	

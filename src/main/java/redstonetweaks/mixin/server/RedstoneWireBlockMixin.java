@@ -32,8 +32,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
-import redstonetweaks.block.PowerBlockEntity;
+import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.RedstoneWireHelper;
 import redstonetweaks.mixinterfaces.RTIWorld;
