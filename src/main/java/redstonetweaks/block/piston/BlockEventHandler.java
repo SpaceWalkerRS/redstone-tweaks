@@ -27,6 +27,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
+import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
 import redstonetweaks.mixinterfaces.RTIPistonHandler;
 import redstonetweaks.mixinterfaces.RTIServerWorld;
 import redstonetweaks.mixinterfaces.RTIWorld;
@@ -146,7 +147,7 @@ public class BlockEventHandler {
 			BlockEntity blockEntity = world.getBlockEntity(headPos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
-				((PistonBlockEntity)blockEntity).finish();
+				((RTIPistonBlockEntity)blockEntity).finishSource();
 			} else {
 				tryContinueBlockEvent();
 			}
@@ -263,7 +264,7 @@ public class BlockEventHandler {
 						BlockEntity blockEntity = world.getBlockEntity(droppedBlocks.get(index));
 						
 						if (blockEntity instanceof PistonBlockEntity) {
-							((PistonBlockEntity)blockEntity).finish();
+							((RTIPistonBlockEntity)blockEntity).finishSource();
 						}
 						
 						index--;

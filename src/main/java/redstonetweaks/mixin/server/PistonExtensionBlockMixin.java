@@ -8,12 +8,12 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonExtensionBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
-import net.minecraft.block.enums.PistonType;
 import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+
 import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
@@ -43,38 +43,42 @@ public class PistonExtensionBlockMixin extends Block {
 			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 			
 			if (pistonBlockEntity.isSource() && !pistonBlockEntity.isExtending()) {
-				BlockState pushedState = pistonBlockEntity.getPushedBlock();
+				((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
 				
-				if (PistonHelper.isPiston(pushedState)) {
-					((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
-					
-					if (PistonHelper.isSticky(pushedState) && PistonSettings.fastBlockDropping()) {
-						if (PistonSettings.superBlockDropping()) {
-							PistonHandler pistonHandler = new PistonHandler(world, pos, facing, false);
+				if (((RTIPistonBlockEntity)pistonBlockEntity).isMovedByStickyPiston() && PistonSettings.fastBlockDropping()) {
+					if (PistonSettings.superBlockDropping()) {
+						PistonHandler pistonHandler = new PistonHandler(world, pos, facing, false);
+						
+						for (BlockPos blockPos : ((RTIPistonHandler)pistonHandler).getMovingStructure()) {
+							blockEntity = world.getBlockEntity(blockPos);
 							
-							for (BlockPos blockPos : ((RTIPistonHandler)pistonHandler).getMovingStructure()) {
-								blockEntity = world.getBlockEntity(blockPos);
-								
-								if (blockEntity instanceof PistonBlockEntity) {
-									((PistonBlockEntity)blockEntity).finish();
-								}
+							if (blockEntity instanceof PistonBlockEntity) {
+								((RTIPistonBlockEntity)blockEntity).finishSource();
 							}
-						} else {
-							BlockPos frontPos = pos.offset(facing);
-							BlockState frontState = world.getBlockState(frontPos);
+						}
+					} else {
+						BlockPos frontPos = pos.offset(facing);
+						BlockState frontState = world.getBlockState(frontPos);
+						
+						if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
+							blockEntity = world.getBlockEntity(frontPos);
 							
-							if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
-								blockEntity = world.getBlockEntity(frontPos);
-								
-								if (blockEntity instanceof PistonBlockEntity) {
-									((PistonBlockEntity)blockEntity).finish();
-								}
+							if (blockEntity instanceof PistonBlockEntity) {
+								((RTIPistonBlockEntity)blockEntity).finishSource();
 							}
 						}
 					}
-					
-					return true;
 				}
+				
+				BlockState piston = world.getBlockState(pos);
+				
+				if (PistonHelper.isPiston(piston)) {
+					if (!piston.onSyncedBlockEvent(world, pos, MotionType.EXTEND, data)) {
+						piston.onSyncedBlockEvent(world, pos, MotionType.EXTEND_BACKWARDS, data);
+					}
+				}
+				
+				return true;
 			}
 		}
 		
@@ -89,8 +93,8 @@ public class PistonExtensionBlockMixin extends Block {
 			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity) blockEntity;
 			
 			if (pistonBlockEntity.isSource() && !pistonBlockEntity.isExtending()) {
-				boolean sticky = state.get(Properties.PISTON_TYPE) == PistonType.STICKY;
-				Direction facing = state.get(Properties.FACING);
+				boolean sticky = ((RTIPistonBlockEntity)pistonBlockEntity).isMovedByStickyPiston();
+				Direction facing = pistonBlockEntity.getFacing();
 				
 				if (!PistonSettings.ignoreUpdatesWhileRetracting(sticky) && PistonHelper.isReceivingPower(world, pos, state, facing)) {
 					if (!world.isClient()) {

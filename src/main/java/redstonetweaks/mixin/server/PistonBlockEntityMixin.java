@@ -313,11 +313,15 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Override
 	public void finishSource() {
+		// With various settings it is possible for a piston to try to drop a source piston block entity
+		// and we do not want those to be set to air.
 		if (source) {
 			// We have to set source to false so that the pushed block is not replaced by air
 			source = false;
 			finish();
 			source = true;
+		} else {
+			finish();
 		}
 	}
 	

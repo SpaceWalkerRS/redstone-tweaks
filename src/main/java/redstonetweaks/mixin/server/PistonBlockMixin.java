@@ -179,8 +179,10 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			if (PistonSettings.doBlockDropping()) {
 				return true;
 			}
-			pistonBlockEntity.finish();
+			
+			((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
 		}
+		
 		return false;
 	}
 	
@@ -196,13 +198,19 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 					BlockEntity blockEntity = world.getBlockEntity(droppedBlocks.get(index));
 					
 					if (blockEntity instanceof PistonBlockEntity) {
-						((PistonBlockEntity)blockEntity).finish();
+						((RTIPistonBlockEntity)blockEntity).finishSource();
 					}
 				}
 			} else {
-				pistonBlockEntity.finish();
+				((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
 			}
 		}
+	}
+	
+	@Inject(method = "onSyncedBlockEvent", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.AFTER, ordinal = 1, target = "Lnet/minecraft/block/entity/PistonBlockEntity;finish()V"))
+	private void onOnSyncedBlockEventInjectAfterFinish1(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir, Direction facing) {
+		// A fix for head duping when movableWhenExtended is enabled
+		world.removeBlock(pos.offset(facing), false);
 	}
 	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;isMovable(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;ZLnet/minecraft/util/math/Direction;)Z"))
