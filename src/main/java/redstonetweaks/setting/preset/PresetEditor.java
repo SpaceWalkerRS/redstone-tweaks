@@ -111,12 +111,21 @@ public class PresetEditor {
 	}
 	
 	public void addSetting(ISetting setting) {
+		addSetting(setting, false);
+	}
+	
+	public void addSetting(ISetting setting, boolean useCurrentValue) {
 		if (setting.hasPreset(preset)) {
 			removedSettings.remove(setting);
 		} else {
 			addedSettings.add(setting);
 		}
-		setting.copyPresetValue(Presets.Default.DEFAULT, TEMP);
+		
+		if (useCurrentValue) {
+			setting.copyValueToPreset(TEMP);
+		} else {
+			setting.copyPresetValue(Presets.Default.DEFAULT, TEMP);
+		}
 	}
 	
 	public void removeSetting(ISetting setting) {

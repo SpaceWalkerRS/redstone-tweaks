@@ -58,15 +58,21 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		private final List<RTElement> children;
 		private final RTButtonWidget addButton;
+		private final RTButtonWidget addFromSettingsButton;
 		private final RTButtonWidget oopsButton;
 		
 		public AddPresetEntry() {
 			this.children = new ArrayList<>();
 			
-			this.addButton = new RTButtonWidget((getX() + getWidth() - 80) / 2, 0, 80, 20, () -> new TranslatableText("New Preset"), (button) -> {
+			this.addButton = new RTButtonWidget((getX() + getWidth() - 80 - 84) / 2, 0, 80, 20, () -> new TranslatableText("New Preset"), (button) -> {
 				parent.newPreset();
 			});
 			this.children.add(this.addButton);
+			
+			this.addFromSettingsButton = new RTButtonWidget((getX() + getWidth() - 80 + 84) / 2, 0, 80, 20, () -> new TranslatableText("From Settings"), (button) -> {
+				parent.newPresetFromSettings();
+			});
+			this.children.add(this.addFromSettingsButton);
 			
 			this.oopsButton = new RTButtonWidget(getX() + getWidth() - 55, 0, 45, 20, () -> new TranslatableText("oops"), (button) -> {
 				screen.openWindow(new RemovedPresetsWindow(parent));
@@ -96,6 +102,9 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			addButton.setY(y);
 			addButton.render(matrices, mouseX, mouseY, tickDelta);
 			
+			addFromSettingsButton.setY(y);
+			addFromSettingsButton.render(matrices, mouseX, mouseY, tickDelta);
+			
 			oopsButton.setY(y);
 			oopsButton.render(matrices, mouseX, mouseY, tickDelta);
 		}
@@ -105,6 +114,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			boolean canEditPresets = ((RTIMinecraftClient)client).getSettingsManager().getPresetsManager().canEditPresets();
 			
 			addButton.setActive(canEditPresets);
+			addFromSettingsButton.setActive(canEditPresets);
 			oopsButton.setActive(canEditPresets);
 		}
 	}

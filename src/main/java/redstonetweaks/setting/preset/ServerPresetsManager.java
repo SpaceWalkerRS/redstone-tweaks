@@ -6,10 +6,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.UUID;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.WorldSavePath;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
@@ -19,7 +19,6 @@ import redstonetweaks.packet.types.ApplyPresetPacket;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
 import redstonetweaks.packet.types.RemovePresetPacket;
-import redstonetweaks.setting.ServerSettingsManager;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 
@@ -29,13 +28,9 @@ public class ServerPresetsManager {
 	private static final String PRESETS_PATH = "presets";
 	
 	private final MinecraftServer server;
-	private final ServerSettingsManager settingsManager;
 	
-	public ServerPresetsManager(MinecraftServer server, ServerSettingsManager settingsManager) {
+	public ServerPresetsManager(MinecraftServer server) {
 		this.server = server;
-		this.settingsManager = settingsManager;
-		
-		onStartUp();
 	}
 	
 	public void onStartUp() {
@@ -175,7 +170,7 @@ public class ServerPresetsManager {
 	}
 	
 	private File getCacheDir() {
-		File directory = new File(settingsManager.getServer().getSavePath(WorldSavePath.ROOT).toFile(), CACHE_DIRECTORY);
+		File directory = new File(server.getRunDirectory(), CACHE_DIRECTORY);
 
 		if (!directory.exists()) {
 			directory.mkdirs();
@@ -249,8 +244,11 @@ public class ServerPresetsManager {
 		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	
-	public void onPlayerJoined(ServerPlayerEntity player) {
-		updatePresetsOfPlayer(player);
+	public void onPlayerJoined(UUID playerUUID) {
+		ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerUUID);
+		if (player != null) {
+			updatePresetsOfPlayer(player);
+		}
 	}
 	
 	private void updatePresetsOfPlayer(ServerPlayerEntity player) {

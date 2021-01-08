@@ -43,14 +43,14 @@ public class RemovePresetPacket extends RedstoneTweaksPacket {
 			Preset preset = Presets.fromName(name);
 			
 			if (preset != null) {
-				((RTIMinecraftServer)server).getSettingsManager().getPresetsManager().removePreset(preset);
+				((RTIMinecraftServer)server).getPresetsManager().removePreset(preset);
 			}
 		}
 		if (action == PUT_BACK) {
 			Preset preset = Presets.getRemovedPresetFromName(name);
 			
 			if (preset != null) {
-				((RTIMinecraftServer)server).getSettingsManager().getPresetsManager().unremovePreset(preset);
+				((RTIMinecraftServer)server).getPresetsManager().unremovePreset(preset);
 			}
 		}
 	}

@@ -34,7 +34,7 @@ public class DuplicatePresetPacket extends RedstoneTweaksPacket {
 		Preset preset = Presets.fromName(name);
 		
 		if (preset != null) {
-			((RTIMinecraftServer)server).getSettingsManager().getPresetsManager().duplicatePreset(preset);
+			((RTIMinecraftServer)server).getPresetsManager().duplicatePreset(preset);
 		}
 	}
 	

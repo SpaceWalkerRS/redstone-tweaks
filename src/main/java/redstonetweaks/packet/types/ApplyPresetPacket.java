@@ -35,7 +35,7 @@ public class ApplyPresetPacket extends RedstoneTweaksPacket {
 		Preset preset = Presets.fromName(name);
 		
 		if (preset != null) {
-			((RTIMinecraftServer)server).getSettingsManager().getPresetsManager().applyPreset(preset);
+			((RTIMinecraftServer)server).getPresetsManager().applyPreset(preset);
 		}
 	}
 	

@@ -133,7 +133,7 @@ public class PresetPacket extends RedstoneTweaksPacket {
 		if (editor.canSave()) {
 			editor.saveChanges();
 			
-			((RTIMinecraftServer)server).getSettingsManager().getPresetsManager().onPresetPacketReceived(editor);
+			((RTIMinecraftServer)server).getPresetsManager().onPresetPacketReceived(editor);
 		} else {
 			editor.discardChanges();
 		}

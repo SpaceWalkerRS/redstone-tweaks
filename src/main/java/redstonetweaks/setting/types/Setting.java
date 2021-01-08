@@ -156,6 +156,11 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	@Override
+	public void copyValueToPreset(Preset preset) {
+		setPresetValue(preset, get());
+	}
+	
+	@Override
 	public boolean hasPreset(Preset preset) {
 		return presetValues.containsKey(preset);
 	}

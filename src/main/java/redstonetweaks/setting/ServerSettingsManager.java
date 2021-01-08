@@ -22,7 +22,6 @@ import redstonetweaks.packet.types.ResetSettingPacket;
 import redstonetweaks.packet.types.ResetSettingsPacket;
 import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.packet.types.SettingsPacket;
-import redstonetweaks.setting.preset.ServerPresetsManager;
 import redstonetweaks.setting.types.ISetting;
 
 public class ServerSettingsManager {
@@ -31,24 +30,17 @@ public class ServerSettingsManager {
 	private static final String SETTINGS_PATH = "settings.txt";
 	
 	private final MinecraftServer server;
-	private final ServerPresetsManager presetsManager;
 	
 	public ServerSettingsManager(MinecraftServer server) {
 		this.server = server;
-		this.presetsManager = new ServerPresetsManager(server, this);
-		
-		onStartUp();
 	}
 	
 	public MinecraftServer getServer() {
 		return server;
 	}
 	
-	public ServerPresetsManager getPresetsManager() {
-		return presetsManager;
-	}
 	
-	private void onStartUp() {
+	public void onStartUp() {
 		Settings.toDefault();
 		Settings.enableAll();
 		
@@ -56,7 +48,6 @@ public class ServerSettingsManager {
 	}
 	
 	public void onShutdown() {
-		presetsManager.onShutdown();
 		saveSettings();
 	}
 	
@@ -164,7 +155,6 @@ public class ServerSettingsManager {
 		ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerUUID);
 		if (player != null) {
 			updateSettingsOfPlayer(player);
-			presetsManager.onPlayerJoined(player);
 		}
 	}
 	

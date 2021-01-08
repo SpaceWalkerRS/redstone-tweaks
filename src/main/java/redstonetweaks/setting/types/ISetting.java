@@ -43,6 +43,8 @@ public interface ISetting {
 	
 	public void copyPresetValue(Preset from, Preset to);
 	
+	public void copyValueToPreset(Preset preset);
+	
 	public boolean hasPreset(Preset preset);
 	
 }

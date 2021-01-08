@@ -34,6 +34,7 @@ public class PlayerJoinedServerPacket extends RedstoneTweaksPacket {
 	@Override
 	public void execute(MinecraftServer server) {
 		((RTIMinecraftServer)server).getSettingsManager().onPlayerJoined(playerUUID);
+		((RTIMinecraftServer)server).getPresetsManager().onPlayerJoined(playerUUID);
 		
 		ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerUUID);
 		if (player != null) {
