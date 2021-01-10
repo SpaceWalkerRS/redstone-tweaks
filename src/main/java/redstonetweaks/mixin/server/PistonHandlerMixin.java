@@ -33,12 +33,15 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+
+import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.ChainHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
 import redstonetweaks.mixinterfaces.RTIPistonHandler;
+import redstonetweaks.mixinterfaces.RTIServerWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(PistonHandler.class)
@@ -358,7 +361,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		}
 		
 		if (Tweaks.StickyPiston.SUPER_STICKY.get()) {
-			if ((PistonHelper.isPiston(state, true, dir) && !state.get(Properties.EXTENDED)) || PistonHelper.isPistonHead(state, true, dir)) {
+			if ((PistonHelper.isPiston(state, true, dir) && !state.get(Properties.EXTENDED) && (world.isClient() || !((RTIServerWorld)world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS))) || PistonHelper.isPistonHead(state, true, dir)) {
 				return true;
 			}
 		}
@@ -480,10 +483,12 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	private void tryDetachPistonHead(BlockPos pos, BlockState state) {
 		if (PistonHelper.isPiston(state) && !state.get(Properties.EXTENDED) && PistonSettings.looseHead(PistonHelper.isSticky(state))) {
-			Direction facing = state.get(Properties.FACING);
-			
-			if (facing.getAxis() == motionDirection.getAxis()) {
-				detachedPistonHeads.put(pos, facing == motionDirection);
+			if (world.isClient() || !Tweaks.Global.DOUBLE_RETRACTION.get() || !((RTIServerWorld)world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
+				Direction facing = state.get(Properties.FACING);
+				
+				if (facing.getAxis() == motionDirection.getAxis()) {
+					detachedPistonHeads.put(pos, facing == motionDirection);
+				}
 			}
 		}
 	}

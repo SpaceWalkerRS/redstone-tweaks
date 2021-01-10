@@ -25,7 +25,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
-import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.PistonType;
@@ -70,7 +69,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	@Inject(method = "tryMove", cancellable = true, at = @At(value = "HEAD"))
 	private void onTryMoveInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
 		if (!world.getBlockTickScheduler().isTicking(pos, this) && !(Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient() && ((RTIServerWorld)world).hasBlockEvent(pos))) {
-			tryMove(world, pos, state, false);
+			PistonHelper.tryMove(world, pos, state, sticky, PistonHelper.isExtended(world, pos, state, false) || PistonHelper.isExtending(world, pos, state), false);
 		}
 		
 		ci.cancel();
@@ -390,19 +389,23 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		
 		Map<BlockPos, Boolean> detachedPistonHeads = ((RTIPistonHandler)pistonHandler).getDetachedPistonHeads();
 		Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
+		Map<BlockPos, SlabType> mergedSlabTypes = ((RTIPistonHandler)pistonHandler).getMergedSlabTypes();
+		
+		Direction moveDirection = extend ? pistonDir : pistonDir.getOpposite();
+		BlockPos toPos = movedPos.offset(moveDirection);
 		
 		if (PistonHelper.isPiston(movedState) && !movedState.get(Properties.EXTENDED)) {
 			if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient() && ((RTIServerWorld)world).hasBlockEvent(movedPos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
-				// Notify clients of any pistons that are about to be double retracted
-				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, movedPos);
-				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, movedPos.getX(), movedPos.getY(), movedPos.getZ(), 64.0D, world.getRegistryKey(), packet);
-				
 				boolean sticky = PistonHelper.isSticky(movedState);
 				
 				if (PistonSettings.looseHead(sticky) || PistonSettings.movableWhenExtended(sticky)) {
 					movedState = movedState.with(Properties.EXTENDED, true);
+				} else {
+					BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, movedPos);
+					((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, movedPos.getX(), movedPos.getY(), movedPos.getZ(), 64.0D, world.getRegistryKey(), packet);
 				}
 			}
+			
 			if (detachedPistonHeads.containsKey(movedPos)) {
 				if (detachedPistonHeads.get(movedPos)) {
 					movedState = Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, PistonHelper.isSticky(movedState) ? PistonType.STICKY : PistonType.DEFAULT).with(Properties.FACING, movedState.get(Properties.FACING));
@@ -413,14 +416,15 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		} else if (splitSlabTypes.containsKey(movedPos) && SlabHelper.isSlab(movedState)) {
 			movedState = movedState.with(Properties.SLAB_TYPE, splitSlabTypes.get(movedPos));
 		}
-		
 		movedStates.add(movedState);
 		movedStatesMap.put(movedPos, movedState);
 		
-		BlockEntity movedBlockEntity = world.getBlockEntity(movedPos);
+		BlockPos blockEntityPos = mergedSlabTypes.containsKey(toPos) ? toPos : movedPos;
+		
+		BlockEntity movedBlockEntity = world.getBlockEntity(blockEntityPos);
 		
 		if (movedBlockEntity != null) {
-			world.removeBlockEntity(movedPos);
+			world.removeBlockEntity(blockEntityPos);
 			
 			// Fix for disappearing block entities on the client
 			if (world.isClient()) {
@@ -571,7 +575,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		tryMove(world, pos, state, true);
+		PistonHelper.tryMove(world, pos, state, sticky, PistonHelper.isExtended(world, pos, state, false) || PistonHelper.isExtending(world, pos, state), true);
 	}
 	
 	@Override
@@ -589,78 +593,5 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		}
 		
 		return true;
-	}
-	
-	private void tryMove(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
-		if (((RTIWorld)world).hasBlockEventHandler(pos)) {
-			return;
-		}
-		
-		Direction facing = state.get(Properties.FACING);
-		boolean isExtended = PistonHelper.isExtended(world, pos, state, false) || PistonHelper.isExtending(world, pos, state);
-		int delay;
-		boolean lazy;
-		if (isExtended) {
-			delay = PistonSettings.delayFallingEdge(sticky);
-			lazy = PistonSettings.lazyFallingEdge(sticky);
-		} else {
-			delay = PistonSettings.delayRisingEdge(sticky);
-			lazy = PistonSettings.lazyRisingEdge(sticky);
-		}
-		boolean powered = PistonHelper.isReceivingPower(world, pos, state, facing);
-		
-		boolean shouldExtend = (onScheduledTick && lazy) ? !isExtended : powered;
-		
-		if (shouldExtend && !isExtended) {
-			int type = new PistonHandler(world, pos, facing, true).calculatePush() ? MotionType.EXTEND : ((PistonSettings.canMoveSelf(sticky) && new PistonHandler(world, pos, facing.getOpposite(), true).calculatePush()) ? MotionType.EXTEND_BACKWARDS : MotionType.NONE);
-			
-			if (type == MotionType.NONE) {
-				if (powered && PistonSettings.updateSelf(sticky)) {
-					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, PistonSettings.tickPriorityRisingEdge(sticky));
-				}
-			} else {
-				if (delay == 0 || onScheduledTick) {
-					world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
-				} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
-					world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, PistonSettings.tickPriorityRisingEdge(sticky));
-				}
-			}
-		} else if (!shouldExtend && isExtended && (!PistonSettings.looseHead(sticky) || PistonHelper.hasPistonHead(world, pos, sticky, facing))) {
-			int type = MotionType.RETRACT_A;
-			
-			if (sticky && PistonSettings.canMoveSelf(sticky)) {
-				BlockPos frontPos = pos.offset(facing, 2);
-				BlockState frontState = world.getBlockState(frontPos);
-				
-				if (!PistonHelper.isPushingBlock(world, frontPos, frontState, facing) && PistonHelper.canPull(frontState) && !(isMovable(frontState, world, frontPos, facing.getOpposite(), false, facing) && new PistonHandler(world, pos, facing, false).calculatePush())) {
-					type = MotionType.RETRACT_FORWARDS;
-				}
-			}
-			
-			if (delay == 0 || onScheduledTick) {
-				if (Tweaks.Global.DOUBLE_RETRACTION.get()) {
-					world.setBlockState(pos, state.with(Properties.EXTENDED, false), 16);
-				}
-				
-				world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
-			} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, PistonSettings.tickPriorityFallingEdge(sticky));
-			}
-		}
-		
-		if (Tweaks.RedstoneTorch.SOFT_INVERSION.get()) {
-			updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
-		}
-	}
-	
-	private void updateAdjacentRedstoneTorches(World world, BlockPos pos, Block block) {
-		if (!world.isDebugWorld()) {
-			for (Direction direction : Direction.values()) {
-				BlockPos neighborPos = pos.offset(direction);
-				if (world.getBlockState(neighborPos).getBlock() instanceof RedstoneTorchBlock) {
-					world.updateNeighbor(neighborPos, block, pos);
-				}
-			}
-		}
 	}
 }

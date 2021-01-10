@@ -339,6 +339,7 @@ public class Tweaks {
 		
 		private static final SettingsPack NORMAL_PISTON = new SettingsPack(TWEAKS, "Normal Piston");
 		
+		public static final BooleanSetting ACCEPTS_POWER_FROM_FRONT = new BooleanSetting(NORMAL_PISTON, "acceptsPowerFromFront", "Allow normal pistons to be powered through their faces.");
 		public static final BooleanSetting CAN_MOVE_SELF = new BooleanSetting(NORMAL_PISTON, "canMoveSelf", "When enabled, normal pistons will try to push themselves backwards when trying to push an immovable structure.");
 		public static final BooleanSetting CONNECTS_TO_WIRE = new BooleanSetting(NORMAL_PISTON, "connectsToWire", "When enabled, normal pistons connect to redstone wire.");
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting(NORMAL_PISTON, "delayRisingEdge", "Delay in ticks before extending.", 0, Settings.Common.MAX_DELAY);
@@ -530,6 +531,7 @@ public class Tweaks {
 		
 		private static final SettingsPack STICKY_PISTON = new SettingsPack(TWEAKS, "Sticky Piston");
 		
+		public static final BooleanSetting ACCEPTS_POWER_FROM_FRONT = new BooleanSetting(STICKY_PISTON, "acceptsPowerFromFront", "Allow sticky pistons to be powered through their faces.");
 		public static final BooleanSetting CAN_MOVE_SELF = new BooleanSetting(STICKY_PISTON, "canMoveSelf", "When enabled, sticky pistons will try to push themselves backwards when trying to push an immovable structure or pull themselves forwards when trying to pull an immovable structure.");
 		public static final BooleanSetting CONNECTS_TO_WIRE = new BooleanSetting(STICKY_PISTON, "connectsToWire", "When enabled, sticky pistons connect to redstone wire.");
 		public static final BooleanSetting DO_BLOCK_DROPPING = new BooleanSetting(STICKY_PISTON, "doBlockDropping", "When enabled, sticky pistons drop their block when given a short pulse (pulse length less than or equal to their speed).");
@@ -879,6 +881,7 @@ public class Tweaks {
 		Settings.register(MagmaBlock.TICK_PRIORITY);
 		
 		Settings.register(NormalPiston.NORMAL_PISTON);
+		Settings.register(NormalPiston.ACCEPTS_POWER_FROM_FRONT);
 		Settings.register(NormalPiston.CAN_MOVE_SELF);
 		Settings.register(NormalPiston.CONNECTS_TO_WIRE);
 		Settings.register(NormalPiston.DELAY_RISING_EDGE);
@@ -1010,6 +1013,7 @@ public class Tweaks {
 		Settings.register(Stairs.FULL_FACES_ARE_SOLID);
 		
 		Settings.register(StickyPiston.STICKY_PISTON);
+		Settings.register(StickyPiston.ACCEPTS_POWER_FROM_FRONT);
 		Settings.register(StickyPiston.CAN_MOVE_SELF);
 		Settings.register(StickyPiston.CONNECTS_TO_WIRE);
 		Settings.register(StickyPiston.DO_BLOCK_DROPPING);

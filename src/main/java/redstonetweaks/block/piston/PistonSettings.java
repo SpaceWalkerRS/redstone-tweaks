@@ -7,6 +7,10 @@ import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 public class PistonSettings {
 	
+	public static boolean acceptsPowerFromFront(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.ACCEPTS_POWER_FROM_FRONT.get() : Tweaks.NormalPiston.ACCEPTS_POWER_FROM_FRONT.get();
+	}
+	
 	public static boolean canMoveSelf(boolean sticky) {
 		return sticky ? Tweaks.StickyPiston.CAN_MOVE_SELF.get() : Tweaks.NormalPiston.CAN_MOVE_SELF.get();
 	}

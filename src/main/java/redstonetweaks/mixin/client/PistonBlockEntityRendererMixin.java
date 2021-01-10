@@ -49,6 +49,7 @@ public abstract class PistonBlockEntityRendererMixin {
 		BlockPos fromPos = toPos.offset(dir);
 		
 		if (pistonBlockEntity.isSource()) {
+			
 			boolean isExtending = pistonBlockEntity.isExtending();
 			boolean sourceIsMoving = ((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving();
 			
@@ -64,8 +65,10 @@ public abstract class PistonBlockEntityRendererMixin {
 				
 				if (isExtending) {
 					if (PistonHelper.isPistonHead(world.getBlockState(fromPos), PistonHelper.isSticky(pushedState), dir)) {
+						// The head should be rendered in front of the base
 						matrixStack.translate(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ());
 					} else {
+						// Don't render a head if there is no piston head in the world at that location
 						renderHead = false;
 					}
 				}
@@ -91,16 +94,18 @@ public abstract class PistonBlockEntityRendererMixin {
 		} else {
 			method_3575(fromPos, pushedState, matrixStack, vertexConsumerProvider, world, false, overlay);
 			
-			if (pushedBlockEntity != null) {
-				BlockEntityRenderDispatcher.INSTANCE.render(pushedBlockEntity, tickDelta, matrixStack, vertexConsumerProvider);
-			}
-			
-			if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs() && SlabHelper.isSlab(pushedState)) {
+			if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs()) {
 				// Undo the offset to render the slab that is merged into as stationary
 				matrixStack.pop();
 				matrixStack.push();
 				
-				method_3575(toPos, pushedState.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(pushedState.get(Properties.SLAB_TYPE))), matrixStack, vertexConsumerProvider, world, false, overlay);
+				if (pushedBlockEntity == null) {
+					method_3575(toPos, pushedState.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(pushedState.get(Properties.SLAB_TYPE))), matrixStack, vertexConsumerProvider, world, false, overlay);
+				}
+			}
+			
+			if (pushedBlockEntity != null) {
+				BlockEntityRenderDispatcher.INSTANCE.render(pushedBlockEntity, tickDelta, matrixStack, vertexConsumerProvider);
 			}
 		}
 		

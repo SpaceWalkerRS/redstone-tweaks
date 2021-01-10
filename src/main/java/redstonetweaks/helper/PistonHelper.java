@@ -7,12 +7,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
+import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.PistonType;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.block.piston.PistonBehavior;
+import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
@@ -20,8 +22,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
+import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
+import redstonetweaks.mixinterfaces.RTIServerWorld;
+import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 public class PistonHelper {
@@ -48,6 +53,10 @@ public class PistonHelper {
 		((RTIPistonBlockEntity)pistonBlockEntity).setSourceIsMoving(sourceIsMoving);
 		
 		return pistonBlockEntity;
+	}
+	
+	public static BlockState getPiston(boolean sticky, Direction facing, boolean extended) {
+		return (sticky ? Blocks.STICKY_PISTON : Blocks.PISTON).getDefaultState().with(Properties.FACING, facing).with(Properties.EXTENDED, extended);
 	}
 	
 	public static boolean isPiston(BlockState state, boolean sticky, Direction facing) {
@@ -254,13 +263,13 @@ public class PistonHelper {
 	}
 	
 	public static boolean isReceivingPower(World world, BlockPos pos, BlockState state, Direction facing, boolean onBlockEvent) {
+		boolean sticky = isSticky(state);
+		
 		for (Direction direction : Direction.values()) {
-			if (direction != facing && world.isEmittingRedstonePower(pos.offset(direction), direction)) {
+			if ((PistonSettings.acceptsPowerFromFront(sticky) || direction != facing) && world.isEmittingRedstonePower(pos.offset(direction), direction)) {
 				return true;
 			}
 		}
-		
-		boolean sticky = isSticky(state);
 		
 		return WorldHelper.isQCPowered(world, pos, state, onBlockEvent, PistonSettings.getQC(sticky), PistonSettings.randQC(sticky));
 	}
@@ -323,7 +332,19 @@ public class PistonHelper {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
-				state = ((RTIPistonBlockEntity)blockEntity).getMovedState();
+				PistonBlockEntity pistonBlockEntity = ((PistonBlockEntity)blockEntity);
+				
+				state = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedState();
+				
+				if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs() && SlabHelper.isSlab(state)) {
+					return state.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
+				}
+				
+				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
+				
+				if (blockEntity != null && blockEntity instanceof PistonBlockEntity) {
+					pistonBlockEntity = ((PistonBlockEntity)blockEntity);
+				}
 			}
 		}
 		
@@ -333,7 +354,7 @@ public class PistonHelper {
 	// Notify clients of any pistons that are about to be "double retracted"
 	public static void prepareDoubleRetraction(World world, BlockPos pos, BlockState state) {
 		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
-			if (isPiston(state) && !state.get(Properties.EXTENDED)) {
+			if (isPiston(state) && !state.get(Properties.EXTENDED) && ((RTIServerWorld)world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
 				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
 				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
 			}
@@ -348,6 +369,81 @@ public class PistonHelper {
 				
 				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
 				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
+			}
+		}
+	}
+	
+	public static void tryMove(World world, BlockPos pos, BlockState state, boolean sticky, boolean extended, boolean onScheduledTick) {
+		if (((RTIWorld)world).hasBlockEventHandler(pos)) {
+			return;
+		}
+		
+		Direction facing = state.get(Properties.FACING);
+		int delay;
+		boolean lazy;
+		if (extended) {
+			delay = PistonSettings.delayFallingEdge(sticky);
+			lazy = PistonSettings.lazyFallingEdge(sticky);
+		} else {
+			delay = PistonSettings.delayRisingEdge(sticky);
+			lazy = PistonSettings.lazyRisingEdge(sticky);
+		}
+		boolean powered = PistonHelper.isReceivingPower(world, pos, state, facing);
+		
+		boolean shouldExtend = (onScheduledTick && lazy) ? !extended : powered;
+		
+		if (shouldExtend && !extended) {
+			int type = new PistonHandler(world, pos, facing, true).calculatePush() ? MotionType.EXTEND : ((PistonSettings.canMoveSelf(sticky) && new PistonHandler(world, pos, facing.getOpposite(), true).calculatePush()) ? MotionType.EXTEND_BACKWARDS : MotionType.NONE);
+			
+			if (type == MotionType.NONE) {
+				if (powered && PistonSettings.updateSelf(sticky)) {
+					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, PistonSettings.tickPriorityRisingEdge(sticky));
+				}
+			} else {
+				if (delay == 0 || onScheduledTick) {
+					world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
+				} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
+					world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, PistonSettings.tickPriorityRisingEdge(sticky));
+				}
+			}
+		} else if (!shouldExtend && extended && (!PistonSettings.looseHead(sticky) || PistonHelper.hasPistonHead(world, pos, sticky, facing))) {
+			int type = MotionType.RETRACT_A;
+			
+			if (sticky && PistonSettings.canMoveSelf(sticky)) {
+				BlockPos frontPos = pos.offset(facing, 2);
+				BlockState frontState = world.getBlockState(frontPos);
+				
+				if (!PistonHelper.isPushingBlock(world, frontPos, frontState, facing) && PistonHelper.canPull(frontState) && !(PistonBlock.isMovable(frontState, world, frontPos, facing.getOpposite(), false, facing) && new PistonHandler(world, pos, facing, false).calculatePush())) {
+					type = MotionType.RETRACT_FORWARDS;
+				}
+			}
+			
+			if (delay == 0 || onScheduledTick) {
+				if (Tweaks.Global.DOUBLE_RETRACTION.get()) {
+					state = getPiston(sticky, facing, false);
+					
+					world.setBlockState(pos, state, 16);
+				}
+				
+				world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
+			} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
+				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, PistonSettings.tickPriorityFallingEdge(sticky));
+			}
+		}
+		
+		if (Tweaks.RedstoneTorch.SOFT_INVERSION.get()) {
+			updateAdjacentRedstoneTorches(world, pos, state.getBlock());	
+		}
+	}
+	
+	public static void updateAdjacentRedstoneTorches(World world, BlockPos pos, Block block) {
+		if (!world.isDebugWorld()) {
+			for (Direction direction : Direction.values()) {
+				BlockPos neighborPos = pos.offset(direction);
+				
+				if (world.getBlockState(neighborPos).getBlock() instanceof RedstoneTorchBlock) {
+					world.updateNeighbor(neighborPos, block, pos);
+				}
 			}
 		}
 	}

@@ -30,9 +30,14 @@ public class PistonExtensionBlockMixin extends Block {
 	@Override
 	public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
 		Direction facing = state.get(Properties.FACING);
+		boolean sticky = data == 1;
+		boolean extend = type == MotionType.EXTEND || type == MotionType.EXTEND_BACKWARDS;
 		
 		if (!world.isClient()) {
-			if (type == MotionType.EXTEND && !PistonHelper.isReceivingPower(world, pos, state, facing)) {
+			boolean lazy = extend ? PistonSettings.lazyRisingEdge(sticky) : PistonSettings.lazyFallingEdge(sticky);
+			boolean shouldExtend = lazy ? extend : PistonHelper.isReceivingPower(world, pos, state, facing, true);
+			
+			if (extend != shouldExtend) {
 				return false;
 			}
 		}
@@ -42,29 +47,31 @@ public class PistonExtensionBlockMixin extends Block {
 		if (blockEntity instanceof PistonBlockEntity) {
 			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 			
-			if (pistonBlockEntity.isSource() && !pistonBlockEntity.isExtending()) {
+			if (pistonBlockEntity.isSource()) {
 				((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
 				
-				if (((RTIPistonBlockEntity)pistonBlockEntity).isMovedByStickyPiston() && PistonSettings.fastBlockDropping()) {
-					if (PistonSettings.superBlockDropping()) {
-						PistonHandler pistonHandler = new PistonHandler(world, pos, facing, false);
-						
-						for (BlockPos blockPos : ((RTIPistonHandler)pistonHandler).getMovingStructure()) {
-							blockEntity = world.getBlockEntity(blockPos);
+				if (extend) {
+					if (sticky && PistonSettings.fastBlockDropping()) {
+						if (PistonSettings.superBlockDropping()) {
+							PistonHandler pistonHandler = new PistonHandler(world, pos, facing, false);
 							
-							if (blockEntity instanceof PistonBlockEntity) {
-								((RTIPistonBlockEntity)blockEntity).finishSource();
+							for (BlockPos blockPos : ((RTIPistonHandler)pistonHandler).getMovingStructure()) {
+								blockEntity = world.getBlockEntity(blockPos);
+								
+								if (blockEntity instanceof PistonBlockEntity) {
+									((RTIPistonBlockEntity)blockEntity).finishSource();
+								}
 							}
-						}
-					} else {
-						BlockPos frontPos = pos.offset(facing);
-						BlockState frontState = world.getBlockState(frontPos);
-						
-						if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
-							blockEntity = world.getBlockEntity(frontPos);
+						} else {
+							BlockPos frontPos = pos.offset(facing);
+							BlockState frontState = world.getBlockState(frontPos);
 							
-							if (blockEntity instanceof PistonBlockEntity) {
-								((RTIPistonBlockEntity)blockEntity).finishSource();
+							if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
+								blockEntity = world.getBlockEntity(frontPos);
+								
+								if (blockEntity instanceof PistonBlockEntity) {
+									((RTIPistonBlockEntity)blockEntity).finishSource();
+								}
 							}
 						}
 					}
@@ -73,8 +80,14 @@ public class PistonExtensionBlockMixin extends Block {
 				BlockState piston = world.getBlockState(pos);
 				
 				if (PistonHelper.isPiston(piston)) {
-					if (!piston.onSyncedBlockEvent(world, pos, MotionType.EXTEND, data)) {
-						piston.onSyncedBlockEvent(world, pos, MotionType.EXTEND_BACKWARDS, data);
+					data = facing.getId();
+					
+					if (extend) {
+						piston.onSyncedBlockEvent(world, pos, type, data);
+					} else {
+						if (!piston.onSyncedBlockEvent(world, pos, MotionType.RETRACT_FORWARDS, data)) {
+							piston.onSyncedBlockEvent(world, pos, MotionType.RETRACT_A, data);
+						}
 					}
 				}
 				
@@ -87,19 +100,21 @@ public class PistonExtensionBlockMixin extends Block {
 	
 	@Override
 	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
+		if (world.isClient()) {
+			return;
+		}
+		
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		
 		if (blockEntity instanceof PistonBlockEntity) {
 			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity) blockEntity;
 			
-			if (pistonBlockEntity.isSource() && !pistonBlockEntity.isExtending()) {
+			if (pistonBlockEntity.isSource()) {
 				boolean sticky = ((RTIPistonBlockEntity)pistonBlockEntity).isMovedByStickyPiston();
-				Direction facing = pistonBlockEntity.getFacing();
+				boolean extending = pistonBlockEntity.isExtending();
 				
-				if (!PistonSettings.ignoreUpdatesWhileRetracting(sticky) && PistonHelper.isReceivingPower(world, pos, state, facing)) {
-					if (!world.isClient()) {
-						world.addSyncedBlockEvent(pos, state.getBlock(), MotionType.EXTEND, facing.getId());
-					}
+				if (!(extending ? PistonSettings.ignoreUpdatesWhileExtending(sticky) : PistonSettings.ignoreUpdatesWhileRetracting(sticky))) {
+					PistonHelper.tryMove(world, pos, state, sticky, extending, false);
 				}
 			}
 		}
