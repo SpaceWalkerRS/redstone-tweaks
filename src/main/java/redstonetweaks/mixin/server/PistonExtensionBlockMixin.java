@@ -53,7 +53,7 @@ public class PistonExtensionBlockMixin extends Block {
 				if (extend) {
 					if (sticky && PistonSettings.fastBlockDropping()) {
 						if (PistonSettings.superBlockDropping()) {
-							PistonHandler pistonHandler = new PistonHandler(world, pos, facing, false);
+							PistonHandler pistonHandler = PistonHelper.createPistonHandler(world, pos, facing, false, sticky);
 							
 							for (BlockPos blockPos : ((RTIPistonHandler)pistonHandler).getMovingStructure()) {
 								blockEntity = world.getBlockEntity(blockPos);

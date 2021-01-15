@@ -12,6 +12,8 @@ public interface RTIPistonBlockEntity {
 	
 	public BlockState getMovedState();
 	
+	public void setMovedState(BlockState state);
+	
 	public void setPushedBlock(BlockState state);
 	
 	public void setPushedBlockEntity(BlockEntity pushedBlockEntity);
@@ -22,6 +24,8 @@ public interface RTIPistonBlockEntity {
 	
 	public BlockEntity getMovedBlockEntity();
 	
+	public void setMovedBlockEntity(BlockEntity blockEntity);
+	
 	public boolean isMergingSlabs();
 	
 	public void setIsMergingSlabs(boolean isMergingSlabs);
@@ -29,6 +33,8 @@ public interface RTIPistonBlockEntity {
 	public boolean sourceIsMoving();
 	
 	public void setSourceIsMoving(boolean moveSource);
+	
+	public void setSource(boolean source);
 	
 	public void finishSource();
 	

@@ -9,6 +9,8 @@ import net.minecraft.util.math.BlockPos;
 
 public interface RTIPistonHandler {
 	
+	public void setSticky(boolean sticky);
+	
 	public Map<BlockPos, Boolean> getDetachedPistonHeads();
 	
 	public List<BlockEntity> getMovedBlockEntities();

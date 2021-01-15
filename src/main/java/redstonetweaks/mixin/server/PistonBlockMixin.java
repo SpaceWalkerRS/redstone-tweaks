@@ -189,7 +189,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	private void onOnSyncedBlockEventRedirectFinish1(PistonBlockEntity pistonBlockEntity, BlockState state, World world, BlockPos pos, int type, int data) {
 		if (PistonSettings.fastBlockDropping()) {
 			if (PistonSettings.superBlockDropping()) {
-				PistonHandler pistonHandler = new PistonHandler(world, pos, state.get(Properties.FACING), true);
+				PistonHandler pistonHandler = PistonHelper.createPistonHandler(world, pos, state.get(Properties.FACING), true, sticky);
 				
 				List<BlockPos> droppedBlocks = ((RTIPistonHandler)pistonHandler).getMovingStructure();
 				
@@ -279,7 +279,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				BlockPos frontPos = pos.offset(facing, 2);
 				BlockState frontState = world.getBlockState(frontPos);
 				
-				if (!frontState.isAir() && PistonHelper.canPull(frontState) && !(isMovable(frontState, world, frontPos, facing.getOpposite(), false, facing) && new PistonHandler(world, pos, facing, false).calculatePush())) {
+				if (!frontState.isAir() && PistonHelper.canPull(frontState) && !(isMovable(frontState, world, frontPos, facing.getOpposite(), false, facing) && PistonHelper.createPistonHandler(world, pos, facing, false, sticky).calculatePush())) {
 					canRetractForwards = true;
 				}
 			}
@@ -371,8 +371,10 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			if (RedstoneTweaks.POWER_BLOCK_ENTITY_TYPE.supports(block)) {
 				return false;
 			}
+			
 			return true;
 		}
+		
 		return false;
 	}
 	
@@ -381,56 +383,56 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		return PistonSettings.headUpdatesWhenPulling() ? (oldFlags | 1) & ~16 : oldFlags;
 	}
 	
+	@Redirect(method = "move", at = @At(value = "NEW", target = "Lnet/minecraft/block/piston/PistonHandler;<init>(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;Z)Lnet/minecraft/block/piston/PistonHandler;"))
+	private PistonHandler onMoveRedirectNewPistonHandler(World world, BlockPos pos, Direction pistonDir, boolean extending) {
+		return PistonHelper.createPistonHandler(world, pos, pistonDir, extending, sticky);
+	}
+	
 	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
 	private void onMoveInjectBeforeListAdd(World world, BlockPos pistonPos, Direction pistonDir, boolean extend, CallbackInfoReturnable<Boolean> cir,
 			BlockPos headPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> movedStatesMap, List<BlockPos> movedBlocksPos,
-			List<BlockState> movedStates, int index, BlockPos movedPos, BlockState movedState) {
+			List<BlockState> movedStates, int index, BlockPos fromPos, BlockState movedState) {
 		List<BlockEntity> movedBlockEntities = ((RTIPistonHandler)pistonHandler).getMovedBlockEntities();
 		
 		Map<BlockPos, Boolean> detachedPistonHeads = ((RTIPistonHandler)pistonHandler).getDetachedPistonHeads();
 		Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
 		Map<BlockPos, SlabType> mergedSlabTypes = ((RTIPistonHandler)pistonHandler).getMergedSlabTypes();
 		
-		Direction moveDirection = extend ? pistonDir : pistonDir.getOpposite();
-		BlockPos toPos = movedPos.offset(moveDirection);
-		
-		if (PistonHelper.isPiston(movedState) && !movedState.get(Properties.EXTENDED)) {
-			if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient() && ((RTIServerWorld)world).hasBlockEvent(movedPos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
-				boolean sticky = PistonHelper.isSticky(movedState);
-				
-				if (PistonSettings.looseHead(sticky) || PistonSettings.movableWhenExtended(sticky)) {
-					movedState = movedState.with(Properties.EXTENDED, true);
-				} else {
-					BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, movedPos);
-					((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, movedPos.getX(), movedPos.getY(), movedPos.getZ(), 64.0D, world.getRegistryKey(), packet);
-				}
-			}
-			
-			if (detachedPistonHeads.containsKey(movedPos)) {
-				if (detachedPistonHeads.get(movedPos)) {
-					movedState = Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, PistonHelper.isSticky(movedState) ? PistonType.STICKY : PistonType.DEFAULT).with(Properties.FACING, movedState.get(Properties.FACING));
-				} else {
-					movedState = movedState.with(Properties.EXTENDED, true);
-				}
-			}
-		} else if (splitSlabTypes.containsKey(movedPos) && SlabHelper.isSlab(movedState)) {
-			movedState = movedState.with(Properties.SLAB_TYPE, splitSlabTypes.get(movedPos));
-		}
-		movedStates.add(movedState);
-		movedStatesMap.put(movedPos, movedState);
-		
-		BlockPos blockEntityPos = mergedSlabTypes.containsKey(toPos) ? toPos : movedPos;
-		
-		BlockEntity movedBlockEntity = world.getBlockEntity(blockEntityPos);
+		BlockEntity movedBlockEntity = world.getBlockEntity(fromPos);
 		
 		if (movedBlockEntity != null) {
-			world.removeBlockEntity(blockEntityPos);
+			world.removeBlockEntity(fromPos);
 			
 			// Fix for disappearing block entities on the client
 			if (world.isClient()) {
 				movedBlockEntity.markDirty();
 			}
 		}
+		
+		if (detachedPistonHeads.containsKey(fromPos)) {
+			if (PistonHelper.isPiston(movedState)) {
+				boolean sticky = PistonHelper.isSticky(movedState);
+				Direction facing = movedState.get(Properties.FACING);
+				
+				movedState = detachedPistonHeads.get(fromPos) ? PistonHelper.getPistonHead(sticky, facing) : PistonHelper.getPiston(sticky, facing, true);
+				movedBlockEntity = null;
+			} else if (movedState.isOf(Blocks.MOVING_PISTON) && movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
+				PistonBlockEntity movingPistonBlockEntity = (PistonBlockEntity)movedBlockEntity;
+				
+				BlockState movingState = ((RTIPistonBlockEntity)movingPistonBlockEntity).getMovedState();
+				
+				if (PistonHelper.isPiston(movingState)) {
+					boolean sticky = PistonHelper.isSticky(movingState);
+					Direction facing = movingState.get(Properties.FACING);
+					
+					((RTIPistonBlockEntity)movingPistonBlockEntity).setMovedState(Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT));
+					((RTIPistonBlockEntity)movingPistonBlockEntity).setMovedBlockEntity(PistonHelper.createPistonBlockEntity(detachedPistonHeads.get(fromPos) ? PistonHelper.getPistonHead(sticky, facing) : PistonHelper.getPiston(sticky, facing, true), null, facing, true, true, sticky, false, !detachedPistonHeads.get(fromPos)));
+				}
+			}
+		}
+		
+		movedStates.add(movedState);
+		movedStatesMap.put(fromPos, movedState);
 		
 		movedBlockEntities.add(movedBlockEntity);
 	}
@@ -464,7 +466,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		boolean isMergingSlabs = mergedSlabTypes.containsKey(toPos);
 		boolean detachedPistonHead = detachedPistonHeads.containsKey(fromPos);
 		
-		if (detachedPistonHead) {
+		if (detachedPistonHead && PistonHelper.isPiston(movedState)) {
 			((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(movedState, null, moveDirection, true, true, sticky, false, !detachedPistonHeads.get(fromPos)));
 		} else {
 			if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
@@ -528,7 +530,23 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				}
 			}
 			
-			world.setBlockState(remainingPos, newState, 82);
+			BlockState currentState = world.getBlockState(remainingPos);
+			
+			if (!newState.isAir()) {
+				if (currentState.isOf(Blocks.MOVING_PISTON)) {
+					BlockEntity blockEntity = world.getBlockEntity(remainingPos);
+					
+					if (blockEntity instanceof PistonBlockEntity) {
+						((RTIPistonBlockEntity)blockEntity).setMovedState(newState);
+						
+						newState = currentState;
+					}
+				}
+			}
+			
+			if (newState != currentState) {
+				world.setBlockState(remainingPos, newState, 82);
+			}
 			
 			newStates.put(remainingPos, newState);
 		}

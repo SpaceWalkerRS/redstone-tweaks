@@ -25,13 +25,16 @@ import net.minecraft.world.World;
 import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
+import redstonetweaks.mixinterfaces.RTIPistonHandler;
 import redstonetweaks.mixinterfaces.RTIServerWorld;
 import redstonetweaks.mixinterfaces.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 public class PistonHelper {
 	
-	private static final List<Block> IMMOVABLE_BLOCK_ENTITIES = Arrays.asList(
+	// Blocks with block entities that are immovable
+	// These are blocks containing obsidian and portal blocks
+	private static final List<Block> IMMOVABLE_BLOCKS = Arrays.asList(
 		Blocks.MOVING_PISTON,
 		Blocks.BEACON,
 		Blocks.ENCHANTING_TABLE,
@@ -39,6 +42,14 @@ public class PistonHelper {
 		Blocks.END_GATEWAY,
 		Blocks.END_PORTAL
 	);
+	
+	public static PistonHandler createPistonHandler(World world, BlockPos pos, Direction pistonDir, boolean extending, boolean sticky) {
+		PistonHandler pistonHandler = new PistonHandler(world, pos, pistonDir, extending);
+		
+		((RTIPistonHandler)pistonHandler).setSticky(sticky);
+		
+		return pistonHandler;
+	}
 	
 	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
 		return createPistonBlockEntity(pushedBlockState, null, pistonDir, extending, isSource, isMovedByStickyPiston, false ,false);
@@ -77,6 +88,10 @@ public class PistonHelper {
 	
 	public static boolean isSticky(BlockState state) {
 		return state.isOf(Blocks.STICKY_PISTON);
+	}
+	
+	public static BlockState getPistonHead(boolean sticky, Direction facing) {
+		return Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT).with(Properties.FACING, facing);
 	}
 	
 	public static boolean isPistonHead(BlockState state, boolean sticky, Direction facing) {
@@ -275,7 +290,7 @@ public class PistonHelper {
 	}
 	
 	public static boolean canMoveBlockEntityOf(Block block) {
-		return block.hasBlockEntity() && !IMMOVABLE_BLOCK_ENTITIES.contains(block);
+		return block.hasBlockEntity() && !IMMOVABLE_BLOCKS.contains(block);
 	}
 	
 	public static float getSoundPitch(World world, boolean extending, boolean sticky) {
@@ -285,7 +300,7 @@ public class PistonHelper {
 	}
 	
 	public static float adjustSoundPitch(float pitch, boolean extending, boolean sticky) {
-		int speed = extending ? PistonSettings.speedRisingEdge(sticky) : PistonSettings.speedFallingEdge(sticky);
+		int speed = PistonSettings.speed(sticky, extending);
 		
 		return speed == 0 ? Float.POSITIVE_INFINITY : pitch * (2.0F / speed);
 	}
@@ -337,6 +352,7 @@ public class PistonHelper {
 				state = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedState();
 				
 				if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs() && SlabHelper.isSlab(state)) {
+					// If two slabs are being merged they should be treated as one double slab
 					return state.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
 				}
 				
@@ -344,13 +360,18 @@ public class PistonHelper {
 				
 				if (blockEntity != null && blockEntity instanceof PistonBlockEntity) {
 					pistonBlockEntity = ((PistonBlockEntity)blockEntity);
+					
+					if (pistonBlockEntity.isSource() && isPiston(state)) {
+						// Both extending and retracting piston bases should be treated as extended
+						return state.with(Properties.EXTENDED, true);
+					}
 				}
 			}
 		}
 		
 		return state;
 	}
-
+	
 	// Notify clients of any pistons that are about to be "double retracted"
 	public static void prepareDoubleRetraction(World world, BlockPos pos, BlockState state) {
 		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
@@ -393,7 +414,7 @@ public class PistonHelper {
 		boolean shouldExtend = (onScheduledTick && lazy) ? !extended : powered;
 		
 		if (shouldExtend && !extended) {
-			int type = new PistonHandler(world, pos, facing, true).calculatePush() ? MotionType.EXTEND : ((PistonSettings.canMoveSelf(sticky) && new PistonHandler(world, pos, facing.getOpposite(), true).calculatePush()) ? MotionType.EXTEND_BACKWARDS : MotionType.NONE);
+			int type = createPistonHandler(world, pos, facing, true, sticky).calculatePush() ? MotionType.EXTEND : ((PistonSettings.canMoveSelf(sticky) && createPistonHandler(world, pos, facing.getOpposite(), true, sticky).calculatePush()) ? MotionType.EXTEND_BACKWARDS : MotionType.NONE);
 			
 			if (type == MotionType.NONE) {
 				if (powered && PistonSettings.updateSelf(sticky)) {
@@ -413,7 +434,7 @@ public class PistonHelper {
 				BlockPos frontPos = pos.offset(facing, 2);
 				BlockState frontState = world.getBlockState(frontPos);
 				
-				if (!PistonHelper.isPushingBlock(world, frontPos, frontState, facing) && PistonHelper.canPull(frontState) && !(PistonBlock.isMovable(frontState, world, frontPos, facing.getOpposite(), false, facing) && new PistonHandler(world, pos, facing, false).calculatePush())) {
+				if (!PistonHelper.isPushingBlock(world, frontPos, frontState, facing) && PistonHelper.canPull(frontState) && !(PistonBlock.isMovable(frontState, world, frontPos, facing.getOpposite(), false, facing) && createPistonHandler(world, pos, facing, false, sticky).calculatePush())) {
 					type = MotionType.RETRACT_FORWARDS;
 				}
 			}

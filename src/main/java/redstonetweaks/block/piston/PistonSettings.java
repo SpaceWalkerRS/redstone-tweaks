@@ -83,6 +83,10 @@ public class PistonSettings {
 		return sticky ? Tweaks.StickyPiston.RANDOMIZE_QC.get() : Tweaks.NormalPiston.RANDOMIZE_QC.get();
 	}
 	
+	public static int speed(boolean sticky, boolean extending) {
+		return extending ? speedRisingEdge(sticky) : speedFallingEdge(sticky);
+	}
+	
 	public static int speedRisingEdge(boolean sticky) {
 		return sticky ? Tweaks.StickyPiston.SPEED_RISING_EDGE.get() : Tweaks.NormalPiston.SPEED_RISING_EDGE.get();
 	}

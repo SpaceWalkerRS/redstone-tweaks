@@ -73,19 +73,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(World world, BlockPos pos, Direction pistonDir, boolean extending, CallbackInfo ci) {
-		BlockState state = world.getBlockState(posFrom);
-		
-		if (state.isOf(Blocks.STICKY_PISTON)) {
-			sticky = true;
-		} else
-		if (state.isOf(Blocks.MOVING_PISTON)) {
-			BlockEntity blockEntity = world.getBlockEntity(posFrom);
-			
-			if (blockEntity instanceof PistonBlockEntity) {
-				sticky = ((RTIPistonBlockEntity)blockEntity).isMovedByStickyPiston();
-			}
-		}
-		
 		headPos = posFrom.offset(pistonDir);
 		
 		anchoredChains = new HashSet<>();
@@ -93,6 +80,11 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		splitSlabTypes = new HashMap<>();
 		detachedPistonHeads = new HashMap<>();
 		movedBlockEntities = new ArrayList<>();
+	}
+	
+	@Override
+	public void setSticky(boolean sticky) {
+		this.sticky = sticky;
 	}
 	
 	@Override
@@ -108,6 +100,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	@Redirect(method = "calculatePush", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonBlock;isMovable(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;ZLnet/minecraft/util/math/Direction;)Z"))
 	private boolean onCalculatePushRedirectIsMovable(BlockState state, World world, BlockPos blockPos, Direction direction, boolean canBreak, Direction pistonDir) {
+		// If a slab is not touching the side it is pulled from, it is not pulled along
 		return PistonBlock.isMovable(state, world, blockPos, direction, canBreak, pistonDir) && (retracted || !SlabHelper.isSlab(state) || PistonHelper.canSlabStickTo(state, direction));
 	}
 	
