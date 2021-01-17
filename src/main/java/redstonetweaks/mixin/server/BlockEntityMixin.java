@@ -35,7 +35,7 @@ public class BlockEntityMixin {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
-				state = ((RTIPistonBlockEntity)blockEntity).getMovedState();
+				state = ((RTIPistonBlockEntity)blockEntity).getMovedMovingState();
 			}
 		}
 		

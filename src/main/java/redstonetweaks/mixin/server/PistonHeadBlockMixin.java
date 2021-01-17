@@ -59,7 +59,7 @@ public abstract class PistonHeadBlockMixin {
 				BlockEntity blockEntity = world.getBlockEntity(pos.offset(facing.getOpposite()));
 				
 				if (blockEntity instanceof PistonBlockEntity) {
-					BlockState movedState = ((RTIPistonBlockEntity)blockEntity).getMovedState();
+					BlockState movedState = ((RTIPistonBlockEntity)blockEntity).getMovedMovingState();
 					
 					canPlace = PistonHelper.isPiston(movedState) && movedState.get(Properties.EXTENDED) && movedState.get(Properties.FACING) == facing;
 				}

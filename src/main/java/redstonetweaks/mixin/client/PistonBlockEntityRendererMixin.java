@@ -33,7 +33,7 @@ public abstract class PistonBlockEntityRendererMixin {
 	private void onRenderInjectAtHead(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, int overlay, CallbackInfo ci) {
 		World world = pistonBlockEntity.getWorld();
 		BlockState pushedState = pistonBlockEntity.getPushedBlock();
-		BlockEntity pushedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getPushedBlockEntity();
+		BlockEntity pushedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
 		
 		if (world == null || pushedState.isAir()) {
 			return;
@@ -94,7 +94,7 @@ public abstract class PistonBlockEntityRendererMixin {
 		} else {
 			method_3575(fromPos, pushedState, matrixStack, vertexConsumerProvider, world, false, overlay);
 			
-			if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs()) {
+			if (((RTIPistonBlockEntity)pistonBlockEntity).isMerging()) {
 				// Undo the offset to render the slab that is merged into as stationary
 				matrixStack.pop();
 				matrixStack.push();

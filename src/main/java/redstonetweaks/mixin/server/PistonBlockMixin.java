@@ -31,7 +31,6 @@ import net.minecraft.block.enums.PistonType;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.block.piston.PistonHandler;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -157,7 +156,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonExtensionBlock;createBlockEntityPiston(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;ZZ)Lnet/minecraft/block/entity/BlockEntity;"))
 	private BlockEntity onOnSyncedBlockEventRedirectCreateBlockEntityPiston(BlockState pushedBlock, Direction facing, boolean extending, boolean source) {
-		return PistonHelper.createPistonBlockEntity(pushedBlock, facing, extending, source, sticky);
+		return PistonHelper.createPistonBlockEntity(extending, facing, sticky, source, false, pushedBlock);
 	}
 	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
@@ -242,7 +241,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				world.setBlockState(pos, pistonHead, 67);
 				
 				BlockState pistonExtension = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, pistonType);
-				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(state.with(Properties.EXTENDED, true), null, motionDir, true, true, sticky, false, true);
+				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(true, motionDir, sticky, true, true, state.with(Properties.EXTENDED, true));
 				
 				BlockPos toPos = pos.offset(motionDir);
 				
@@ -296,7 +295,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				air.updateNeighbors(world, pos, 2);
 				
 				BlockState pistonExtension = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT);
-				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(state.with(Properties.EXTENDED, false), null, facing, false, true, sticky, false, true);
+				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(false, facing, sticky, true, true, state.with(Properties.EXTENDED, false));
 				
 				((RTIWorld)world).queueBlockEntityPlacement(headPos, pistonBlockEntity);
 				world.setBlockState(headPos, pistonExtension, 67);
@@ -343,7 +342,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				
 				// Check if the block that is moved by the moving block is movable itself
 				// By default piston heads are not movable but they do appear in the moving blocks of extending pistons
-				BlockState movedState = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedState();
+				BlockState movedState = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedMovingState();
 				
 				if (!movedState.isOf(Blocks.MOVING_PISTON) && PistonBlock.isMovable(movedState, world, pos, direction, canBreak, pistonDir)) {
 					// Prevent a piston from pushing its own extending piston head
@@ -398,36 +397,38 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
 		Map<BlockPos, SlabType> mergedSlabTypes = ((RTIPistonHandler)pistonHandler).getMergedSlabTypes();
 		
-		BlockEntity movedBlockEntity = world.getBlockEntity(fromPos);
+		BlockEntity movedBlockEntity = PistonHelper.getBlockEntityToMove(world, fromPos, false);
+		// In some cases we keep the block entity and move a copy of it instead
+		boolean keepBlockEntity = false;
 		
-		if (movedBlockEntity != null) {
+		Direction motionDir = extend ? pistonDir : pistonDir.getOpposite();
+		BlockPos toPos = fromPos.offset(motionDir);
+		
+		if (splitSlabTypes.containsKey(fromPos)) {
+			SlabType movedType = splitSlabTypes.get(fromPos);
+			SlabType remainingType = SlabHelper.getOppositeType(movedType);
+			
+			if (SlabHelper.isSlab(movedState)) {
+				movedState = movedState.with(Properties.SLAB_TYPE, movedType);
+			} else if (movedState.isOf(Blocks.MOVING_PISTON) && movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
+				RTIPistonBlockEntity remainingPistonBlockEntity = (RTIPistonBlockEntity)movedBlockEntity;
+				
+				movedBlockEntity = remainingPistonBlockEntity.copy();
+				RTIPistonBlockEntity movedPistonBlockEntity = (RTIPistonBlockEntity)movedBlockEntity;
+				
+				movedPistonBlockEntity.splitDoubleSlab(movedType);
+				remainingPistonBlockEntity.splitDoubleSlab(remainingType);
+				
+				keepBlockEntity = true;
+			}
+		}
+		
+		if (!keepBlockEntity && movedBlockEntity != null) {
 			world.removeBlockEntity(fromPos);
 			
 			// Fix for disappearing block entities on the client
 			if (world.isClient()) {
 				movedBlockEntity.markDirty();
-			}
-		}
-		
-		if (detachedPistonHeads.containsKey(fromPos)) {
-			if (PistonHelper.isPiston(movedState)) {
-				boolean sticky = PistonHelper.isSticky(movedState);
-				Direction facing = movedState.get(Properties.FACING);
-				
-				movedState = detachedPistonHeads.get(fromPos) ? PistonHelper.getPistonHead(sticky, facing) : PistonHelper.getPiston(sticky, facing, true);
-				movedBlockEntity = null;
-			} else if (movedState.isOf(Blocks.MOVING_PISTON) && movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
-				PistonBlockEntity movingPistonBlockEntity = (PistonBlockEntity)movedBlockEntity;
-				
-				BlockState movingState = ((RTIPistonBlockEntity)movingPistonBlockEntity).getMovedState();
-				
-				if (PistonHelper.isPiston(movingState)) {
-					boolean sticky = PistonHelper.isSticky(movingState);
-					Direction facing = movingState.get(Properties.FACING);
-					
-					((RTIPistonBlockEntity)movingPistonBlockEntity).setMovedState(Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT));
-					((RTIPistonBlockEntity)movingPistonBlockEntity).setMovedBlockEntity(PistonHelper.createPistonBlockEntity(detachedPistonHeads.get(fromPos) ? PistonHelper.getPistonHead(sticky, facing) : PistonHelper.getPiston(sticky, facing, true), null, facing, true, true, sticky, false, !detachedPistonHeads.get(fromPos)));
-				}
 			}
 		}
 		
@@ -467,14 +468,14 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		boolean detachedPistonHead = detachedPistonHeads.containsKey(fromPos);
 		
 		if (detachedPistonHead && PistonHelper.isPiston(movedState)) {
-			((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(movedState, null, moveDirection, true, true, sticky, false, !detachedPistonHeads.get(fromPos)));
+			((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(true, moveDirection, sticky, true, !detachedPistonHeads.get(fromPos), movedState));
 		} else {
 			if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
 				// This ensures the block entity gets placed
 				world.setBlockState(toPos, Blocks.AIR.getDefaultState(), 80);
 			}
 			
-			((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(movedState, movedBlockEntity, pistonDir, extend, false, sticky, isMergingSlabs, false));
+			((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(extend, pistonDir, sticky, false, false, movedState, movedBlockEntity, null, null));
 		}
 	}
 	
@@ -489,7 +490,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> brokenPositions,
 			BlockState[] affectedStates, PistonType headType, BlockState pistonHead) 
 	{
-		world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(pistonHead, pistonDir, true, true, sticky));
+		world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(true, pistonDir, sticky, true, false, pistonHead));
 	}
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))
@@ -537,7 +538,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 					BlockEntity blockEntity = world.getBlockEntity(remainingPos);
 					
 					if (blockEntity instanceof PistonBlockEntity) {
-						((RTIPistonBlockEntity)blockEntity).setMovedState(newState);
+						((RTIPistonBlockEntity)blockEntity).setMovedMovingState(newState);
 						
 						newState = currentState;
 					}

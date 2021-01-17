@@ -51,17 +51,18 @@ public class PistonHelper {
 		return pistonHandler;
 	}
 	
-	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston) {
-		return createPistonBlockEntity(pushedBlockState, null, pistonDir, extending, isSource, isMovedByStickyPiston, false ,false);
+	public static PistonBlockEntity createPistonBlockEntity(boolean extending, Direction facing, boolean sticky, boolean isSource, boolean sourceIsMoving, BlockState movedState) {
+		return createPistonBlockEntity(extending, facing, sticky, isSource, sourceIsMoving, movedState, null, null, null);
 	}
 	
-	public static PistonBlockEntity createPistonBlockEntity(BlockState pushedBlockState, BlockEntity pushedBlockEntity, Direction pistonDir, boolean extending, boolean isSource, boolean isMovedByStickyPiston, boolean isMergingSlabs, boolean sourceIsMoving) {
-		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(pushedBlockState, pistonDir, extending, isSource);
+	public static PistonBlockEntity createPistonBlockEntity(boolean extending, Direction facing, boolean sticky, boolean isSource, boolean sourceIsMoving, BlockState movedState, BlockEntity movedBlockEntity, BlockState mergedState, BlockEntity mergedBlockEntity) {
+		PistonBlockEntity pistonBlockEntity = new PistonBlockEntity(movedState, facing, extending, isSource);
 		
-		((RTIPistonBlockEntity)pistonBlockEntity).setIsMovedByStickyPiston(isMovedByStickyPiston);
-		((RTIPistonBlockEntity)pistonBlockEntity).setPushedBlockEntity(pushedBlockEntity);
-		((RTIPistonBlockEntity)pistonBlockEntity).setIsMergingSlabs(isMergingSlabs);
+		((RTIPistonBlockEntity)pistonBlockEntity).setSticky(sticky);
 		((RTIPistonBlockEntity)pistonBlockEntity).setSourceIsMoving(sourceIsMoving);
+		((RTIPistonBlockEntity)pistonBlockEntity).setMovedBlockEntity(movedBlockEntity);
+		((RTIPistonBlockEntity)pistonBlockEntity).setMergingState(mergedState);
+		((RTIPistonBlockEntity)pistonBlockEntity).setMergingBlockEntity(mergedBlockEntity);
 		
 		return pistonBlockEntity;
 	}
@@ -119,7 +120,7 @@ public class PistonHelper {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
-				return isPiston(((RTIPistonBlockEntity)blockEntity).getMovedState(), sticky, facing);
+				return isPiston(((RTIPistonBlockEntity)blockEntity).getMovedMovingState(), sticky, facing);
 			}
 		}
 		
@@ -131,7 +132,7 @@ public class PistonHelper {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
-				return isPistonHead(((RTIPistonBlockEntity)blockEntity).getMovedState(), sticky, facing);
+				return isPistonHead(((RTIPistonBlockEntity)blockEntity).getMovedMovingState(), sticky, facing);
 			}
 		}
 		
@@ -170,16 +171,16 @@ public class PistonHelper {
 			if (blockEntity instanceof PistonBlockEntity) {
 				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 				
-				if (pistonBlockEntity.isSource() && pistonBlockEntity.isExtending() && !((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving() && (sticky == null || sticky == ((RTIPistonBlockEntity)pistonBlockEntity).isMovedByStickyPiston()) && (facing == null || facing == pistonBlockEntity.getFacing())) {
+				if (pistonBlockEntity.isSource() && pistonBlockEntity.isExtending() && !((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving() && (sticky == null || sticky == ((RTIPistonBlockEntity)pistonBlockEntity).isSticky()) && (facing == null || facing == pistonBlockEntity.getFacing())) {
 					return true;
 				}
 				
-				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
+				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedMovingBlockEntity();
 				
 				if (blockEntity instanceof PistonBlockEntity) {
 					pistonBlockEntity = (PistonBlockEntity)blockEntity;
 					
-					return pistonBlockEntity.isSource() && pistonBlockEntity.isExtending() && !((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving() && (sticky == null || sticky == ((RTIPistonBlockEntity)pistonBlockEntity).isMovedByStickyPiston()) && (facing == null || facing == pistonBlockEntity.getFacing());
+					return pistonBlockEntity.isSource() && pistonBlockEntity.isExtending() && !((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving() && (sticky == null || sticky == ((RTIPistonBlockEntity)pistonBlockEntity).isSticky()) && (facing == null || facing == pistonBlockEntity.getFacing());
 				}
 			}
 		}
@@ -198,7 +199,7 @@ public class PistonHelper {
 					return true;
 				}
 				
-				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
+				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedMovingBlockEntity();
 				
 				if (blockEntity instanceof PistonBlockEntity) {
 					pistonBlockEntity = (PistonBlockEntity)blockEntity;
@@ -340,36 +341,38 @@ public class PistonHelper {
 		return true;
 	}
 	
-	public static BlockState getStateToMove(World world, BlockPos pos) {
+	// The block state that will be used to calculate the movement of a piston
+	public static BlockState getStateForMovement(World world, BlockPos pos) {
 		BlockState state = world.getBlockState(pos);
 		
 		if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() && state.isOf(Blocks.MOVING_PISTON)) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
-				PistonBlockEntity pistonBlockEntity = ((PistonBlockEntity)blockEntity);
-				
-				state = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedState();
-				
-				if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs() && SlabHelper.isSlab(state)) {
-					// If two slabs are being merged they should be treated as one double slab
-					return state.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
-				}
-				
-				blockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
-				
-				if (blockEntity != null && blockEntity instanceof PistonBlockEntity) {
-					pistonBlockEntity = ((PistonBlockEntity)blockEntity);
-					
-					if (pistonBlockEntity.isSource() && isPiston(state)) {
-						// Both extending and retracting piston bases should be treated as extended
-						return state.with(Properties.EXTENDED, true);
-					}
-				}
+				return ((RTIPistonBlockEntity)blockEntity).getStateToMove();
 			}
 		}
 		
 		return state;
+	}
+	
+	public static BlockEntity getBlockEntityToMove(World world, BlockPos pos) {
+		return getBlockEntityToMove(world, pos, true);
+	}
+	
+	public static BlockEntity getBlockEntityToMove(World world, BlockPos pos, boolean remove) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		
+		if (remove && blockEntity != null) {
+			world.removeBlockEntity(pos);
+			
+			// Fix for disappearing block entities on the client
+			if (world.isClient()) {
+				blockEntity.markDirty();
+			}
+		}
+		
+		return blockEntity;
 	}
 	
 	// Notify clients of any pistons that are about to be "double retracted"

@@ -58,17 +58,17 @@ public class BlockHelper {
 			
 			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 			
-			if (((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs()) {
+			if (((RTIPistonBlockEntity)pistonBlockEntity).isMerging()) {
 				return true;
 			}
 			
-			BlockEntity movedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
+			BlockEntity movedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedMovingBlockEntity();
 			
 			if (movedBlockEntity instanceof PistonBlockEntity) {
 				pistonBlockEntity = (PistonBlockEntity)movedBlockEntity;
 			}
 			
-			return ((RTIPistonBlockEntity)pistonBlockEntity).isMergingSlabs();
+			return ((RTIPistonBlockEntity)pistonBlockEntity).isMerging();
 		}
 		
 		return false;
