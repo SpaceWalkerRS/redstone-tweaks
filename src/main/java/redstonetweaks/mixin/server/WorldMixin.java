@@ -78,7 +78,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	@Shadow public abstract void updateListeners(BlockPos pos, BlockState oldState, BlockState newState, int flags);
 	@Shadow public abstract RegistryKey<World> getRegistryKey();
 	@Shadow public abstract MinecraftServer getServer();
-	@Shadow public static boolean isHeightInvalid(BlockPos pos) { return false; }
+	@Shadow public static boolean isOutOfBuildLimitVertically(BlockPos pos) { return false; }
 	@Shadow public abstract void setBlockEntity(BlockPos pos, BlockEntity blockEntity);
 	@Shadow public abstract void removeBlockEntity(BlockPos pos);
 	@Shadow public abstract void updateComparators(BlockPos pos, Block block);
