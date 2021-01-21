@@ -1,9 +1,15 @@
 package redstonetweaks.mixinterfaces;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SideShapeType;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.SlabType;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
+
+import redstonetweaks.block.piston.MovedBlock;
 
 public interface RTIPistonBlockEntity {
 	
@@ -37,6 +43,8 @@ public interface RTIPistonBlockEntity {
 	
 	public void setMergingBlockEntity(BlockEntity blockEntity);
 	
+	public PistonBlockEntity getParent();
+	
 	public void setParentPistonBlockEntity(PistonBlockEntity pistonBlockEntity);
 	
 	public BlockState getMovedMovingState();
@@ -51,6 +59,8 @@ public interface RTIPistonBlockEntity {
 	
 	public PistonBlockEntity copy();
 	
-	public void splitDoubleSlab(SlabType keepType);
+	public MovedBlock splitDoubleSlab(SlabType keepType);
+	
+	public boolean isSideSolid(BlockView world, BlockPos pos, Direction face, SideShapeType shapeType);
 	
 }

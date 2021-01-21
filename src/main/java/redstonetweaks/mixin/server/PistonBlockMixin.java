@@ -42,9 +42,9 @@ import net.minecraft.world.World;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.block.piston.MotionType;
+import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.mixinterfaces.RTIBlock;
 import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
 import redstonetweaks.mixinterfaces.RTIPistonHandler;
@@ -342,9 +342,9 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				
 				// Check if the block that is moved by the moving block is movable itself
 				// By default piston heads are not movable but they do appear in the moving blocks of extending pistons
-				BlockState movedState = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedMovingState();
+				BlockState stateToMove = ((RTIPistonBlockEntity)pistonBlockEntity).getStateToMove();
 				
-				if (!movedState.isOf(Blocks.MOVING_PISTON) && PistonBlock.isMovable(movedState, world, pos, direction, canBreak, pistonDir)) {
+				if (!stateToMove.isOf(Blocks.MOVING_PISTON) && PistonBlock.isMovable(stateToMove, world, pos, direction, canBreak, pistonDir)) {
 					// Prevent a piston from pushing its own extending piston head
 					if (direction == pistonDir && direction == state.get(Properties.FACING)) {
 						movable = !(pistonBlockEntity.isSource() && pistonBlockEntity.isExtending());
@@ -395,41 +395,17 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		
 		Map<BlockPos, Boolean> detachedPistonHeads = ((RTIPistonHandler)pistonHandler).getDetachedPistonHeads();
 		Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
-		Map<BlockPos, SlabType> mergedSlabTypes = ((RTIPistonHandler)pistonHandler).getMergedSlabTypes();
 		
-		BlockEntity movedBlockEntity = PistonHelper.getBlockEntityToMove(world, fromPos, false);
-		// In some cases we keep the block entity and move a copy of it instead
-		boolean keepBlockEntity = false;
+		BlockEntity movedBlockEntity = PistonHelper.getBlockEntityToMove(world, fromPos);
 		
-		Direction motionDir = extend ? pistonDir : pistonDir.getOpposite();
-		BlockPos toPos = fromPos.offset(motionDir);
-		
-		if (splitSlabTypes.containsKey(fromPos)) {
-			SlabType movedType = splitSlabTypes.get(fromPos);
-			SlabType remainingType = SlabHelper.getOppositeType(movedType);
+		if (detachedPistonHeads.containsKey(fromPos)) {
 			
-			if (SlabHelper.isSlab(movedState)) {
-				movedState = movedState.with(Properties.SLAB_TYPE, movedType);
-			} else if (movedState.isOf(Blocks.MOVING_PISTON) && movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
-				RTIPistonBlockEntity remainingPistonBlockEntity = (RTIPistonBlockEntity)movedBlockEntity;
-				
-				movedBlockEntity = remainingPistonBlockEntity.copy();
-				RTIPistonBlockEntity movedPistonBlockEntity = (RTIPistonBlockEntity)movedBlockEntity;
-				
-				movedPistonBlockEntity.splitDoubleSlab(movedType);
-				remainingPistonBlockEntity.splitDoubleSlab(remainingType);
-				
-				keepBlockEntity = true;
-			}
 		}
-		
-		if (!keepBlockEntity && movedBlockEntity != null) {
-			world.removeBlockEntity(fromPos);
+		if (splitSlabTypes.containsKey(fromPos)) {
+			MovedBlock movedBlock = PistonHelper.trySplitDoubleSlab(world, fromPos, movedState, movedBlockEntity, splitSlabTypes.get(fromPos));
 			
-			// Fix for disappearing block entities on the client
-			if (world.isClient()) {
-				movedBlockEntity.markDirty();
-			}
+			movedState = movedBlock.getBlockState();
+			movedBlockEntity = movedBlock.getBlockEntity();
 		}
 		
 		movedStates.add(movedState);
@@ -454,7 +430,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	private void onMoveInjectBeforeSetBlockState2(World world, BlockPos pistonPos, Direction pistonDir, boolean extend, CallbackInfoReturnable<Boolean> cir,
 			BlockPos headPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> movedStatesMap,
 			List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> brokenBlocksPos,
-			BlockState[] removedStates, Direction moveDirection, int affectedIndex, int movedIndex, BlockPos toPos) 
+			BlockState[] removedStates, Direction moveDirection, int removedIndex, int movedIndex, BlockPos toPos) 
 	{
 		List<BlockEntity> movedBlockEntities = ((RTIPistonHandler)pistonHandler).getMovedBlockEntities();
 		Map<BlockPos, SlabType> mergedSlabTypes = ((RTIPistonHandler)pistonHandler).getMergedSlabTypes();
@@ -464,8 +440,14 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		
 		BlockState movedState = movedStates.get(movedIndex);
 		BlockEntity movedBlockEntity = movedBlockEntities.get(movedIndex);
-		boolean isMergingSlabs = mergedSlabTypes.containsKey(toPos);
+		BlockState mergingState = null;
+		BlockEntity mergingBlockEntity = null;
 		boolean detachedPistonHead = detachedPistonHeads.containsKey(fromPos);
+		
+		if (mergedSlabTypes.containsKey(toPos)) {
+			mergingState = world.getBlockState(toPos);
+			mergingBlockEntity = PistonHelper.getBlockEntityToMove(world, toPos);
+		}
 		
 		if (detachedPistonHead && PistonHelper.isPiston(movedState)) {
 			((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(true, moveDirection, sticky, true, !detachedPistonHeads.get(fromPos), movedState));
@@ -475,7 +457,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				world.setBlockState(toPos, Blocks.AIR.getDefaultState(), 80);
 			}
 			
-			((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(extend, pistonDir, sticky, false, false, movedState, movedBlockEntity, null, null));
+			((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(extend, pistonDir, sticky, false, false, movedState, movedBlockEntity, mergingState, mergingBlockEntity));
 		}
 	}
 	
@@ -509,43 +491,9 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		Map<BlockPos, Boolean> detachedPistonHeads = ((RTIPistonHandler)pistonHandler).getDetachedPistonHeads();
 		
 		for (BlockPos remainingPos : movedStatesMap.keySet()) {
-			BlockState newState = Blocks.AIR.getDefaultState();
+			BlockState newState = splitSlabTypes.containsKey(remainingPos) || detachedPistonHeads.containsKey(remainingPos) ? world.getBlockState(remainingPos) : Blocks.AIR.getDefaultState();
 			
-			if (splitSlabTypes.containsKey(remainingPos)) {
-				BlockState movedState = movedStatesMap.get(remainingPos);
-				
-				if (SlabHelper.isSlab(movedState)) {
-					newState = movedState.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(splitSlabTypes.get(remainingPos)));
-				}
-			} else if (detachedPistonHeads.containsKey(remainingPos)) {
-				BlockState movedState = movedStatesMap.get(remainingPos);
-				
-				if (detachedPistonHeads.get(remainingPos)) {
-					if (PistonHelper.isPistonHead(movedState)) {
-						newState = (PistonHelper.isStickyHead(movedState) ? Blocks.STICKY_PISTON : Blocks.PISTON).getDefaultState().with(Properties.EXTENDED, true).with(Properties.FACING, movedState.get(Properties.FACING));
-					}
-				} else {
-					if (PistonHelper.isPiston(movedState)) {
-						newState = Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, PistonHelper.isSticky(movedState) ? PistonType.STICKY : PistonType.DEFAULT).with(Properties.FACING, movedState.get(Properties.FACING));
-					}
-				}
-			}
-			
-			BlockState currentState = world.getBlockState(remainingPos);
-			
-			if (!newState.isAir()) {
-				if (currentState.isOf(Blocks.MOVING_PISTON)) {
-					BlockEntity blockEntity = world.getBlockEntity(remainingPos);
-					
-					if (blockEntity instanceof PistonBlockEntity) {
-						((RTIPistonBlockEntity)blockEntity).setMovedMovingState(newState);
-						
-						newState = currentState;
-					}
-				}
-			}
-			
-			if (newState != currentState) {
+			if (newState.isAir()) {
 				world.setBlockState(remainingPos, newState, 82);
 			}
 			

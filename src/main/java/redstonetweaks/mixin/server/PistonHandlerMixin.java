@@ -138,6 +138,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			// and the piston head is not detached
 			detachedPistonHeads.remove(pos);
 		} else if (pulledFrom == motionDirection && (!retracted || !pos.equals(posTo))) {
+			// Don't try to detach if the block is pushed by the piston directly
 			tryDetachPistonHead(pos, movedState);
 		}
 		
@@ -196,15 +197,15 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			
 			if (isAdjacentBlockStuck) {
 				tryDetachPistonHead(behindPos, behindState);
-			}
-			
-			if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(behindState)) {
-				if (motionDirection.getAxis().isVertical() && !movedBlocks.contains(behindPos)) {
-					trySplitDoubleSlab(behindPos, behindState, SlabHelper.getTypeFromDirection(motionDirection));
-				}
 				
-				// If the slab is pulled in the direction of the movement, it cannot be merged into!
-				mergedSlabTypes.remove(behindPos);
+				if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(behindState)) {
+					if (motionDirection.getAxis().isVertical() && !movedBlocks.contains(behindPos)) {
+						trySplitDoubleSlab(behindPos, behindState, SlabHelper.getTypeFromDirection(motionDirection));
+					}
+					
+					// If the slab is pulled in the direction of the movement, it cannot be merged into!
+					mergedSlabTypes.remove(behindPos);
+				}
 			}
 		}
 	}
@@ -248,7 +249,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			boolean breakLoop = alreadyMoved;
 			
 			BlockPos blockPos = pos.offset(motionDirection, distance - 1);
-			BlockState pushingState = world.getBlockState(blockPos);
+			BlockState pushingState = PistonHelper.getStateForMovement(world, blockPos);
 			
 			// If the pushing state is a split double slab only one half of it will be moving
 			SlabType pushingType = splitSlabTypes.get(blockPos);
@@ -496,7 +497,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			Direction dir = Direction.from(axis, side);
 			
 			BlockPos sidePos = pos.offset(dir);
-			BlockState sideState = world.getBlockState(sidePos);
+			BlockState sideState = PistonHelper.getStateForMovement(world, sidePos);
 			
 			while(sideState.isOf(Blocks.CHAIN)) {
 				if (sideState.get(Properties.AXIS) != axis) {
@@ -506,7 +507,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				currentChain.add(sidePos);
 				
 				sidePos = sidePos.offset(dir);
-				sideState = world.getBlockState(sidePos);
+				sideState = PistonHelper.getStateForMovement(world, sidePos);
 			}
 			
 			// A chain cannot be anchored in the source piston

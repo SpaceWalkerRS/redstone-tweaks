@@ -339,12 +339,12 @@ public class Tweaks {
 		
 		private static final SettingsPack NORMAL_PISTON = new SettingsPack(TWEAKS, "Normal Piston");
 		
-		public static final BooleanSetting ACCEPTS_POWER_FROM_FRONT = new BooleanSetting(NORMAL_PISTON, "acceptsPowerFromFront", "Allow normal pistons to be powered through their faces.");
 		public static final BooleanSetting CAN_MOVE_SELF = new BooleanSetting(NORMAL_PISTON, "canMoveSelf", "When enabled, normal pistons will try to push themselves backwards when trying to push an immovable structure.");
 		public static final BooleanSetting CONNECTS_TO_WIRE = new BooleanSetting(NORMAL_PISTON, "connectsToWire", "When enabled, normal pistons connect to redstone wire.");
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting(NORMAL_PISTON, "delayRisingEdge", "Delay in ticks before extending.", 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(NORMAL_PISTON, "delayFallingEdge", "Delay in ticks before retracting", 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting HEAD_UPDATES_ON_EXTENSION = new BooleanSetting(NORMAL_PISTON, "headUpdatesOnExtension", "Dispatch block updates around the piston head when it starts extending.");
+		public static final BooleanSetting IGNORE_POWER_FROM_FRONT = new BooleanSetting(NORMAL_PISTON, "ignorePowerFromFront", "Ignore power received through the piston face.");
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_EXTENDING = new BooleanSetting(NORMAL_PISTON, "ignoreUpdatesWhileExtending", "Ignore any neighbor updates received during the extension.");
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_RETRACTING = new BooleanSetting(NORMAL_PISTON, "ignoreUpdatesWhileRetracting", "Ignore any neighbor updates received during the retraction.");
 		public static final BooleanSetting LAZY_RISING_EDGE = new BooleanSetting(NORMAL_PISTON, "lazyRisingEdge", Settings.Common.DESC_LAZY_RISING_EDGE);
@@ -531,7 +531,6 @@ public class Tweaks {
 		
 		private static final SettingsPack STICKY_PISTON = new SettingsPack(TWEAKS, "Sticky Piston");
 		
-		public static final BooleanSetting ACCEPTS_POWER_FROM_FRONT = new BooleanSetting(STICKY_PISTON, "acceptsPowerFromFront", "Allow sticky pistons to be powered through their faces.");
 		public static final BooleanSetting CAN_MOVE_SELF = new BooleanSetting(STICKY_PISTON, "canMoveSelf", "When enabled, sticky pistons will try to push themselves backwards when trying to push an immovable structure or pull themselves forwards when trying to pull an immovable structure.");
 		public static final BooleanSetting CONNECTS_TO_WIRE = new BooleanSetting(STICKY_PISTON, "connectsToWire", "When enabled, sticky pistons connect to redstone wire.");
 		public static final BooleanSetting DO_BLOCK_DROPPING = new BooleanSetting(STICKY_PISTON, "doBlockDropping", "When enabled, sticky pistons drop their block when given a short pulse (pulse length less than or equal to their speed).");
@@ -541,6 +540,7 @@ public class Tweaks {
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(STICKY_PISTON, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting HEAD_UPDATES_ON_EXTENSION = new BooleanSetting(STICKY_PISTON, "headUpdatesOnExtension", "Dispatch block updates around the piston head when it starts extending.");
 		public static final BooleanSetting HEAD_UPDATES_WHEN_PULLING = new BooleanSetting(STICKY_PISTON, "headUpdatesWhenPulling", "Dispatch block updates around the piston head when it tries pulling a block or structure.");
+		public static final BooleanSetting IGNORE_POWER_FROM_FRONT = new BooleanSetting(STICKY_PISTON, "ignorePowerFromFront", "Ignore power received through the piston face.");
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_EXTENDING = new BooleanSetting(STICKY_PISTON, "ignoreUpdatesWhileExtending", "Ignore any neighbor updates received during the extension.");
 		public static final BooleanSetting IGNORE_UPDATES_WHILE_RETRACTING = new BooleanSetting(STICKY_PISTON, "ignoreUpdatesWhileRetracting", "Ignore any neighbor updates received during the retraction.");
 		public static final BooleanSetting LAZY_RISING_EDGE = new BooleanSetting(STICKY_PISTON, "lazyRisingEdge", Settings.Common.DESC_LAZY_RISING_EDGE);
@@ -881,12 +881,12 @@ public class Tweaks {
 		Settings.register(MagmaBlock.TICK_PRIORITY);
 		
 		Settings.register(NormalPiston.NORMAL_PISTON);
-		Settings.register(NormalPiston.ACCEPTS_POWER_FROM_FRONT);
 		Settings.register(NormalPiston.CAN_MOVE_SELF);
 		Settings.register(NormalPiston.CONNECTS_TO_WIRE);
 		Settings.register(NormalPiston.DELAY_RISING_EDGE);
 		Settings.register(NormalPiston.DELAY_FALLING_EDGE);
 		Settings.register(NormalPiston.HEAD_UPDATES_ON_EXTENSION);
+		Settings.register(NormalPiston.IGNORE_POWER_FROM_FRONT);
 		Settings.register(NormalPiston.IGNORE_UPDATES_WHILE_EXTENDING);
 		Settings.register(NormalPiston.IGNORE_UPDATES_WHILE_RETRACTING);
 		Settings.register(NormalPiston.LAZY_RISING_EDGE);
@@ -1013,7 +1013,6 @@ public class Tweaks {
 		Settings.register(Stairs.FULL_FACES_ARE_SOLID);
 		
 		Settings.register(StickyPiston.STICKY_PISTON);
-		Settings.register(StickyPiston.ACCEPTS_POWER_FROM_FRONT);
 		Settings.register(StickyPiston.CAN_MOVE_SELF);
 		Settings.register(StickyPiston.CONNECTS_TO_WIRE);
 		Settings.register(StickyPiston.DO_BLOCK_DROPPING);
@@ -1023,6 +1022,7 @@ public class Tweaks {
 		Settings.register(StickyPiston.DELAY_FALLING_EDGE);
 		Settings.register(StickyPiston.HEAD_UPDATES_ON_EXTENSION);
 		Settings.register(StickyPiston.HEAD_UPDATES_WHEN_PULLING);
+		Settings.register(StickyPiston.IGNORE_POWER_FROM_FRONT);
 		Settings.register(StickyPiston.IGNORE_UPDATES_WHILE_EXTENDING);
 		Settings.register(StickyPiston.IGNORE_UPDATES_WHILE_RETRACTING);
 		Settings.register(StickyPiston.LAZY_RISING_EDGE);

@@ -11,9 +11,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SideShapeType;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.PistonBlockEntity;
@@ -29,8 +31,10 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
@@ -97,6 +101,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Inject(method = "finish", cancellable = true, at = @At(value = "HEAD"))
 	private void onFinishInjectAtHead(CallbackInfo ci) {
 		if (parentPistonBlockEntity != null) {
+			prepareBlockPlacement();
+			
 			if (isMerging) {
 				((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingState(pushedBlock);
 				((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingBlockEntity(movedBlockEntity);
@@ -112,9 +118,11 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		}
 	}
 	
-	@Inject(method = "finish", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/Block;postProcessState(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-	private void onFinishInjectBeforePostProcessState(CallbackInfo ci) {
+	@Redirect(method = "finish", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;postProcessState(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
+	private BlockState onFinishInjectBeforePostProcessState(BlockState blockState, WorldAccess worldAccess, BlockPos blockPos) {
 		prepareBlockPlacement();
+		
+		return Block.postProcessState(pushedBlock, world, pos);
 	}
 	
 	@Inject(method = "finish", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
@@ -140,6 +148,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Inject(method = "tick", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;isClient:Z"))
 	private void onTickInjectBeforeIsClient(CallbackInfo ci) {
 		if (parentPistonBlockEntity != null) {
+			prepareBlockPlacement();
+			
 			if (isMerging) {
 				((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingState(pushedBlock);
 				((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingBlockEntity(movedBlockEntity);
@@ -147,17 +157,21 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 				((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedState(pushedBlock);
 				((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedBlockEntity(movedBlockEntity);
 				
-				((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingState(mergingState);
-				((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingBlockEntity(mergingBlockEntity);
+				if (mergingState != null) {
+					((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingState(mergingState);
+					((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingBlockEntity(mergingBlockEntity);
+				}
 			}
 			
 			ci.cancel();
 		}
 	}
 	
-	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/Block;postProcessState(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-	private void onTickInjectBeforePostProcessState(CallbackInfo ci) {
+	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;postProcessState(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
+	private BlockState onTickInjectBeforePostProcessState(BlockState blockState, WorldAccess worldAccess, BlockPos blockPos) {
 		prepareBlockPlacement();
+		
+		return Block.postProcessState(pushedBlock, world, pos);
 	}
 	
 	@Inject(method = "tick", at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 1, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
@@ -185,17 +199,16 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		}
 	}
 	
-	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5f))
+	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5F))
 	private float tickIncrementProgress(float oldIncrementValue) {
 		int speed = PistonSettings.speed(sticky, extending);
 		
-		return speed == 0 ? 1.0f : 1.0f / speed;
+		return speed > 0 ? 1.0F / speed : 1.0F;
 	}
 	
 	@Inject(method = "fromTag", at = @At(value = "RETURN"))
 	private void onFromTagInjectAtReturn(BlockState state, CompoundTag tag, CallbackInfo ci) {
 		sticky = tag.contains("sticky") ? tag.getBoolean("sticky") : false;
-		isMerging = tag.contains("isMerging") ? tag.getBoolean("isMerging") : false;
 		sourceIsMoving = tag.contains("sourceIsMoving") ? tag.getBoolean("sourceIsMoving") : false;
 
 		if (tag.contains("movedBlockEntity")) {
@@ -236,7 +249,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Inject(method = "toTag", at = @At(value = "RETURN"))
 	private void onToTagInjectAtReturn(CompoundTag tag, CallbackInfoReturnable<?> cir) {
 		tag.putBoolean("sticky", sticky);
-		tag.putBoolean("isMerging", isMerging);
 		tag.putBoolean("sourceIsMoving", sourceIsMoving);
 		
 		if (movedBlockEntity != null) {
@@ -271,6 +283,9 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (movedBlockEntity != null) {
 			movedBlockEntity.setLocation(this.world, this.pos);
 		}
+		if (mergingBlockEntity != null) {
+			mergingBlockEntity.setLocation(this.world, this.pos);
+		}
 	}
 	
 	@Override
@@ -279,6 +294,9 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		
 		if (movedBlockEntity != null) {
 			movedBlockEntity.setPos(this.pos);
+		}
+		if (mergingBlockEntity != null) {
+			mergingBlockEntity.setPos(this.pos);
 		}
 	}
 	
@@ -385,6 +403,11 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
+	public PistonBlockEntity getParent() {
+		return parentPistonBlockEntity == null ? (PistonBlockEntity)(BlockEntity)this : ((RTIPistonBlockEntity)parentPistonBlockEntity).getParent();
+	}
+	
+	@Override
 	public void setParentPistonBlockEntity(PistonBlockEntity pistonBlockEntity) {
 		parentPistonBlockEntity = pistonBlockEntity;
 	}
@@ -435,19 +458,19 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			return pushedBlock.with(Properties.EXTENDED, true);
 		}
 		
+		if (mergingState == null) {
+			if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
+				return ((RTIPistonBlockEntity)movedBlockEntity).getStateToMove();
+			}
+			
+			return pushedBlock;
+		}
+		
 		BlockState state = getMovedMovingState();
 		
 		// If two blocks are merging they should be treated as already merged
-		if (mergingState != null) {
-			if (SlabHelper.isSlab(state)) {
-				if (mergingState.isOf(state.getBlock())) {
-					state = state.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
-				} else if (mergingState.isOf(Blocks.MOVING_PISTON) && mergingBlockEntity != null && mergingBlockEntity instanceof PistonBlockEntity) {
-					if (((RTIPistonBlockEntity)mergingBlockEntity).getMovedMovingState().isOf(state.getBlock())) {
-						state = state.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
-					}
-				}
-			}
+		if (SlabHelper.isSlab(state)) {
+			state = state.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
 		}
 		
 		return state;
@@ -464,39 +487,59 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
-	public void splitDoubleSlab(SlabType keepType) {
+	public MovedBlock splitDoubleSlab(SlabType keepType) {
 		if (mergingState != null) {
-			if (SlabHelper.isSlab(mergingState)) {
-				undoSlabMerge(mergingState, keepType);
-			} else if (mergingState.isOf(Blocks.MOVING_PISTON) && mergingBlockEntity != null && mergingBlockEntity instanceof PistonBlockEntity) {
-				BlockState movingState = ((RTIPistonBlockEntity)mergingBlockEntity).getMovedMovingState();
-				
-				if (SlabHelper.isSlab(movingState)) {
-					undoSlabMerge(movingState, keepType);
+			BlockState movingState = getMovedMovingState();
+			
+			if (SlabHelper.isSlab(movingState)) {
+				if (movingState.get(Properties.SLAB_TYPE) != keepType) {
+					return undoMerge(mergingState, mergingBlockEntity);
 				}
+				
+				setMergingState(null);
+				setMergingBlockEntity(null);
 			}
 		} else if (SlabHelper.isSlab(pushedBlock)) {
 			pushedBlock = pushedBlock.with(Properties.SLAB_TYPE, keepType);
 		} else if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
-			((RTIPistonBlockEntity)movedBlockEntity).splitDoubleSlab(keepType);
-		}
-	}
-	
-	private void undoSlabMerge(BlockState state, SlabType keepType) {
-		if (state.get(Properties.SLAB_TYPE) == keepType) {
-			setMovedState(mergingState);
-			setMovedBlockEntity(mergingBlockEntity);
+			return ((RTIPistonBlockEntity)movedBlockEntity).splitDoubleSlab(keepType);
 		}
 		
-		setMergingState(null);
-		setMergingBlockEntity(null);
+		PistonBlockEntity parent = getParent();
+		
+		return new MovedBlock(parent.getCachedState(), parent);
+	}
+	
+	@Override
+	public boolean isSideSolid(BlockView world, BlockPos pos, Direction face, SideShapeType shapeType) {
+		if (mergingState != null && !mergingState.isOf(Blocks.MOVING_PISTON)) {
+			return mergingState.isSideSolid(world, pos, face, shapeType);
+		}
+		
+		return false;
+	}
+	
+	private MovedBlock undoMerge(BlockState state, BlockEntity blockEntity) {
+		if (parentPistonBlockEntity == null) {
+			return new MovedBlock(mergingState, mergingBlockEntity);
+		}
+		
+		((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedState(mergingState);
+		((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedBlockEntity(mergingBlockEntity);
+		
+		PistonBlockEntity parent = getParent();
+		
+		return new MovedBlock(parent.getCachedState(), parent);
 	}
 	
 	private void prepareBlockPlacement() {
 		if (mergingState != null) {
 			if (SlabHelper.isSlab(pushedBlock)) {
 				if (mergingState.isOf(pushedBlock.getBlock())) {
-					pushedBlock = pushedBlock.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
+					setMovedState(pushedBlock.with(Properties.SLAB_TYPE, SlabType.DOUBLE));
+					
+					setMergingState(null);
+					setMergingBlockEntity(null);
 				} else if (mergingState.isOf(Blocks.MOVING_PISTON) && mergingBlockEntity != null && mergingBlockEntity instanceof PistonBlockEntity) {
 					RTIPistonBlockEntity pistonBlockEntity = (RTIPistonBlockEntity)mergingBlockEntity;
 					
@@ -504,8 +547,11 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 					pistonBlockEntity.setMergingState(pushedBlock);
 					pistonBlockEntity.setMergingBlockEntity(movedBlockEntity);
 					
-					pushedBlock = mergingState;
-					movedBlockEntity = mergingBlockEntity;
+					setMovedState(mergingState);
+					setMovedBlockEntity(mergingBlockEntity);
+					
+					setMergingState(null);
+					setMergingBlockEntity(null);
 				} else {
 					RedstoneTweaks.LOGGER.warn("Cannot merge " + pushedBlock + " with " + movedBlockEntity + " into " + mergingState + " with " + mergingBlockEntity);
 				}
@@ -514,6 +560,9 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 				
 				pistonBlockEntity.setMergingState(mergingState);
 				pistonBlockEntity.setMergingBlockEntity(mergingBlockEntity);
+				
+				setMergingState(null);
+				setMergingBlockEntity(null);
 			} else {
 				RedstoneTweaks.LOGGER.warn("Cannot merge " + pushedBlock + " with " + movedBlockEntity + " into " + mergingState + " with " + mergingBlockEntity);
 			}

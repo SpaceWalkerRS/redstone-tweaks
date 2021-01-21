@@ -20,8 +20,8 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
 
 @Mixin(PistonBlockEntityRenderer.class)
@@ -32,10 +32,10 @@ public abstract class PistonBlockEntityRendererMixin {
 	@Inject(method = "render", cancellable = true, at = @At(value = "HEAD"))
 	private void onRenderInjectAtHead(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, int overlay, CallbackInfo ci) {
 		World world = pistonBlockEntity.getWorld();
-		BlockState pushedState = pistonBlockEntity.getPushedBlock();
-		BlockEntity pushedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
+		BlockState movedState = pistonBlockEntity.getPushedBlock();
+		BlockEntity movedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedBlockEntity();
 		
-		if (world == null || pushedState.isAir()) {
+		if (world == null || movedState.isAir()) {
 			return;
 		}
 		
@@ -57,14 +57,14 @@ public abstract class PistonBlockEntityRendererMixin {
 			
 			if (sourceIsMoving) {
 				// Render a piston base that is pushing itself backwards or pulling itself forward
-				method_3575(fromPos, pushedState.with(Properties.EXTENDED, true), matrixStack, vertexConsumerProvider, world, false, overlay);
+				method_3575(fromPos, movedState.with(Properties.EXTENDED, true), matrixStack, vertexConsumerProvider, world, false, overlay);
 				
 				// Undo the offset so the piston head is rendered stationary
 				matrixStack.pop();
 				matrixStack.push();
 				
 				if (isExtending) {
-					if (PistonHelper.isPistonHead(world.getBlockState(fromPos), PistonHelper.isSticky(pushedState), dir)) {
+					if (PistonHelper.isPistonHead(world.getBlockState(fromPos), PistonHelper.isSticky(movedState), dir)) {
 						// The head should be rendered in front of the base
 						matrixStack.translate(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ());
 					} else {
@@ -75,8 +75,8 @@ public abstract class PistonBlockEntityRendererMixin {
 			}
 			
 			if (renderHead) {
-				PistonType pistonType = PistonHelper.isPistonHead(pushedState) ? pushedState.get(Properties.PISTON_TYPE) : (PistonHelper.isPiston(pushedState, true) ? PistonType.STICKY : PistonType.DEFAULT);
-				Direction facing = pushedState.get(Properties.FACING);
+				PistonType pistonType = PistonHelper.isPistonHead(movedState) ? movedState.get(Properties.PISTON_TYPE) : (PistonHelper.isPiston(movedState, true) ? PistonType.STICKY : PistonType.DEFAULT);
+				Direction facing = movedState.get(Properties.FACING);
 				boolean shortArm = isExtending ? pistonBlockEntity.getProgress(tickDelta) <= 0.5F : pistonBlockEntity.getProgress(tickDelta) >= 0.5F;
 				
 				BlockState pistonHead = Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, pistonType).with(Properties.FACING, facing).with(Properties.SHORT, shortArm);
@@ -89,23 +89,26 @@ public abstract class PistonBlockEntityRendererMixin {
 				matrixStack.pop();
 				matrixStack.push();
 				
-				method_3575(toPos, pushedState.with(Properties.EXTENDED, true), matrixStack, vertexConsumerProvider, world, false, overlay);
+				method_3575(toPos, movedState.with(Properties.EXTENDED, true), matrixStack, vertexConsumerProvider, world, false, overlay);
 			}
 		} else {
-			method_3575(fromPos, pushedState, matrixStack, vertexConsumerProvider, world, false, overlay);
+			method_3575(fromPos, movedState, matrixStack, vertexConsumerProvider, world, false, overlay);
 			
-			if (((RTIPistonBlockEntity)pistonBlockEntity).isMerging()) {
-				// Undo the offset to render the slab that is merged into as stationary
-				matrixStack.pop();
-				matrixStack.push();
-				
-				if (pushedBlockEntity == null) {
-					method_3575(toPos, pushedState.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(pushedState.get(Properties.SLAB_TYPE))), matrixStack, vertexConsumerProvider, world, false, overlay);
-				}
+			if (movedBlockEntity != null) {
+				BlockEntityRenderDispatcher.INSTANCE.render(movedBlockEntity, tickDelta, matrixStack, vertexConsumerProvider);
 			}
 			
-			if (pushedBlockEntity != null) {
-				BlockEntityRenderDispatcher.INSTANCE.render(pushedBlockEntity, tickDelta, matrixStack, vertexConsumerProvider);
+			matrixStack.pop();
+			matrixStack.push();
+			
+			BlockState mergingState = ((RTIPistonBlockEntity)pistonBlockEntity).getMergingState();
+			BlockEntity mergingBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMergingBlockEntity();
+			
+			if (mergingState != null) {
+				method_3575(toPos, mergingState, matrixStack, vertexConsumerProvider, world, false, overlay);
+			}
+			if (mergingBlockEntity != null) {
+				BlockEntityRenderDispatcher.INSTANCE.render(mergingBlockEntity, tickDelta, matrixStack, vertexConsumerProvider);
 			}
 		}
 		

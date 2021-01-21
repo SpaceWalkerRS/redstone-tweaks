@@ -7,10 +7,6 @@ import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 public class PistonSettings {
 	
-	public static boolean acceptsPowerFromFront(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.ACCEPTS_POWER_FROM_FRONT.get() : Tweaks.NormalPiston.ACCEPTS_POWER_FROM_FRONT.get();
-	}
-	
 	public static boolean canMoveSelf(boolean sticky) {
 		return sticky ? Tweaks.StickyPiston.CAN_MOVE_SELF.get() : Tweaks.NormalPiston.CAN_MOVE_SELF.get();
 	}
@@ -45,6 +41,10 @@ public class PistonSettings {
 	
 	public static boolean headUpdatesWhenPulling() {
 		return Tweaks.StickyPiston.HEAD_UPDATES_WHEN_PULLING.get();
+	}
+	
+	public static boolean ignorePowerFromFront(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.IGNORE_POWER_FROM_FRONT.get() : Tweaks.NormalPiston.IGNORE_POWER_FROM_FRONT.get();
 	}
 	
 	public static boolean ignoreUpdatesWhileExtending(boolean sticky) {
@@ -93,6 +93,10 @@ public class PistonSettings {
 	
 	public static int speedFallingEdge(boolean sticky) {
 		return sticky ? Tweaks.StickyPiston.SPEED_FALLING_EDGE.get() : Tweaks.NormalPiston.SPEED_FALLING_EDGE.get();
+	}
+	
+	public static boolean supportsBrittleBlocks(boolean sticky) {
+		return sticky ? Tweaks.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.get() : Tweaks.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.get();
 	}
 	
 	public static TickPriority tickPriorityRisingEdge(boolean sticky) {

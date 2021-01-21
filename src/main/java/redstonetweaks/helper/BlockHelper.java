@@ -2,41 +2,41 @@ package redstonetweaks.helper;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.PistonBlock;
+import net.minecraft.block.SideShapeType;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+
+import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
-import redstonetweaks.setting.Tweaks;
 
 public class BlockHelper {
 	
 	public static final Direction[] FACINGS = AbstractBlockHelper.FACINGS;
 	
-	public static BlockState postProcessState(World world, BlockState state, BlockPos pos) {
-		BlockState blockState = state;
-		
-		for (Direction direction : FACINGS) {
-			BlockPos neighborPos = pos.offset(direction);
-			blockState = blockState.getStateForNeighborUpdate(direction, world.getBlockState(neighborPos), world, pos, neighborPos);
-		}
-		return blockState;
+	public static boolean isSideSolid(BlockView world, BlockPos pos, Direction face, BlockState state, SideShapeType shapeType) {
+		return isSolidPiston(world, pos, state, face) || isMergingStationarySlab(world, pos, state, face, shapeType);
 	}
 	
-	public static boolean isRigidPistonBase(BlockView world, BlockPos pos, BlockState state) {
-		if (state.getBlock() instanceof PistonBlock) {
-			return isPistonRigid(state.isOf(Blocks.STICKY_PISTON));
+	public static boolean isSolidPiston(BlockView world, BlockPos pos, BlockState state, Direction face) {
+		if (PistonHelper.isPiston(state)) {
+			return PistonSettings.supportsBrittleBlocks(PistonHelper.isSticky(state));
 		}
 		if (state.isOf(Blocks.MOVING_PISTON)) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
 			if (blockEntity instanceof PistonBlockEntity) {
 				PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
+				
 				if (pistonBlockEntity.isSource() && !pistonBlockEntity.isExtending()) {
-					BlockState piston = pistonBlockEntity.getPushedBlock();
-					return isPistonRigid(piston.isOf(Blocks.STICKY_PISTON));
+					if (((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving()) {
+						// The side where the piston head is will be solid since the head is not moving
+						return face == pistonBlockEntity.getFacing();
+					}
+					
+					return PistonSettings.supportsBrittleBlocks(((RTIPistonBlockEntity)pistonBlockEntity).isSticky());
 				}
 			}
 		}
@@ -44,31 +44,13 @@ public class BlockHelper {
 		return false;
 	}
 	
-	public static boolean isPistonRigid(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.get() : Tweaks.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.get();
-	}
-	
-	public static boolean isSplitSlab(BlockView world, BlockPos pos, BlockState state, Direction face) {
+	public static boolean isMergingStationarySlab(BlockView world, BlockPos pos, BlockState state, Direction face, SideShapeType shapeType) {
 		if (state.isOf(Blocks.MOVING_PISTON) && face.getAxis().isVertical()) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
-			if (!(blockEntity instanceof PistonBlockEntity)) {
-				return false;
+			if (blockEntity instanceof PistonBlockEntity) {
+				return ((RTIPistonBlockEntity)blockEntity).isSideSolid(world, pos, face, shapeType);
 			}
-			
-			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
-			
-			if (((RTIPistonBlockEntity)pistonBlockEntity).isMerging()) {
-				return true;
-			}
-			
-			BlockEntity movedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedMovingBlockEntity();
-			
-			if (movedBlockEntity instanceof PistonBlockEntity) {
-				pistonBlockEntity = (PistonBlockEntity)movedBlockEntity;
-			}
-			
-			return ((RTIPistonBlockEntity)pistonBlockEntity).isMerging();
 		}
 		
 		return false;

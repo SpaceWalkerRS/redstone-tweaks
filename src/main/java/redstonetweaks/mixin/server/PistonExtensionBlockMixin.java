@@ -107,9 +107,9 @@ public class PistonExtensionBlockMixin extends Block {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		
 		if (blockEntity instanceof PistonBlockEntity) {
-			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity) blockEntity;
+			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 			
-			if (pistonBlockEntity.isSource()) {
+			if (pistonBlockEntity.isSource() && PistonHelper.isPiston(pistonBlockEntity.getPushedBlock())) {
 				boolean sticky = ((RTIPistonBlockEntity)pistonBlockEntity).isSticky();
 				boolean extending = pistonBlockEntity.isExtending();
 				

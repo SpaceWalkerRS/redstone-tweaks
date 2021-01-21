@@ -312,12 +312,12 @@ public class Presets {
 			Tweaks.MagmaBlock.DELAY.setPresetValue(DEFAULT, 20);
 			Tweaks.MagmaBlock.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.NormalPiston.ACCEPTS_POWER_FROM_FRONT.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.CAN_MOVE_SELF.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.CONNECTS_TO_WIRE.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
 			Tweaks.NormalPiston.DELAY_FALLING_EDGE.setPresetValue(DEFAULT, 0);
 			Tweaks.NormalPiston.HEAD_UPDATES_ON_EXTENSION.setPresetValue(DEFAULT, true);
+			Tweaks.NormalPiston.IGNORE_POWER_FROM_FRONT.setPresetValue(DEFAULT, true);
 			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(DEFAULT, false);
 			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(DEFAULT, true);
 			Tweaks.NormalPiston.LAZY_RISING_EDGE.setPresetValue(DEFAULT, false);
@@ -464,7 +464,6 @@ public class Presets {
 			
 			Tweaks.Stairs.FULL_FACES_ARE_SOLID.setPresetValue(DEFAULT, false);
 			
-			Tweaks.StickyPiston.ACCEPTS_POWER_FROM_FRONT.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.CAN_MOVE_SELF.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.CONNECTS_TO_WIRE.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.DO_BLOCK_DROPPING.setPresetValue(DEFAULT, true);
@@ -474,6 +473,7 @@ public class Presets {
 			Tweaks.StickyPiston.DELAY_FALLING_EDGE.setPresetValue(DEFAULT, 0);
 			Tweaks.StickyPiston.HEAD_UPDATES_ON_EXTENSION.setPresetValue(DEFAULT, true);
 			Tweaks.StickyPiston.HEAD_UPDATES_WHEN_PULLING.setPresetValue(DEFAULT, false);
+			Tweaks.StickyPiston.IGNORE_POWER_FROM_FRONT.setPresetValue(DEFAULT, true);
 			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(DEFAULT, true);
 			Tweaks.StickyPiston.LAZY_RISING_EDGE.setPresetValue(DEFAULT, false);
@@ -786,7 +786,7 @@ public class Presets {
 			
 			Tweaks.HeavyWeightedPressurePlate.WEIGHT.setPresetValue(HELL, 150);
 			
-			Tweaks.NormalPiston.ACCEPTS_POWER_FROM_FRONT.setPresetValue(HELL, true);
+			Tweaks.NormalPiston.IGNORE_POWER_FROM_FRONT.setPresetValue(HELL, true);
 			Tweaks.NormalPiston.DELAY_RISING_EDGE.setPresetValue(HELL, 2);
 			Tweaks.NormalPiston.DELAY_FALLING_EDGE.setPresetValue(HELL, 2);
 			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_EXTENDING.setPresetValue(HELL, true);
@@ -822,7 +822,7 @@ public class Presets {
 			Tweaks.RedstoneTorch.BURNOUT_COUNT.setPresetValue(HELL, 4);
 			Tweaks.RedstoneTorch.BURNOUT_TIMER.setPresetValue(HELL, 50);
 			
-			Tweaks.StickyPiston.ACCEPTS_POWER_FROM_FRONT.setPresetValue(HELL, true);
+			Tweaks.StickyPiston.IGNORE_POWER_FROM_FRONT.setPresetValue(HELL, true);
 			Tweaks.StickyPiston.DELAY_RISING_EDGE.setPresetValue(HELL, 2);
 			Tweaks.StickyPiston.DELAY_FALLING_EDGE.setPresetValue(HELL, 2);
 			Tweaks.StickyPiston.DO_BLOCK_DROPPING.setPresetValue(HELL, false);
@@ -858,9 +858,9 @@ public class Presets {
 			
 			Tweaks.HayBale.DIRECTIONALLY_MOVABLE.setPresetValue(PISTON_MADNESS, true);
 			
-			Tweaks.NormalPiston.ACCEPTS_POWER_FROM_FRONT.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.CAN_MOVE_SELF.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.CONNECTS_TO_WIRE.setPresetValue(PISTON_MADNESS, true);
+			Tweaks.NormalPiston.IGNORE_POWER_FROM_FRONT.setPresetValue(PISTON_MADNESS, false);
 			Tweaks.NormalPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(PISTON_MADNESS, false);
 			Tweaks.NormalPiston.LOOSE_HEAD.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.MOVABLE_WHEN_EXTENDED.setPresetValue(PISTON_MADNESS, true);
@@ -868,11 +868,11 @@ public class Presets {
 			Tweaks.NormalPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.NormalPiston.UPDATE_SELF.setPresetValue(PISTON_MADNESS, true);
 			
-			Tweaks.StickyPiston.ACCEPTS_POWER_FROM_FRONT.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.CAN_MOVE_SELF.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.CONNECTS_TO_WIRE.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.SUPER_BLOCK_DROPPING.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.HEAD_UPDATES_WHEN_PULLING.setPresetValue(PISTON_MADNESS, true);
+			Tweaks.StickyPiston.IGNORE_POWER_FROM_FRONT.setPresetValue(PISTON_MADNESS, false);
 			Tweaks.StickyPiston.IGNORE_UPDATES_WHILE_RETRACTING.setPresetValue(PISTON_MADNESS, false);
 			Tweaks.StickyPiston.LOOSE_HEAD.setPresetValue(PISTON_MADNESS, true);
 			Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.setPresetValue(PISTON_MADNESS, true);

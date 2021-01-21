@@ -44,7 +44,11 @@ public class ServerIncompleteActionScheduler implements IIncompleteActionSchedul
 	}
 	
 	public void scheduleBlockAction(BlockPos pos, int type, double viewDistance, Block block) {
-		incompleteActions.add(new IncompleteBlockAction(pos, type, viewDistance, block));
+		scheduleAction(new IncompleteBlockAction(pos, type, viewDistance, block));
+	}
+	
+	private void scheduleAction(IIncompleteAction action) {
+		incompleteActions.add(action);
 	}
 	
 	private void syncClientIncompleteActionScheduler(IIncompleteAction action) {

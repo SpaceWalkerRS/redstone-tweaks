@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
@@ -18,7 +19,7 @@ public class BlockMixin implements RTIBlock {
 	
 	@Inject(method = "hasTopRim", cancellable =  true, at = @At(value = "HEAD"))
 	private static void onHasTopTimInjectAtReturn(BlockView world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (BlockHelper.isRigidPistonBase(world, pos, world.getBlockState(pos))) {
+		if (BlockHelper.isSolidPiston(world, pos, world.getBlockState(pos), Direction.UP)) {
 			cir.setReturnValue(true);
 			cir.cancel();
 		}

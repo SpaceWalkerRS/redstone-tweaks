@@ -23,6 +23,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import redstonetweaks.block.piston.MotionType;
+import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
 import redstonetweaks.mixinterfaces.RTIPistonHandler;
@@ -282,7 +283,11 @@ public class PistonHelper {
 		boolean sticky = isSticky(state);
 		
 		for (Direction direction : Direction.values()) {
-			if ((PistonSettings.acceptsPowerFromFront(sticky) || direction != facing) && world.isEmittingRedstonePower(pos.offset(direction), direction)) {
+			if (PistonSettings.ignorePowerFromFront(sticky) && direction == facing) {
+				continue;
+			}
+			
+			if (world.isEmittingRedstonePower(pos.offset(direction), direction)) {
 				return true;
 			}
 		}
@@ -349,7 +354,7 @@ public class PistonHelper {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
-				return ((RTIPistonBlockEntity)blockEntity).getStateToMove();
+				state = ((RTIPistonBlockEntity)blockEntity).getStateToMove();
 			}
 		}
 		
@@ -357,13 +362,9 @@ public class PistonHelper {
 	}
 	
 	public static BlockEntity getBlockEntityToMove(World world, BlockPos pos) {
-		return getBlockEntityToMove(world, pos, true);
-	}
-	
-	public static BlockEntity getBlockEntityToMove(World world, BlockPos pos, boolean remove) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		
-		if (remove && blockEntity != null) {
+		if (blockEntity != null) {
 			world.removeBlockEntity(pos);
 			
 			// Fix for disappearing block entities on the client
@@ -373,6 +374,26 @@ public class PistonHelper {
 		}
 		
 		return blockEntity;
+	}
+	
+	public static MovedBlock trySplitDoubleSlab(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, SlabType movedType) {
+	if (SlabHelper.isSlab(state)) {
+			world.setBlockState(pos, state.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(movedType)), 82);
+			
+			state = state.with(Properties.SLAB_TYPE, movedType);
+		} else if (state.isOf(Blocks.MOVING_PISTON) && blockEntity != null && blockEntity instanceof PistonBlockEntity) {
+			PistonBlockEntity remainingBlockEntity = ((RTIPistonBlockEntity)blockEntity).copy();
+			PistonBlockEntity movedBlockEntity = ((RTIPistonBlockEntity)blockEntity).copy();
+			
+			MovedBlock remainingBlock = ((RTIPistonBlockEntity)remainingBlockEntity).splitDoubleSlab(SlabHelper.getOppositeType(movedType));
+			MovedBlock movedBlock = ((RTIPistonBlockEntity)movedBlockEntity).splitDoubleSlab(movedType);
+			
+			WorldHelper.setBlockWithEntity(world, pos, remainingBlock.getBlockState(), remainingBlock.getBlockEntity(), 82);
+			
+			return movedBlock;
+		}
+		
+		return new MovedBlock(state, blockEntity);
 	}
 	
 	// Notify clients of any pistons that are about to be "double retracted"
