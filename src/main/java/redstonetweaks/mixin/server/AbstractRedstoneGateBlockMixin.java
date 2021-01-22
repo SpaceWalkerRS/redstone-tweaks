@@ -71,6 +71,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 		if (state.isOf(Blocks.COMPARATOR)) {
 			return state.getWeakRedstonePower(world, pos, direction);
 		}
+		
 		return state.get(Properties.POWERED) && state.get(Properties.HORIZONTAL_FACING) == direction ? Tweaks.Repeater.POWER_STRONG.get() : 0;
 	}
 	
@@ -95,6 +96,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 		if (Tweaks.BugFixes.MC54711.get() && ((RTIRedstoneDiode)this).isInputBugOccurring(world, pos, state)) {
 			return Tweaks.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 		}
+		
 		return Tweaks.Repeater.TICK_PRIORITY_FACING_DIODE.get();
 	}
 	

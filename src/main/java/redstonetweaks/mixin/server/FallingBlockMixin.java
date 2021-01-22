@@ -12,12 +12,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.setting.Tweaks;
@@ -45,25 +45,21 @@ public abstract class FallingBlockMixin {
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/FallingBlock;canFallThrough(Lnet/minecraft/block/BlockState;)Z"))
 	private boolean onScheduledTickRedirectCanFallThrough(BlockState belowState, BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		return canFallThrough(belowState) && !isSupported(world, pos);
+		return canFallThrough(belowState) && !isSuspended(world, pos, state);
 	}
 	
-	private boolean isSupported(World world, BlockPos pos) {
-		if (!Tweaks.StickyPiston.SUPER_STICKY.get()) {
-			return false;
-		}
-		
-		for (Direction dir : Direction.values()) {
-			BlockState neighborState = world.getBlockState(pos.offset(dir));
-			
-			if (PistonHelper.isPiston(neighborState, true, dir.getOpposite())) {
-				if (!neighborState.get(Properties.EXTENDED)) {
+	private boolean isSuspended(World world, BlockPos pos, BlockState state) {
+		if (Tweaks.GravityBlock.SUSPENDED_BY_STICKY_BLOCKS.get()) {
+			for (Direction dir : Direction.values()) {
+				BlockPos neighborPos = pos.offset(dir);
+				BlockState neighborState = world.getBlockState(neighborPos);
+				
+				if (PistonHelper.isAdjacentBlockStuck(world, neighborPos, neighborState, pos, state, dir.getOpposite())) {
 					return true;
 				}
-			} else if (PistonHelper.isPistonHead(neighborState, true, dir.getOpposite())) {
-				return true;
 			}
 		}
+		
 		
 		return false;
 	}

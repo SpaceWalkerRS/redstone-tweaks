@@ -26,8 +26,7 @@ public abstract class RepeaterBlockMixin implements RTIRedstoneDiode {
 		return state.get(Properties.POWERED) ? Tweaks.Repeater.DELAY_FALLING_EDGE.get() : Tweaks.Repeater.DELAY_RISING_EDGE.get();
 	}
 	
-	// To fix the chain bug without altering other behavior,
-	// we identify if the chain bug is occuring
+	// To fix the chain bug without altering other behavior, we identify if the chain bug is occurring
 	@Override
 	public boolean isInputBugOccurring(World world, BlockPos pos, BlockState state) {
 		Direction facing = state.get(Properties.HORIZONTAL_FACING);
@@ -46,8 +45,8 @@ public abstract class RepeaterBlockMixin implements RTIRedstoneDiode {
 		}
 		if (frontState.get(Properties.POWERED)) {
 			return ((RTIServerTickScheduler)world.getBlockTickScheduler()).hasScheduledTickAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
-		} else {
-			return world.getBlockTickScheduler().isTicking(frontPos, frontState.getBlock());
 		}
+		
+		return world.getBlockTickScheduler().isTicking(frontPos, frontState.getBlock());
 	}
 }

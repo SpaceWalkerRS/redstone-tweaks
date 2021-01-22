@@ -23,7 +23,7 @@ public class RedstoneTweaks implements ModInitializer {
 	
 	@Override
 	public void onInitialize() {
-		POWER_BLOCK_ENTITY_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, "redstonetweaks", BlockEntityType.Builder.create(PowerBlockEntity::new, Blocks.REDSTONE_WIRE, Blocks.TARGET, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE).build(null));
+		POWER_BLOCK_ENTITY_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, "redstonetweaks", BlockEntityType.Builder.create(() -> new PowerBlockEntity(), Blocks.REDSTONE_WIRE, Blocks.TARGET, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE).build(null));
 		
 		Settings.init();
 		Presets.init();

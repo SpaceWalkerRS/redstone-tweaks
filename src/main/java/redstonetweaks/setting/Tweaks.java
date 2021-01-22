@@ -228,6 +228,7 @@ public class Tweaks {
 		private static final SettingsPack GRAVITY_BLOCK = new SettingsPack(TWEAKS, "Gravity Block");
 		
 		public static final IntegerSetting DELAY = new IntegerSetting(GRAVITY_BLOCK, "delay", "Delay before attempting to fall.", 0, Settings.Common.MAX_DELAY);
+		public static final BooleanSetting SUSPENDED_BY_STICKY_BLOCKS = new BooleanSetting(GRAVITY_BLOCK, "suspendedByStickyBlocks", "Allow gravity blocks to be suspended when next to sticky blocks.");
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(GRAVITY_BLOCK, "tickPriority", Settings.Common.DESC_TICK_PRIORITY);
 	}
 	
@@ -814,6 +815,7 @@ public class Tweaks {
 		
 		Settings.register(GravityBlock.GRAVITY_BLOCK);
 		Settings.register(GravityBlock.DELAY);
+		Settings.register(GravityBlock.SUSPENDED_BY_STICKY_BLOCKS);
 		Settings.register(GravityBlock.TICK_PRIORITY);
 		
 		Settings.register(HayBale.HAY_BALE);

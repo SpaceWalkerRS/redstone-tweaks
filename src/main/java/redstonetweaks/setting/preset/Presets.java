@@ -252,6 +252,7 @@ public class Presets {
 			Tweaks.GrassPath.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
 			Tweaks.GravityBlock.DELAY.setPresetValue(DEFAULT, 2);
+			Tweaks.GravityBlock.SUSPENDED_BY_STICKY_BLOCKS.setPresetValue(DEFAULT, false);
 			Tweaks.GravityBlock.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
 			Tweaks.HeavyWeightedPressurePlate.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).

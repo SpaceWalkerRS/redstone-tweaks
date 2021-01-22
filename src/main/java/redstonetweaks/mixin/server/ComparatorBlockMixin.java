@@ -104,8 +104,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 		return Tweaks.Comparator.DELAY.get();
 	}
 	
-	// To fix the chain bug without altering other behavior,
-	// we identify if the chain bug is occuring
+	// To fix the chain bug without altering other behavior, we identify if the chain bug is occurring
 	@Override
 	public boolean isInputBugOccurring(World world, BlockPos pos, BlockState state) {
 		Direction facing = state.get(Properties.HORIZONTAL_FACING);
@@ -122,6 +121,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 		if (state.get(Properties.POWERED) == frontState.get(Properties.POWERED)) {
 			return false;
 		}
+		
 		return ((RTIServerTickScheduler)world.getBlockTickScheduler()).hasScheduledTickAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
 	}
 }
