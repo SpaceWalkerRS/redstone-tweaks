@@ -1,4 +1,4 @@
-package redstonetweaks.mixinterfaces;
+package redstonetweaks.interfaces.mixin;
 
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
 import redstonetweaks.world.client.ClientIncompleteActionScheduler;

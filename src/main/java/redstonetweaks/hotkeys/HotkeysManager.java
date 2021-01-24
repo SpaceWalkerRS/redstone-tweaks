@@ -15,7 +15,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.InputUtil.Key;
 
 import redstonetweaks.gui.RTMenuScreen;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.packet.types.TickPausePacket;
 import redstonetweaks.setting.ServerConfig;
 

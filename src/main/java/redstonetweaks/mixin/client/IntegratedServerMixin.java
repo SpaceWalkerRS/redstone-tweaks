@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.integrated.IntegratedServer;
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 
 @Mixin(IntegratedServer.class)
 public class IntegratedServerMixin {

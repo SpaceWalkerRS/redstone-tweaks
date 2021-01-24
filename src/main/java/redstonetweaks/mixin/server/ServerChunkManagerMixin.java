@@ -11,8 +11,8 @@ import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import net.minecraft.world.chunk.WorldChunk;
-import redstonetweaks.mixinterfaces.RTIServerChunkManager;
-import redstonetweaks.mixinterfaces.RTIThreadedAnvilChunkStorage;
+import redstonetweaks.interfaces.mixin.RTIServerChunkManager;
+import redstonetweaks.interfaces.mixin.RTIThreadedAnvilChunkStorage;
 
 @Mixin(ServerChunkManager.class)
 public class ServerChunkManagerMixin implements RTIServerChunkManager {

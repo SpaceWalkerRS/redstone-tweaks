@@ -38,8 +38,8 @@ import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
-import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 
 @Mixin(PistonBlockEntity.class)
 public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIPistonBlockEntity {
@@ -190,10 +190,11 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		// When a piston pushes itself backwards a short piston arm is placed so the rod does not poke out
 		// of the back of the piston base. When the extension is finished the long arm needs to be placed.
 		if (sourceIsMoving && extending) {
-			BlockPos headPos = pos.offset(pushedBlock.get(Properties.FACING));
+			Direction facing = pushedBlock.get(Properties.FACING);
+			BlockPos headPos = pos.offset(facing);
 			BlockState pistonHead = world.getBlockState(headPos);
 			
-			if (PistonHelper.isPistonHead(pistonHead)) {
+			if (PistonHelper.isPistonHead(pistonHead, facing)) {
 				world.setBlockState(headPos, pistonHead.with(Properties.SHORT, false), 18);
 			}
 		}
@@ -212,12 +213,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		sourceIsMoving = tag.contains("sourceIsMoving") ? tag.getBoolean("sourceIsMoving") : false;
 
 		if (tag.contains("movedBlockEntity")) {
-			if (pushedBlock.getBlock().hasBlockEntity()) {
-				if (pushedBlock.isOf(Blocks.MOVING_PISTON)) {
-					movedBlockEntity = new PistonBlockEntity();
-				} else {
-					movedBlockEntity = ((BlockEntityProvider)pushedBlock.getBlock()).createBlockEntity(world);
-				}
+			Block movedBlock = pushedBlock.getBlock();
+			
+			if (movedBlock.hasBlockEntity()) {
+				movedBlockEntity = movedBlock == Blocks.MOVING_PISTON ? new PistonBlockEntity() : ((BlockEntityProvider)movedBlock).createBlockEntity(world);
 				
 				if (movedBlockEntity != null) {
 					movedBlockEntity.fromTag(pushedBlock, tag.getCompound("movedBlockEntity"));
@@ -230,12 +229,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			mergingState = NbtHelper.toBlockState(tag.getCompound("mergingState"));
 		}
 		if (tag.contains("mergingBlockEntity")) {
-			if (mergingState.getBlock().hasBlockEntity()) {
-				if (mergingState.isOf(Blocks.MOVING_PISTON)) {
-					mergingBlockEntity = new PistonBlockEntity();
-				} else {
-					mergingBlockEntity = ((BlockEntityProvider)mergingState.getBlock()).createBlockEntity(world);
-				}
+			Block mergingBlock = mergingState.getBlock();
+			
+			if (mergingBlock.hasBlockEntity()) {
+				mergingBlockEntity = mergingBlock == Blocks.MOVING_PISTON ? new PistonBlockEntity() : ((BlockEntityProvider)mergingBlock).createBlockEntity(world);
 				
 				if (mergingBlockEntity != null) {
 					mergingBlockEntity.fromTag(mergingState, tag.getCompound("mergingBlockEntity"));
@@ -273,6 +270,15 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Redirect(method = "getCollisionShape", at = @At(value = "FIELD", target = "Lnet/minecraft/block/entity/PistonBlockEntity;pushedBlock:Lnet/minecraft/block/BlockState;"))
 	private BlockState onGetCollisionShapeRedirectPushedBlock(PistonBlockEntity pistonBlockEntity) {
 		return getMovedMovingState();
+	}
+	
+	@Override
+	public void init() {
+		if (PistonSettings.speed(sticky, extending) == 0) {
+			// This ensures the block entity finishes the first time it is ticked
+			// Otherwise the behavior would be the same as if the speed was set to 1
+			this.progress = 1.0F;
+		}
 	}
 	
 	@Override
@@ -325,8 +331,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
-	public void setSticky(boolean isMovedByStickyPiston) {
-		this.sticky = isMovedByStickyPiston;
+	public void setSticky(boolean sticky) {
+		this.sticky = sticky;
 	}
 	
 	@Override

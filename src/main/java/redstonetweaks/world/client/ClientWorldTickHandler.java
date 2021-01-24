@@ -2,7 +2,7 @@ package redstonetweaks.world.client;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.packet.types.DoWorldTicksPacket;
 import redstonetweaks.packet.types.TaskSyncPacket;
 import redstonetweaks.packet.types.TickBlockEntityPacket;

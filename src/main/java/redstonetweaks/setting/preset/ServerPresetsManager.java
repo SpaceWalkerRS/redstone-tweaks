@@ -6,14 +6,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.UUID;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.types.ApplyPresetPacket;
 import redstonetweaks.packet.types.PresetPacket;
@@ -244,11 +243,8 @@ public class ServerPresetsManager {
 		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	
-	public void onPlayerJoined(UUID playerUUID) {
-		ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerUUID);
-		if (player != null) {
-			updatePresetsOfPlayer(player);
-		}
+	public void onPlayerJoined(ServerPlayerEntity player) {
+		updatePresetsOfPlayer(player);
 	}
 	
 	private void updatePresetsOfPlayer(ServerPlayerEntity player) {

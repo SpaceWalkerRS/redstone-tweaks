@@ -29,10 +29,10 @@ import net.minecraft.world.WorldView;
 
 import redstonetweaks.helper.RedstoneWireHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.mixinterfaces.RTIBlock;
-import redstonetweaks.mixinterfaces.RTIRedstoneDiode;
-import redstonetweaks.mixinterfaces.RTIServerWorld;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIBlock;
+import redstonetweaks.interfaces.mixin.RTIRedstoneDiode;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.UpdateOrder;
 
@@ -93,7 +93,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;EXTREMELY_HIGH:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority updatePoweredRedirectPriorityExtremelyHigh(World world, BlockPos pos, BlockState state) {
-		if (Tweaks.BugFixes.MC54711.get() && ((RTIRedstoneDiode)this).isInputBugOccurring(world, pos, state)) {
+		if (Tweaks.BugFixes.MC54711.get() && ((RTIRedstoneDiode)this).isChainBugOccurring(world, pos, state)) {
 			return Tweaks.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 		}
 		

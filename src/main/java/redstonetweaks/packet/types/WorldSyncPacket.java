@@ -4,7 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 
 public class WorldSyncPacket extends RedstoneTweaksPacket {
 	

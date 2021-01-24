@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 
 @Mixin(Keyboard.class)
 public class KeyboardMixin {

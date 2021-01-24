@@ -13,11 +13,6 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	}
 	
 	@Override
-	public boolean isDefault() {
-		return Arrays.equals(get(), getDefault());
-	}
-	
-	@Override
 	public String valueToString(E[] values) {
 		String string = "";
 		
@@ -34,8 +29,8 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 		int size = args.length;
 		
 		E[] values = getEmptyArray(size);
-		for (int i = 0; i < size; i++) {
-			values[i] = stringToElement(args[i]);
+		for (int index = 0; index < size; index++) {
+			values[index] = stringToElement(args[index]);
 		}
 		
 		return values;
@@ -50,9 +45,14 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
 	@Override
 	public void setPresetValue(Preset preset, E[] newValue) {
-		if (!hasPreset(Presets.Default.DEFAULT) || newValue.length == getSize()) {
+		if (preset == Presets.Default.DEFAULT || newValue.length == getSize()) {
 			super.setPresetValue(preset, newValue.clone());
 		}
+	}
+	
+	@Override
+	public boolean valueEquals(E[] value1, E[] value2) {
+		return Arrays.equals(value1, value2);
 	}
 	
 	protected abstract E[] getEmptyArray(int size);
@@ -67,6 +67,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 		if (inRange(index)) {
 			return get()[index];
 		}
+		
 		return null;
 	}
 	
@@ -96,6 +97,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 		if (inRange(index)) {
 			return get()[index].equals(getDefault()[index]);
 		}
+		
 		return false;
 	}
 	
@@ -107,6 +109,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 		if (inRange(index)) {
 			return getDefault()[index];
 		}
+		
 		return null;
 	}
 	

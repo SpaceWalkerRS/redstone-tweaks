@@ -7,8 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.packet.types.OpenMenuPacket;
 
 public class RedstoneTweaksMenuCommand {

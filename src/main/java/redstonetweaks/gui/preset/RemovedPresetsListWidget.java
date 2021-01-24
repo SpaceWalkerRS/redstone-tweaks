@@ -11,7 +11,7 @@ import net.minecraft.util.Formatting;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.util.TextFormatting;
@@ -66,7 +66,7 @@ public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWid
 			this.children = new ArrayList<>();
 			
 			this.unremoveButton = new RTButtonWidget(0, 0, 55, 20, () -> new TranslatableText("Put Back"), (button) -> {
-				((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().unremovePreset(this.preset);
+				((RTIMinecraftClient)screen.client).getPresetsManager().unremovePreset(this.preset);
 			});
 			this.children.add(this.unremoveButton);
 		}
@@ -130,7 +130,7 @@ public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWid
 		
 		@Override
 		public void updateButtonsActive() {
-			unremoveButton.setActive(((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().canEditPresets());
+			unremoveButton.setActive(((RTIMinecraftClient)screen.client).getPresetsManager().canEditPresets());
 		}
 	}
 	

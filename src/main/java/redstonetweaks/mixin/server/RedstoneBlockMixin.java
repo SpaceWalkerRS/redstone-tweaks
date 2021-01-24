@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(RedstoneBlock.class)

@@ -11,7 +11,7 @@ import redstonetweaks.gui.RTMenuTab;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.hotkeys.Hotkeys;
 import redstonetweaks.hotkeys.RTKeyBinding;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 
 public class HotkeysTab extends RTMenuTab {
 	

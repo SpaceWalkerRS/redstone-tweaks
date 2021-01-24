@@ -9,7 +9,7 @@ import net.minecraft.util.Formatting;
 import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 
@@ -109,7 +109,7 @@ public class PresetWindow extends RTWindow {
 	}
 	
 	public void updateButtonsActive() {
-		boolean canEditPresets = ((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().canEditPresets();
+		boolean canEditPresets = ((RTIMinecraftClient)screen.client).getPresetsManager().canEditPresets();
 		boolean editable = parent.getPresetEditor().isEditable();
 		
 		nameField.setActive(canEditPresets && editable);

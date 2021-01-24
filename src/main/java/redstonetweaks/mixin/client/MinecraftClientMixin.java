@@ -12,10 +12,11 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.hotkeys.HotkeysManager;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.ClientSettingsManager;
+import redstonetweaks.setting.preset.ClientPresetsManager;
 import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.client.NeighborUpdateVisualizer;
 import redstonetweaks.world.client.TickInfoLabelRenderer;
@@ -28,6 +29,7 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	private ClientPacketHandler packetHandler;
 	private ClientSettingsManager settingsManager;
+	private ClientPresetsManager presetsManager;
 	private HotkeysManager hotkeysManager;
 	private ClientWorldTickHandler worldTickHandler;
 	private NeighborUpdateVisualizer neighborUpdateVisualizer;
@@ -37,6 +39,7 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	private void onInitInjectAtReturn(RunArgs args, CallbackInfo ci) {
 		packetHandler = new ClientPacketHandler((MinecraftClient)(Object)this);
 		settingsManager = new ClientSettingsManager((MinecraftClient)(Object)this);
+		presetsManager = new ClientPresetsManager((MinecraftClient)(Object)this);
 		hotkeysManager = new HotkeysManager((MinecraftClient)(Object)this);
 		worldTickHandler = new ClientWorldTickHandler((MinecraftClient)(Object)this);
 		neighborUpdateVisualizer = new NeighborUpdateVisualizer((MinecraftClient)(Object)this);
@@ -53,6 +56,7 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 		ServerInfo.clear();
 		worldTickHandler.onDisconnect();
 		settingsManager.onDisconnect();
+		presetsManager.onDisconnect();
 		RTMenuScreen.clearLastSearchQueries();
 		RTMenuScreen.resetLastOpenedTabIndex();
 	}
@@ -70,6 +74,11 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	@Override
 	public ClientSettingsManager getSettingsManager() {
 		return settingsManager;
+	}
+	
+	@Override
+	public ClientPresetsManager getPresetsManager() {
+		return presetsManager;
 	}
 	
 	@Override

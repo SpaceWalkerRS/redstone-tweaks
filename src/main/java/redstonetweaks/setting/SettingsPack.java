@@ -24,6 +24,7 @@ public class SettingsPack {
 		if (other instanceof SettingsPack) {
 			return category.equals(((SettingsPack)other).category) && name.equals(((SettingsPack)other).name);
 		}
+		
 		return false;
 	}
 	

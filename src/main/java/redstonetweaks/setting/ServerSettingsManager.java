@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.UUID;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -14,7 +13,7 @@ import net.minecraft.util.WorldSavePath;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.types.LockCategoryPacket;
 import redstonetweaks.packet.types.LockSettingPacket;
@@ -24,12 +23,14 @@ import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.packet.types.SettingsPacket;
 import redstonetweaks.setting.types.ISetting;
 
-public class ServerSettingsManager {
+public class ServerSettingsManager implements ISettingChangeListener {
 	
 	private static final String CACHE_DIRECTORY = "redstonetweaks";
 	private static final String SETTINGS_PATH = "settings.txt";
 	
 	private final MinecraftServer server;
+	
+	private boolean deaf;
 	
 	public ServerSettingsManager(MinecraftServer server) {
 		this.server = server;
@@ -45,9 +46,13 @@ public class ServerSettingsManager {
 		Settings.enableAll();
 		
 		loadSettings();
+		
+		Settings.addChangeListener(this);
 	}
 	
 	public void onShutdown() {
+		Settings.removeChangeListener(this);
+		
 		saveSettings();
 	}
 	
@@ -126,16 +131,6 @@ public class ServerSettingsManager {
 	
 	// Setting changes occur on a client and are then sent to the server,
 	// which then notifies all clients of the change
-	public void onSettingPacketReceived(ISetting setting) {
-		SettingPacket packet = new SettingPacket(setting);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void onLockSettingPacketReceived(ISetting setting) {
-		LockSettingPacket packet = new LockSettingPacket(setting);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
-	}
-	
 	public void onLockCategoryPacketReceived(SettingsCategory category) {
 		LockCategoryPacket packet = new LockCategoryPacket(category);
 		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
@@ -151,9 +146,8 @@ public class ServerSettingsManager {
 		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
 	}
 	
-	public void onPlayerJoined(UUID playerUUID) {
-		ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerUUID);
-		if (player != null) {
+	public void onPlayerJoined(ServerPlayerEntity player) {
+		if (server.isRemote()) {
 			updateSettingsOfPlayer(player);
 		}
 	}
@@ -166,6 +160,20 @@ public class ServerSettingsManager {
 			packetHandler.sendPacket(packet);
 		} else {
 			packetHandler.sendPacketToPlayer(packet, player);
+		}
+	}
+	
+	@Override
+	public void settingLockedChanged(ISetting setting) {
+		if (!deaf && server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new LockSettingPacket(setting));
+		}
+	}
+	
+	@Override
+	public void settingValueChanged(ISetting setting) {
+		if (!deaf && server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new SettingPacket(setting));
 		}
 	}
 }

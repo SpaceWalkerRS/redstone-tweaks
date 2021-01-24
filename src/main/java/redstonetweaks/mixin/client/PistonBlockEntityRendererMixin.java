@@ -22,7 +22,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 
 @Mixin(PistonBlockEntityRenderer.class)
 public abstract class PistonBlockEntityRendererMixin {

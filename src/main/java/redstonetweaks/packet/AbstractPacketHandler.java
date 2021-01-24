@@ -19,7 +19,6 @@ import redstonetweaks.packet.types.LockSettingPacket;
 import redstonetweaks.packet.types.NeighborUpdateSchedulerPacket;
 import redstonetweaks.packet.types.NeighborUpdateVisualizerPacket;
 import redstonetweaks.packet.types.OpenMenuPacket;
-import redstonetweaks.packet.types.PlayerJoinedServerPacket;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
 import redstonetweaks.packet.types.RedstoneTweaksPacket;
@@ -53,6 +52,7 @@ public abstract class AbstractPacketHandler {
 		buffer.writeByte(packetType.getIndex());
 		
 		packet.encode(buffer);
+		
 		return toCustomPayloadPacket(buffer);
 	}
 	
@@ -63,6 +63,7 @@ public abstract class AbstractPacketHandler {
 		RedstoneTweaksPacket packet = type.getClazz().newInstance();
 		
 		packet.decode(buffer);
+		
 		return packet;
 	}
 	
@@ -83,6 +84,7 @@ public abstract class AbstractPacketHandler {
 	protected abstract void execute(RedstoneTweaksPacket packet);
 	
 	private enum PacketType {
+		
 		INVALID(0, null),
 		SETTING(1, SettingPacket.class),
 		SETTINGS(2, SettingsPacket.class),
@@ -96,19 +98,18 @@ public abstract class AbstractPacketHandler {
 		WORLD_TIME_SYNC(10, WorldTimeSyncPacket.class),
 		TICK_STATUS(11, TickStatusPacket.class),
 		TICK_BLOCK_ENTITY(12, TickBlockEntityPacket.class),
-		PLAYER_JOINED_SERVER(13, PlayerJoinedServerPacket.class),
-		DO_WORLD_TICKS(14, DoWorldTicksPacket.class),
-		TICK_PAUSE(15, TickPausePacket.class),
-		SERVER_INFO(16, ServerInfoPacket.class),
-		PRESET(17, PresetPacket.class),
-		PRESETS(18, PresetsPacket.class),
-		RELOAD_PRESETS(19, ReloadPresetsPacket.class),
-		REMOVE_PRESET(20, RemovePresetPacket.class),
-		DUPLICATE_PRESET(21, DuplicatePresetPacket.class),
-		APPLY_PRESET(22, ApplyPresetPacket.class),
-		LOCK_SETTING(23, LockSettingPacket.class),
-		LOCK_CATEGORY(24, LockCategoryPacket.class),
-		OPEN_MENU(25, OpenMenuPacket.class);
+		DO_WORLD_TICKS(13, DoWorldTicksPacket.class),
+		TICK_PAUSE(14, TickPausePacket.class),
+		SERVER_INFO(15, ServerInfoPacket.class),
+		PRESET(16, PresetPacket.class),
+		PRESETS(17, PresetsPacket.class),
+		RELOAD_PRESETS(18, ReloadPresetsPacket.class),
+		REMOVE_PRESET(19, RemovePresetPacket.class),
+		DUPLICATE_PRESET(20, DuplicatePresetPacket.class),
+		APPLY_PRESET(21, ApplyPresetPacket.class),
+		LOCK_SETTING(22, LockSettingPacket.class),
+		LOCK_CATEGORY(23, LockCategoryPacket.class),
+		OPEN_MENU(24, OpenMenuPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends RedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;

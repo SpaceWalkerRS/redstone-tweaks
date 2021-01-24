@@ -3,7 +3,7 @@ package redstonetweaks.world.common;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import redstonetweaks.mixinterfaces.RTIBlock;
+import redstonetweaks.interfaces.mixin.RTIBlock;
 import redstonetweaks.packet.types.IncompleteBlockActionPacket;
 import redstonetweaks.packet.types.RedstoneTweaksPacket;
 

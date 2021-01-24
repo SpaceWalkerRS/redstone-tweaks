@@ -16,11 +16,13 @@ public class RTKeyBinding {
 	public RTKeyBinding(String name, InputUtil.Type type, int defaultKeyCode) {
 		this.name = name;
 		this.defaultKey = type.createFromCode(defaultKeyCode);
-		this.key = defaultKey;
+		
+		setKey(defaultKey);
 	}
 	
 	public RTKeyBinding alwaysBound() {
 		allowUnbinding = false;
+		
 		return this;
 	}
 	

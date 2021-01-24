@@ -1,4 +1,4 @@
-package redstonetweaks.mixinterfaces;
+package redstonetweaks.interfaces.mixin;
 
 import java.util.List;
 import java.util.Map;

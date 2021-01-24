@@ -1,4 +1,4 @@
-package redstonetweaks.mixinterfaces;
+package redstonetweaks.interfaces.mixin;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;

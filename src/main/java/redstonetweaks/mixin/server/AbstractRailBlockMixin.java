@@ -10,7 +10,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.mixinterfaces.RTIRail;
+import redstonetweaks.interfaces.mixin.RTIRail;
 
 @Mixin(AbstractRailBlock.class)
 public class AbstractRailBlockMixin {

@@ -10,7 +10,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 
 import redstonetweaks.block.piston.PistonSettings;
-import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 
 public class BlockHelper {
 	

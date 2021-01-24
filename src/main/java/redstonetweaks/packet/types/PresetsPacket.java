@@ -6,7 +6,7 @@ import java.util.List;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
@@ -158,6 +158,6 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 			}
 		}
 		
-		((RTIMinecraftClient)client).getSettingsManager().getPresetsManager().onPresetsPacketReceived();
+		((RTIMinecraftClient)client).getPresetsManager().onPresetsPacketReceived();
 	}
 }

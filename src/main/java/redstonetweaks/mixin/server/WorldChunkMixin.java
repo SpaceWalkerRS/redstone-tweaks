@@ -18,8 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
-
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 
 @Mixin(WorldChunk.class)
 public abstract class WorldChunkMixin {

@@ -13,7 +13,7 @@ import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTLockButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.types.ISetting;
 

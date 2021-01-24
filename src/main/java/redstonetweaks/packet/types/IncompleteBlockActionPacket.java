@@ -6,7 +6,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import redstonetweaks.mixinterfaces.RTIClientWorld;
+import redstonetweaks.interfaces.mixin.RTIClientWorld;
 import redstonetweaks.world.common.IncompleteBlockAction;
 
 public class IncompleteBlockActionPacket extends RedstoneTweaksPacket {

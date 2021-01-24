@@ -19,13 +19,14 @@ import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.hotkeys.RTKeyBinding;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.setting.ISettingChangeListener;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
-public class RTMenuScreen extends Screen {
+public class RTMenuScreen extends Screen implements ISettingChangeListener {
 	
 	private static final int TITLE_MARGIN = 8;
 	private static final int TITLE_HEIGHT = 15;
@@ -45,6 +46,8 @@ public class RTMenuScreen extends Screen {
 		this.client = client;
 		this.tabs = new ArrayList<>();
 		this.tabButtons = new ArrayList<>();
+		
+		this.addChangeListener();
 	}
 	
 	@Override
@@ -101,6 +104,8 @@ public class RTMenuScreen extends Screen {
 	
 	@Override
 	public void onClose() {
+		removeChangeListener();
+		
 		RTMenuTab selectedTab = getSelectedTab();
 		if (!selectedTab.closeTopWindow()) {
 			selectedTab.onTabClosed();
@@ -221,8 +226,20 @@ public class RTMenuScreen extends Screen {
 		return getSelectedTab().focusedIsTextField();
 	}
 	
+	@Override
+	public void settingLockedChanged(ISetting setting) {
+		onSettingChanged(setting);
+		
+	}
+	
+	@Override
+	public void settingValueChanged(ISetting setting) {
+		onSettingChanged(setting);
+	}	
+	
 	public void onSettingChanged(ISetting setting) {
 		RTMenuTab selectedTab = getSelectedTab();
+		
 		if (selectedTab instanceof SettingsTab) {
 			((SettingsTab)selectedTab).onSettingChanged(setting);
 		} else if (selectedTab instanceof PresetsTab) {

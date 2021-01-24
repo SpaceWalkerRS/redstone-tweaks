@@ -1,4 +1,4 @@
-package redstonetweaks.mixinterfaces;
+package redstonetweaks.interfaces.mixin;
 
 import net.minecraft.world.TickPriority;
 

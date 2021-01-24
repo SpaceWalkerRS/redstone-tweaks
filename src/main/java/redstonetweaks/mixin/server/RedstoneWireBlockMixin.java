@@ -35,7 +35,7 @@ import net.minecraft.world.WorldAccess;
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.RedstoneWireHelper;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.ShapeUpdate;
 

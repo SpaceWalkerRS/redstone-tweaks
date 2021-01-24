@@ -4,7 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import net.minecraft.block.RailPlacementHelper;
-import redstonetweaks.mixinterfaces.RTIRailPlacementHelper;
+import redstonetweaks.interfaces.mixin.RTIRailPlacementHelper;
 
 @Mixin(RailPlacementHelper.class)
 public abstract class RailPlacementHelperMixin implements RTIRailPlacementHelper {

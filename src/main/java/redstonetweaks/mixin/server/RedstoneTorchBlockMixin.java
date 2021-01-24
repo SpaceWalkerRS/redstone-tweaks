@@ -27,7 +27,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(RedstoneTorchBlock.class)

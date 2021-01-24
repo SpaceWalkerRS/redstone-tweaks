@@ -16,8 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
-
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.ServerSettingsManager;
@@ -46,7 +45,7 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(CallbackInfo ci) {
-		ServerInfo.init();
+		ServerInfo.onServerStart();
 		
 		packetHandler = new ServerPacketHandler((MinecraftServer)(Object)this);
 		settingsManager = new ServerSettingsManager((MinecraftServer)(Object)this);

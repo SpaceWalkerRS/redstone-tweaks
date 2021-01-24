@@ -1,8 +1,10 @@
 package redstonetweaks.setting;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.setting.preset.Preset;
@@ -12,6 +14,19 @@ public class Settings {
 	
 	public static final Map<String, ISetting> ALL = new HashMap<>();
 	public static final Map<String, SettingsCategory> CATEGORIES = new LinkedHashMap<>();
+	
+	private static final Set<ISettingChangeListener> CHANGE_LISTENERS = new HashSet<>();
+	
+	public static void init() {
+		Tweaks.init();
+		ServerConfig.init();
+	}
+
+	public static void toDefault() {
+		disableAll();
+		unlockAll();
+		resetAll();
+	}
 	
 	public static void register(SettingsCategory category) {
 		if (CATEGORIES.putIfAbsent(category.getName(), category) != null) {
@@ -70,15 +85,24 @@ public class Settings {
 		ALL.forEach((name, setting) -> setting.removePreset(preset));
 	}
 	
-	public static void toDefault() {
-		disableAll();
-		unlockAll();
-		resetAll();
+	public static void addChangeListener(ISettingChangeListener listener) {
+		CHANGE_LISTENERS.add(listener);
 	}
 	
-	public static void init() {
-		Tweaks.init();
-		ServerConfig.init();
+	public static void removeChangeListener(ISettingChangeListener listener) {
+		CHANGE_LISTENERS.remove(listener);
+	}
+	
+	public static void lockedChanged(ISetting setting) {
+		for (ISettingChangeListener listener : CHANGE_LISTENERS) {
+			listener.settingLockedChanged(setting);
+		}
+	}
+	
+	public static void valueChanged(ISetting setting) {
+		for (ISettingChangeListener listener : CHANGE_LISTENERS) {
+			listener.settingValueChanged(setting);
+		}
 	}
 	
 	public static class Common {

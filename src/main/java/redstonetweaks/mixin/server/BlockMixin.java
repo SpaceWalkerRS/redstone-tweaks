@@ -12,7 +12,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.BlockHelper;
-import redstonetweaks.mixinterfaces.RTIBlock;
+import redstonetweaks.interfaces.mixin.RTIBlock;
 
 @Mixin(Block.class)
 public class BlockMixin implements RTIBlock {

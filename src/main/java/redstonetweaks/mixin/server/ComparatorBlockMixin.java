@@ -26,8 +26,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
-import redstonetweaks.mixinterfaces.RTIRedstoneDiode;
-import redstonetweaks.mixinterfaces.RTIServerTickScheduler;
+import redstonetweaks.interfaces.mixin.RTIRedstoneDiode;
+import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(ComparatorBlock.class)
@@ -87,7 +87,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority onUpdatePoweredRedirectPriorityHigh(World world, BlockPos pos, BlockState state) {
-		if (Tweaks.BugFixes.MC54711.get() && ((RTIRedstoneDiode)this).isInputBugOccurring(world, pos, state)) {
+		if (Tweaks.BugFixes.MC54711.get() && ((RTIRedstoneDiode)this).isChainBugOccurring(world, pos, state)) {
 			return Tweaks.Comparator.TICK_PRIORITY.get();
 		} else {
 			return Tweaks.Comparator.TICK_PRIORITY_FACING_DIODE.get();
@@ -106,7 +106,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	
 	// To fix the chain bug without altering other behavior, we identify if the chain bug is occurring
 	@Override
-	public boolean isInputBugOccurring(World world, BlockPos pos, BlockState state) {
+	public boolean isChainBugOccurring(World world, BlockPos pos, BlockState state) {
 		Direction facing = state.get(Properties.HORIZONTAL_FACING);
 		BlockPos frontPos = pos.offset(facing.getOpposite());
 		BlockState frontState = world.getBlockState(frontPos);

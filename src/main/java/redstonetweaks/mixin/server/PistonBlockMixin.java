@@ -45,11 +45,11 @@ import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.mixinterfaces.RTIBlock;
-import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
-import redstonetweaks.mixinterfaces.RTIPistonHandler;
-import redstonetweaks.mixinterfaces.RTIServerWorld;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIBlock;
+import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIPistonHandler;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(PistonBlock.class)

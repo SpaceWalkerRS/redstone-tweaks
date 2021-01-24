@@ -27,9 +27,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.mixinterfaces.RTIBlock;
-import redstonetweaks.mixinterfaces.RTIServerWorld;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIBlock;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(ObserverBlock.class)

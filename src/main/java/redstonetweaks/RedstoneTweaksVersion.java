@@ -62,6 +62,10 @@ public class RedstoneTweaksVersion {
 		return major > version.major;
 	}
 	
+	public boolean isOlderThan(RedstoneTweaksVersion version) {
+		return version.isNewerThan(this);
+	}
+	
 	public static RedstoneTweaksVersion createRelease(int major, int minor, int patch) {
 		return create(Type.RELEASE, major, minor, patch, 0);
 	}
@@ -70,54 +74,35 @@ public class RedstoneTweaksVersion {
 		return create(Type.SNAPSHOT, major, minor, patch, snapshot);
 	}
 	
-	public static RedstoneTweaksVersion create(Type type, int major, int minor, int patch, int snapshot) {
-		if (type != Type.INVALID && major >= 0 && minor >= 0 && patch >= 0 && snapshot >= 0) {
+	private static RedstoneTweaksVersion create(Type type, int major, int minor, int patch, int snapshot) {
+		if (type != Type.INVALID && major >= 0 && minor >= 0 && patch >= 0 && snapshot >= (type == Type.SNAPSHOT ? 1 : 0)) {
 			return new RedstoneTweaksVersion(type, major, minor, patch, snapshot);
 		}
+		
 		return INVALID_VERSION;
 	}
 	
 	public static RedstoneTweaksVersion parseVersion(String string) {
-		Type type = Type.INVALID;
-		int major = -1;
-		int minor = -1;
-		int patch = -1;
-		int snapshot = -1;
-		
-		String[] args = string.split("-pre");
-		
-		switch (args.length) {
-		case 1:
-			type = Type.RELEASE;
-			snapshot = 0;
+		try {
+			String[] args = string.split("-pre");
+			String[] version = args[0].split("[.]");
 			
-			break;
-		case 2:
-			type = Type.SNAPSHOT;
-			try {
-				snapshot = Integer.parseInt(args[1]);
-			} catch (NumberFormatException e) {
+			if (version.length == 3) {
+				int major = Integer.parseInt(version[0]);
+				int minor = Integer.parseInt(version[1]);
+				int patch = Integer.parseInt(version[2]);
 				
+				if (args.length == 1) {
+					return createRelease(major, minor, patch);
+				} else if (args.length == 2) {
+					return createSnapshot(major, minor, patch, Integer.parseInt(args[1]));
+				}
 			}
+		} catch (Exception e) {
 			
-			break;
-		default:
-			return INVALID_VERSION;
 		}
 		
-		String[] version = args[0].split("[.]");
-		
-		if (version.length == 3) {
-			try {
-				major = Integer.parseInt(version[0]);
-				minor = Integer.parseInt(version[1]);
-				patch = Integer.parseInt(version[2]);
-			} catch (NumberFormatException e) {
-				
-			}
-		}
-		
-		return create(type, major, minor, patch, snapshot);
+		return INVALID_VERSION;
 	}
 	
 	public enum Type {

@@ -11,7 +11,7 @@ import net.minecraft.util.Formatting;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.util.TextFormatting;
@@ -111,7 +111,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditPresets = ((RTIMinecraftClient)client).getSettingsManager().getPresetsManager().canEditPresets();
+			boolean canEditPresets = ((RTIMinecraftClient)client).getPresetsManager().canEditPresets();
 			
 			addButton.setActive(canEditPresets);
 			addFromSettingsButton.setActive(canEditPresets);
@@ -147,17 +147,17 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.children.add(this.applyButton);
 			
 			this.duplicateButton = new RTButtonWidget(0, 0, 60, 20, () -> new TranslatableText("Duplicate"), (button) -> {
-				((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().duplicatePreset(this.preset);
+				((RTIMinecraftClient)screen.client).getPresetsManager().duplicatePreset(this.preset);
 			});
 			this.children.add(this.duplicateButton);
 			
-			this.editButton = new RTButtonWidget(0, 0, 34, 20, () -> new TranslatableText(((RTIMinecraftClient)client).getSettingsManager().getPresetsManager().canEditPresets() && this.preset.isEditable() ? "Edit" : "View"), (button) -> {
+			this.editButton = new RTButtonWidget(0, 0, 34, 20, () -> new TranslatableText(((RTIMinecraftClient)client).getPresetsManager().canEditPresets() && this.preset.isEditable() ? "Edit" : "View"), (button) -> {
 				parent.editPreset(this.preset);
 			});
 			this.children.add(this.editButton);
 			
 			this.deleteButton = new RTButtonWidget(0, 0, 45, 20, () -> new TranslatableText("Delete"), (button) -> {
-				((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().removePreset(this.preset);
+				((RTIMinecraftClient)screen.client).getPresetsManager().removePreset(this.preset);
 			});
 			this.children.add(deleteButton);
 			
@@ -244,7 +244,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		@Override
 		public void updateButtonsActive() {
 			boolean canEditSettings = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
-			boolean canEditPresets = ((RTIMinecraftClient)client).getSettingsManager().getPresetsManager().canEditPresets();
+			boolean canEditPresets = ((RTIMinecraftClient)client).getPresetsManager().canEditPresets();
 			
 			applyButton.setActive(canEditSettings);
 			duplicateButton.setActive(canEditPresets);

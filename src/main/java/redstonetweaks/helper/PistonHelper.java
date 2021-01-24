@@ -27,10 +27,10 @@ import net.minecraft.world.World;
 import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.block.piston.PistonSettings;
-import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
-import redstonetweaks.mixinterfaces.RTIPistonHandler;
-import redstonetweaks.mixinterfaces.RTIServerWorld;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIPistonHandler;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 public class PistonHelper {
@@ -65,6 +65,8 @@ public class PistonHelper {
 		((RTIPistonBlockEntity)pistonBlockEntity).setMovedBlockEntity(movedBlockEntity);
 		((RTIPistonBlockEntity)pistonBlockEntity).setMergingState(mergedState);
 		((RTIPistonBlockEntity)pistonBlockEntity).setMergingBlockEntity(mergedBlockEntity);
+		
+		((RTIPistonBlockEntity)pistonBlockEntity).init();
 		
 		return pistonBlockEntity;
 	}
@@ -379,12 +381,12 @@ public class PistonHelper {
 		return blockEntity;
 	}
 	
-	public static MovedBlock trySplitDoubleSlab(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, SlabType movedType) {
-		if (SlabHelper.isSlab(state)) {
-			world.setBlockState(pos, state.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(movedType)), 82);
+	public static MovedBlock trySplitDoubleSlab(World world, BlockPos pos, BlockState movedState, BlockEntity blockEntity, SlabType movedType) {
+		if (SlabHelper.isSlab(movedState)) {
+			world.setBlockState(pos, movedState.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(movedType)), 82);
 			
-			state = state.with(Properties.SLAB_TYPE, movedType);
-		} else if (state.isOf(Blocks.MOVING_PISTON) && blockEntity != null && blockEntity instanceof PistonBlockEntity) {
+			movedState = movedState.with(Properties.SLAB_TYPE, movedType);
+		} else if (movedState.isOf(Blocks.MOVING_PISTON) && blockEntity != null && blockEntity instanceof PistonBlockEntity) {
 			PistonBlockEntity remainingBlockEntity = ((RTIPistonBlockEntity)blockEntity).copy();
 			PistonBlockEntity movedBlockEntity = ((RTIPistonBlockEntity)blockEntity).copy();
 			
@@ -396,7 +398,7 @@ public class PistonHelper {
 			return movedBlock;
 		}
 		
-		return new MovedBlock(state, blockEntity);
+		return new MovedBlock(movedState, blockEntity);
 	}
 	
 	// Notify clients of any pistons that are about to be "double retracted"
@@ -419,6 +421,10 @@ public class PistonHelper {
 				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
 			}
 		}
+	}
+	
+	public static boolean isPotentiallySticky(BlockState state) {
+		return isPotentiallySticky(state.getBlock());
 	}
 	
 	public static boolean isPotentiallySticky(Block block) {

@@ -8,7 +8,7 @@ public class ServerInfo {
 	
 	private static RedstoneTweaksVersion modVersion = RedstoneTweaksVersion.INVALID_VERSION;
 	
-	public static void init() {
+	public static void onServerStart() {
 		modVersion = RedstoneTweaks.MOD_VERSION;
 	}
 	

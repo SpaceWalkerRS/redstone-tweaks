@@ -75,7 +75,7 @@ public class Tweaks {
 		
 		private static final SettingsPack BARRIER = new SettingsPack(TWEAKS, "Barrier");
 		
-		public static final BooleanSetting IS_MOVABLE = new BooleanSetting(BARRIER, "isMovable", "When enabled, barriers can be moved by pistons.");
+		public static final BooleanSetting IS_MOVABLE = new BooleanSetting(BARRIER, "isMovable", "Allow pistons to move barriers.");
 	}
 	
 	public static class BubbleColumn {

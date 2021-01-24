@@ -37,9 +37,9 @@ import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
-import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
-import redstonetweaks.mixinterfaces.RTIPistonHandler;
-import redstonetweaks.mixinterfaces.RTIServerWorld;
+import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIPistonHandler;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(PistonHandler.class)
@@ -57,8 +57,8 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	private boolean sticky = false;
 	private BlockPos headPos;
 	private Set<BlockPos> anchoredChains;
-	// A map of positions where a piston head detaches from the piston base, mapped to a boolean
-	// which is true if the piston head moves out, false if the piston base moves out
+	// A map of positions where 'looseHead' behavior occurs, mapped to a boolean
+	// which is true if the piston head detaches, false if it re-attaches
 	private Map<BlockPos, Boolean> loosePistonHeads;
 	private List<BlockEntity> movedBlockEntities;
 	// A map of positions where two slabs will merge, mapped to the type of slab that will move in
@@ -133,9 +133,10 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		Direction pulledFrom = (pos == posTo && !retracted) ? dir : dir.getOpposite();
 		
 		if (alreadyMoved) {
-			// If the piston is now pulled along from a different side the base moves as well
-			// and the piston head is not detached
-			loosePistonHeads.remove(pos);
+			if (loosePistonHeads.containsKey(pos)) {
+				// If the piston is now pulled along from a different side no looseHead behavior can occur
+				loosePistonHeads.remove(pos);
+			}
 		} else if (pulledFrom == motionDirection && (!retracted || !pos.equals(posTo))) {
 			// Don't try to detach if the block is pushed by the piston directly
 			tryDetachPistonHead(pos, movedState);
@@ -240,16 +241,16 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
 	private void onTryMoveInjectBeforeGetPistonBehavior(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int j, int distance, BlockPos frontPos) {
-		// If the piston is pushed the head does not detach
-		loosePistonHeads.remove(frontPos);
+		// We break out of the loop to prevent the front block from being added to the movedBlocks list multiple times
+		// or when it should not be added at all
+		boolean breakLoop = false;
 		
-		if (Tweaks.Global.MERGE_SLABS.get()) {
-			// We break out of the loop to prevent the front block from being added to the movedBlocks list multiple times
-			boolean breakLoop = alreadyMoved;
-			
-			BlockPos blockPos = pos.offset(motionDirection, distance - 1);
-			BlockState pushingState = PistonHelper.getStateForMovement(world, blockPos);
-			
+		BlockPos blockPos = pos.offset(motionDirection, distance - 1);
+		BlockState pushingState = PistonHelper.getStateForMovement(world, blockPos);
+		
+		if (tryAttachPistonHead(blockPos, pushingState, frontPos, frontState)) {
+			breakLoop = true;
+		} else if (Tweaks.Global.MERGE_SLABS.get()) {
 			// If the pushing state is a split double slab only one half of it will be moving
 			SlabType pushingType = splitSlabTypes.get(blockPos);
 			if (pushingType != null) {
@@ -267,17 +268,18 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				}
 			}
 			
-			if (isPotentiallySticky(frontState)) {
+			if (PistonHelper.isPotentiallySticky(frontState)) {
 				// If a splitting double slab pushes a sticky block, the double slab should move as a whole after all!
 				if (isAdjacentBlockStuck(frontPos, frontState, blockPos, pushingState, motionDirection.getOpposite())) {
 					splitSlabTypes.remove(blockPos);
+					mergedSlabTypes.remove(blockPos);
 				}
 			}
-			
-			if (breakLoop) {
-				cir.setReturnValue(true);
-				cir.cancel();
-			}
+		}
+		
+		if (breakLoop) {
+			cir.setReturnValue(true);
+			cir.cancel();
 		}
 	}
 	
@@ -307,10 +309,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	private boolean isPistonPos(BlockPos pos) {
 		return pos.equals(posFrom) || (!retracted && pos.equals(headPos));
-	}
-	
-	private static boolean isPotentiallySticky(BlockState state) {
-		return PistonHelper.isPotentiallySticky(state.getBlock());
 	}
 	
 	// dir is the direction from pos towards adjacentPos
@@ -405,6 +403,35 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				}
 			}
 		}
+	}
+	
+	private boolean tryAttachPistonHead(BlockPos pos, BlockState state, BlockPos frontPos, BlockState frontState) {
+		if (loosePistonHeads.containsKey(pos)) {
+			return false;
+		}
+		if (loosePistonHeads.containsKey(frontPos)) {
+			if (loosePistonHeads.get(frontPos)) {
+				// If the piston is now pushed the head will not detach
+				loosePistonHeads.remove(frontPos);
+			}
+			
+			return false;
+		}
+		if (!PistonHelper.isPiston(state, motionDirection) && !PistonHelper.isPiston(frontState, motionDirection.getOpposite())) {
+			return false;
+		}
+		
+		for (boolean sticky : new boolean[] {false, true}) {
+			if (PistonSettings.looseHead(sticky)) {
+				if (PistonHelper.isPistonHead(state, sticky, motionDirection.getOpposite()) || PistonHelper.isPistonHead(frontState, sticky, motionDirection)) {
+					loosePistonHeads.put(frontPos, false);
+					
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 	// Check if a slab block is a double slab block that should split

@@ -48,10 +48,10 @@ public class AbstractNeighborUpdate {
 		int index = 0;
 		
 		Mode mode = Mode.valueOf(args[index++]);
-		RelativePos not = RelativePos.valueOf(args[index++]);
-		RelativePos up = RelativePos.valueOf(args[index++]);
+		RelativePos notifierPos = RelativePos.valueOf(args[index++]);
+		RelativePos updatePos = RelativePos.valueOf(args[index++]);
 		
-		return new AbstractNeighborUpdate(mode, not, up);
+		return new AbstractNeighborUpdate(mode, notifierPos, updatePos);
 	}
 	
 	public AbstractNeighborUpdate copy() {
@@ -89,17 +89,21 @@ public class AbstractNeighborUpdate {
 	public BlockUpdate toBlockUpdate(World world, BlockPos pos, BlockPos source, Direction sourceFacing, Block sourceBlock) {
 		BlockPos notifier = notifierPos.toBlockPos(pos, sourceFacing);
 		BlockPos update = updatePos.toBlockPos(notifier, sourceFacing);
+		
 		return new BlockUpdate(update, notifier, source, sourceBlock);
 	}
 	
 	public ComparatorUpdate toComparatorUpdate(World world, BlockPos pos, BlockPos source, Direction sourceFacing, Block sourceBlock) {
 		Direction dir = updatePos.asDirection(sourceFacing);
+		
 		if (dir == null) {
 			return null;
 		}
+		
 		BlockPos notifier = notifierPos.toBlockPos(pos, sourceFacing);
 		BlockPos update = updatePos.toBlockPos(notifier, sourceFacing);
 		BlockState state = world.getBlockState(update);
+		
 		if (!state.isOf(Blocks.COMPARATOR)) {
 			if (state.isSolidBlock(world, update)) {
 				update = update.offset(dir);
@@ -112,12 +116,14 @@ public class AbstractNeighborUpdate {
 				return null;
 			}
 		}
+		
 		return new ComparatorUpdate(update, notifier, source, sourceBlock);
 	}
 	
 	public ShapeUpdate toShapeUpdate(World world, BlockPos pos, BlockPos source, BlockState notifierState, int flags, int depth) {
 		BlockPos notifier = notifierPos.toBlockPos(pos, null);
 		BlockPos update = updatePos.toBlockPos(notifier, null);
+		
 		return new ShapeUpdate(update, notifier, source, notifierState, updatePos.asDirection(null).getOpposite(), flags, depth);
 	}
 	
@@ -155,6 +161,7 @@ public class AbstractNeighborUpdate {
 			if (index >= MODES.length) {
 				return MODES[0];
 			}
+			
 			return MODES[index];
 		}
 		

@@ -3,8 +3,8 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 
@@ -46,7 +46,7 @@ public class ApplyPresetPacket extends RedstoneTweaksPacket {
 		if (preset != null) {
 			preset.apply();
 			
-			((RTIMinecraftClient)client).getSettingsManager().getPresetsManager().onApplyPresetPacketReceived(preset);
+			((RTIMinecraftClient)client).getPresetsManager().onApplyPresetPacketReceived(preset);
 		}
 	}
 }

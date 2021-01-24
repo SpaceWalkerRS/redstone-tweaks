@@ -12,8 +12,8 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import redstonetweaks.mixinterfaces.RTIRedstoneDiode;
-import redstonetweaks.mixinterfaces.RTIServerTickScheduler;
+import redstonetweaks.interfaces.mixin.RTIRedstoneDiode;
+import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(RepeaterBlock.class)
@@ -28,7 +28,7 @@ public abstract class RepeaterBlockMixin implements RTIRedstoneDiode {
 	
 	// To fix the chain bug without altering other behavior, we identify if the chain bug is occurring
 	@Override
-	public boolean isInputBugOccurring(World world, BlockPos pos, BlockState state) {
+	public boolean isChainBugOccurring(World world, BlockPos pos, BlockState state) {
 		Direction facing = state.get(Properties.HORIZONTAL_FACING);
 		BlockPos frontPos = pos.offset(facing.getOpposite());
 		BlockState frontState = world.getBlockState(frontPos);

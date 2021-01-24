@@ -10,11 +10,11 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameRules;
 
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
-import redstonetweaks.mixinterfaces.RTIServerChunkManager;
-import redstonetweaks.mixinterfaces.RTIServerTickScheduler;
-import redstonetweaks.mixinterfaces.RTIServerWorld;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTIServerChunkManager;
+import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.packet.types.DoWorldTicksPacket;
 import redstonetweaks.packet.types.TaskSyncPacket;
 import redstonetweaks.packet.types.TickPausePacket;

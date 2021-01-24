@@ -17,8 +17,8 @@ import net.minecraft.world.World;
 import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
-import redstonetweaks.mixinterfaces.RTIPistonHandler;
+import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIPistonHandler;
 
 @Mixin(PistonExtensionBlock.class)
 public class PistonExtensionBlockMixin extends Block {

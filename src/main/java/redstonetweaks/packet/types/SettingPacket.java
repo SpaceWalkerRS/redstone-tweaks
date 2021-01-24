@@ -3,10 +3,10 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
+import redstonetweaks.setting.types.Setting;
 
 public class SettingPacket extends RedstoneTweaksPacket {
 	
@@ -19,6 +19,10 @@ public class SettingPacket extends RedstoneTweaksPacket {
 	
 	public SettingPacket(ISetting setting) {
 		this(setting, setting.getValueAsString());
+	}
+	
+	public <T> SettingPacket(Setting<T> setting, T value) {
+		this(setting, setting.valueToString(value));
 	}
 	
 	public SettingPacket(ISetting setting, String value) {
@@ -42,8 +46,6 @@ public class SettingPacket extends RedstoneTweaksPacket {
 	public void execute(MinecraftServer server) {
 		if (setting != null) {
 			setting.setValueFromString(value);
-			
-			((RTIMinecraftServer)server).getSettingsManager().onSettingPacketReceived(setting);
 		}
 	}
 	
@@ -51,8 +53,6 @@ public class SettingPacket extends RedstoneTweaksPacket {
 	public void execute(MinecraftClient client) {
 		if (setting != null) {
 			setting.setValueFromString(value);
-			
-			((RTIMinecraftClient)client).getSettingsManager().onSettingPacketReceived(setting);
 		}
 	}
 }

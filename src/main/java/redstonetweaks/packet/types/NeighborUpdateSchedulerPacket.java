@@ -5,7 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.mixinterfaces.RTIClientWorld;
+import redstonetweaks.interfaces.mixin.RTIClientWorld;
 
 public class NeighborUpdateSchedulerPacket extends RedstoneTweaksPacket {
 

@@ -11,8 +11,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
-import redstonetweaks.mixinterfaces.RTICustomPayloadC2SPacket;
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTICustomPayloadC2SPacket;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.packet.AbstractPacketHandler;
 
 @Mixin(ServerPlayNetworkHandler.class)

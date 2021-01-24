@@ -8,6 +8,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+
 import redstonetweaks.packet.types.RedstoneTweaksPacket;
 
 public class ServerPacketHandler extends AbstractPacketHandler {
@@ -29,6 +30,11 @@ public class ServerPacketHandler extends AbstractPacketHandler {
 		
 	}
 	
+	@Override
+	protected void execute(RedstoneTweaksPacket packet) {
+		packet.execute(server);
+	}
+	
 	public void sendPacketToDimension(RedstoneTweaksPacket packet, RegistryKey<World> dimension) {
 		server.getPlayerManager().sendToDimension(encodePacket(packet), dimension);
 	}
@@ -39,10 +45,5 @@ public class ServerPacketHandler extends AbstractPacketHandler {
 
 	public void sendPacketToPlayer(RedstoneTweaksPacket packet, ServerPlayerEntity player) {
 		player.networkHandler.sendPacket(encodePacket(packet));
-	}
-	
-	@Override
-	protected void execute(RedstoneTweaksPacket packet) {
-		packet.execute(server);
 	}
 }

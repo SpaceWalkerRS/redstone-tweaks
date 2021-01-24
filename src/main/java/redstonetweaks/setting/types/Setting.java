@@ -3,6 +3,7 @@ package redstonetweaks.setting.types;
 import java.util.HashMap;
 import java.util.Map;
 
+import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
@@ -38,6 +39,7 @@ public abstract class Setting<T> implements ISetting {
 		if (other instanceof Setting<?>) {
 			return id.equals(((Setting<?>)other).id);
 		}
+		
 		return false;
 	}
 	
@@ -83,12 +85,18 @@ public abstract class Setting<T> implements ISetting {
 	
 	@Override
 	public void setLocked(boolean locked) {
+		boolean changed = this.locked != locked;
+		
 		this.locked = locked;
+		
+		if (changed) {
+			Settings.lockedChanged(this);
+		}
 	}
 	
 	@Override
 	public boolean isDefault() {
-		return get().equals(getDefault());
+		return valueEquals(get(), getDefault());
 	}
 	
 	@Override
@@ -170,7 +178,13 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	public void set(T newValue) {
+		boolean changed = !valueEquals(value, newValue);
+		
 		value = newValue;
+		
+		if (changed) {
+			Settings.valueChanged(this);
+		}
 	}
 	
 	public T getDefault() {
@@ -178,6 +192,7 @@ public abstract class Setting<T> implements ISetting {
 		if (value == null) {
 			return backupValue;
 		}
+		
 		return value;
 	}
 	
@@ -199,5 +214,9 @@ public abstract class Setting<T> implements ISetting {
 		if (preset.isEditable() || !hasPreset(preset)) {
 			presetValues.put(preset, value);
 		}
+	}
+	
+	public boolean valueEquals(T value1, T value2) {
+		return value1.equals(value2);
 	}
 }

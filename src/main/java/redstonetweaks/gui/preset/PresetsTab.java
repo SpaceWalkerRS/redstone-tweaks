@@ -16,7 +16,7 @@ import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.WarningWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.preset.Preset;
@@ -100,7 +100,7 @@ public class PresetsTab extends RTMenuTab {
 		
 		
 		reloadPresetsButton = new RTButtonWidget(screen.getWidth() - 110, screen.getHeaderHeight(), 100, 20, () -> new TranslatableText("Reload Presets"), (button) -> {
-			((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().reloadPresets();
+			((RTIMinecraftClient)screen.client).getPresetsManager().reloadPresets();
 		});
 		addBrowserContent(reloadPresetsButton);
 		
@@ -333,7 +333,7 @@ public class PresetsTab extends RTMenuTab {
 	}
 	
 	public void updateButtonsActive() {
-		boolean canEditPresets = ((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().canEditPresets();
+		boolean canEditPresets = ((RTIMinecraftClient)screen.client).getPresetsManager().canEditPresets();
 		boolean editable = isEditingPreset() ? getPresetEditor().isEditable() : false;
 		
 		reloadPresetsButton.setActive(canEditPresets);
@@ -357,7 +357,7 @@ public class PresetsTab extends RTMenuTab {
 	private void savePreset() {
 		PresetEditor editor = getPresetEditor();
 		
-		((RTIMinecraftClient)screen.client).getSettingsManager().getPresetsManager().savePreset(editor);
+		((RTIMinecraftClient)screen.client).getPresetsManager().savePreset(editor);
 		
 		browsePresets();
 	}

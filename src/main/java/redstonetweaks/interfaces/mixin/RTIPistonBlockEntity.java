@@ -1,4 +1,4 @@
-package redstonetweaks.mixinterfaces;
+package redstonetweaks.interfaces.mixin;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SideShapeType;
@@ -12,6 +12,8 @@ import net.minecraft.world.BlockView;
 import redstonetweaks.block.piston.MovedBlock;
 
 public interface RTIPistonBlockEntity {
+	
+	public void init();
 	
 	public void setSource(boolean source);
 	

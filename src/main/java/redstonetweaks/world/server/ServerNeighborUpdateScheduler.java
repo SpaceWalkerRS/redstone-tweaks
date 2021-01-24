@@ -3,8 +3,8 @@ package redstonetweaks.world.server;
 import java.util.TreeSet;
 
 import net.minecraft.server.world.ServerWorld;
-import redstonetweaks.mixinterfaces.RTIMinecraftServer;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.packet.types.NeighborUpdateSchedulerPacket;
 import redstonetweaks.packet.types.NeighborUpdateVisualizerPacket;
 import redstonetweaks.setting.Tweaks;

@@ -4,28 +4,22 @@ import net.minecraft.client.MinecraftClient;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.gui.RTMenuScreen;
-import redstonetweaks.mixinterfaces.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.packet.types.LockCategoryPacket;
 import redstonetweaks.packet.types.LockSettingPacket;
 import redstonetweaks.packet.types.ResetSettingPacket;
 import redstonetweaks.packet.types.ResetSettingsPacket;
 import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.server.ServerInfo;
-import redstonetweaks.setting.preset.ClientPresetsManager;
 import redstonetweaks.setting.types.ISetting;
+import redstonetweaks.setting.types.Setting;
 
 public class ClientSettingsManager {
 	
 	private final MinecraftClient client;
-	private final ClientPresetsManager presetsManager;
 	
 	public ClientSettingsManager(MinecraftClient client) {
 		this.client = client;
-		this.presetsManager = new ClientPresetsManager(client);
-	}
-	
-	public ClientPresetsManager getPresetsManager() {
-		return presetsManager;
 	}
 	
 	public boolean canChangeSettings() {
@@ -36,14 +30,20 @@ public class ClientSettingsManager {
 		return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(ServerConfig.Settings.LOCK_PERMISSION_LEVEL.get()) && ServerConfig.Settings.LOCK_GAME_MODES.get(client.interactionManager.getCurrentGameMode());
 	}
 	
-	public void changeSetting(ISetting setting, String value) {
-		SettingPacket packet = new SettingPacket(setting, value);
-		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+	public <T> void changeSetting(Setting<T> setting, T value) {
+		if (client.isInSingleplayer()) {
+			setting.set(value);
+		} else {
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new SettingPacket(setting, value));
+		}
 	}
 	
 	public void lockSetting(ISetting setting, boolean locked) {
-		LockSettingPacket packet = new LockSettingPacket(setting, locked);
-		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+		if (client.isInSingleplayer()) {
+			setting.setLocked(locked);
+		} else {
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new LockSettingPacket(setting, locked));
+		}
 	}
 	
 	public void lockCategory(SettingsCategory category, boolean locked) {
@@ -59,14 +59,6 @@ public class ClientSettingsManager {
 	public void resetSettings(SettingsCategory category) {
 		ResetSettingsPacket packet = new ResetSettingsPacket(category);
 		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void onSettingPacketReceived(ISetting setting) {
-		notifyMenuScreenOfSettingChange(setting);
-	}
-	
-	public void onLockSettingPacketReceived(ISetting setting) {
-		notifyMenuScreenOfSettingChange(setting);
 	}
 	
 	public void onLockCategoryPacketReceived() {
@@ -99,6 +91,5 @@ public class ClientSettingsManager {
 	
 	public void onDisconnect() {
 		Settings.toDefault();
-		presetsManager.onDisconnect();
 	}
 }

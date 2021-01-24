@@ -23,7 +23,7 @@ import net.minecraft.world.WorldView;
 
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.mixinterfaces.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 
 @Mixin(PistonHeadBlock.class)
 public abstract class PistonHeadBlockMixin {

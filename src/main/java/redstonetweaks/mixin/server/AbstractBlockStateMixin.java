@@ -16,7 +16,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.BlockHelper;
-import redstonetweaks.mixinterfaces.RTIWorld;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(AbstractBlockState.class)

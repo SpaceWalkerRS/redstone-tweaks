@@ -7,6 +7,7 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.util.registry.Registry;
+
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.preset.Presets;
@@ -16,7 +17,7 @@ public class RedstoneTweaks implements ModInitializer {
 	public static final Logger LOGGER = LogManager.getLogger("Redstone Tweaks");
 	
 	public static final RedstoneTweaksVersion MOD_VERSION = RedstoneTweaksVersion.createSnapshot(0, 9, 0, 3);
-	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.createRelease(1, 0, 2);
+	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.createRelease(1, 0, 3);
 	public static final RedstoneTweaksVersion SETTINGS_VERSION = RedstoneTweaksVersion.createRelease(1, 2, 1);
 	
 	public static BlockEntityType<PowerBlockEntity> POWER_BLOCK_ENTITY_TYPE;

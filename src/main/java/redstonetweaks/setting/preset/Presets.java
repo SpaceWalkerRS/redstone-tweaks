@@ -1,7 +1,9 @@
 package redstonetweaks.setting.preset;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.world.TickPriority;
 import redstonetweaks.RedstoneTweaks;
@@ -20,83 +22,8 @@ public class Presets {
 	public static final List<Preset> ALL = new ArrayList<>();
 	public static final List<Preset> REMOVED = new ArrayList<>();
 	
-	public static void register(Preset preset) {
-		ALL.add(preset);
-	}
-	
-	public static void tryRegister(Preset preset) {
-		if (!isRegistered(preset)) {
-			ALL.add(preset);
-		}
-	}
-	
-	public static boolean isRegistered(Preset preset) {
-		return ALL.contains(preset);
-	}
-	
-	public static void remove(Preset preset) {
-		ALL.remove(preset);
-		REMOVED.add(preset);
-	}
-	
-	public static void unremove(Preset preset) {
-		REMOVED.remove(preset);
-		tryRegister(preset);
-	}
-	
-	public static void cleanUp() {
-		for (Preset preset : REMOVED) {
-			Settings.removePreset(preset);
-		}
-		REMOVED.clear();
-	}
-	
-	public static boolean isNameValid(String name) {
-		return !name.isEmpty() && !name.equals("null") && fromName(name) == null;
-	}
-	
-	public static Preset fromName(String name) {
-		for (Preset preset : ALL) {
-			if (preset.getName().equals(name)) {
-				return preset;
-			}
-		}
-		return null;
-	}
-	
-	public static Preset create(String name, String description, Preset.Mode mode) {
-		return new Preset(name, description, mode, true);
-	}
-	
-	public static Preset fromNameOrCreate(String name) {
-		return fromNameOrCreate(name, "", Preset.Mode.SET);
-	}
-	
-	public static Preset fromNameOrCreate(String name, String description, Preset.Mode mode) {
-		Preset preset = fromName(name);
-		return preset == null ? create(name, description, mode) : preset;
-	}
-	
-	public static Preset getRemovedPresetFromName(String name) {
-		for (Preset preset : REMOVED) {
-			if (preset.getName().equals(name)) {
-				return preset;
-			}
-		}
-		return null;
-	}
-	
-	public static Preset getRemovedPresetFromSavedName(String savedName) {
-		if (isNameValid(savedName)) {
-			for (Preset preset : REMOVED) {
-				if (preset.getSavedName().equals(savedName)) {
-					return preset;
-				}
-			}
-		}
-		return null;
-	}
-	
+	private static final Set<IPresetChangeListener> CHANGE_LISTENERS = new HashSet<>();
+
 	public static void init() {
 		Default.init();
 		Bedrock.init();
@@ -115,7 +42,104 @@ public class Presets {
 				remove(preset);
 			}
 		}
+		
 		cleanUp();
+	}
+
+	public static void cleanUp() {
+		for (Preset preset : REMOVED) {
+			Settings.removePreset(preset);
+		}
+		
+		REMOVED.clear();
+	}
+	
+	public static void register(Preset preset) {
+		ALL.add(preset);
+	}
+	
+	public static void tryRegister(Preset preset) {
+		if (!isRegistered(preset)) {
+			register(preset);
+		}
+	}
+	
+	public static boolean isRegistered(Preset preset) {
+		return ALL.contains(preset);
+	}
+	
+	public static void remove(Preset preset) {
+		ALL.remove(preset);
+		REMOVED.add(preset);
+	}
+	
+	public static void unremove(Preset preset) {
+		REMOVED.remove(preset);
+		tryRegister(preset);
+	}
+	
+	public static void addChangeListener(IPresetChangeListener listener) {
+		CHANGE_LISTENERS.add(listener);
+	}
+	
+	public static void removeChangeListener(IPresetChangeListener listener) {
+		CHANGE_LISTENERS.remove(listener);
+	}
+	
+	public static void presetChanged(Preset preset) {
+		for (IPresetChangeListener listener : CHANGE_LISTENERS) {
+			listener.presetChanged(preset);
+		}
+	}
+	
+	public static boolean isNameValid(String name) {
+		return !name.isEmpty() && !name.equals("null") && fromName(name) == null;
+	}
+	
+	public static Preset fromName(String name) {
+		for (Preset preset : ALL) {
+			if (preset.getName().equals(name)) {
+				return preset;
+			}
+		}
+		
+		return null;
+	}
+	
+	public static Preset create(String name, String description, Preset.Mode mode) {
+		return new Preset(name, description, mode, true);
+	}
+	
+	public static Preset fromNameOrCreate(String name) {
+		return fromNameOrCreate(name, "", Preset.Mode.SET);
+	}
+	
+	public static Preset fromNameOrCreate(String name, String description, Preset.Mode mode) {
+		Preset preset = fromName(name);
+		
+		return preset == null ? create(name, description, mode) : preset;
+	}
+	
+	public static Preset getRemovedPresetFromName(String name) {
+		for (Preset preset : REMOVED) {
+			if (preset.getName().equals(name)) {
+				return preset;
+			}
+		}
+		
+		return null;
+	}
+	
+	public static Preset getRemovedPresetFromSavedName(String savedName) {
+		if (isNameValid(savedName)) {
+			for (Preset preset : REMOVED) {
+				if (preset.getSavedName().equals(savedName)) {
+					return preset;
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	public static class Default {
@@ -594,7 +618,6 @@ public class Presets {
 			
 			Tweaks.Global.MOVABLE_BLOCK_ENTITIES.setPresetValue(BEDROCK, true);
 			Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.setPresetValue(BEDROCK, true);
-			Tweaks.Global.RANDOMIZE_TICK_PRIORITIES.setPresetValue(BEDROCK, true);
 			
 			Tweaks.Dispenser.QC.setPresetValue(BEDROCK, new Boolean[] {false, false, false, false, false ,false});
 			
@@ -614,6 +637,7 @@ public class Presets {
 			Tweaks.Observer.DELAY_RISING_EDGE.setPresetValue(BEDROCK, 6);
 			
 			Tweaks.RedstoneTorch.SOFT_INVERSION.setPresetValue(BEDROCK, true);
+			Tweaks.RedstoneTorch.TICK_PRIORITY_FALLING_EDGE.setPresetValue(BEDROCK, TickPriority.HIGH);
 			
 			Tweaks.StickyPiston.CONNECTS_TO_WIRE.setPresetValue(BEDROCK, true);
 			Tweaks.StickyPiston.DELAY_RISING_EDGE.setPresetValue(BEDROCK, 2);

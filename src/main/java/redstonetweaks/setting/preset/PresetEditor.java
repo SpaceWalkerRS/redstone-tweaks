@@ -134,6 +134,7 @@ public class PresetEditor {
 		} else {
 			addedSettings.remove(setting);
 		}
+		
 		setting.removePreset(TEMP);
 	}
 	
@@ -200,6 +201,8 @@ public class PresetEditor {
 		}
 		
 		saved = true;
+		
+		Presets.presetChanged(preset);
 	}
 	
 	public void discardChanges() {

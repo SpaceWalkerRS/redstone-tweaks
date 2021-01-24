@@ -67,6 +67,7 @@
 	"server.PistonExtensionBlockMixin",
 	"server.PistonHandlerMixin",
 	"server.PistonHeadBlockMixin",
+	"server.PlayerManagerMixin",
 	"server.PoweredRailBlockMixin",
 	"server.PressurePlateBlockMixin",
 	"server.RailBlockMixin",
