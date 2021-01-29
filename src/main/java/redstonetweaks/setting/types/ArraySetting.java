@@ -8,8 +8,8 @@ import redstonetweaks.setting.preset.Presets;
 
 public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
-	public ArraySetting(SettingsPack pack, String name, String description, E[] backupValues) {
-		super(pack, name, description, backupValues);
+	public ArraySetting(SettingsPack pack, String name, String description) {
+		super(pack, name, description);
 	}
 	
 	@Override

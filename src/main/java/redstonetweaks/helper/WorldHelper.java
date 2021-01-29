@@ -6,12 +6,18 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+
+import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 import redstonetweaks.world.common.WorldTickOptions;
 
 public class WorldHelper {
+	
+	public static void setBlockWithEntity(World world, BlockPos pos, MovedBlock movedBlock, int flags) {
+		setBlockWithEntity(world, pos, movedBlock.getBlockState(), movedBlock.getBlockEntity(), flags);
+	}
 	
 	public static void setBlockWithEntity(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, int flags) {
 		if (blockEntity != null) {

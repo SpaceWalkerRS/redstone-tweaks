@@ -51,7 +51,7 @@ public class SettingPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (setting != null) {
+		if (setting != null && !client.isInSingleplayer()) {
 			setting.setValueFromString(value);
 		}
 	}

@@ -7,7 +7,12 @@ import redstonetweaks.setting.SettingsPack;
 public class GameModeToBooleanSetting extends ArraySetting<GameMode, Boolean> {
 	
 	public GameModeToBooleanSetting(SettingsPack pack, String name, String description) {
-		super(pack, name, description, new Boolean[GameMode.values().length]);
+		super(pack, name, description);
+	}
+	
+	@Override
+	public Boolean[] getBackupValue() {
+		return new Boolean[] {false};
 	}
 	
 	@Override

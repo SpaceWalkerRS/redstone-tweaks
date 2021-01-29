@@ -7,7 +7,12 @@ import redstonetweaks.world.common.WorldTickOptions;
 public class WorldTickOptionsSetting extends Setting<WorldTickOptions> {
 	
 	public WorldTickOptionsSetting(SettingsPack pack, String name, String description) {
-		super(pack, name, description, new WorldTickOptions());
+		super(pack, name, description);
+	}
+	
+	@Override
+	public WorldTickOptions getBackupValue() {
+		return new WorldTickOptions();
 	}
 	
 	@Override

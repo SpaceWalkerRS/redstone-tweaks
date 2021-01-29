@@ -143,6 +143,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (mergingBlockEntity instanceof Tickable) {
 			((Tickable)mergingBlockEntity).tick();
 		}
+		
+		
 	}
 	
 	@Inject(method = "tick", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;isClient:Z"))
@@ -428,7 +430,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Override
 	public void setMovedMovingState(BlockState state) {
-		if (movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
+		if (movedBlockEntity instanceof PistonBlockEntity) {
 			((RTIPistonBlockEntity)movedBlockEntity).setMovedMovingState(state);
 		} else {
 			pushedBlock = state;
@@ -437,7 +439,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Override
 	public BlockEntity getMovedMovingBlockEntity() {
-		if (movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
+		if (movedBlockEntity instanceof PistonBlockEntity) {
 			BlockEntity movingBlockEntity = ((RTIPistonBlockEntity)movedBlockEntity).getMovedMovingBlockEntity();
 			
 			if (movingBlockEntity != null) {
@@ -450,7 +452,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Override
 	public void setMovedMovingBlockEntity(BlockEntity blockEntity) {
-		if (movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
+		if (movedBlockEntity instanceof PistonBlockEntity) {
 			((RTIPistonBlockEntity)movedBlockEntity).setMovedMovingBlockEntity(blockEntity);
 		} else if (blockEntity.getType().supports(pushedBlock.getBlock())) {
 			movedBlockEntity = blockEntity;
@@ -465,7 +467,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		}
 		
 		if (mergingState == null) {
-			if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
+			if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity instanceof PistonBlockEntity) {
 				return ((RTIPistonBlockEntity)movedBlockEntity).getStateToMove();
 			}
 			
@@ -477,6 +479,12 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		// If two blocks are merging they should be treated as already merged
 		if (SlabHelper.isSlab(state)) {
 			state = state.with(Properties.SLAB_TYPE, SlabType.DOUBLE);
+		} else
+		if (PistonHelper.isPiston(state)) {
+			state = state.with(Properties.EXTENDED, false);
+		} else
+		if (PistonHelper.isPistonHead(state)) {
+			state = PistonHelper.getPiston(PistonHelper.isStickyHead(state), state.get(Properties.FACING), false);
 		}
 		
 		return state;
@@ -499,7 +507,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			
 			if (SlabHelper.isSlab(movingState)) {
 				if (movingState.get(Properties.SLAB_TYPE) != keepType) {
-					return undoMerge(mergingState, mergingBlockEntity);
+					return undoMerge();
 				}
 				
 				setMergingState(null);
@@ -507,8 +515,40 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			}
 		} else if (SlabHelper.isSlab(pushedBlock)) {
 			pushedBlock = pushedBlock.with(Properties.SLAB_TYPE, keepType);
-		} else if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
+		} else if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity instanceof PistonBlockEntity) {
 			return ((RTIPistonBlockEntity)movedBlockEntity).splitDoubleSlab(keepType);
+		}
+		
+		PistonBlockEntity parent = getParent();
+		
+		return new MovedBlock(parent.getCachedState(), parent);
+	}
+	
+	@Override
+	public MovedBlock detachPistonHead(Direction motionDir, boolean returnMovingPart) {
+		if (mergingState != null) {
+			BlockState movingState = getMovedMovingState();
+			
+			boolean isPiston = PistonHelper.isPiston(movingState);
+			
+			if (isPiston || PistonHelper.isPistonHead(movingState)) {
+				if (!returnMovingPart == isPiston == (movingState.get(Properties.FACING) == motionDir)) {
+					return undoMerge();
+				}
+				
+				setMergingState(null);
+				setMergingBlockEntity(null);
+			}
+		} else if (PistonHelper.isPiston(pushedBlock)) {
+			Direction facing = pushedBlock.get(Properties.FACING);
+			
+			if (returnMovingPart == (facing == motionDir)) {
+				setMovedState(PistonHelper.getPistonHead(PistonHelper.isSticky(pushedBlock), facing));
+			} else {
+				setMovedState(pushedBlock.with(Properties.EXTENDED, true));
+			}
+		} else if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity instanceof PistonBlockEntity) {
+			return ((RTIPistonBlockEntity)movedBlockEntity).detachPistonHead(motionDir, returnMovingPart);
 		}
 		
 		PistonBlockEntity parent = getParent();
@@ -525,7 +565,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		return false;
 	}
 	
-	private MovedBlock undoMerge(BlockState state, BlockEntity blockEntity) {
+	private MovedBlock undoMerge() {
 		if (parentPistonBlockEntity == null) {
 			return new MovedBlock(mergingState, mergingBlockEntity);
 		}
@@ -546,7 +586,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 					
 					setMergingState(null);
 					setMergingBlockEntity(null);
-				} else if (mergingState.isOf(Blocks.MOVING_PISTON) && mergingBlockEntity != null && mergingBlockEntity instanceof PistonBlockEntity) {
+				} else if (mergingState.isOf(Blocks.MOVING_PISTON) && mergingBlockEntity instanceof PistonBlockEntity) {
 					RTIPistonBlockEntity pistonBlockEntity = (RTIPistonBlockEntity)mergingBlockEntity;
 					
 					pistonBlockEntity.setIsMerging(false);
@@ -561,7 +601,28 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 				} else {
 					RedstoneTweaks.LOGGER.warn("Cannot merge " + pushedBlock + " with " + movedBlockEntity + " into " + mergingState + " with " + mergingBlockEntity);
 				}
-			} else if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity != null && movedBlockEntity instanceof PistonBlockEntity) {
+			} else if (PistonHelper.isPiston(pushedBlock) || PistonHelper.isPistonHead(pushedBlock)) {
+				if (PistonHelper.isPiston(mergingState) || PistonHelper.isPistonHead(mergingState)) {
+					boolean sticky = PistonHelper.isPistonHead(pushedBlock, true) || PistonHelper.isPistonHead(mergingState, true);
+					
+					setMovedState(PistonHelper.getPiston(sticky, pushedBlock.get(Properties.FACING), false));
+					
+					setMergingState(null);
+					setMergingBlockEntity(null);
+				} else if (mergingState.isOf(Blocks.MOVING_PISTON) && mergingBlockEntity instanceof PistonBlockEntity) {
+					RTIPistonBlockEntity pistonBlockEntity = (RTIPistonBlockEntity)mergingBlockEntity;
+					
+					pistonBlockEntity.setIsMerging(false);
+					pistonBlockEntity.setMergingState(pushedBlock);
+					pistonBlockEntity.setMergingBlockEntity(movedBlockEntity);
+					
+					setMovedState(mergingState);
+					setMovedBlockEntity(mergingBlockEntity);
+					
+					setMergingState(null);
+					setMergingBlockEntity(null);
+				}
+			} else if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity instanceof PistonBlockEntity) {
 				RTIPistonBlockEntity pistonBlockEntity = (RTIPistonBlockEntity)movedBlockEntity;
 				
 				pistonBlockEntity.setMergingState(mergingState);

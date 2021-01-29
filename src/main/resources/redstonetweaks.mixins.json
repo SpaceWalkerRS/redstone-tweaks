@@ -107,6 +107,7 @@
   ],
   "client": [
   	"client.AbstractButtonWidgetMixin",
+  	"client.ClientPlayerEntityMixin",
   	"client.ClientPlayNetworkHandlerMixin",
   	"client.ClientWorldMixin",
   	"client.DebugHudMixin",

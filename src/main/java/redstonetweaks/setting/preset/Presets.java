@@ -7,6 +7,7 @@ import java.util.Set;
 
 import net.minecraft.world.TickPriority;
 import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.changelisteners.IPresetChangeListener;
 import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.Tweaks;

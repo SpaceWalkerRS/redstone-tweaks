@@ -3,8 +3,7 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
-import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
+
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 
@@ -42,17 +41,13 @@ public class LockCategoryPacket extends RedstoneTweaksPacket {
 	public void execute(MinecraftServer server) {
 		if (category != null) {
 			category.setLocked(locked);
-			
-			((RTIMinecraftServer)server).getSettingsManager().onLockCategoryPacketReceived(category);
 		}
 	}
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (category != null) {
+		if (category != null && !client.isInSingleplayer()) {
 			category.setLocked(locked);
-			
-			((RTIMinecraftClient)client).getSettingsManager().onLockCategoryPacketReceived();
 		}
 	}
 }

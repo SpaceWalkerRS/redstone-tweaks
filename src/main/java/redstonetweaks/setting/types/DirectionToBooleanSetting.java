@@ -7,7 +7,12 @@ import redstonetweaks.setting.SettingsPack;
 public class DirectionToBooleanSetting extends ArraySetting<Direction, Boolean> {
 	
 	public DirectionToBooleanSetting(SettingsPack pack, String name, String description) {
-		super(pack, name, description, new Boolean[] {false});
+		super(pack, name, description);
+	}
+	
+	@Override
+	public Boolean[] getBackupValue() {
+		return new Boolean[] {false};
 	}
 	
 	@Override

@@ -381,6 +381,32 @@ public class PistonHelper {
 		return blockEntity;
 	}
 	
+	// Notify clients of any pistons that are about to be "double retracted"
+	public static boolean prepareDoubleRetraction(World world, BlockPos pos, BlockState state) {
+		if (!world.isClient() && isPiston(state) && !state.get(Properties.EXTENDED)) {
+			if (doDoubleRetraction(isSticky(state)) && ((RTIServerWorld)world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
+				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
+				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
+				
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	// This fixes some cases of pistons disappearing on clients
+	public static void cancelDoubleRetraction(World world, BlockPos pos, BlockState state) {
+		if (!world.isClient() && isPiston(state) && !state.get(Properties.EXTENDED)) {
+			if (doDoubleRetraction(isSticky(state)) && ((RTIServerWorld)world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
+				world.setBlockState(pos, state.with(Properties.EXTENDED, true), 16);
+				
+				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
+				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
+			}
+		}
+	}
+	
 	public static MovedBlock trySplitDoubleSlab(World world, BlockPos pos, BlockState movedState, BlockEntity blockEntity, SlabType movedType) {
 		if (SlabHelper.isSlab(movedState)) {
 			world.setBlockState(pos, movedState.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(movedType)), 82);
@@ -393,7 +419,7 @@ public class PistonHelper {
 			MovedBlock remainingBlock = ((RTIPistonBlockEntity)remainingBlockEntity).splitDoubleSlab(SlabHelper.getOppositeType(movedType));
 			MovedBlock movedBlock = ((RTIPistonBlockEntity)movedBlockEntity).splitDoubleSlab(movedType);
 			
-			WorldHelper.setBlockWithEntity(world, pos, remainingBlock.getBlockState(), remainingBlock.getBlockEntity(), 82);
+			WorldHelper.setBlockWithEntity(world, pos, remainingBlock, 82);
 			
 			return movedBlock;
 		}
@@ -401,26 +427,44 @@ public class PistonHelper {
 		return new MovedBlock(movedState, blockEntity);
 	}
 	
-	// Notify clients of any pistons that are about to be "double retracted"
-	public static void prepareDoubleRetraction(World world, BlockPos pos, BlockState state) {
-		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
-			if (isPiston(state) && !state.get(Properties.EXTENDED) && ((RTIServerWorld)world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
-				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
-				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
-			}
+	public static MovedBlock detachPistonHead(World world, BlockPos pos, BlockState movedState, BlockEntity blockEntity, Direction motionDir) {
+		if (isPiston(movedState)) {
+			Direction facing = movedState.get(Properties.FACING);
+			boolean moveHead = facing == motionDir;
+			
+			BlockState base = movedState.with(Properties.EXTENDED, true);
+			BlockState head = getPistonHead(isSticky(movedState), facing);
+			
+			world.setBlockState(pos, moveHead ? base : head, 82);
+			
+			movedState = moveHead ? head : base;
+		} else if (movedState.isOf(Blocks.MOVING_PISTON) && blockEntity != null && blockEntity instanceof PistonBlockEntity) {
+			PistonBlockEntity remainingBlockEntity = ((RTIPistonBlockEntity)blockEntity).copy();
+			PistonBlockEntity movedBlockEntity = ((RTIPistonBlockEntity)blockEntity).copy();
+			
+			MovedBlock remainingBlock = ((RTIPistonBlockEntity)remainingBlockEntity).detachPistonHead(motionDir, false);
+			MovedBlock movedBlock = ((RTIPistonBlockEntity)movedBlockEntity).detachPistonHead(motionDir, true);
+			
+			WorldHelper.setBlockWithEntity(world, pos, remainingBlock, 82);
+			
+			return movedBlock;
 		}
+		
+		return new MovedBlock(movedState, blockEntity);
 	}
 	
-	// This fixes some cases of pistons disappearing on clients
-	public static void cancelDoubleRetraction(World world, BlockPos pos, BlockState state) {
-		if (Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
-			if (isPiston(state) && !state.get(Properties.EXTENDED)) {
-				world.setBlockState(pos, state.with(Properties.EXTENDED, true), 16);
-				
-				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
-				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
-			}
+	public static MovedBlock attachPistonHead(World world, BlockPos pos, BlockState movedState, BlockEntity blockEntity, Direction motionDir) {
+		BlockPos toPos = pos.offset(motionDir);
+		BlockState toState = world.getBlockState(toPos);
+		
+		if (isPiston(movedState, motionDir) && isPistonHead(toState, motionDir)) {
+			movedState = getPiston(isStickyHead(toState), motionDir, true);
+		} else
+		if (isPistonHead(movedState, motionDir.getOpposite()) && isPiston(toState, motionDir.getOpposite())) {
+			world.setBlockState(toPos, getPiston(isStickyHead(movedState), motionDir.getOpposite(), true), 16);
 		}
+		
+		return new MovedBlock(movedState, blockEntity);
 	}
 	
 	public static boolean isPotentiallySticky(BlockState state) {
@@ -591,7 +635,7 @@ public class PistonHelper {
 			}
 			
 			if (delay == 0 || onScheduledTick) {
-				if (Tweaks.Global.DOUBLE_RETRACTION.get()) {
+				if (PistonHelper.doDoubleRetraction(sticky)) {
 					state = getPiston(sticky, facing, false);
 					
 					world.setBlockState(pos, state, 16);
@@ -609,14 +653,16 @@ public class PistonHelper {
 	}
 	
 	public static void updateAdjacentRedstoneTorches(World world, BlockPos pos, Block block) {
-		if (!world.isDebugWorld()) {
-			for (Direction direction : Direction.values()) {
-				BlockPos neighborPos = pos.offset(direction);
-				
-				if (world.getBlockState(neighborPos).getBlock() instanceof RedstoneTorchBlock) {
-					world.updateNeighbor(neighborPos, block, pos);
-				}
+		for (Direction direction : Direction.values()) {
+			BlockPos neighborPos = pos.offset(direction);
+			
+			if (world.getBlockState(neighborPos).getBlock() instanceof RedstoneTorchBlock) {
+				world.updateNeighbor(neighborPos, block, pos);
 			}
 		}
+	}
+	
+	public static boolean doDoubleRetraction(boolean sticky) {
+		return Tweaks.Global.DOUBLE_RETRACTION.get() && !PistonSettings.looseHead(sticky);
 	}
 }

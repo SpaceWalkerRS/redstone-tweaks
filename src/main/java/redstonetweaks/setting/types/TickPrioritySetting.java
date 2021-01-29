@@ -7,7 +7,12 @@ import redstonetweaks.setting.SettingsPack;
 public class TickPrioritySetting extends Setting<TickPriority> {
 	
 	public TickPrioritySetting(SettingsPack pack, String name, String description) {
-		super(pack, name, description, TickPriority.NORMAL);
+		super(pack, name, description);
+	}
+	
+	@Override
+	public TickPriority getBackupValue() {
+		return TickPriority.NORMAL;
 	}
 	
 	@Override

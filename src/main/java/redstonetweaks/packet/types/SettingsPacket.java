@@ -5,7 +5,7 @@ import java.util.Collection;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 
@@ -28,6 +28,7 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 		for (ISetting setting : collection) {
 			settings[index] = setting;
 			values[index] = setting.getAsString();
+			
 			index++;
 		}
 	}
@@ -61,6 +62,10 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
+		if (client.isInSingleplayer()) {
+			return;
+		}
+		
 		while (count >= 0) {
 			count--;
 			
@@ -70,7 +75,5 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 				setting.setFromString(values[count]);
 			}
 		}
-		
-		((RTIMinecraftClient)client).getSettingsManager().onSettingsPacketReceived();
 	}
 }

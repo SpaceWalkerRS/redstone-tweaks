@@ -1,5 +1,7 @@
 package redstonetweaks.gui;
 
+import java.util.Iterator;
+
 import net.minecraft.client.gui.AbstractParentElement;
 import net.minecraft.client.gui.Element;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
@@ -21,7 +23,11 @@ public abstract class RTAbstractParentElement extends AbstractParentElement {
 		}
 		
 		boolean clicked = false;
-		for (Element el : children()) {
+		
+		Iterator<? extends Element> it = children().iterator();
+		while (it.hasNext()) {
+			Element el = it.next();
+			
 			if (el.mouseClicked(mouseX, mouseY, button)) {
 				setFocused(el);
 				clicked = true;

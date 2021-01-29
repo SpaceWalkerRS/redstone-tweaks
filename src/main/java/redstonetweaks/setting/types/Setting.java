@@ -14,24 +14,22 @@ public abstract class Setting<T> implements ISetting {
 	private final String id;
 	private final String name;
 	private final String description;
-	private final T backupValue;
 	private final Map<Preset, T> presetValues;
 	
 	private boolean enabled;
 	private boolean locked;
 	private T value;
 	
-	public Setting(SettingsPack pack, String name, String description, T backupValue) {
+	public Setting(SettingsPack pack, String name, String description) {
 		this.pack = pack;
-		this.id = pack.getCategory().getName() + "/" + pack.getName() + "/" + name;
+		this.id = String.format("%s/%s", pack.getId(), name);
 		this.name = name;
 		this.description = description;
-		this.backupValue = backupValue;
 		this.presetValues = new HashMap<>();
 		
 		this.enabled = false;
 		this.locked = true;
-		this.value = this.backupValue;
+		this.value = getBackupValue();
 	}
 	
 	@Override
@@ -90,7 +88,7 @@ public abstract class Setting<T> implements ISetting {
 		this.locked = locked;
 		
 		if (changed) {
-			Settings.lockedChanged(this);
+			Settings.settingLockedChanged(this);
 		}
 	}
 	
@@ -145,7 +143,7 @@ public abstract class Setting<T> implements ISetting {
 	
 	@Override
 	public void applyPreset(Preset preset) {
-		T value = presetValues.get(preset);
+		T value = getPresetValue(preset);
 		if (value != null) {
 			set(value);
 		}
@@ -158,8 +156,9 @@ public abstract class Setting<T> implements ISetting {
 	
 	@Override
 	public void copyPresetValue(Preset from, Preset to) {
-		if (hasPreset(from)) {
-			setPresetValue(to, getPresetValue(from));
+		T value = getPresetValue(from);
+		if (value != null) {
+			setPresetValue(to, value);
 		}
 	}
 	
@@ -173,6 +172,8 @@ public abstract class Setting<T> implements ISetting {
 		return presetValues.containsKey(preset);
 	}
 	
+	protected abstract T getBackupValue();
+	
 	public T get() {
 		return value;
 	}
@@ -183,14 +184,14 @@ public abstract class Setting<T> implements ISetting {
 		value = newValue;
 		
 		if (changed) {
-			Settings.valueChanged(this);
+			Settings.settingValueChanged(this);
 		}
 	}
 	
 	public T getDefault() {
-		T value = presetValues.get(Presets.Default.DEFAULT);
+		T value = getPresetValue(Presets.Default.DEFAULT);
 		if (value == null) {
-			return backupValue;
+			return getBackupValue();
 		}
 		
 		return value;

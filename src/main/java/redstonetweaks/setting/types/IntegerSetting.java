@@ -9,10 +9,15 @@ public class IntegerSetting extends Setting<Integer> {
 	private int maxValue;
 	
 	public IntegerSetting(SettingsPack pack, String name, String description, int minValue, int maxValue) {
-		super(pack, name, description, 0);
+		super(pack, name, description);
 		
 		this.minValue = minValue;
 		this.maxValue = maxValue;
+	}
+	
+	@Override
+	public Integer getBackupValue() {
+		return 0;
 	}
 	
 	@Override

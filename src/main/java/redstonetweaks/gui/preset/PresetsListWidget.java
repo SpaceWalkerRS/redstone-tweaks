@@ -7,7 +7,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
-
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
@@ -243,8 +243,8 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditSettings = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
-			boolean canEditPresets = ((RTIMinecraftClient)client).getPresetsManager().canEditPresets();
+			boolean canEditSettings = PermissionManager.canChangeSettings();
+			boolean canEditPresets = PermissionManager.canManageSettings();
 			
 			applyButton.setActive(canEditSettings);
 			duplicateButton.setActive(canEditPresets);

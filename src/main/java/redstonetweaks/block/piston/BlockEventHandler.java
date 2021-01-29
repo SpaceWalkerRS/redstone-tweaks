@@ -346,7 +346,7 @@ public class BlockEventHandler {
 		} else {
 			movedPositions = pistonHandler.getMovedBlocks();
 			brokenPositions = pistonHandler.getBrokenBlocks();
-			detachedPistonHeads = ((RTIPistonHandler)pistonHandler).getDetachedPistonHeads();
+			detachedPistonHeads = ((RTIPistonHandler)pistonHandler).getLoosePistonHeads();
 			splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
 			mergedSlabTypes = ((RTIPistonHandler)pistonHandler).getMergedSlabTypes();
 			

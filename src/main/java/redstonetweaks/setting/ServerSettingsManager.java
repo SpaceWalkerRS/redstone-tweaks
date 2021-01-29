@@ -13,9 +13,11 @@ import net.minecraft.util.WorldSavePath;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.changelisteners.ISettingChangeListener;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.types.LockCategoryPacket;
+import redstonetweaks.packet.types.LockPackPacket;
 import redstonetweaks.packet.types.LockSettingPacket;
 import redstonetweaks.packet.types.ResetSettingPacket;
 import redstonetweaks.packet.types.ResetSettingsPacket;
@@ -36,10 +38,59 @@ public class ServerSettingsManager implements ISettingChangeListener {
 		this.server = server;
 	}
 	
+	@Override
+	public void categoryLockedChanged(SettingsCategory category) {
+		if (!deaf && server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new LockCategoryPacket(category));
+		}
+	}
+	
+	@Override
+	public void packLockedChanged(SettingsPack pack) {
+		if (!deaf && server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new LockPackPacket(pack));
+		}
+	}
+	
+	@Override
+	public void settingLockedChanged(ISetting setting) {
+		if (!deaf && server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new LockSettingPacket(setting));
+		}
+	}
+	
+	@Override
+	public void settingValueChanged(ISetting setting) {
+		if (!deaf && server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new SettingPacket(setting));
+		}
+	}
+	
+	public void resetSetting(ISetting setting) {
+		deaf = true;
+		
+		setting.reset();
+		if (server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new ResetSettingPacket(setting));
+		}
+		
+		deaf = false;
+	}
+	
+	public void resetSettings(SettingsCategory category) {
+		deaf = true;
+		
+		category.resetAll();
+		if (server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new ResetSettingsPacket(category));
+		}
+		
+		deaf = false;
+	}
+	
 	public MinecraftServer getServer() {
 		return server;
 	}
-	
 	
 	public void onStartUp() {
 		Settings.toDefault();
@@ -54,6 +105,23 @@ public class ServerSettingsManager implements ISettingChangeListener {
 		Settings.removeChangeListener(this);
 		
 		saveSettings();
+	}
+
+	public void onPlayerJoined(ServerPlayerEntity player) {
+		if (server.isRemote()) {
+			updateSettingsOfPlayer(player);
+		}
+	}
+	
+	private void updateSettingsOfPlayer(ServerPlayerEntity player) {
+		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
+		SettingsPacket packet = new SettingsPacket(Settings.ALL.values());
+		
+		if (player == null) {
+			packetHandler.sendPacket(packet);
+		} else {
+			packetHandler.sendPacketToPlayer(packet, player);
+		}
 	}
 	
 	private void loadSettings() {
@@ -104,9 +172,7 @@ public class ServerSettingsManager implements ISettingChangeListener {
 			bw.newLine();
 			
 			for (ISetting setting : Settings.ALL.values()) {
-				bw.write(setting.getId());
-				bw.write(" = ");
-				bw.write(setting.getAsString());
+				bw.write(String.format("%s = %s", setting.getId(), setting.getAsString()));
 				
 				bw.newLine();
 			}
@@ -127,53 +193,5 @@ public class ServerSettingsManager implements ISettingChangeListener {
 	
 	private File getSettingsFile() {
 		return new File(getCacheDir(), SETTINGS_PATH);
-	}
-	
-	// Setting changes occur on a client and are then sent to the server,
-	// which then notifies all clients of the change
-	public void onLockCategoryPacketReceived(SettingsCategory category) {
-		LockCategoryPacket packet = new LockCategoryPacket(category);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void onResetSettingPacketReceived(ISetting setting) {
-		ResetSettingPacket packet = new ResetSettingPacket(setting);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void onResetSettingsPacketReceived() {
-		ResetSettingsPacket packet = new ResetSettingsPacket();
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void onPlayerJoined(ServerPlayerEntity player) {
-		if (server.isRemote()) {
-			updateSettingsOfPlayer(player);
-		}
-	}
-	
-	private void updateSettingsOfPlayer(ServerPlayerEntity player) {
-		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
-		SettingsPacket packet = new SettingsPacket(Settings.ALL.values());
-		
-		if (player == null) {
-			packetHandler.sendPacket(packet);
-		} else {
-			packetHandler.sendPacketToPlayer(packet, player);
-		}
-	}
-	
-	@Override
-	public void settingLockedChanged(ISetting setting) {
-		if (!deaf && server.isRemote()) {
-			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new LockSettingPacket(setting));
-		}
-	}
-	
-	@Override
-	public void settingValueChanged(ISetting setting) {
-		if (!deaf && server.isRemote()) {
-			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new SettingPacket(setting));
-		}
 	}
 }

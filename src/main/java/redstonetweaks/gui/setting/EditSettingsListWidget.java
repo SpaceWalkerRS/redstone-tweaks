@@ -11,6 +11,8 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.world.TickPriority;
+
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
@@ -21,7 +23,6 @@ import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.gui.widget.RTTexturedButtonWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
-import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
@@ -54,10 +55,10 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	
 	@Override
 	protected void initList() {
-		for (SettingsPack pack : category.getPacks().values()) {
+		for (SettingsPack pack : category.getPacks()) {
 			addEntry(new SettingsPackEntry(pack));
 			
-			for (ISetting setting : pack.getSettings().values()) {
+			for (ISetting setting : pack.getSettings()) {
 				addEntry(new SettingEntry(setting));
 				
 				updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
@@ -69,12 +70,12 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	
 	@Override
 	protected void filterEntries(String query) {
-		for (SettingsPack pack : category.getPacks().values()) {
+		for (SettingsPack pack : category.getPacks()) {
 			boolean packMatchesQuery = pack.getName().toLowerCase().contains(query);
 			
 			List<Entry> settingEntries = new ArrayList<>();
 			
-			for (ISetting setting : pack.getSettings().values()) {
+			for (ISetting setting : pack.getSettings()) {
 				if (packMatchesQuery || setting.getName().toLowerCase().contains(query)) {
 					settingEntries.add(new SettingEntry(setting));
 					
@@ -93,17 +94,11 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	}
 	
 	public boolean canChangeSettings() {
-		if (category == ServerConfig.SERVER_CONFIG) {
-			return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(2);
-		}
-		return ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
+		return category == ServerConfig.SERVER_CONFIG ? PermissionManager.canManageSettings() : PermissionManager.canChangeSettings();
 	}
 	
 	public boolean canLockSettings() {
-		if (category == ServerConfig.SERVER_CONFIG) {
-			return ServerInfo.getModVersion().isValid() && client.player.hasPermissionLevel(2);
-		}
-		return ((RTIMinecraftClient)client).getSettingsManager().canLockSettings();
+		return PermissionManager.canManageSettings();
 	}
 	
 	public void onSettingChanged(ISetting setting) {
@@ -281,7 +276,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!((RTIMinecraftClient)client).getSettingsManager().canChangeSettings() || category.isLocked() || setting.isLocked()) {
+					if (!canChangeSettings() || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -293,7 +288,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!((RTIMinecraftClient)client).getSettingsManager().canChangeSettings() || category.isLocked() || setting.isLocked()) {
+					if (!canChangeSettings() || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -375,7 +370,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!((RTIMinecraftClient)client).getSettingsManager().canChangeSettings() || category.isLocked() || setting.isLocked()) {
+					if (!canChangeSettings() || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -387,7 +382,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!((RTIMinecraftClient)client).getSettingsManager().canChangeSettings() || category.isLocked() || setting.isLocked()) {
+					if (!canChangeSettings() || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());

@@ -11,7 +11,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-
+import redstonetweaks.changelisteners.IPresetChangeListener;
+import redstonetweaks.changelisteners.ISettingChangeListener;
 import redstonetweaks.gui.hotkeys.HotkeysTab;
 import redstonetweaks.gui.info.InfoTab;
 import redstonetweaks.gui.preset.PresetsTab;
@@ -20,13 +21,13 @@ import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.hotkeys.RTKeyBinding;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
-import redstonetweaks.setting.ISettingChangeListener;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
-public class RTMenuScreen extends Screen implements ISettingChangeListener {
+public class RTMenuScreen extends Screen implements ISettingChangeListener, IPresetChangeListener {
 	
 	private static final int TITLE_MARGIN = 8;
 	private static final int TITLE_HEIGHT = 15;
@@ -47,7 +48,7 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener {
 		this.tabs = new ArrayList<>();
 		this.tabButtons = new ArrayList<>();
 		
-		this.addChangeListener();
+		Settings.addChangeListener(this);
 	}
 	
 	@Override
@@ -104,7 +105,7 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener {
 	
 	@Override
 	public void onClose() {
-		removeChangeListener();
+		Settings.removeChangeListener(this);
 		
 		RTMenuTab selectedTab = getSelectedTab();
 		if (!selectedTab.closeTopWindow()) {
@@ -140,6 +141,7 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener {
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		getSelectedTab().onTabClosed();
+		
 		super.resize(client, width, height);
 	}
 	
@@ -227,15 +229,29 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener {
 	}
 	
 	@Override
+	public void categoryLockedChanged(SettingsCategory category) {
+		onSettingChanged(null);
+	}
+	
+	@Override
+	public void packLockedChanged(SettingsPack pack) {
+		onSettingChanged(null);
+	}
+	
+	@Override
 	public void settingLockedChanged(ISetting setting) {
 		onSettingChanged(setting);
-		
 	}
 	
 	@Override
 	public void settingValueChanged(ISetting setting) {
 		onSettingChanged(setting);
 	}	
+	
+	@Override
+	public void presetChanged(Preset preset) {
+		onPresetChanged(preset);
+	}
 	
 	public void onSettingChanged(ISetting setting) {
 		RTMenuTab selectedTab = getSelectedTab();

@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.Set;
 
 import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.changelisteners.ISettingChangeListener;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
 public class Settings {
 	
 	public static final Map<String, ISetting> ALL = new HashMap<>();
+	public static final Map<String, SettingsPack> PACKS = new LinkedHashMap<>();
 	public static final Map<String, SettingsCategory> CATEGORIES = new LinkedHashMap<>();
 	
 	private static final Set<ISettingChangeListener> CHANGE_LISTENERS = new HashSet<>();
@@ -30,22 +32,19 @@ public class Settings {
 	
 	public static void register(SettingsCategory category) {
 		if (CATEGORIES.putIfAbsent(category.getName(), category) != null) {
-			RedstoneTweaks.LOGGER.warn("SettingsCategory " + category.getName() + " could not be registered, as a category with that name already exists");
+			RedstoneTweaks.LOGGER.warn(String.format("SettingsCategory %s could not be registered, as a category with that name already exists.", category.getName()));
 		}
 	}
 	
 	public static void register(SettingsPack pack) {
-		if (pack.getCategory().getPacks().putIfAbsent(pack.getName(), pack) != null) {
-			RedstoneTweaks.LOGGER.warn("SettingsPack " + pack.getName() + " could not be registered, as a pack with that name already exists in SettingsCategory " + pack.getCategory().getName());
+		if (PACKS.putIfAbsent(pack.getId(), pack) != null || !pack.getCategory().addPack(pack)) {
+			RedstoneTweaks.LOGGER.warn(String.format("SettingsPack %s could not be registered, as a pack with id %s already exists.", pack.getName(), pack.getId()));
 		}
 	}
 	
 	public static void register(ISetting setting) {
-		if (setting.getPack().getSettings().putIfAbsent(setting.getName(), setting) != null) {
-			RedstoneTweaks.LOGGER.warn(setting.getClass() + " " + setting.getName() + " could not be registered, as a setting with that name already exists in SettingsPack " + setting.getPack().getName() + " in SettingsCategory " + setting.getPack().getCategory().getName());
-		} else
-		if (ALL.putIfAbsent(setting.getId(), setting) != null) {
-			RedstoneTweaks.LOGGER.warn(setting.getClass() + " " + setting.getName() + " could not be registered, as a setting with that name already exists");
+		if (ALL.putIfAbsent(setting.getId(), setting) != null || !setting.getPack().addSetting(setting)) {
+			RedstoneTweaks.LOGGER.warn(String.format("%s %s could not be registered, as a setting with id %s already exists.", setting.getClass(), setting.getName(), setting.getId()));
 		}
 	}
 	
@@ -53,36 +52,40 @@ public class Settings {
 		return CATEGORIES.get(name);
 	}
 	
+	public static SettingsPack getPackFromId(String id) {
+		return PACKS.get(id);
+	}
+	
 	public static ISetting getSettingFromId(String id) {
 		return ALL.get(id);
 	}
 	
 	public static void resetAll() {
-		ALL.forEach((name, setting) -> setting.reset());
+		ALL.values().forEach((setting) -> setting.reset());
 	}
 	
 	public static void enableAll() {
-		ALL.forEach((name, setting) -> setting.setEnabled(true));
+		ALL.values().forEach((setting) -> setting.setEnabled(true));
 	}
 	
 	public static void disableAll() {
-		ALL.forEach((name, setting) -> setting.setEnabled(false));
+		ALL.values().forEach((setting) -> setting.setEnabled(false));
 	}
 	
 	public static void lockAll() {
-		ALL.forEach((name, setting) -> setting.setLocked(true));
+		ALL.values().forEach((setting) -> setting.setLocked(true));
 	}
 	
 	public static void unlockAll() {
-		ALL.forEach((name, setting) -> setting.setLocked(false));
+		ALL.values().forEach((setting) -> setting.setLocked(false));
 	}
 	
 	public static void applyPreset(Preset preset) {
-		ALL.forEach((name, setting) -> setting.applyPreset(preset));
+		ALL.values().forEach((setting) -> setting.applyPreset(preset));
 	}
 	
 	public static void removePreset(Preset preset) {
-		ALL.forEach((name, setting) -> setting.removePreset(preset));
+		ALL.values().forEach((setting) -> setting.removePreset(preset));
 	}
 	
 	public static void addChangeListener(ISettingChangeListener listener) {
@@ -93,16 +96,20 @@ public class Settings {
 		CHANGE_LISTENERS.remove(listener);
 	}
 	
-	public static void lockedChanged(ISetting setting) {
-		for (ISettingChangeListener listener : CHANGE_LISTENERS) {
-			listener.settingLockedChanged(setting);
-		}
+	public static void categoryLockedChanged(SettingsCategory category) {
+		CHANGE_LISTENERS.forEach((listener) -> listener.categoryLockedChanged(category));
 	}
 	
-	public static void valueChanged(ISetting setting) {
-		for (ISettingChangeListener listener : CHANGE_LISTENERS) {
-			listener.settingValueChanged(setting);
-		}
+	public static void packLockedChanged(SettingsPack pack) {
+		CHANGE_LISTENERS.forEach((listener) -> listener.packLockedChanged(pack));
+	}
+	
+	public static void settingLockedChanged(ISetting setting) {
+		CHANGE_LISTENERS.forEach((listener) -> listener.settingLockedChanged(setting));
+	}
+	
+	public static void settingValueChanged(ISetting setting) {
+		CHANGE_LISTENERS.forEach((listener) -> listener.settingValueChanged(setting));
 	}
 	
 	public static class Common {

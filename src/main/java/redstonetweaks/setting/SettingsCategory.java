@@ -1,18 +1,18 @@
 package redstonetweaks.setting;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class SettingsCategory {
 	
 	private final String name;
-	private final Map<String, SettingsPack> packs;
+	private final Set<SettingsPack> packs;
 	
 	private boolean locked;
 	
 	public SettingsCategory(String name) {
 		this.name = name;
-		this.packs = new LinkedHashMap<>();
+		this.packs = new LinkedHashSet<>();
 	}
 	
 	@Override
@@ -20,6 +20,7 @@ public class SettingsCategory {
 		if (other instanceof SettingsCategory) {
 			return name.equals(((SettingsCategory)other).name);
 		}
+		
 		return false;
 	}
 	
@@ -32,7 +33,7 @@ public class SettingsCategory {
 		return name;
 	}
 	
-	public Map<String, SettingsPack> getPacks() {
+	public Set<SettingsPack> getPacks() {
 		return packs;
 	}
 	
@@ -41,10 +42,30 @@ public class SettingsCategory {
 	}
 	
 	public void setLocked(boolean locked) {
+		boolean changed = this.locked != locked;
+		
 		this.locked = locked;
+		
+		if (changed) {
+			Settings.categoryLockedChanged(this);
+		}
+	}
+	
+	public boolean addPack(SettingsPack pack) {
+		return packs.add(pack);
+	}
+	
+	public boolean isDefault() {
+		for (SettingsPack pack : packs) {
+			if (!pack.isDefault()) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	public void resetAll() {
-		packs.forEach((packName, pack) -> pack.getSettings().forEach((settingName, setting) -> setting.reset()));
+		packs.forEach((pack) -> pack.resetAll());
 	}
 }

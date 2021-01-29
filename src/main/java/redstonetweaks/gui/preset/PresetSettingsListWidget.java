@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.TickPriority;
-
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
@@ -52,10 +52,10 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 	
 	@Override
 	protected void initList() {
-		for (SettingsPack pack : parent.getSelectedCategory().getPacks().values()) {
+		for (SettingsPack pack : parent.getSelectedCategory().getPacks()) {
 			List<Entry> settingEntries = new ArrayList<>();
 			
-			for (ISetting setting : pack.getSettings().values()) {
+			for (ISetting setting : pack.getSettings()) {
 				if (addSettingsMode || parent.getPresetEditor().hasSetting(setting)) {
 					settingEntries.add(addSettingsMode ? new AddSettingEntry(setting) : new EditSettingEntry(setting));
 					
@@ -75,12 +75,12 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 	
 	@Override
 	protected void filterEntries(String query) {
-		for (SettingsPack pack : parent.getSelectedCategory().getPacks().values()) {
+		for (SettingsPack pack : parent.getSelectedCategory().getPacks()) {
 			boolean packMatchesQuery = pack.getName().toLowerCase().contains(query);
 			
 			List<Entry> settingEntries = new ArrayList<>();
 			
-			for (ISetting setting : pack.getSettings().values()) {
+			for (ISetting setting : pack.getSettings()) {
 				if ((addSettingsMode || parent.getPresetEditor().hasSetting(setting)) && (packMatchesQuery || setting.getName().toLowerCase().contains(query))) {
 					settingEntries.add(addSettingsMode ? new AddSettingEntry(setting) : new EditSettingEntry(setting));
 					
@@ -265,7 +265,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditSettings = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
+			boolean canEditSettings = PermissionManager.canChangeSettings();
 			
 			addRemoveButton.setActive(canEditSettings);
 		}
@@ -459,7 +459,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditSettings = ((RTIMinecraftClient)client).getSettingsManager().canChangeSettings();
+			boolean canEditSettings = PermissionManager.canChangeSettings();
 			boolean editable = parent.getPresetEditor().isEditable();
 			
 			buttonPanel.setActive(canEditSettings && editable);

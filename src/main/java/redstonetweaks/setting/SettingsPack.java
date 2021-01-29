@@ -1,28 +1,30 @@
 package redstonetweaks.setting;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import redstonetweaks.setting.types.ISetting;
 
 public class SettingsPack {
 	
 	private final SettingsCategory category;
+	private final String id;
 	private final String name;
-	private final Map<String, ISetting> settings;
+	private final Set<ISetting> settings;
 	
 	private boolean locked;
 	
 	public SettingsPack(SettingsCategory category, String name) {
 		this.category = category;
+		this.id = String.format("%s/%s", category.getName(), name);
 		this.name = name;
-		this.settings = new LinkedHashMap<>();
+		this.settings = new LinkedHashSet<>();
 	}
 	
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof SettingsPack) {
-			return category.equals(((SettingsPack)other).category) && name.equals(((SettingsPack)other).name);
+			return id.equals(((SettingsPack)other).id);
 		}
 		
 		return false;
@@ -37,11 +39,15 @@ public class SettingsPack {
 		return category;
 	}
 	
+	public String getId() {
+		return id;
+	}
+	
 	public String getName() {
 		return name;
 	}
 	
-	public Map<String, ISetting> getSettings() {
+	public Set<ISetting> getSettings() {
 		return settings;
 	}
 	
@@ -50,6 +56,30 @@ public class SettingsPack {
 	}
 	
 	public void setLocked(boolean locked) {
+		boolean changed = this.locked != locked;
+		
 		this.locked = locked;
+		
+		if (changed) {
+			Settings.packLockedChanged(this);
+		}
+	}
+	
+	public boolean addSetting(ISetting setting) {
+		return settings.add(setting);
+	}
+	
+	public boolean isDefault() {
+		for (ISetting setting : settings) {
+			if (!setting.isDefault()) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public void resetAll() {
+		settings.forEach((setting) -> setting.reset());
 	}
 }

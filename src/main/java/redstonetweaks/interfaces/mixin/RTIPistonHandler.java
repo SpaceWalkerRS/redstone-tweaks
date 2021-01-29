@@ -11,7 +11,7 @@ public interface RTIPistonHandler {
 	
 	public void setSticky(boolean sticky);
 	
-	public Map<BlockPos, Boolean> getDetachedPistonHeads();
+	public Map<BlockPos, Boolean> getLoosePistonHeads();
 	
 	public List<BlockEntity> getMovedBlockEntities();
 	

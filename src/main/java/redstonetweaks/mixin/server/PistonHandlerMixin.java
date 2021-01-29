@@ -63,7 +63,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	private List<BlockEntity> movedBlockEntities;
 	// A map of positions where two slabs will merge, mapped to the type of slab that will move in
 	private Map<BlockPos, SlabType> mergedSlabTypes;
-	// A map of positions where a double slab is split, mapped to type of slab that will move out
+	// A map of positions where a double slab is split, mapped to the type of slab that will move out
 	private Map<BlockPos, SlabType> splitSlabTypes;
 	
 	@Shadow protected abstract boolean tryMove(BlockPos pos, Direction dir);
@@ -236,11 +236,10 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		if (!retracted && frontPos.equals(headPos)) {
 			cir.setReturnValue(true);
 			cir.cancel();
+			
+			return;
 		}
-	}
-	
-	@Inject(method = "tryMove", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"))
-	private void onTryMoveInjectBeforeGetPistonBehavior(BlockPos pos, Direction dir, CallbackInfoReturnable<Boolean> cir, BlockState frontState, Block block, int i, int j, int distance, BlockPos frontPos) {
+		
 		// We break out of the loop to prevent the front block from being added to the movedBlocks list multiple times
 		// or when it should not be added at all
 		boolean breakLoop = false;
@@ -377,7 +376,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	}
 	
 	@Override
-	public Map<BlockPos, Boolean> getDetachedPistonHeads() {
+	public Map<BlockPos, Boolean> getLoosePistonHeads() {
 		return loosePistonHeads;
 	}
 	
@@ -399,7 +398,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				Direction facing = state.get(Properties.FACING);
 				
 				if (facing.getAxis() == motionDirection.getAxis()) {
-					loosePistonHeads.put(pos, facing == motionDirection);
+					loosePistonHeads.put(pos, true);
 				}
 			}
 		}
@@ -407,6 +406,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	private boolean tryAttachPistonHead(BlockPos pos, BlockState state, BlockPos frontPos, BlockState frontState) {
 		if (loosePistonHeads.containsKey(pos)) {
+			System.out.println("position already attaches or detaches");
 			return false;
 		}
 		if (loosePistonHeads.containsKey(frontPos)) {
@@ -414,10 +414,11 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				// If the piston is now pushed the head will not detach
 				loosePistonHeads.remove(frontPos);
 			}
-			
+			System.out.println("front position already attaches or detaches");
 			return false;
 		}
 		if (!PistonHelper.isPiston(state, motionDirection) && !PistonHelper.isPiston(frontState, motionDirection.getOpposite())) {
+			System.out.println("cannot attach: no valid piston found");
 			return false;
 		}
 		
@@ -428,6 +429,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 					
 					return true;
 				}
+				System.out.println("cannot attach: no valid head found");
 			}
 		}
 		

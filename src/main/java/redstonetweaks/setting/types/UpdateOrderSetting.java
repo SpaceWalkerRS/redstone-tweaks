@@ -8,7 +8,12 @@ import redstonetweaks.world.common.UpdateOrder;
 public class UpdateOrderSetting extends Setting<UpdateOrder> {
 	
 	public UpdateOrderSetting(SettingsPack pack, String name, String description) {
-		super(pack, name, description, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL));
+		super(pack, name, description);
+	}
+	
+	@Override
+	public UpdateOrder getBackupValue() {
+		return new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL);
 	}
 	
 	@Override

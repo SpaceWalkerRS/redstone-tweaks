@@ -3,6 +3,7 @@ package redstonetweaks.setting.preset;
 import java.util.HashSet;
 import java.util.Set;
 
+import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.Setting;
 
@@ -12,6 +13,7 @@ public class PresetEditor {
 	
 	private final Preset preset;
 	
+	private final Set<ISetting> currentSettings;
 	private final Set<ISetting> changedSettings;
 	private final Set<ISetting> addedSettings;
 	private final Set<ISetting> removedSettings;
@@ -38,9 +40,16 @@ public class PresetEditor {
 	private PresetEditor(Preset preset, String previousName, String name, String description, Preset.Mode mode) {
 		this.preset = preset;
 		
+		this.currentSettings = new HashSet<>();
 		this.changedSettings = new HashSet<>();
 		this.addedSettings = new HashSet<>();
 		this.removedSettings = new HashSet<>();
+		
+		for (ISetting setting : Settings.ALL.values()) {
+			if (setting.hasPreset(preset)) {
+				currentSettings.add(setting);
+			}
+		}
 		
 		this.previousName = previousName;
 		this.name = name;
@@ -107,7 +116,7 @@ public class PresetEditor {
 	}
 	
 	public boolean hasSetting(ISetting setting) {
-		return (setting.hasPreset(preset) && !removedSettings.contains(setting)) || addedSettings.contains(setting);
+		return (currentSettings.contains(setting) && !removedSettings.contains(setting)) || addedSettings.contains(setting);
 	}
 	
 	public void addSetting(ISetting setting) {
@@ -115,7 +124,7 @@ public class PresetEditor {
 	}
 	
 	public void addSetting(ISetting setting, boolean useCurrentValue) {
-		if (setting.hasPreset(preset)) {
+		if (currentSettings.contains(setting)) {
 			removedSettings.remove(setting);
 		} else {
 			addedSettings.add(setting);
@@ -129,7 +138,7 @@ public class PresetEditor {
 	}
 	
 	public void removeSetting(ISetting setting) {
-		if (setting.hasPreset(preset)) {
+		if (currentSettings.contains(setting)) {
 			removedSettings.add(setting);
 		} else {
 			addedSettings.remove(setting);
@@ -150,7 +159,7 @@ public class PresetEditor {
 		if (hasSetting(setting)) {
 			setting.setPresetValue(TEMP, value);
 			
-			if (setting.hasPreset(preset)) {
+			if (currentSettings.contains(setting)) {
 				changedSettings.add(setting);
 			}
 		}
@@ -160,7 +169,7 @@ public class PresetEditor {
 		if (hasSetting(setting)) {
 			setting.setPresetValueFromString(TEMP, value);
 			
-			if (setting.hasPreset(preset)) {
+			if (currentSettings.contains(setting)) {
 				changedSettings.add(setting);
 			}
 		}
@@ -170,7 +179,7 @@ public class PresetEditor {
 		if (hasSetting(setting)) {
 			setting.copyPresetValue(preset, TEMP);
 			
-			if (setting.hasPreset(this.preset)) {
+			if (currentSettings.contains(setting)) {
 				changedSettings.add(setting);
 			}
 		}

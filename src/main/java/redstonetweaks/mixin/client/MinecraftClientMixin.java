@@ -10,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.hotkeys.HotkeysManager;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
@@ -37,6 +38,7 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(RunArgs args, CallbackInfo ci) {
+		PermissionManager.init((MinecraftClient)(Object)this);
 		packetHandler = new ClientPacketHandler((MinecraftClient)(Object)this);
 		settingsManager = new ClientSettingsManager((MinecraftClient)(Object)this);
 		presetsManager = new ClientPresetsManager((MinecraftClient)(Object)this);

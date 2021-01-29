@@ -63,6 +63,8 @@ public interface RTIPistonBlockEntity {
 	
 	public MovedBlock splitDoubleSlab(SlabType keepType);
 	
+	public MovedBlock detachPistonHead(Direction motionDir, boolean returnMovingPart);
+	
 	public boolean isSideSolid(BlockView world, BlockPos pos, Direction face, SideShapeType shapeType);
 	
 }
