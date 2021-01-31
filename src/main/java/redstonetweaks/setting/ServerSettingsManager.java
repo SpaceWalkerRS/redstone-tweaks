@@ -16,6 +16,7 @@ import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.changelisteners.ISettingChangeListener;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
+import redstonetweaks.packet.types.ApplyPresetPacket;
 import redstonetweaks.packet.types.LockCategoryPacket;
 import redstonetweaks.packet.types.LockPackPacket;
 import redstonetweaks.packet.types.LockSettingPacket;
@@ -23,6 +24,7 @@ import redstonetweaks.packet.types.ResetSettingPacket;
 import redstonetweaks.packet.types.ResetSettingsPacket;
 import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.packet.types.SettingsPacket;
+import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
 public class ServerSettingsManager implements ISettingChangeListener {
@@ -83,6 +85,17 @@ public class ServerSettingsManager implements ISettingChangeListener {
 		category.resetAll();
 		if (server.isRemote()) {
 			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new ResetSettingsPacket(category));
+		}
+		
+		deaf = false;
+	}
+	
+	public void applyPreset(Preset preset) {
+		deaf = true;
+		
+		preset.apply();
+		if (server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new ApplyPresetPacket(preset));
 		}
 		
 		deaf = false;

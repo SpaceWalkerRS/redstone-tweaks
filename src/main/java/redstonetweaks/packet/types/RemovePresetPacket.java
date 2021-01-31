@@ -3,77 +3,49 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
-import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
+
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 
 public class RemovePresetPacket extends RedstoneTweaksPacket {
 	
-	public static final boolean REMOVE = true;
-	public static final boolean PUT_BACK = false;
-	
-	private String name;
-	private boolean action;
+	private int id;
 	
 	public RemovePresetPacket() {
 		
 	}
 	
-	public RemovePresetPacket(Preset preset, boolean action) {
-		name = preset.getName();
-		this.action = action;
+	public RemovePresetPacket(Preset preset) {
+		this.id = preset.getId();
 	}
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		buffer.writeString(name);
-		buffer.writeBoolean(action);
+		buffer.writeInt(id);
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		name = buffer.readString(MAX_STRING_LENGTH);
-		action = buffer.readBoolean();
+		id = buffer.readInt();
 	}
 	
 	@Override
 	public void execute(MinecraftServer server) {
-		if (action == REMOVE) {
-			Preset preset = Presets.fromName(name);
-			
-			if (preset != null) {
-				((RTIMinecraftServer)server).getPresetsManager().removePreset(preset);
-			}
-		}
-		if (action == PUT_BACK) {
-			Preset preset = Presets.getRemovedPresetFromName(name);
-			
-			if (preset != null) {
-				((RTIMinecraftServer)server).getPresetsManager().unremovePreset(preset);
-			}
+		Preset preset = Presets.fromId(id);
+		
+		if (preset != null) {
+			Presets.remove(preset);
 		}
 	}
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (action == REMOVE) {
-			Preset preset = Presets.fromName(name);
+		if (!client.isInSingleplayer()) {
+			Preset preset = Presets.fromId(id);
 			
 			if (preset != null) {
 				Presets.remove(preset);
 			}
-			
-			((RTIMinecraftClient)client).getPresetsManager().onRemovePresetPacketReceived(preset);
-		}
-		if (action == PUT_BACK) {
-			Preset preset = Presets.getRemovedPresetFromName(name);
-			
-			if (preset != null) {
-				Presets.unremove(preset);
-			}
-			
-			((RTIMinecraftClient)client).getPresetsManager().onRemovePresetPacketReceived(preset);
 		}
 	}
 }

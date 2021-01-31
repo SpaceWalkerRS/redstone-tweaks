@@ -1,21 +1,24 @@
 package redstonetweaks.packet.types;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
+import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.setting.types.ISetting;
 
 public class PresetsPacket extends RedstoneTweaksPacket {
 	
 	private int presetsCount;
 	
+	private int[] ids;
 	private String[] names;
 	private String[] descriptions;
 	private Preset.Mode[] modes;
@@ -28,7 +31,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 		
 	}
 	
-	public PresetsPacket(List<Preset> presets) {
+	public PresetsPacket(Collection<Preset> presets) {
 		presetsCount = 0;
 		
 		for (Preset preset : presets) {
@@ -39,6 +42,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 			presetsCount++;
 		}
 		
+		ids = new int[presetsCount];
 		names = new String[presetsCount];
 		descriptions = new String[presetsCount];
 		modes = new Preset.Mode[presetsCount];
@@ -60,6 +64,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 				}
 			}
 			
+			ids[presetIndex] = preset.getId();
 			names[presetIndex] = preset.getName();
 			descriptions[presetIndex] = preset.getDescription();
 			modes[presetIndex] = preset.getMode();
@@ -74,6 +79,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 			for (ISetting setting : list) {
 				settings[presetIndex][settingIndex] = setting;
 				values[presetIndex][settingIndex] = setting.getPresetValueAsString(preset);
+				
 				settingIndex++;
 			}
 			
@@ -86,6 +92,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 		buffer.writeInt(presetsCount);
 		
 		for (int presetIndex = 0; presetIndex < presetsCount; presetIndex++) {
+			buffer.writeInt(ids[presetIndex]);
 			buffer.writeString(names[presetIndex]);
 			buffer.writeString(descriptions[presetIndex]);
 			buffer.writeShort(modes[presetIndex].getIndex());
@@ -104,6 +111,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 	public void decode(PacketByteBuf buffer) {
 		presetsCount = buffer.readInt();
 		
+		ids = new int[presetsCount];
 		names = new String[presetsCount];
 		descriptions = new String[presetsCount];
 		modes = new Preset.Mode[presetsCount];
@@ -113,6 +121,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 		values = new String[presetsCount][];
 		
 		for (int presetIndex = 0; presetIndex < presetsCount; presetIndex++) {
+			ids[presetIndex] = buffer.readInt();
 			names[presetIndex] = buffer.readString(MAX_STRING_LENGTH);
 			descriptions[presetIndex] = buffer.readString(MAX_STRING_LENGTH);
 			modes[presetIndex] = Preset.Mode.fromIndex(buffer.readShort());
@@ -138,8 +147,10 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 	@Override
 	public void execute(MinecraftClient client) {
 		if (!client.isInSingleplayer()) {
+			Presets.toDefault();
+			
 			for (int presetIndex = 0; presetIndex < presetsCount; presetIndex++) {
-				PresetEditor editor = new PresetEditor(names[presetIndex], descriptions[presetIndex], modes[presetIndex]);
+				PresetEditor editor = Presets.editPreset(new Preset(ids[presetIndex], null, names[presetIndex], descriptions[presetIndex], modes[presetIndex], true));
 				
 				int settingsCount = settingsCounts[presetIndex];
 				
@@ -152,12 +163,8 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 					}
 				}
 				
-				if (editor.canSave()) {
-					editor.saveChanges();
-				}
+				editor.trySaveChanges();
 			}
 		}
-		
-		((RTIMinecraftClient)client).getPresetsManager().onPresetsPacketReceived();
 	}
 }

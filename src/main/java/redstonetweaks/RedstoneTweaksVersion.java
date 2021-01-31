@@ -35,7 +35,13 @@ public class RedstoneTweaksVersion {
 	
 	@Override
 	public String toString() {
-		return isValid() ? (major + "." + minor + "." + patch + (type == Type.SNAPSHOT ? "-pre" + snapshot : "")) : "INVALID";
+		String version = String.format("%d.%d.%d", major, minor, patch);
+		
+		if (type == Type.SNAPSHOT) {
+			version = String.format("%s-pre%d", version, snapshot);
+		}
+		
+		return version;
 	}
 	
 	public boolean isValid() {

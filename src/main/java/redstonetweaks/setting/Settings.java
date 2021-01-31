@@ -14,21 +14,10 @@ import redstonetweaks.setting.types.ISetting;
 public class Settings {
 	
 	public static final Map<String, ISetting> ALL = new HashMap<>();
-	public static final Map<String, SettingsPack> PACKS = new LinkedHashMap<>();
+	public static final Map<String, SettingsPack> PACKS = new HashMap<>();
 	public static final Map<String, SettingsCategory> CATEGORIES = new LinkedHashMap<>();
 	
 	private static final Set<ISettingChangeListener> CHANGE_LISTENERS = new HashSet<>();
-	
-	public static void init() {
-		Tweaks.init();
-		ServerConfig.init();
-	}
-
-	public static void toDefault() {
-		disableAll();
-		unlockAll();
-		resetAll();
-	}
 	
 	public static void register(SettingsCategory category) {
 		if (CATEGORIES.putIfAbsent(category.getName(), category) != null) {
@@ -58,6 +47,17 @@ public class Settings {
 	
 	public static ISetting getSettingFromId(String id) {
 		return ALL.get(id);
+	}
+	
+	public static void init() {
+		Tweaks.init();
+		ServerConfig.init();
+	}
+
+	public static void toDefault() {
+		disableAll();
+		unlockAll();
+		resetAll();
 	}
 	
 	public static void resetAll() {

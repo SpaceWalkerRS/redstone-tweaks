@@ -7,10 +7,14 @@ import redstonetweaks.gui.RTWindow;
 
 public class RemovedPresetsWindow extends RTWindow {
 	
+	public final PresetsTab parent;
+	
 	private RemovedPresetsListWidget list;
 	
 	public RemovedPresetsWindow(PresetsTab parent) {
 		super(parent.screen, new TranslatableText("Removed Presets"), 0, 0, 0, 0);
+		
+		this.parent = parent;
 	}
 	
 	@Override

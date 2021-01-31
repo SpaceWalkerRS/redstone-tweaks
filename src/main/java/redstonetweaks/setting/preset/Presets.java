@@ -1,11 +1,13 @@
 package redstonetweaks.setting.preset;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import net.minecraft.world.TickPriority;
+
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.changelisteners.IPresetChangeListener;
 import redstonetweaks.setting.ServerConfig;
@@ -20,11 +22,99 @@ import redstonetweaks.world.common.WorldTickOptions;
 
 public class Presets {
 	
-	public static final List<Preset> ALL = new ArrayList<>();
-	public static final List<Preset> REMOVED = new ArrayList<>();
+	public static final Map<Integer, Preset> ALL = new HashMap<>();
+	public static final Map<String, Preset> ACTIVE = new LinkedHashMap<>();
 	
 	private static final Set<IPresetChangeListener> CHANGE_LISTENERS = new HashSet<>();
+	
+	public static void register(Preset preset) {
+		int id = preset.getId();
+		
+		if (ALL.containsKey(id) && ALL.get(id) != preset) {
+			RedstoneTweaks.LOGGER.warn(String.format("Preset %s could not be registered, as a preset with id %d has already been registered.", preset.getName(), id));
+			
+			return;
+		}
+		
+		ALL.putIfAbsent(id, preset);
+		ACTIVE.putIfAbsent(preset.getName(), preset);
+	}
+	
+	public static void remove(Preset preset) {
+		if (preset.isEditable()) {
+			if (ACTIVE.remove(preset.getName(), preset)) {
+				presetRemoved(preset);
+			}
+		}
+	}
+	
+	private static void removeAll() {
+		ALL.values().forEach((preset) -> remove(preset));
+	}
 
+	public static boolean isValidName(String name) {
+		return name != null && !name.isEmpty() && ACTIVE.containsKey(name);
+	}
+	
+	public static Preset fromId(int id) {
+		return ALL.get(id);
+	}
+	
+	public static Preset fromName(String name) {
+		return ACTIVE.get(name);
+	}
+	
+	public static Preset create(String name, String description, Preset.Mode mode) {
+		return new Preset(name, description, mode, true);
+	}
+	
+	public static Preset fromIdOrCreate(int id, String name, String description, Preset.Mode mode) {
+		Preset preset = fromId(id);
+		
+		return preset == null ? new Preset(id, null, name, description, mode, true) : preset;
+	}
+	
+	public static PresetEditor newPreset(boolean fromSettings) {
+		PresetEditor editor = editPreset(create("", "", Preset.Mode.SET));
+		
+		if (fromSettings) {
+			for (ISetting setting : Settings.ALL.values()) {
+				if (!setting.isDefault()) {
+					editor.addSetting(setting, true);
+				}
+			}
+		}
+		
+		return editor;
+	}
+	
+	public static PresetEditor duplicatePreset(Preset preset) {
+		PresetEditor editor = editPreset(create(String.format("[duplicate] %s", preset.getName()), preset.getDescription(), preset.getMode()));
+		
+		for (ISetting setting : Settings.ALL.values()) {
+			if (setting.hasPreset(preset)) {
+				editor.addSetting(setting);
+				editor.copyPresetValue(setting, preset);
+			}
+		}
+		
+		return editor;
+	}
+	
+	public static PresetEditor editPreset(Preset preset) {
+		return new PresetEditor(preset);
+	}
+	
+	public static Preset getRemovedPresetFromSavedName(String savedName) {
+		for (Preset preset : ALL.values()) {
+			if (!ACTIVE.containsValue(preset) && preset.getSavedName().equals(savedName)) {
+				return preset;
+			}
+		}
+		
+		return null;
+	}
+	
 	public static void init() {
 		Default.init();
 		Bedrock.init();
@@ -35,48 +125,12 @@ public class Presets {
 	}
 	
 	public static void toDefault() {
-		for (int i = ALL.size() - 1; i >= 0; i--) {
-			Preset preset = ALL.get(i);
-			
-			// Only the built-in presets aren't editable
-			if (preset.isEditable()) {
-				remove(preset);
-			}
-		}
-		
+		removeAll();
 		cleanUp();
 	}
 
 	public static void cleanUp() {
-		for (Preset preset : REMOVED) {
-			Settings.removePreset(preset);
-		}
-		
-		REMOVED.clear();
-	}
-	
-	public static void register(Preset preset) {
-		ALL.add(preset);
-	}
-	
-	public static void tryRegister(Preset preset) {
-		if (!isRegistered(preset)) {
-			register(preset);
-		}
-	}
-	
-	public static boolean isRegistered(Preset preset) {
-		return ALL.contains(preset);
-	}
-	
-	public static void remove(Preset preset) {
-		ALL.remove(preset);
-		REMOVED.add(preset);
-	}
-	
-	public static void unremove(Preset preset) {
-		REMOVED.remove(preset);
-		tryRegister(preset);
+		ALL.values().removeIf((preset) -> !ACTIVE.containsValue(preset));
 	}
 	
 	public static void addChangeListener(IPresetChangeListener listener) {
@@ -87,60 +141,17 @@ public class Presets {
 		CHANGE_LISTENERS.remove(listener);
 	}
 	
-	public static void presetChanged(Preset preset) {
-		for (IPresetChangeListener listener : CHANGE_LISTENERS) {
-			listener.presetChanged(preset);
+	public static void presetChanged(PresetEditor editor) {
+		Preset preset = editor.getPreset();
+		
+		ACTIVE.values().remove(preset);
+		if (ACTIVE.putIfAbsent(preset.getName(), preset) == null) {
+			CHANGE_LISTENERS.forEach((listener) -> listener.presetChanged(editor));
 		}
 	}
 	
-	public static boolean isNameValid(String name) {
-		return !name.isEmpty() && !name.equals("null") && fromName(name) == null;
-	}
-	
-	public static Preset fromName(String name) {
-		for (Preset preset : ALL) {
-			if (preset.getName().equals(name)) {
-				return preset;
-			}
-		}
-		
-		return null;
-	}
-	
-	public static Preset create(String name, String description, Preset.Mode mode) {
-		return new Preset(name, description, mode, true);
-	}
-	
-	public static Preset fromNameOrCreate(String name) {
-		return fromNameOrCreate(name, "", Preset.Mode.SET);
-	}
-	
-	public static Preset fromNameOrCreate(String name, String description, Preset.Mode mode) {
-		Preset preset = fromName(name);
-		
-		return preset == null ? create(name, description, mode) : preset;
-	}
-	
-	public static Preset getRemovedPresetFromName(String name) {
-		for (Preset preset : REMOVED) {
-			if (preset.getName().equals(name)) {
-				return preset;
-			}
-		}
-		
-		return null;
-	}
-	
-	public static Preset getRemovedPresetFromSavedName(String savedName) {
-		if (isNameValid(savedName)) {
-			for (Preset preset : REMOVED) {
-				if (preset.getSavedName().equals(savedName)) {
-					return preset;
-				}
-			}
-		}
-		
-		return null;
+	public static void presetRemoved(Preset preset) {
+		CHANGE_LISTENERS.forEach((listener) -> listener.presetRemoved(preset));
 	}
 	
 	public static class Default {
@@ -314,7 +325,7 @@ public class Presets {
 			Tweaks.Lectern.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.Lectern.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.Lever.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.SEQUENTIAL).
+			Tweaks.Lever.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.ALL, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.FRONT, RelativePos.WEST));
 			Tweaks.Lever.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -366,7 +377,7 @@ public class Presets {
 			Tweaks.NoteBlock.RANDOMIZE_QC.setPresetValue(DEFAULT, false);
 			Tweaks.NoteBlock.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
-			Tweaks.Observer.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.SEQUENTIAL).
+			Tweaks.Observer.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.ALL, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.FRONT).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.FRONT, RelativePos.BACK));
 			Tweaks.Observer.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 2);
@@ -517,7 +528,7 @@ public class Presets {
 			Tweaks.StickyPiston.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.StickyPiston.UPDATE_SELF.setPresetValue(DEFAULT, false);
 			
-			Tweaks.StoneButton.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.SEQUENTIAL).
+			Tweaks.StoneButton.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.ALL, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.FRONT, RelativePos.WEST));
 			Tweaks.StoneButton.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -570,7 +581,7 @@ public class Presets {
 			
 			Tweaks.WhiteConcretePowder.IS_SOLID.setPresetValue(DEFAULT, true);
 			
-			Tweaks.WoodenButton.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.BOTH, UpdateOrder.NotifierOrder.SEQUENTIAL).
+			Tweaks.WoodenButton.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.ALL, UpdateOrder.NotifierOrder.SEQUENTIAL).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.FRONT, RelativePos.WEST));
 			Tweaks.WoodenButton.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
@@ -604,7 +615,7 @@ public class Presets {
 			// Check if every setting has a default value, otherwise log a warning
 			for (ISetting setting : Settings.ALL.values()) {
 				if (!setting.hasPreset(DEFAULT)) {
-					RedstoneTweaks.LOGGER.warn(setting.getClass() + " " + setting.getId() + " does not have a default value!");
+					RedstoneTweaks.LOGGER.warn(String.format("%s with id %s does not have a default value!", setting.getClass(), setting.getId()));
 				}
 			}
 		}

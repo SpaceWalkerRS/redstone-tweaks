@@ -4,7 +4,11 @@ import redstonetweaks.setting.Settings;
 
 public class Preset {
 	
+	private static int idCounter = 0;
+	
 	private final boolean editable;
+	private final int id;
+	// The name of the preset when it was loaded from file, or null if it was not loaded from file
 	private final String savedName;
 	
 	private String name;
@@ -12,11 +16,16 @@ public class Preset {
 	private Mode mode;
 	
 	public Preset(String name, String description, Mode mode, boolean editable) {
-		this("null", name, description, mode, editable);
+		this(null, name, description, mode, editable);
 	}
 	
 	public Preset(String savedName, String name, String description, Mode mode, boolean editable) {
+		this(idCounter++, savedName, name, description, mode, editable);
+	}
+	
+	public Preset(int id, String savedName, String name, String description, Mode mode, boolean editable) {
 		this.editable = editable;
+		this.id = id;
 		this.savedName = savedName;
 		
 		this.name = name;
@@ -25,12 +34,25 @@ public class Preset {
 	}
 	
 	@Override
+	public boolean equals(Object other) {
+		if (other instanceof Preset) {
+			return id == ((Preset)other).id;
+		}
+		
+		return false;
+	}
+	
+	@Override
 	public int hashCode() {
-		return savedName.hashCode();
+		return id;
 	}
 	
 	public boolean isEditable() {
 		return editable;
+	}
+	
+	public int getId() {
+		return id;
 	}
 	
 	public String getSavedName() {

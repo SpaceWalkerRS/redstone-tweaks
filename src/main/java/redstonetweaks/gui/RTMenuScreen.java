@@ -25,6 +25,7 @@ import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
+import redstonetweaks.setting.preset.PresetEditor;
 import redstonetweaks.setting.types.ISetting;
 
 public class RTMenuScreen extends Screen implements ISettingChangeListener, IPresetChangeListener {
@@ -249,7 +250,12 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener, IPre
 	}	
 	
 	@Override
-	public void presetChanged(Preset preset) {
+	public void presetChanged(PresetEditor editor) {
+		onPresetChanged(editor.getPreset());
+	}
+	
+	@Override
+	public void presetRemoved(Preset preset) {
 		onPresetChanged(preset);
 	}
 	

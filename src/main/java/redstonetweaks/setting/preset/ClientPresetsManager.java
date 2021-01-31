@@ -1,11 +1,9 @@
 package redstonetweaks.setting.preset;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import redstonetweaks.gui.RTMenuScreen;
+
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.packet.types.ApplyPresetPacket;
-import redstonetweaks.packet.types.DuplicatePresetPacket;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.ReloadPresetsPacket;
 import redstonetweaks.packet.types.RemovePresetPacket;
@@ -34,59 +32,20 @@ public class ClientPresetsManager {
 	}
 	
 	public void savePreset(PresetEditor editor) {
-		PresetPacket packet = new PresetPacket(editor);
-		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
-		
-		editor.discardChanges();
+		if (client.isInSingleplayer()) {
+			editor.trySaveChanges();
+		} else {
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new PresetPacket(editor));
+			
+			editor.discardChanges();
+		}
 	}
 	
 	public void reloadPresets() {
-		ReloadPresetsPacket packet = new ReloadPresetsPacket();
-		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(new ReloadPresetsPacket());
 	}
 	
 	public void removePreset(Preset preset) {
-		RemovePresetPacket packet = new RemovePresetPacket(preset, RemovePresetPacket.REMOVE);
-		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void unremovePreset(Preset preset) {
-		RemovePresetPacket packet = new RemovePresetPacket(preset, RemovePresetPacket.PUT_BACK);
-		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void duplicatePreset(Preset preset) {
-		DuplicatePresetPacket packet = new DuplicatePresetPacket(preset);
-		((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void onPresetPacketReceived(Preset preset) {
-		notifyMenuScreenOfPresetChange(preset);
-	}
-	
-	public void onPresetsPacketReceived() {
-		notifyMenuScreenOfPresetChange(null);
-	}
-	
-	public void onReloadPresetsPacketReceived() {
-		notifyMenuScreenOfPresetChange(null);
-	}
-	
-	public void onRemovePresetPacketReceived(Preset preset) {
-		notifyMenuScreenOfPresetChange(preset);
-	}
-	
-	public void onApplyPresetPacketReceived(Preset preset) {
-		Screen screen = client.currentScreen;
-		if (screen instanceof RTMenuScreen) {
-			((RTMenuScreen)screen).onSettingChanged(null);
-		}
-	}
-	
-	private void notifyMenuScreenOfPresetChange(Preset preset) {
-		Screen screen = client.currentScreen;
-		if (screen instanceof RTMenuScreen) {
-			((RTMenuScreen)screen).onPresetChanged(preset);
-		}
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(new RemovePresetPacket(preset));
 	}
 }

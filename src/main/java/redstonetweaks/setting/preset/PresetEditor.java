@@ -18,6 +18,7 @@ public class PresetEditor {
 	private final Set<ISetting> addedSettings;
 	private final Set<ISetting> removedSettings;
 	
+	private final int id;
 	private final String previousName;
 	private String name;
 	private String description;
@@ -26,18 +27,10 @@ public class PresetEditor {
 	private boolean saved;
 	
 	public PresetEditor(Preset preset) {
-		this(preset, preset.getName(), preset.getName(), preset.getDescription(), preset.getMode());
+		this(preset, preset.getId(), preset.getName(), preset.getName(), preset.getDescription(), preset.getMode());
 	}
 	
-	public PresetEditor(String name, String description, Preset.Mode mode) {
-		this(name, name, description, mode);
-	}
-	
-	public PresetEditor(String previousName, String name, String description, Preset.Mode mode) {
-		this(Presets.fromNameOrCreate(previousName == null ? name : previousName), previousName, name, description, mode);
-	}
-	
-	private PresetEditor(Preset preset, String previousName, String name, String description, Preset.Mode mode) {
+	private PresetEditor(Preset preset, int id, String previousName, String name, String description, Preset.Mode mode) {
 		this.preset = preset;
 		
 		this.currentSettings = new HashSet<>();
@@ -51,6 +44,7 @@ public class PresetEditor {
 			}
 		}
 		
+		this.id = id;
 		this.previousName = previousName;
 		this.name = name;
 		this.description = description;
@@ -77,6 +71,10 @@ public class PresetEditor {
 	
 	public Set<ISetting> getRemovedSettings() {
 		return removedSettings;
+	}
+	
+	public int getId() {
+		return id;
 	}
 	
 	public String getName() {
@@ -186,15 +184,21 @@ public class PresetEditor {
 	}
 	
 	public boolean canSave() {
-		return Presets.isNameValid(name) || name.equals(previousName);
+		return name.equals(previousName) || Presets.isValidName(name);
+	}
+	
+	public void trySaveChanges() {
+		if (canSave()) {
+			saveChanges();
+		} else {
+			discardChanges();
+		}
 	}
 	
 	public void saveChanges() {
 		preset.setName(name);
 		preset.setDescription(description);
 		preset.setMode(mode);
-		
-		Presets.tryRegister(preset);
 		
 		for (ISetting setting : changedSettings) {
 			setting.copyPresetValue(TEMP, preset);
@@ -211,7 +215,7 @@ public class PresetEditor {
 		
 		saved = true;
 		
-		Presets.presetChanged(preset);
+		Presets.presetChanged(this);
 	}
 	
 	public void discardChanges() {

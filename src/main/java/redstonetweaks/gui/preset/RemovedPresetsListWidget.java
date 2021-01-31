@@ -18,23 +18,29 @@ import redstonetweaks.util.TextFormatting;
 
 public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWidget.Entry> {
 	
+	private final RemovedPresetsWindow parent;
+	
 	public RemovedPresetsListWidget(RemovedPresetsWindow parent, int x, int y, int width, int height) {
 		super(parent.screen, x, y, width, height, 22, "Removed Presets List");
+		
+		this.parent = parent;
 	}
 	
 	@Override
 	protected void initList() {
-		for (Preset preset : Presets.REMOVED) {
-			addEntry(new PresetEntry(preset));
-			
-			updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+		for (Preset preset : Presets.ALL.values()) {
+			if (!Presets.ACTIVE.containsValue(preset)) {
+				addEntry(new PresetEntry(preset));
+				
+				updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+			}
 		}
 	}
 	
 	@Override
 	protected void filterEntries(String query) {
-		for (Preset preset : Presets.REMOVED) {
-			if (preset.getName().toLowerCase().contains(query)) {
+		for (Preset preset : Presets.ALL.values()) {
+			if (!Presets.ACTIVE.containsValue(preset) && preset.getName().toLowerCase().contains(query)) {
 				addEntry(new PresetEntry(preset));
 				
 				updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
@@ -66,7 +72,9 @@ public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWid
 			this.children = new ArrayList<>();
 			
 			this.unremoveButton = new RTButtonWidget(0, 0, 55, 20, () -> new TranslatableText("Put Back"), (button) -> {
-				((RTIMinecraftClient)screen.client).getPresetsManager().unremovePreset(this.preset);
+				parent.close();
+				
+				parent.parent.editPreset(this.preset);
 			});
 			this.children.add(this.unremoveButton);
 		}

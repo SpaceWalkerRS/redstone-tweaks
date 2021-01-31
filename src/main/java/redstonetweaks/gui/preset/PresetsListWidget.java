@@ -3,6 +3,7 @@ package redstonetweaks.gui.preset;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -28,17 +29,18 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	
 	@Override
 	protected void initList() {
-		for (Preset preset : Presets.ALL) {
+		for (Preset preset : Presets.ACTIVE.values()) {
 			addEntry(new PresetEntry(preset));
 			
 			updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
 		}
+		
 		addEntry(new AddPresetEntry());
 	}
 	
 	@Override
 	protected void filterEntries(String query) {
-		for (Preset preset : Presets.ALL) {
+		for (Preset preset : Presets.ACTIVE.values()) {
 			if (preset.getName().toLowerCase().contains(query)) {
 				addEntry(new PresetEntry(preset));
 				
@@ -58,21 +60,15 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		private final List<RTElement> children;
 		private final RTButtonWidget addButton;
-		private final RTButtonWidget addFromSettingsButton;
 		private final RTButtonWidget oopsButton;
 		
 		public AddPresetEntry() {
 			this.children = new ArrayList<>();
 			
-			this.addButton = new RTButtonWidget((getX() + getWidth() - 80 - 84) / 2, 0, 80, 20, () -> new TranslatableText("New Preset"), (button) -> {
-				parent.newPreset();
+			this.addButton = new RTButtonWidget((getX() + getWidth() - 80) / 2, 0, 80, 20, () -> new TranslatableText("New Preset"), (button) -> {
+				parent.newPreset(Screen.hasShiftDown());
 			});
 			this.children.add(this.addButton);
-			
-			this.addFromSettingsButton = new RTButtonWidget((getX() + getWidth() - 80 + 84) / 2, 0, 80, 20, () -> new TranslatableText("From Settings"), (button) -> {
-				parent.newPresetFromSettings();
-			});
-			this.children.add(this.addFromSettingsButton);
 			
 			this.oopsButton = new RTButtonWidget(getX() + getWidth() - 55, 0, 45, 20, () -> new TranslatableText("oops"), (button) -> {
 				screen.openWindow(new RemovedPresetsWindow(parent));
@@ -102,9 +98,6 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			addButton.setY(y);
 			addButton.render(matrices, mouseX, mouseY, tickDelta);
 			
-			addFromSettingsButton.setY(y);
-			addFromSettingsButton.render(matrices, mouseX, mouseY, tickDelta);
-			
 			oopsButton.setY(y);
 			oopsButton.render(matrices, mouseX, mouseY, tickDelta);
 		}
@@ -114,7 +107,6 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			boolean canEditPresets = ((RTIMinecraftClient)client).getPresetsManager().canEditPresets();
 			
 			addButton.setActive(canEditPresets);
-			addFromSettingsButton.setActive(canEditPresets);
 			oopsButton.setActive(canEditPresets);
 		}
 	}
@@ -147,7 +139,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.children.add(this.applyButton);
 			
 			this.duplicateButton = new RTButtonWidget(0, 0, 60, 20, () -> new TranslatableText("Duplicate"), (button) -> {
-				((RTIMinecraftClient)screen.client).getPresetsManager().duplicatePreset(this.preset);
+				parent.editPreset(Presets.duplicatePreset(this.preset));
 			});
 			this.children.add(this.duplicateButton);
 			

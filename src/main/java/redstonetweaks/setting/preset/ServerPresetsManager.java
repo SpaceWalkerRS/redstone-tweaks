@@ -12,24 +12,40 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.changelisteners.IPresetChangeListener;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.packet.ServerPacketHandler;
-import redstonetweaks.packet.types.ApplyPresetPacket;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
 import redstonetweaks.packet.types.RemovePresetPacket;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 
-public class ServerPresetsManager {
+public class ServerPresetsManager implements IPresetChangeListener {
 	
 	private static final String CACHE_DIRECTORY = "redstonetweaks";
 	private static final String PRESETS_PATH = "presets";
 	
 	private final MinecraftServer server;
 	
+	private boolean deaf;
+	
 	public ServerPresetsManager(MinecraftServer server) {
 		this.server = server;
+	}
+	
+	@Override
+	public void presetChanged(PresetEditor editor) {
+		if (!deaf && server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new PresetPacket(editor));
+		}
+	}
+	
+	@Override
+	public void presetRemoved(Preset preset) {
+		if (!deaf && server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new RemovePresetPacket(preset));
+		}
 	}
 	
 	public void onStartUp() {
@@ -67,7 +83,7 @@ public class ServerPresetsManager {
 				preset = new Preset(name, name, "", Preset.Mode.SET, true);
 			}
 			
-			Presets.tryRegister(preset);
+			Presets.register(preset);
 			
 			if ((line = br.readLine()) == null) {
 				return;
@@ -117,7 +133,7 @@ public class ServerPresetsManager {
 		}
 		Presets.cleanUp();
 		
-		for (Preset preset : Presets.ALL) {
+		for (Preset preset : Presets.ALL.values()) {
 			if (preset.isEditable()) {
 				savePreset(preset);
 			}
@@ -189,58 +205,7 @@ public class ServerPresetsManager {
 	}
 	
 	private File getPresetFile(Preset preset) {
-		return new File(getPresetsFolder(), preset.getName() + ".txt");
-	}
-	
-	public void removePreset(Preset preset) {
-		Presets.remove(preset);
-		
-		RemovePresetPacket packet = new RemovePresetPacket(preset, RemovePresetPacket.REMOVE);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void unremovePreset(Preset preset) {
-		Presets.unremove(preset);
-		
-		RemovePresetPacket packet = new RemovePresetPacket(preset, RemovePresetPacket.PUT_BACK);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void duplicatePreset(Preset preset) {
-		String name;
-		int i = 0;
-		do {
-			i++;
-			name = preset.getName() + " (" + i + ")";
-		} while (!Presets.isNameValid(name));
-		
-		PresetEditor editor = new PresetEditor(name, preset.getDescription(), preset.getMode());
-		
-		for (ISetting setting : Settings.ALL.values()) {
-			if (setting.hasPreset(preset)) {
-				editor.addSetting(setting);
-				editor.copyPresetValue(setting, preset);
-			}
-		}
-		
-		if (editor.canSave()) {
-			editor.saveChanges();
-			
-			PresetPacket packet = new PresetPacket(editor);
-			((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
-		}
-	}
-	
-	public void applyPreset(Preset preset) {
-		preset.apply();
-		
-		ApplyPresetPacket packet = new ApplyPresetPacket(preset);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
-	}
-	
-	public void onPresetPacketReceived(PresetEditor editor) {
-		PresetPacket packet = new PresetPacket(editor);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+		return new File(getPresetsFolder(), String.format("%s.txt", preset.getName()));
 	}
 	
 	public void onPlayerJoined(ServerPlayerEntity player) {
@@ -249,7 +214,8 @@ public class ServerPresetsManager {
 	
 	private void updatePresetsOfPlayer(ServerPlayerEntity player) {
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
-		PresetsPacket packet = new PresetsPacket(Presets.ALL);
+		PresetsPacket packet = new PresetsPacket(Presets.ALL.values());
+		
 		if (player == null) {
 			packetHandler.sendPacket(packet);
 		} else {

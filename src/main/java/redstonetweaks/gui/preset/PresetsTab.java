@@ -22,7 +22,6 @@ import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
 import redstonetweaks.setting.preset.Presets;
-import redstonetweaks.setting.types.ISetting;
 
 public class PresetsTab extends RTMenuTab {
 	
@@ -114,7 +113,7 @@ public class PresetsTab extends RTMenuTab {
 			if (getPresetEditor().canSave()) {
 				savePreset();
 			} else {
-				if (!Presets.isNameValid(getPresetEditor().getName())) {
+				if (!Presets.isValidName(getPresetEditor().getName())) {
 					screen.openWindow(new InvalidNameWindow(this));
 				}
 			}
@@ -258,25 +257,15 @@ public class PresetsTab extends RTMenuTab {
 	}
 	
 	public void editPreset(Preset preset) {
-		presetEditor = new PresetEditor(preset);
-		
-		initEditorContent();
+		editPreset(Presets.editPreset(preset));
 	}
 	
-	public void newPreset() {
-		presetEditor = new PresetEditor("null", "", "", Preset.Mode.SET);
-		
-		initEditorContent();
+	public void newPreset(boolean fromSettings) {
+		editPreset(Presets.newPreset(fromSettings));
 	}
 	
-	public void newPresetFromSettings() {
-		presetEditor = new PresetEditor("null", "", "", Preset.Mode.SET);
-		
-		for (ISetting setting : Settings.ALL.values()) {
-			if (!setting.isDefault()) {
-				presetEditor.addSetting(setting, true);
-			}
-		}
+	public void editPreset(PresetEditor editor) {
+		presetEditor = editor;
 		
 		initEditorContent();
 	}
