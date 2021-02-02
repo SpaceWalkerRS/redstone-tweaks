@@ -406,7 +406,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	private boolean tryAttachPistonHead(BlockPos pos, BlockState state, BlockPos frontPos, BlockState frontState) {
 		if (loosePistonHeads.containsKey(pos)) {
-			System.out.println("position already attaches or detaches");
 			return false;
 		}
 		if (loosePistonHeads.containsKey(frontPos)) {
@@ -414,11 +413,9 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 				// If the piston is now pushed the head will not detach
 				loosePistonHeads.remove(frontPos);
 			}
-			System.out.println("front position already attaches or detaches");
 			return false;
 		}
 		if (!PistonHelper.isPiston(state, motionDirection) && !PistonHelper.isPiston(frontState, motionDirection.getOpposite())) {
-			System.out.println("cannot attach: no valid piston found");
 			return false;
 		}
 		
@@ -429,7 +426,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 					
 					return true;
 				}
-				System.out.println("cannot attach: no valid head found");
 			}
 		}
 		

@@ -89,7 +89,7 @@ public class Presets {
 	}
 	
 	public static PresetEditor duplicatePreset(Preset preset) {
-		PresetEditor editor = editPreset(create(String.format("[duplicate] %s", preset.getName()), preset.getDescription(), preset.getMode()));
+		PresetEditor editor = editPreset(create(String.format("%s - copy", preset.getName()), preset.getDescription(), preset.getMode()));
 		
 		for (ISetting setting : Settings.ALL.values()) {
 			if (setting.hasPreset(preset)) {

@@ -22,6 +22,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 	private String[] names;
 	private String[] descriptions;
 	private Preset.Mode[] modes;
+	private boolean[] removed;
 	
 	private int[] settingsCounts;
 	private ISetting[][] settings;
@@ -46,6 +47,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 		names = new String[presetsCount];
 		descriptions = new String[presetsCount];
 		modes = new Preset.Mode[presetsCount];
+		removed = new boolean[presetsCount];
 		
 		settingsCounts = new int[presetsCount];
 		settings = new ISetting[presetsCount][];
@@ -57,17 +59,18 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 				continue;
 			}
 			
+			ids[presetIndex] = preset.getId();
+			names[presetIndex] = preset.getName();
+			descriptions[presetIndex] = preset.getDescription();
+			modes[presetIndex] = preset.getMode();
+			removed[presetIndex] = !Presets.ACTIVE.containsValue(preset);
+					
 			List<ISetting> list = new ArrayList<>();
 			for (ISetting setting : Settings.ALL.values()) {
 				if (setting.hasPreset(preset)) {
 					list.add(setting);
 				}
 			}
-			
-			ids[presetIndex] = preset.getId();
-			names[presetIndex] = preset.getName();
-			descriptions[presetIndex] = preset.getDescription();
-			modes[presetIndex] = preset.getMode();
 			
 			int settingsCount = list.size();
 			
@@ -96,6 +99,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 			buffer.writeString(names[presetIndex]);
 			buffer.writeString(descriptions[presetIndex]);
 			buffer.writeShort(modes[presetIndex].getIndex());
+			buffer.writeBoolean(removed[presetIndex]);
 			
 			int settingsCount = settingsCounts[presetIndex];
 			buffer.writeInt(settingsCount);
@@ -115,6 +119,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 		names = new String[presetsCount];
 		descriptions = new String[presetsCount];
 		modes = new Preset.Mode[presetsCount];
+		removed = new boolean[presetsCount];
 		
 		settingsCounts = new int[presetsCount];
 		settings = new ISetting[presetsCount][];
@@ -125,6 +130,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 			names[presetIndex] = buffer.readString(MAX_STRING_LENGTH);
 			descriptions[presetIndex] = buffer.readString(MAX_STRING_LENGTH);
 			modes[presetIndex] = Preset.Mode.fromIndex(buffer.readShort());
+			removed[presetIndex] = buffer.readBoolean();
 			
 			int settingsCount = buffer.readInt();
 			
@@ -164,6 +170,10 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 				}
 				
 				editor.trySaveChanges();
+				
+				if (removed[presetIndex]) {
+					Presets.remove(editor.getPreset());
+				}
 			}
 		}
 	}

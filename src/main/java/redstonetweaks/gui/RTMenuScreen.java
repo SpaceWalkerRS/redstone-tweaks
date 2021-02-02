@@ -26,6 +26,7 @@ import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
+import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.setting.types.ISetting;
 
 public class RTMenuScreen extends Screen implements ISettingChangeListener, IPresetChangeListener {
@@ -50,6 +51,7 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener, IPre
 		this.tabButtons = new ArrayList<>();
 		
 		Settings.addChangeListener(this);
+		Presets.addChangeListener(this);
 	}
 	
 	@Override
@@ -107,6 +109,7 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener, IPre
 	@Override
 	public void onClose() {
 		Settings.removeChangeListener(this);
+		Presets.removeChangeListener(this);
 		
 		RTMenuTab selectedTab = getSelectedTab();
 		if (!selectedTab.closeTopWindow()) {
