@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -32,6 +33,7 @@ public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IP
 	private EditSettingsListWidget settingsList;
 	private RTTextFieldWidget searchBox;
 	private RTButtonWidget clearSearchBoxButton;
+	private RTButtonWidget viewModeButton;
 	private RTLockButtonWidget lockButton;
 	private RTButtonWidget resetButton;
 	
@@ -72,7 +74,15 @@ public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IP
 		});
 		addContent(lockButton);
 		
-		clearSearchBoxButton = new RTButtonWidget(lockButton.getX() - 27, y, 20, 20, () -> new TranslatableText("<"), (button) -> {
+		viewModeButton = new RTButtonWidget(lockButton.getX() - 82, y, 80, 20, () -> new TranslatableText(String.format("View: %s", settingsList.getMode())), (button) -> {
+			settingsList.updateMode(!Screen.hasShiftDown());
+			settingsList.filter(searchBox.getText());
+			
+			button.updateMessage();
+		});
+		addContent(viewModeButton);
+		
+		clearSearchBoxButton = new RTButtonWidget(viewModeButton.getX() - 25, y, 20, 20, () -> new TranslatableText("<"), (button) -> {
 			searchBox.setText("");
 		});
 		addContent(clearSearchBoxButton);
@@ -95,6 +105,7 @@ public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IP
 		settingsList.render(matrices, mouseX, mouseY, delta);
 		searchBox.render(matrices, mouseX, mouseY, delta);
 		clearSearchBoxButton.render(matrices, mouseX, mouseY, delta);
+		viewModeButton.render(matrices, mouseX, mouseY, delta);
 		lockButton.render(matrices, mouseX, mouseY, delta);
 		resetButton.render(matrices, mouseX, mouseY, delta);
 	}

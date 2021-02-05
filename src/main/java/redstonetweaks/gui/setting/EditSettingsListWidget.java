@@ -2,7 +2,10 @@ package redstonetweaks.gui.setting;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -40,12 +43,31 @@ import redstonetweaks.util.TextFormatting;
 
 public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.Entry> {
 	
+	private static final Map<SettingsCategory, EditSettingsListWidget.ViewMode> LAST_VIEW_MODES = new HashMap<>();
+	
 	private final SettingsCategory category;
+	private final Predicate<ISetting> modePredicate;
+	
+	private ViewMode mode;
 	
 	public EditSettingsListWidget(RTMenuScreen screen, SettingsCategory category, int x, int y, int width, int height) {
 		super(screen, x, y, width, height, 22, category.getName());
 		
 		this.category = category;
+		this.modePredicate = (setting) -> {
+			if (mode == ViewMode.ALL) {
+				return true;
+			}
+			if (mode == ViewMode.DEFAULT && setting.isDefault()) {
+				return true;
+			}
+			if (mode == ViewMode.CHANGED && !setting.isDefault()) {
+				return true;
+			}
+			
+			return false;
+		};
+		this.mode = LAST_VIEW_MODES.getOrDefault(category, ViewMode.ALL);
 	}
 	
 	@Override
@@ -76,7 +98,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			List<Entry> settingEntries = new ArrayList<>();
 			
 			for (ISetting setting : pack.getSettings()) {
-				if (packMatchesQuery || setting.getName().toLowerCase().contains(query)) {
+				if (modePredicate.test(setting) && (packMatchesQuery || setting.getName().toLowerCase().contains(query))) {
 					settingEntries.add(new SettingEntry(setting));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
@@ -110,6 +132,26 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 				}
 			}
 		}
+	}
+	
+	public ViewMode getMode() {
+		return mode;
+	}
+	
+	public void updateMode(boolean next) {
+		setMode(next ? mode.next() : mode.previous());
+	}
+	
+	public void setMode(ViewMode mode) {
+		this.mode = mode;
+		
+		LAST_VIEW_MODES.put(category, mode);
+		
+		init();
+	}
+	
+	public static void resetLastModes() {
+		LAST_VIEW_MODES.clear();
 	}
 	
 	public class SettingsPackEntry extends Entry {
@@ -418,5 +460,47 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	
 	public static abstract class Entry extends RTListWidget.Entry<EditSettingsListWidget.Entry> {
 		
+	}
+	
+	public enum ViewMode {
+		
+		ALL(0),
+		DEFAULT(1),
+		CHANGED(2);
+		
+		private static final ViewMode[] MODES;
+		
+		static {
+			MODES = new ViewMode[values().length];
+			
+			for (ViewMode mode : values()) {
+				MODES[mode.index] = mode;
+			}
+		}
+		
+		private final int index;
+		
+		private ViewMode(int index) {
+			this.index = index;
+		}
+		
+		public static ViewMode fromIndex(int index) {
+			if (index < 0) {
+				return MODES[MODES.length - 1];
+			}
+			if (index >= MODES.length) {
+				return MODES[0];
+			}
+			
+			return MODES[index];
+		}
+		
+		public ViewMode next() {
+			return fromIndex(index + 1);
+		}
+		
+		public ViewMode previous() {
+			return fromIndex(index - 1);
+		}
 	}
 }
