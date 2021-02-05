@@ -10,8 +10,6 @@ public interface RTIServerWorld  {
 	
 	public void tickTimeAccess();
 	
-	public boolean hasBlockEvent(BlockPos pos);
-	
 	public boolean hasBlockEvent(BlockPos pos, int... types);
 	
 	public ServerNeighborUpdateScheduler getNeighborUpdateScheduler();

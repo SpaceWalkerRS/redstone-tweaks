@@ -24,7 +24,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
-import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
 import redstonetweaks.interfaces.mixin.RTIWorld;
@@ -49,7 +48,7 @@ public class BlockEventHandler {
 	private List<BlockPos> brokenPositions;
 	private Map<BlockPos, SlabType> splitSlabTypes;
 	private Map<BlockPos, SlabType> mergedSlabTypes;
-	private Map<BlockPos, Boolean> detachedPistonHeads;
+	private Map<BlockPos, Boolean> loosePistonHeads;
 	private BlockState[] movedStates;
 	private Map<BlockPos, BlockState> movedStatesMap;
 	private Map<BlockPos, BlockState> newStatesMap;
@@ -74,7 +73,7 @@ public class BlockEventHandler {
 		this.extend = (type == MotionType.EXTEND || type == MotionType.EXTEND_BACKWARDS);
 		this.data = data;
 		this.facing = state.get(Properties.FACING);
-		this.moveDirection = (type == MotionType.EXTEND) ? facing : facing.getOpposite();
+		this.moveDirection = (type == MotionType.EXTEND || type == MotionType.RETRACT_FORWARDS) ? facing : facing.getOpposite();
 		this.headPos = pos.offset(facing);
 		this.sticky = sticky;
 	}
@@ -90,7 +89,7 @@ public class BlockEventHandler {
 			boolean shouldExtend =  lazy ? extend : PistonHelper.isReceivingPower(world, pos, state, facing, true);
 			
 			if (shouldExtend && !extend) {
-				int flags = Tweaks.Global.DOUBLE_RETRACTION.get() ? 18 : 2;
+				int flags = PistonHelper.doDoubleRetraction(sticky) ? 18 : 2;
 				world.setBlockState(pos, state.with(Properties.EXTENDED, true), flags);
 				
 				return false;
@@ -127,7 +126,7 @@ public class BlockEventHandler {
 					BlockPos blockPos = headPos.offset(facing);
 					BlockState blockState = world.getBlockState(blockPos);
 					
-					if (!blockState.isAir() && PistonHelper.canPull(blockState) && !(PistonBlock.isMovable(blockState, world, blockPos, moveDirection, false, facing) && new PistonHandler(world, pos, facing, false).calculatePush())) {
+					if (!blockState.isAir() && PistonHelper.canPull(blockState) && !(PistonBlock.isMovable(blockState, world, blockPos, facing.getOpposite(), false, facing) && new PistonHandler(world, pos, facing, false).calculatePush())) {
 						canRetractForwards = true;
 					}
 				}
@@ -182,18 +181,19 @@ public class BlockEventHandler {
 				
 				return true;
 			case 1:
-				BlockPos frontPos = pos.offset(moveDirection);
+				BlockPos behindPos = pos.offset(moveDirection);
 				
 				BlockState pistonExtension = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT);
-				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(true, moveDirection, sticky, true, true, state.with(Properties.EXTENDED, true));
+				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(true, facing, sticky, true, true, state.with(Properties.EXTENDED, true));
 				
-				((RTIWorld)world).queueBlockEntityPlacement(frontPos, pistonBlockEntity);
-				world.setBlockState(frontPos, pistonExtension, 20);
+				((RTIWorld)world).queueBlockEntityPlacement(behindPos, pistonBlockEntity);
+				world.setBlockState(behindPos, pistonExtension, 20);
 				
-				world.updateNeighbors(frontPos, pistonExtension.getBlock());
-				pistonExtension.updateNeighbors(world, frontPos, 2);
+				world.updateNeighbors(behindPos, pistonExtension.getBlock());
+				pistonExtension.updateNeighbors(world, behindPos, 2);
 				
 				world.playSound(null, pos, SoundEvents.BLOCK_PISTON_EXTEND, SoundCategory.BLOCKS, 0.5F, PistonHelper.getSoundPitch(world, true, sticky));
+				
 				return false;
 			default:
 				return false;
@@ -202,19 +202,19 @@ public class BlockEventHandler {
 			switch (progress) {
 			case 0:
 				BlockState pistonExtension = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT);
-				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(false, facing, sticky, true, false, state.getBlock().getDefaultState().with(Properties.FACING, Direction.byId(data & 7)));
+				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(false, facing, sticky, true, false, PistonHelper.getPiston(sticky, Direction.byId(data & 7), false));
 				
+				((RTIWorld)world).queueBlockEntityPlacement(pos, pistonBlockEntity);
 				world.setBlockState(pos, pistonExtension, 20);
-				world.setBlockEntity(pos, pistonBlockEntity);
 				
 				world.updateNeighbors(pos, pistonExtension.getBlock());
 				pistonExtension.updateNeighbors(world, pos, 2);
 				
-				if (redstonetweaks.setting.Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient()) {
+				if (!world.isClient()) {
 					BlockPos frontPos = headPos.offset(facing);
 					BlockState frontState = world.getBlockState(frontPos);
 					
-					if (PistonHelper.isPiston(frontState) && frontState.get(Properties.EXTENDED)) {
+					if (PistonHelper.isPiston(frontState) && frontState.get(Properties.EXTENDED) && PistonHelper.doDoubleRetraction(PistonHelper.isSticky(frontState))) {
 						world.updateNeighbor(frontPos, frontState.getBlock(), frontPos);
 					}
 				}
@@ -222,6 +222,7 @@ public class BlockEventHandler {
 				world.playSound(null, pos, SoundEvents.BLOCK_PISTON_CONTRACT, SoundCategory.BLOCKS, 0.5F, PistonHelper.getSoundPitch(world, extend, sticky));
 				
 				progress++;
+				
 				return true;
 			case 1:
 				if (sticky) {
@@ -240,7 +241,11 @@ public class BlockEventHandler {
 								BlockEntity blockEntity = world.getBlockEntity(frontPos);
 								
 								if (blockEntity instanceof PistonBlockEntity) {
-									droppedBlocks.add(frontPos);
+									PistonBlockEntity pistonBlockEntity2 = (PistonBlockEntity)blockEntity;
+									
+									if (pistonBlockEntity2.getFacing() == facing && pistonBlockEntity2.isExtending()) {
+										droppedBlocks.add(frontPos);
+									}
 								}
 							}
 						}
@@ -296,11 +301,15 @@ public class BlockEventHandler {
 					} else {
 						world.removeBlock(headPos, false);
 					}
+				} else {
+					// A fix for head duping when movableWhenExtended is enabled
+					world.removeBlock(headPos, false);
 				}
 				
 				return false;
 			case 4:
 				progress++;
+				
 				return startMove();
 			case 5:
 				return tryContinueMove();
@@ -319,6 +328,7 @@ public class BlockEventHandler {
 				air.updateNeighbors(world, pos, 2);
 				
 				progress++;
+				
 				return true;
 			case 1:
 				BlockState pistonExtension = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT);
@@ -346,7 +356,7 @@ public class BlockEventHandler {
 		} else {
 			movedPositions = pistonHandler.getMovedBlocks();
 			brokenPositions = pistonHandler.getBrokenBlocks();
-			detachedPistonHeads = ((RTIPistonHandler)pistonHandler).getLoosePistonHeads();
+			loosePistonHeads = ((RTIPistonHandler)pistonHandler).getLoosePistonHeads();
 			splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
 			mergedSlabTypes = ((RTIPistonHandler)pistonHandler).getMergedSlabTypes();
 			
@@ -361,14 +371,24 @@ public class BlockEventHandler {
 			
 			for (index  = 0; index < movedCount; index++) {
 				BlockPos fromPos = movedPositions.get(index);
+				BlockPos toPos = fromPos.offset(moveDirection);
 				BlockState movedState = world.getBlockState(fromPos);
 				BlockEntity movedBlockEntity = PistonHelper.getBlockEntityToMove(world, fromPos);
 				
-				if (detachedPistonHeads.containsKey(fromPos)) {
+				if (!PistonHelper.prepareDoubleRetraction(world, fromPos, movedState)) {
+					MovedBlock movedBlock;
 					
-				}
-				if (splitSlabTypes.containsKey(fromPos)) {
-					MovedBlock movedBlock = PistonHelper.trySplitDoubleSlab(world, fromPos, movedState, movedBlockEntity, splitSlabTypes.get(fromPos));
+					if (loosePistonHeads.get(fromPos) == Boolean.TRUE) {
+						movedBlock = PistonHelper.detachPistonHead(world, fromPos, movedState, movedBlockEntity, moveDirection);
+					} else
+					if (loosePistonHeads.get(toPos) == Boolean.FALSE) {
+						movedBlock = PistonHelper.attachPistonHead(world, fromPos, movedState, movedBlockEntity, moveDirection);
+					} else
+					if (splitSlabTypes.containsKey(fromPos)) {
+						movedBlock = PistonHelper.splitDoubleSlab(world, fromPos, movedState, movedBlockEntity, splitSlabTypes.get(fromPos));
+					} else {
+						movedBlock = new MovedBlock(movedState, movedBlockEntity);
+					}
 					
 					movedState = movedBlock.getBlockState();
 					movedBlockEntity = movedBlock.getBlockEntity();
@@ -378,7 +398,6 @@ public class BlockEventHandler {
 				movedStatesMap.put(fromPos, movedState);
 				movedBlockEntities[index] = movedBlockEntity;
 			}
-			
 
 			removedIndex = 0;
 
@@ -416,24 +435,18 @@ public class BlockEventHandler {
 				BlockEntity movedBlockEntity = movedBlockEntities[index];
 				BlockState mergingState = null;
 				BlockEntity mergingBlockEntity = null;
-				boolean detachedPistonHead = detachedPistonHeads.containsKey(fromPos);
 				
-				if (mergedSlabTypes.containsKey(toPos)) {
+				if (mergedSlabTypes.containsKey(toPos) || loosePistonHeads.get(toPos) == Boolean.FALSE) {
 					mergingState = removedState;
 					mergingBlockEntity = PistonHelper.getBlockEntityToMove(world, toPos);
 				}
 				
-				if (detachedPistonHead) {
-					((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(extend, moveDirection, sticky, true, !detachedPistonHeads.get(fromPos), movedState));
-				} else {
-					if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
-						// This ensures the block entity gets placed
-						world.setBlockState(toPos, Blocks.AIR.getDefaultState(), 80);
-					}
-					
-					((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(extend, facing, sticky, false, false, movedState, movedBlockEntity, mergingState, mergingBlockEntity));
+				if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
+					// This ensures the block entity gets placed
+					world.setBlockState(toPos, Blocks.AIR.getDefaultState(), 80);
 				}
 				
+				((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(extend, facing, sticky, false, false, movedState, movedBlockEntity, mergingState, mergingBlockEntity));
 				world.setBlockState(toPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing), 68);
 				
 				movedStatesMap.remove(toPos);
@@ -450,15 +463,18 @@ public class BlockEventHandler {
 			if (type == MotionType.EXTEND) {
 				PistonType pistonType = sticky ? PistonType.STICKY : PistonType.DEFAULT;
 				BlockState pistonHead = Blocks.PISTON_HEAD.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, pistonType);
-				BlockState movingPiston = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, pistonType);
 				
+				BlockState movingPiston = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, pistonType);
+				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(true, facing, sticky, true, true, pistonHead);
+				
+				((RTIWorld)world).queueBlockEntityPlacement(headPos, pistonBlockEntity);
 				world.setBlockState(headPos, movingPiston, 68);
-				world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(true, facing, sticky, true, true, pistonHead));
 				
 				movedStatesMap.remove(headPos);
 			}
 			
 			moveProgress++;
+			
 			break;
 		case 2:
 			if (!isIterating) {
@@ -467,29 +483,12 @@ public class BlockEventHandler {
 			}
 			if (movedPositionsIt.hasNext()) {
 				BlockPos remainingPos = movedPositionsIt.next();
-				BlockState newState = Blocks.AIR.getDefaultState();
 				
-				if (splitSlabTypes.containsKey(remainingPos)) {
-					BlockState movedState = movedStatesMap.get(remainingPos);
-					
-					if (SlabHelper.isSlab(movedState)) {
-						newState = movedState.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(splitSlabTypes.get(remainingPos)));
-					}
-				} else if (detachedPistonHeads.containsKey(remainingPos)) {
-					BlockState movedState = movedStatesMap.get(remainingPos);
-					
-					if (detachedPistonHeads.get(remainingPos)) {
-						if (PistonHelper.isPistonHead(movedState)) {
-							newState = (PistonHelper.isStickyHead(movedState) ? Blocks.STICKY_PISTON : Blocks.PISTON).getDefaultState().with(Properties.EXTENDED, true).with(Properties.FACING, movedState.get(Properties.FACING));
-						}
-					} else {
-						if (PistonHelper.isPiston(movedState)) {
-							newState = Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, PistonHelper.isSticky(movedState) ? PistonType.STICKY : PistonType.DEFAULT).with(Properties.FACING, movedState.get(Properties.FACING));
-						}
-					}
+				BlockState newState = (splitSlabTypes.containsKey(remainingPos) || loosePistonHeads.containsKey(remainingPos)) ? world.getBlockState(remainingPos) : Blocks.AIR.getDefaultState();
+				
+				if (!newState.isAir()) {
+					world.setBlockState(remainingPos, newState, 82);
 				}
-				
-				world.setBlockState(remainingPos, newState, 82);
 				
 				newStatesMap.put(remainingPos, newState);
 			} else {

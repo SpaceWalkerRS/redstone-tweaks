@@ -49,7 +49,6 @@ public abstract class PistonBlockEntityRendererMixin {
 		BlockPos fromPos = toPos.offset(dir);
 		
 		if (pistonBlockEntity.isSource()) {
-			
 			boolean isExtending = pistonBlockEntity.isExtending();
 			boolean sourceIsMoving = ((RTIPistonBlockEntity)pistonBlockEntity).sourceIsMoving();
 			
@@ -75,7 +74,7 @@ public abstract class PistonBlockEntityRendererMixin {
 			}
 			
 			if (renderHead) {
-				PistonType pistonType = PistonHelper.isPistonHead(movedState) ? movedState.get(Properties.PISTON_TYPE) : (PistonHelper.isPiston(movedState, true) ? PistonType.STICKY : PistonType.DEFAULT);
+				PistonType pistonType = PistonHelper.isPistonHead(movedState) ? movedState.get(Properties.PISTON_TYPE) : (PistonHelper.isSticky(movedState) ? PistonType.STICKY : PistonType.DEFAULT);
 				Direction facing = movedState.get(Properties.FACING);
 				boolean shortArm = isExtending ? pistonBlockEntity.getProgress(tickDelta) <= 0.5F : pistonBlockEntity.getProgress(tickDelta) >= 0.5F;
 				
@@ -92,6 +91,12 @@ public abstract class PistonBlockEntityRendererMixin {
 				method_3575(toPos, movedState.with(Properties.EXTENDED, true), matrixStack, vertexConsumerProvider, world, false, overlay);
 			}
 		} else {
+			if (PistonHelper.isPistonHead(movedState) && ((RTIPistonBlockEntity)pistonBlockEntity).isMerging()) {
+				if (pistonBlockEntity.getProgress(tickDelta) >= 0.5F) {
+					movedState = movedState.with(Properties.SHORT, true);
+				}
+			}
+			
 			method_3575(fromPos, movedState, matrixStack, vertexConsumerProvider, world, false, overlay);
 			
 			if (movedBlockEntity != null) {
@@ -105,6 +110,10 @@ public abstract class PistonBlockEntityRendererMixin {
 			BlockEntity mergingBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMergingBlockEntity();
 			
 			if (mergingState != null) {
+				if (PistonHelper.isPistonHead(mergingState) && pistonBlockEntity.getProgress(tickDelta) >= 0.5F) {
+					mergingState = mergingState.with(Properties.SHORT, true);
+				}
+				
 				method_3575(toPos, mergingState, matrixStack, vertexConsumerProvider, world, false, overlay);
 			}
 			if (mergingBlockEntity != null) {

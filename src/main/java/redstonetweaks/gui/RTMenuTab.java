@@ -1,12 +1,12 @@
 package redstonetweaks.gui;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 
 public abstract class RTMenuTab extends RTAbstractParentElement {
@@ -16,7 +16,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	public final RTMenuScreen screen;
 	private final Text title;
 	private final List<RTElement> contents;
-	protected final List<RTWindow> windows;
+	private final List<RTWindow> windows;
 	private final List<RTWindow> closedWindows;
 	
 	public RTMenuTab(RTMenuScreen screen, Text title) {
@@ -100,11 +100,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	protected abstract void tickContents();
 
 	private void tickWindows() {
-		Iterator<RTWindow> windows = this.windows.iterator();
-		
-		while (windows.hasNext()) {
-			windows.next().tick();
-		}
+		windows.forEach((window) -> window.tick());
 	}
 	
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -134,8 +130,10 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	public boolean closeTopWindow() {
 		if (hasWindowOpen()) {
 			closeWindow(windows.get(0));
+			
 			return true;
 		}
+		
 		return false;
 	}
 	

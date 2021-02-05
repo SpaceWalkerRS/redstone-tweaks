@@ -119,7 +119,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@ModifyArg(method = "onSyncedBlockEvent", index = 2, at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private int onOnSyncedBlockEventOnSetBlockState0ModifyFlags(int oldFlags) {
-		return Tweaks.Global.DOUBLE_RETRACTION.get() ? oldFlags | 16 : oldFlags;
+		return PistonHelper.doDoubleRetraction(sticky) ? oldFlags | 16 : oldFlags;
 	}
 	
 	@Inject(method = "onSyncedBlockEvent", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "RETURN", ordinal = 2, shift = Shift.BEFORE))
@@ -242,7 +242,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				world.setBlockState(pos, pistonHead, 67);
 				
 				BlockState pistonExtension = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, pistonType);
-				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(true, motionDir, sticky, true, true, state.with(Properties.EXTENDED, true));
+				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(true, facing, sticky, true, true, state.with(Properties.EXTENDED, true));
 				
 				BlockPos toPos = pos.offset(motionDir);
 				
@@ -403,23 +403,24 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		Direction motionDir = extend ? pistonDir : pistonDir.getOpposite();
 		BlockPos toPos = fromPos.offset(motionDir);
 		
-		MovedBlock movedBlock = new MovedBlock(movedState, movedBlockEntity);
-		
-		if (PistonHelper.prepareDoubleRetraction(world, fromPos, movedState)) {
+		if (!PistonHelper.prepareDoubleRetraction(world, fromPos, movedState)) {
+			MovedBlock movedBlock;
 			
-		} else
-		if (loosePistonHeads.get(fromPos) == Boolean.TRUE) {
-			movedBlock = PistonHelper.detachPistonHead(world, fromPos, movedState, movedBlockEntity, motionDir);
-		} else
-		if (loosePistonHeads.get(toPos) == Boolean.FALSE) {
-			movedBlock = PistonHelper.attachPistonHead(world, fromPos, movedState, movedBlockEntity, motionDir);
-		} else
-		if (splitSlabTypes.containsKey(fromPos)) {
-			movedBlock = PistonHelper.trySplitDoubleSlab(world, fromPos, movedState, movedBlockEntity, splitSlabTypes.get(fromPos));
+			if (loosePistonHeads.get(fromPos) == Boolean.TRUE) {
+				movedBlock = PistonHelper.detachPistonHead(world, fromPos, movedState, movedBlockEntity, motionDir);
+			} else
+			if (loosePistonHeads.get(toPos) == Boolean.FALSE) {
+				movedBlock = PistonHelper.attachPistonHead(world, fromPos, movedState, movedBlockEntity, motionDir);
+			} else
+			if (splitSlabTypes.containsKey(fromPos)) {
+				movedBlock = PistonHelper.splitDoubleSlab(world, fromPos, movedState, movedBlockEntity, splitSlabTypes.get(fromPos));
+			} else {
+				movedBlock = new MovedBlock(movedState, movedBlockEntity);
+			}
+			
+			movedState = movedBlock.getBlockState();
+			movedBlockEntity = movedBlock.getBlockEntity();
 		}
-		
-		movedState = movedBlock.getBlockState();
-		movedBlockEntity = movedBlock.getBlockEntity();
 		
 		movedStates.add(movedState);
 		movedStatesMap.put(fromPos, movedState);
@@ -447,14 +448,14 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	{
 		List<BlockEntity> movedBlockEntities = ((RTIPistonHandler)pistonHandler).getMovedBlockEntities();
 		Map<BlockPos, SlabType> mergedSlabTypes = ((RTIPistonHandler)pistonHandler).getMergedSlabTypes();
-		Map<BlockPos, Boolean> detachedPistonHeads = ((RTIPistonHandler)pistonHandler).getLoosePistonHeads();
+		Map<BlockPos, Boolean> loosePistonHeads = ((RTIPistonHandler)pistonHandler).getLoosePistonHeads();
 		
 		BlockState movedState = movedStates.get(movedIndex);
 		BlockEntity movedBlockEntity = movedBlockEntities.get(movedIndex);
 		BlockState mergingState = null;
 		BlockEntity mergingBlockEntity = null;
 		
-		if (mergedSlabTypes.containsKey(toPos) || (detachedPistonHeads.get(toPos) == Boolean.FALSE)) {
+		if (mergedSlabTypes.containsKey(toPos) || (loosePistonHeads.get(toPos) == Boolean.FALSE)) {
 			mergingState = world.getBlockState(toPos);
 			mergingBlockEntity = PistonHelper.getBlockEntityToMove(world, toPos);
 		}
@@ -472,13 +473,13 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		// Replaced by the inject above
 	}
 	
-	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 1, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))
-	private void onMoveInjectBeforeSetBlockEntity1(World world, BlockPos pistonPos, Direction pistonDir, boolean extend, CallbackInfoReturnable<Boolean> cir,
+	@Inject(method = "move", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, ordinal = 3, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private void onMoveInjectBeforeSetBlockState3(World world, BlockPos pistonPos, Direction pistonDir, boolean extend, CallbackInfoReturnable<Boolean> cir,
 			BlockPos headPos, PistonHandler pistonHandler, Map<BlockPos, BlockState> movedStatesMap,
 			List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> brokenPositions,
 			BlockState[] affectedStates, PistonType headType, BlockState pistonHead) 
 	{
-		world.setBlockEntity(headPos, PistonHelper.createPistonBlockEntity(true, pistonDir, sticky, true, false, pistonHead));
+		((RTIWorld)world).queueBlockEntityPlacement(headPos, PistonHelper.createPistonBlockEntity(true, pistonDir, sticky, true, false, pistonHead));
 	}
 	
 	@Redirect(method = "move", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/World;setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;)V"))
@@ -494,10 +495,10 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		Map<BlockPos, BlockState> newStates = new HashMap<>();
 		
 		Map<BlockPos, SlabType> splitSlabTypes = ((RTIPistonHandler)pistonHandler).getSplitSlabTypes();
-		Map<BlockPos, Boolean> detachedPistonHeads = ((RTIPistonHandler)pistonHandler).getLoosePistonHeads();
+		Map<BlockPos, Boolean> loosePistonHeads = ((RTIPistonHandler)pistonHandler).getLoosePistonHeads();
 		
 		for (BlockPos remainingPos : movedStatesMap.keySet()) {
-			BlockState newState = splitSlabTypes.containsKey(remainingPos) || detachedPistonHeads.containsKey(remainingPos) ? world.getBlockState(remainingPos) : Blocks.AIR.getDefaultState();
+			BlockState newState = (splitSlabTypes.containsKey(remainingPos) || loosePistonHeads.containsKey(remainingPos)) ? world.getBlockState(remainingPos) : Blocks.AIR.getDefaultState();
 			
 			if (newState.isAir()) {
 				world.setBlockState(remainingPos, newState, 82);

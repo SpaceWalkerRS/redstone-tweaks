@@ -6,13 +6,13 @@ import java.util.Map;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
+
 import redstonetweaks.changelisteners.IPermissionChangeListener;
 import redstonetweaks.changelisteners.ISettingChangeListener;
 import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.ConfirmWindow;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTMenuTab;
-import redstonetweaks.gui.RTWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTLockButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
@@ -123,9 +123,8 @@ public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IP
 		updateButtonsActive();
 		
 		settingsList.onSettingChanged(setting);
-		for (RTWindow window : windows) {
-			window.refresh();
-		}
+		
+		refreshWindows();
 	}
 	
 	public void updateButtonsActive() {

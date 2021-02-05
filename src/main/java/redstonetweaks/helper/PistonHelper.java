@@ -353,6 +353,10 @@ public class PistonHelper {
 	
 	// The block state that will be used to calculate the movement of a piston
 	public static BlockState getStateForMovement(World world, BlockPos pos) {
+		if (((RTIWorld)world).hasBlockEventHandler(pos)) {
+			return Blocks.BEDROCK.getDefaultState();
+		}
+		
 		BlockState state = world.getBlockState(pos);
 		
 		if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() && state.isOf(Blocks.MOVING_PISTON)) {
@@ -397,17 +401,15 @@ public class PistonHelper {
 	
 	// This fixes some cases of pistons disappearing on clients
 	public static void cancelDoubleRetraction(World world, BlockPos pos, BlockState state) {
-		if (!world.isClient() && isPiston(state) && !state.get(Properties.EXTENDED)) {
-			if (doDoubleRetraction(isSticky(state)) && ((RTIServerWorld)world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
-				world.setBlockState(pos, state.with(Properties.EXTENDED, true), 16);
-				
-				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
-				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
-			}
+		if (!world.isClient() && isPiston(state) && !state.get(Properties.EXTENDED) && doDoubleRetraction(isSticky(state))) {
+			world.setBlockState(pos, state.with(Properties.EXTENDED, true), 16);
+			
+			BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
+			((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
 		}
 	}
 	
-	public static MovedBlock trySplitDoubleSlab(World world, BlockPos pos, BlockState movedState, BlockEntity blockEntity, SlabType movedType) {
+	public static MovedBlock splitDoubleSlab(World world, BlockPos pos, BlockState movedState, BlockEntity blockEntity, SlabType movedType) {
 		if (SlabHelper.isSlab(movedState)) {
 			world.setBlockState(pos, movedState.with(Properties.SLAB_TYPE, SlabHelper.getOppositeType(movedType)), 82);
 			
@@ -430,10 +432,11 @@ public class PistonHelper {
 	public static MovedBlock detachPistonHead(World world, BlockPos pos, BlockState movedState, BlockEntity blockEntity, Direction motionDir) {
 		if (isPiston(movedState)) {
 			Direction facing = movedState.get(Properties.FACING);
+			boolean sticky = isSticky(movedState);
 			boolean moveHead = facing == motionDir;
 			
 			BlockState base = movedState.with(Properties.EXTENDED, true);
-			BlockState head = getPistonHead(isSticky(movedState), facing);
+			BlockState head = getPistonHead(sticky, facing).with(Properties.SHORT, moveHead);
 			
 			world.setBlockState(pos, moveHead ? base : head, 82);
 			
@@ -494,9 +497,13 @@ public class PistonHelper {
 		return false;
 	}
 	
-	// dir is the direction from pos towards adjacentPos
 	public static boolean isAdjacentBlockStuck(World world, BlockPos pos, BlockState state, BlockPos adjacentPos, BlockState adjacentState, Direction dir) {
-		if (adjacentState.isAir()) {
+		return isAdjacentBlockStuck(world, pos, state, adjacentPos, adjacentState, dir, true, null, null, null);
+	}
+	
+	// dir is the direction from pos towards adjacentPos
+	public static boolean isAdjacentBlockStuck(World world, BlockPos pos, BlockState state, BlockPos adjacentPos, BlockState adjacentState, Direction dir, boolean extend, Direction motionDir, BlockPos sourcePos, BlockPos headPos) {
+		if (adjacentPos.equals(sourcePos) || adjacentState.isAir()) {
 			return false;
 		}
 		if (SlabHelper.isSlab(adjacentState) && !PistonHelper.canSlabStickTo(adjacentState, dir.getOpposite()))
@@ -511,7 +518,7 @@ public class PistonHelper {
 		}
 		
 		if (Tweaks.StickyPiston.SUPER_STICKY.get()) {
-			if ((PistonHelper.isPiston(state, true, dir) && !state.get(Properties.EXTENDED) && (world.isClient() || !((RTIServerWorld) world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS))) || PistonHelper.isPistonHead(state, true, dir)) {
+			if ((PistonHelper.isPiston(state, true, dir) && !state.get(Properties.EXTENDED)) || PistonHelper.isPistonHead(state, true, dir)) {
 				return true;
 			}
 		}
@@ -528,7 +535,7 @@ public class PistonHelper {
 					return false;
 				}
 				
-				return isFullyAnchoredChain(world, pos, axis);
+				return isFullyAnchoredChain(world, pos, axis, extend, motionDir, sourcePos, headPos);
 			}
 		}
 		if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get() && (state.isOf(Blocks.CHEST) || state.isOf(Blocks.TRAPPED_CHEST))) {
@@ -541,11 +548,7 @@ public class PistonHelper {
 			if (adjacentState.isOf(state.getBlock()) && adjacentState.get(Properties.CHEST_TYPE) == chestType.getOpposite()) {
 				Direction facing = state.get(Properties.HORIZONTAL_FACING);
 				
-				if (chestType == ChestType.LEFT) {
-					return (dir == facing.rotateYClockwise());
-				}
-				
-				return (dir == facing.rotateYCounterclockwise());
+				return chestType == ChestType.LEFT ? dir == facing.rotateYClockwise() : dir == facing.rotateYCounterclockwise();
 			}
 		}
 		for (boolean sticky : new boolean[] { false, true }) {
@@ -565,7 +568,7 @@ public class PistonHelper {
 		return false;
 	}
 	
-	public static boolean isFullyAnchoredChain(World world, BlockPos pos, Direction.Axis axis) {
+	private static boolean isFullyAnchoredChain(World world, BlockPos pos, Direction.Axis axis, boolean extend, Direction motionDir, BlockPos sourcePos, BlockPos headPos) {
 		for (Direction.AxisDirection side : Direction.AxisDirection.values()) {
 			Direction dir = Direction.from(axis, side);
 			
@@ -582,7 +585,9 @@ public class PistonHelper {
 			}
 			
 			if (!Block.sideCoversSmallSquare(world, sidePos, dir.getOpposite())) {
-				return false;
+				if (extend || !sidePos.equals(headPos) || motionDir == null || axis != motionDir.getAxis()) {
+					return false;
+				}
 			}
 		}
 		

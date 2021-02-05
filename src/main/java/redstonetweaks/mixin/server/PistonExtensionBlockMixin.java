@@ -29,25 +29,25 @@ public class PistonExtensionBlockMixin extends Block {
 	
 	@Override
 	public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
-		Direction facing = state.get(Properties.FACING);
-		boolean sticky = data == 1;
-		boolean extend = type == MotionType.EXTEND || type == MotionType.EXTEND_BACKWARDS;
-		
-		if (!world.isClient()) {
-			boolean lazy = extend ? PistonSettings.lazyRisingEdge(sticky) : PistonSettings.lazyFallingEdge(sticky);
-			boolean shouldExtend = lazy ? extend : PistonHelper.isReceivingPower(world, pos, state, facing, true);
-			
-			if (extend != shouldExtend) {
-				return false;
-			}
-		}
-		
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		
 		if (blockEntity instanceof PistonBlockEntity) {
 			PistonBlockEntity pistonBlockEntity = (PistonBlockEntity)blockEntity;
 			
 			if (pistonBlockEntity.isSource()) {
+				Direction facing = state.get(Properties.FACING);
+				boolean sticky = ((RTIPistonBlockEntity)pistonBlockEntity).isSticky();
+				boolean extend = type == MotionType.EXTEND || type == MotionType.EXTEND_BACKWARDS;
+				
+				if (!world.isClient()) {
+					boolean lazy = extend ? PistonSettings.lazyRisingEdge(sticky) : PistonSettings.lazyFallingEdge(sticky);
+					boolean shouldExtend = lazy ? extend : PistonHelper.isReceivingPower(world, pos, state, facing, true);
+					
+					if (extend != shouldExtend) {
+						return false;
+					}
+				}
+				
 				((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
 				
 				if (extend) {
@@ -65,9 +65,10 @@ public class PistonExtensionBlockMixin extends Block {
 						} else {
 							BlockPos frontPos = pos.offset(facing);
 							BlockState frontState = world.getBlockState(frontPos);
-							
+							System.out.println("try drop " + frontState);
 							if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
 								blockEntity = world.getBlockEntity(frontPos);
+								System.out.println("try drop " + blockEntity);
 								
 								if (blockEntity instanceof PistonBlockEntity) {
 									((RTIPistonBlockEntity)blockEntity).finishSource();

@@ -2,10 +2,8 @@ package redstonetweaks.mixin.server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,13 +31,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.SlabHelper;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
-import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(PistonHandler.class)
@@ -56,7 +52,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 
 	private boolean sticky = false;
 	private BlockPos headPos;
-	private Set<BlockPos> anchoredChains;
 	// A map of positions where 'looseHead' behavior occurs, mapped to a boolean
 	// which is true if the piston head detaches, false if it re-attaches
 	private Map<BlockPos, Boolean> loosePistonHeads;
@@ -73,7 +68,6 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	private void onInitInjectAtReturn(World world, BlockPos pos, Direction pistonDir, boolean extending, CallbackInfo ci) {
 		headPos = posFrom.offset(pistonDir);
 		
-		anchoredChains = new HashSet<>();
 		mergedSlabTypes = new HashMap<>();
 		splitSlabTypes = new HashMap<>();
 		loosePistonHeads = new HashMap<>();
@@ -134,7 +128,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		
 		if (alreadyMoved) {
 			if (loosePistonHeads.containsKey(pos)) {
-				// If the piston is now pulled along from a different side no looseHead behavior can occur
+				// If the piston is now pulled along from two different sides no looseHead behavior can occur
 				loosePistonHeads.remove(pos);
 			}
 		} else if (pulledFrom == motionDirection && (!retracted || !pos.equals(posTo))) {
@@ -312,67 +306,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	// dir is the direction from pos towards adjacentPos
 	private boolean isAdjacentBlockStuck(BlockPos pos, BlockState state, BlockPos adjacentPos, BlockState adjacentState, Direction dir) {
-		if (Tweaks.Global.CHAINSTONE.get() && state.isOf(Blocks.CHAIN)) {
-			Direction.Axis axis = state.get(Properties.AXIS);
-			
-			if (axis == dir.getAxis()) {
-				// Identify situations where the adjacent block is definitely not pulled along
-				if (adjacentState.isOf(Blocks.CHAIN)) {
-					if (adjacentState.get(Properties.AXIS) != axis) {
-						return false;
-					}
-				} else if (!Block.sideCoversSmallSquare(world, adjacentPos, dir.getOpposite())) {
-					return false;
-				}
-				
-				return isFullyAnchoredChain(world, pos, axis);
-			}
-		}
-		
-		return PistonHelper.isAdjacentBlockStuck(world, pos, state, adjacentPos, adjacentState, dir);
-	}
-
-	private boolean isFullyAnchoredChain(World world, BlockPos pos, Direction.Axis axis) {
-		if (anchoredChains.contains(pos)) {
-			return true;
-		}
-		
-		List<BlockPos> currentChain = new ArrayList<>();
-		
-		for (Direction.AxisDirection side : Direction.AxisDirection.values()) {
-			Direction dir = Direction.from(axis, side);
-			
-			BlockPos sidePos = pos.offset(dir);
-			BlockState sideState = PistonHelper.getStateForMovement(world, sidePos);
-			
-			while(sideState.isOf(Blocks.CHAIN)) {
-				if (sideState.get(Properties.AXIS) != axis) {
-					return false;
-				}
-				
-				currentChain.add(sidePos);
-				
-				sidePos = sidePos.offset(dir);
-				sideState = PistonHelper.getStateForMovement(world, sidePos);
-			}
-			
-			// A chain cannot be anchored to the source piston
-			if (sidePos.equals(posFrom)) {
-				return false;
-			}
-			// Before retracting, the piston head is replaced by air, but chains should still connect to it
-			if (!retracted && sidePos.equals(headPos)) {
-				return axis == motionDirection.getAxis();
-			}
-			
-			if (!Block.sideCoversSmallSquare(world, sidePos, dir.getOpposite()) || !PistonBlock.isMovable(sideState, world, sidePos, motionDirection, false, pistonDirection)) {
-				return false;
-			}
-		}
-		
-		anchoredChains.addAll(currentChain);
-		
-		return true;
+		return PistonHelper.isAdjacentBlockStuck(world, pos, state, adjacentPos, adjacentState, dir, retracted, motionDirection, posFrom, headPos);
 	}
 	
 	@Override
@@ -392,14 +326,10 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	private void tryDetachPistonHead(BlockPos pos, BlockState state) {
 		if (PistonHelper.isPiston(state) && !state.get(Properties.EXTENDED) && PistonSettings.looseHead(PistonHelper.isSticky(state))) {
-			// With double retraction a depowered piston turns into a retracted piston before retracting
-			// The piston head should not detach in this scenario
-			if (world.isClient() || !Tweaks.Global.DOUBLE_RETRACTION.get() || !((RTIServerWorld)world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
-				Direction facing = state.get(Properties.FACING);
-				
-				if (facing.getAxis() == motionDirection.getAxis()) {
-					loosePistonHeads.put(pos, true);
-				}
+			Direction facing = state.get(Properties.FACING);
+			
+			if (facing.getAxis() == motionDirection.getAxis()) {
+				loosePistonHeads.put(pos, true);
 			}
 		}
 	}

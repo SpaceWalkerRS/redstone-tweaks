@@ -498,6 +498,7 @@ public class Tweaks {
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(REPEATER, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting LAZY_RISING_EDGE = new BooleanSetting(REPEATER, "lazyRisingEdge", Settings.Common.DESC_LAZY_RISING_EDGE);
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(REPEATER, "lazyFallingEdge", Settings.Common.DESC_LAZY_FALLING_EDGE);
+		public static final BooleanSetting MICRO_TICK_MODE = new BooleanSetting(REPEATER, "microTickMode", "When enabled, repeaters schedule block events instead of scheduled ticks.");
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting(REPEATER, "weakPower", Settings.Common.DESC_POWER_WEAK, 0, Settings.Common.MAX_POWER);
 		public static final IntegerSetting POWER_STRONG = new IntegerSetting(REPEATER, "strongPower", Settings.Common.DESC_POWER_STRONG, 0, Settings.Common.MAX_POWER);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(REPEATER, "tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE);
@@ -997,6 +998,7 @@ public class Tweaks {
 		Settings.register(Repeater.DELAY_FALLING_EDGE);
 		Settings.register(Repeater.LAZY_RISING_EDGE);
 		Settings.register(Repeater.LAZY_FALLING_EDGE);
+		Settings.register(Repeater.MICRO_TICK_MODE);
 		Settings.register(Repeater.POWER_WEAK);
 		Settings.register(Repeater.POWER_STRONG);
 		Settings.register(Repeater.TICK_PRIORITY_RISING_EDGE);

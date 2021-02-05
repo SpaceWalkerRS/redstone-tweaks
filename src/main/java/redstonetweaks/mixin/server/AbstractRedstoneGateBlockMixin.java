@@ -24,6 +24,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
+import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 
@@ -75,6 +76,15 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 		return state.get(Properties.POWERED) && state.get(Properties.HORIZONTAL_FACING) == direction ? Tweaks.Repeater.POWER_STRONG.get() : 0;
 	}
 	
+	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;isTicking(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;)Z"))
+	private <T> boolean onUpdatePoweredRedirectIsTicking(TickScheduler<T> scheduler, BlockPos pos, T block, World world, BlockPos blockPos, BlockState state) {
+		if (Tweaks.Repeater.MICRO_TICK_MODE.get()) {
+			return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(blockPos);
+		}
+		
+		return scheduler.isTicking(pos, block);
+	}
+	
 	@Inject(method = "updatePowered", cancellable =  true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
 	private void updatePoweredInjectBeforePriorityHigh(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
 		if (getUpdateDelayInternal(state) == 0) {
@@ -103,6 +113,17 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;VERY_HIGH:Lnet/minecraft/world/TickPriority;"))
 	private TickPriority updatePoweredRedirectPriorityVeryHigh() {
 		return Tweaks.Repeater.TICK_PRIORITY_FALLING_EDGE.get();
+	}
+	
+	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;ILnet/minecraft/world/TickPriority;)V"))
+	private <T> void onUpdatePoweredRedirectSchedule(TickScheduler<T> scheduler, BlockPos pos, T block, int delay, TickPriority priority, World world, BlockPos blockPos, BlockState state) {
+		if (Tweaks.Repeater.MICRO_TICK_MODE.get()) {
+			if (!world.isClient()) {
+				((ServerWorld)world).addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
+			}
+		} else {
+			scheduler.schedule(pos, block, delay, priority);
+		}
 	}
 	
 	@Inject(method = "getPower", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Ljava/lang/Math;max(II)I"))
@@ -151,8 +172,13 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	private void scheduleTickOnScheduledTick(ServerWorld world, BlockPos pos, BlockState state, Random random) {
 		boolean powered = state.get(Properties.POWERED);
 		int delay = powered ? Tweaks.Repeater.DELAY_FALLING_EDGE.get() : Tweaks.Repeater.DELAY_RISING_EDGE.get();
-		TickPriority priority = powered ? Tweaks.Repeater.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 		
-		TickSchedulerHelper.schedule(world, state, world.getBlockTickScheduler(), pos, state.getBlock(), delay, priority);
+		if (Tweaks.Repeater.MICRO_TICK_MODE.get()) {
+			world.addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
+		} else {
+			TickPriority priority = powered ? Tweaks.Repeater.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.Repeater.TICK_PRIORITY_RISING_EDGE.get();
+			
+			TickSchedulerHelper.schedule(world, state, world.getBlockTickScheduler(), pos, state.getBlock(), delay, priority);
+		}
 	}
 }

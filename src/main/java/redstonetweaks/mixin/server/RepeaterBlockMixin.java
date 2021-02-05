@@ -5,9 +5,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.RepeaterBlock;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -17,13 +19,28 @@ import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(RepeaterBlock.class)
-public abstract class RepeaterBlockMixin implements RTIRedstoneDiode {
+public abstract class RepeaterBlockMixin extends AbstractBlock implements RTIRedstoneDiode {
 	
 	@Shadow protected abstract int getUpdateDelayInternal(BlockState state);
+	
+	public RepeaterBlockMixin(Settings settings) {
+		super(settings);
+	}
 	
 	@ModifyConstant(method = "getUpdateDelayInternal", constant = @Constant(intValue = 2))
 	private int onGetUpdateDelayInternalModify2(int oldValue, BlockState state) {
 		return state.get(Properties.POWERED) ? Tweaks.Repeater.DELAY_FALLING_EDGE.get() : Tweaks.Repeater.DELAY_RISING_EDGE.get();
+	}
+	
+	@Override
+	public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
+		if (type <= 1) {
+			state.scheduledTick((ServerWorld)world, pos, world.getRandom());
+		} else {
+			((ServerWorld)world).addSyncedBlockEvent(pos, state.getBlock(), type - 1, data);
+		}
+		
+		return false;
 	}
 	
 	// To fix the chain bug without altering other behavior, we identify if the chain bug is occurring

@@ -487,6 +487,7 @@ public class Presets {
 			Tweaks.Repeater.DELAY_FALLING_EDGE.setPresetValue(DEFAULT, 2);
 			Tweaks.Repeater.LAZY_RISING_EDGE.setPresetValue(DEFAULT, true);
 			Tweaks.Repeater.LAZY_FALLING_EDGE.setPresetValue(DEFAULT, false);
+			Tweaks.Repeater.MICRO_TICK_MODE.setPresetValue(DEFAULT, false);
 			Tweaks.Repeater.POWER_WEAK.setPresetValue(DEFAULT, 15);
 			Tweaks.Repeater.POWER_STRONG.setPresetValue(DEFAULT, 15);
 			Tweaks.Repeater.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.HIGH);
