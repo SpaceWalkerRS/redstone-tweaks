@@ -155,8 +155,8 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	}
 	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/PistonExtensionBlock;createBlockEntityPiston(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;ZZ)Lnet/minecraft/block/entity/BlockEntity;"))
-	private BlockEntity onOnSyncedBlockEventRedirectCreateBlockEntityPiston(BlockState pushedBlock, Direction facing, boolean extending, boolean source) {
-		return PistonHelper.createPistonBlockEntity(extending, facing, sticky, source, false, pushedBlock);
+	private BlockEntity onOnSyncedBlockEventRedirectCreateBlockEntityPiston(BlockState pushedBlock, Direction facing, boolean extending, boolean source, BlockState state, World world, BlockPos pos, int type, int data) {
+		return PistonHelper.createPistonBlockEntity(false, state.get(Properties.FACING), sticky, true, false, pushedBlock);
 	}
 	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))

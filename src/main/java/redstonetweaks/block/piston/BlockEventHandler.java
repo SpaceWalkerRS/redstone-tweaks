@@ -437,7 +437,7 @@ public class BlockEventHandler {
 				BlockEntity mergingBlockEntity = null;
 				
 				if (mergedSlabTypes.containsKey(toPos) || loosePistonHeads.get(toPos) == Boolean.FALSE) {
-					mergingState = removedState;
+					mergingState = world.getBlockState(toPos);
 					mergingBlockEntity = PistonHelper.getBlockEntityToMove(world, toPos);
 				}
 				
@@ -461,11 +461,10 @@ public class BlockEventHandler {
 			break;
 		case 1:
 			if (type == MotionType.EXTEND) {
-				PistonType pistonType = sticky ? PistonType.STICKY : PistonType.DEFAULT;
-				BlockState pistonHead = Blocks.PISTON_HEAD.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, pistonType);
+				BlockState pistonHead = PistonHelper.getPistonHead(sticky, facing);
 				
-				BlockState movingPiston = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, pistonType);
-				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(true, facing, sticky, true, true, pistonHead);
+				BlockState movingPiston = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT);
+				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(true, facing, sticky, true, false, pistonHead);
 				
 				((RTIWorld)world).queueBlockEntityPlacement(headPos, pistonBlockEntity);
 				world.setBlockState(headPos, movingPiston, 68);
@@ -480,13 +479,14 @@ public class BlockEventHandler {
 			if (!isIterating) {
 				isIterating = true;
 				movedPositionsIt = movedStatesMap.keySet().iterator();
+				newStatesMap = new HashMap<>();
 			}
 			if (movedPositionsIt.hasNext()) {
 				BlockPos remainingPos = movedPositionsIt.next();
 				
 				BlockState newState = (splitSlabTypes.containsKey(remainingPos) || loosePistonHeads.containsKey(remainingPos)) ? world.getBlockState(remainingPos) : Blocks.AIR.getDefaultState();
 				
-				if (!newState.isAir()) {
+				if (newState.isAir()) {
 					world.setBlockState(remainingPos, newState, 82);
 				}
 				
