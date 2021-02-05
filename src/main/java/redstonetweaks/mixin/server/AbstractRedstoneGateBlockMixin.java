@@ -174,7 +174,9 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 		int delay = powered ? Tweaks.Repeater.DELAY_FALLING_EDGE.get() : Tweaks.Repeater.DELAY_RISING_EDGE.get();
 		
 		if (Tweaks.Repeater.MICRO_TICK_MODE.get()) {
-			world.addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
+			if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
+				world.addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
+			}
 		} else {
 			TickPriority priority = powered ? Tweaks.Repeater.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 			
