@@ -38,7 +38,7 @@ public class PresetEditor {
 		this.addedSettings = new HashSet<>();
 		this.removedSettings = new HashSet<>();
 		
-		for (ISetting setting : Settings.ALL.values()) {
+		for (ISetting setting : Settings.getSettings()) {
 			if (setting.hasPreset(preset)) {
 				currentSettings.add(setting);
 			}
@@ -184,7 +184,7 @@ public class PresetEditor {
 	}
 	
 	public boolean canSave() {
-		return name.equals(previousName) || Presets.isValidName(name);
+		return Presets.isNameValid(name) && (name.equals(previousName) || Presets.isNameAvailable(name));
 	}
 	
 	public void trySaveChanges() {
@@ -214,7 +214,6 @@ public class PresetEditor {
 		}
 		
 		saved = true;
-		
 		Presets.presetChanged(this);
 	}
 	

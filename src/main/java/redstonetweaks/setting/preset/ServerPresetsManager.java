@@ -12,8 +12,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.changelisteners.IPresetChangeListener;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
+import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
@@ -21,7 +21,7 @@ import redstonetweaks.packet.types.RemovePresetPacket;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 
-public class ServerPresetsManager implements IPresetChangeListener {
+public class ServerPresetsManager implements IPresetListener {
 	
 	private static final String CACHE_DIRECTORY = "redstonetweaks";
 	private static final String PRESETS_PATH = "presets";
@@ -43,6 +43,7 @@ public class ServerPresetsManager implements IPresetChangeListener {
 	
 	@Override
 	public void presetRemoved(Preset preset) {
+		System.out.println(preset.getName() + " removed");
 		if (!deaf && server.isRemote()) {
 			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new RemovePresetPacket(preset));
 		}
@@ -50,9 +51,13 @@ public class ServerPresetsManager implements IPresetChangeListener {
 	
 	public void onStartUp() {
 		loadPresets();
+		
+		Presets.addListener(this);
 	}
 	
 	public void onShutdown() {
+		Presets.removeListener(this);
+		
 		savePresets();
 	}
 	
@@ -83,18 +88,18 @@ public class ServerPresetsManager implements IPresetChangeListener {
 				preset = new Preset(name, name, "", Preset.Mode.SET, true);
 			}
 			
-			Presets.register(preset);
+			PresetEditor editor = Presets.editPreset(preset);
 			
 			if ((line = br.readLine()) == null) {
 				return;
 			}
-			preset.setDescription(line);
+			editor.setDescription(line);
 			
 			if ((line = br.readLine()) == null) {
 				return;
 			}
 			try {
-				preset.setMode(Preset.Mode.valueOf(line));
+				editor.setMode(Preset.Mode.valueOf(line));
 			} catch (Exception e) {
 				
 			}
@@ -105,12 +110,15 @@ public class ServerPresetsManager implements IPresetChangeListener {
 					
 					ISetting setting = Settings.getSettingFromId(args[0]);
 					if (setting != null) {
-						setting.setPresetValueFromString(preset, args[1]);
+						editor.addSetting(setting);
+						editor.setValueFromString(setting, args[1]);
 					}
 				} catch (Exception e) {
 					
 				}
 			}
+			
+			editor.trySaveChanges();
 		} catch (IOException e) {
 			
 		}
@@ -133,7 +141,7 @@ public class ServerPresetsManager implements IPresetChangeListener {
 		}
 		Presets.cleanUp();
 		
-		for (Preset preset : Presets.ALL.values()) {
+		for (Preset preset : Presets.getAllPresets()) {
 			if (preset.isEditable()) {
 				savePreset(preset);
 			}
@@ -160,7 +168,7 @@ public class ServerPresetsManager implements IPresetChangeListener {
 			bw.write(preset.getMode().toString());
 			bw.newLine();
 			
-			for (ISetting setting : Settings.ALL.values()) {
+			for (ISetting setting : Settings.getSettings()) {
 				if (setting.hasPreset(preset)) {
 					bw.write(setting.getId());
 					bw.write(" = ");
@@ -214,7 +222,7 @@ public class ServerPresetsManager implements IPresetChangeListener {
 	
 	private void updatePresetsOfPlayer(ServerPlayerEntity player) {
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
-		PresetsPacket packet = new PresetsPacket(Presets.ALL.values());
+		PresetsPacket packet = new PresetsPacket(Presets.getAllPresets());
 		
 		if (player == null) {
 			packetHandler.sendPacket(packet);

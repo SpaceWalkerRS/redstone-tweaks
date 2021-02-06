@@ -39,7 +39,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.block.entity.BlockEntityTypes;
 import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.MovedBlock;
@@ -368,7 +368,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get()) {
 				return !PistonHelper.canMoveBlockEntityOf(block);
 			}
-			if (RedstoneTweaks.POWER_BLOCK_ENTITY_TYPE.supports(block)) {
+			if (BlockEntityTypes.POWER_COMPONENT.supports(block)) {
 				return false;
 			}
 			
@@ -479,6 +479,11 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			List<BlockPos> movedPositions, List<BlockState> movedStates, List<BlockPos> brokenPositions,
 			BlockState[] affectedStates, PistonType headType, BlockState pistonHead) 
 	{
+		if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
+			// This ensures the block entity gets placed
+			world.setBlockState(headPos, Blocks.AIR.getDefaultState(), 80);
+		}
+		
 		((RTIWorld)world).queueBlockEntityPlacement(headPos, PistonHelper.createPistonBlockEntity(true, pistonDir, sticky, true, false, pistonHead));
 	}
 	

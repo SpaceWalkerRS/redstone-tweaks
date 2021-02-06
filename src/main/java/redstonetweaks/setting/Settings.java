@@ -1,5 +1,7 @@
 package redstonetweaks.setting;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -7,17 +9,17 @@ import java.util.Map;
 import java.util.Set;
 
 import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.changelisteners.ISettingChangeListener;
+import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
 public class Settings {
 	
-	public static final Map<String, ISetting> ALL = new HashMap<>();
-	public static final Map<String, SettingsPack> PACKS = new HashMap<>();
-	public static final Map<String, SettingsCategory> CATEGORIES = new LinkedHashMap<>();
+	private static final Map<String, ISetting> ALL = new HashMap<>();
+	private static final Map<String, SettingsPack> PACKS = new HashMap<>();
+	private static final Map<String, SettingsCategory> CATEGORIES = new LinkedHashMap<>();
 	
-	private static final Set<ISettingChangeListener> CHANGE_LISTENERS = new HashSet<>();
+	private static final Set<ISettingListener> LISTENERS = new HashSet<>();
 	
 	public static void register(SettingsCategory category) {
 		if (CATEGORIES.putIfAbsent(category.getName(), category) != null) {
@@ -35,6 +37,18 @@ public class Settings {
 		if (ALL.putIfAbsent(setting.getId(), setting) != null || !setting.getPack().addSetting(setting)) {
 			RedstoneTweaks.LOGGER.warn(String.format("%s %s could not be registered, as a setting with id %s already exists.", setting.getClass(), setting.getName(), setting.getId()));
 		}
+	}
+	
+	public static Collection<SettingsCategory> getCategories() {
+		return Collections.unmodifiableCollection(CATEGORIES.values());
+	}
+	
+	public static Collection<SettingsPack> getPacks() {
+		return Collections.unmodifiableCollection(PACKS.values());
+	}
+	
+	public static Collection<ISetting> getSettings() {
+		return Collections.unmodifiableCollection(ALL.values());
 	}
 	
 	public static SettingsCategory getCategoryFromName(String name) {
@@ -88,28 +102,28 @@ public class Settings {
 		ALL.values().forEach((setting) -> setting.removePreset(preset));
 	}
 	
-	public static void addChangeListener(ISettingChangeListener listener) {
-		CHANGE_LISTENERS.add(listener);
+	public static void addListener(ISettingListener listener) {
+		LISTENERS.add(listener);
 	}
 	
-	public static void removeChangeListener(ISettingChangeListener listener) {
-		CHANGE_LISTENERS.remove(listener);
+	public static void removeListener(ISettingListener listener) {
+		LISTENERS.remove(listener);
 	}
 	
 	public static void categoryLockedChanged(SettingsCategory category) {
-		CHANGE_LISTENERS.forEach((listener) -> listener.categoryLockedChanged(category));
+		LISTENERS.forEach((listener) -> listener.categoryLockedChanged(category));
 	}
 	
 	public static void packLockedChanged(SettingsPack pack) {
-		CHANGE_LISTENERS.forEach((listener) -> listener.packLockedChanged(pack));
+		LISTENERS.forEach((listener) -> listener.packLockedChanged(pack));
 	}
 	
 	public static void settingLockedChanged(ISetting setting) {
-		CHANGE_LISTENERS.forEach((listener) -> listener.settingLockedChanged(setting));
+		LISTENERS.forEach((listener) -> listener.settingLockedChanged(setting));
 	}
 	
 	public static void settingValueChanged(ISetting setting) {
-		CHANGE_LISTENERS.forEach((listener) -> listener.settingValueChanged(setting));
+		LISTENERS.forEach((listener) -> listener.settingValueChanged(setting));
 	}
 	
 	public static class Common {

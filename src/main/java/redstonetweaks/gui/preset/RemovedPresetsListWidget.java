@@ -8,10 +8,10 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.util.TextFormatting;
@@ -28,8 +28,8 @@ public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWid
 	
 	@Override
 	protected void initList() {
-		for (Preset preset : Presets.ALL.values()) {
-			if (!Presets.ACTIVE.containsValue(preset)) {
+		for (Preset preset : Presets.getAllPresets()) {
+			if (!Presets.isActive(preset)) {
 				addEntry(new PresetEntry(preset));
 				
 				updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
@@ -39,8 +39,8 @@ public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWid
 	
 	@Override
 	protected void filterEntries(String query) {
-		for (Preset preset : Presets.ALL.values()) {
-			if (!Presets.ACTIVE.containsValue(preset) && preset.getName().toLowerCase().contains(query)) {
+		for (Preset preset : Presets.getAllPresets()) {
+			if (!Presets.isActive(preset) && preset.getName().toLowerCase().contains(query)) {
 				addEntry(new PresetEntry(preset));
 				
 				updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
@@ -138,7 +138,7 @@ public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWid
 		
 		@Override
 		public void updateButtonsActive() {
-			unremoveButton.setActive(((RTIMinecraftClient)screen.client).getPresetsManager().canEditPresets());
+			unremoveButton.setActive(PermissionManager.canEditPresets());
 		}
 	}
 	

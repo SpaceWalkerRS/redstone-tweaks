@@ -16,6 +16,7 @@ public class RemovePresetPacket extends RedstoneTweaksPacket {
 	}
 	
 	public RemovePresetPacket(Preset preset) {
+		System.out.println(preset.getId());
 		this.id = preset.getId();
 	}
 	

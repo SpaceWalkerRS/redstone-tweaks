@@ -25,7 +25,8 @@ import redstonetweaks.packet.types.RedstoneTweaksPacket;
 import redstonetweaks.packet.types.ReloadPresetsPacket;
 import redstonetweaks.packet.types.RemovePresetPacket;
 import redstonetweaks.packet.types.ResetSettingPacket;
-import redstonetweaks.packet.types.ResetSettingsPacket;
+import redstonetweaks.packet.types.ResetCategoryPacket;
+import redstonetweaks.packet.types.ResetPackPacket;
 import redstonetweaks.packet.types.ServerInfoPacket;
 import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.packet.types.SettingsPacket;
@@ -89,27 +90,28 @@ public abstract class AbstractPacketHandler {
 		SETTING(1, SettingPacket.class),
 		SETTINGS(2, SettingsPacket.class),
 		RESET_SETTING(3, ResetSettingPacket.class),
-		RESET_SETTINGS(4, ResetSettingsPacket.class),
-		NEIGHBOR_UPDATE_VISUALIZER(5, NeighborUpdateVisualizerPacket.class),
-		NEIGHBOR_UPDATE_SCHEDULER(6, NeighborUpdateSchedulerPacket.class),
-		WORLD_SYNC(7, WorldSyncPacket.class),
-		TASK_SYNC(8, TaskSyncPacket.class),
-		UNFINISHED_EVENT(9, IncompleteBlockActionPacket.class),
-		WORLD_TIME_SYNC(10, WorldTimeSyncPacket.class),
-		TICK_STATUS(11, TickStatusPacket.class),
-		TICK_BLOCK_ENTITY(12, TickBlockEntityPacket.class),
-		DO_WORLD_TICKS(13, DoWorldTicksPacket.class),
-		TICK_PAUSE(14, TickPausePacket.class),
-		SERVER_INFO(15, ServerInfoPacket.class),
-		PRESET(16, PresetPacket.class),
-		PRESETS(17, PresetsPacket.class),
-		RELOAD_PRESETS(18, ReloadPresetsPacket.class),
-		REMOVE_PRESET(19, RemovePresetPacket.class),
-		APPLY_PRESET(20, ApplyPresetPacket.class),
-		LOCK_SETTING(21, LockSettingPacket.class),
-		LOCK_PACK(22, LockPackPacket.class),
-		LOCK_CATEGORY(23, LockCategoryPacket.class),
-		OPEN_MENU(24, OpenMenuPacket.class);
+		RESET_PACK(4, ResetPackPacket.class),
+		RESET_CATEGORY(5, ResetCategoryPacket.class),
+		NEIGHBOR_UPDATE_VISUALIZER(6, NeighborUpdateVisualizerPacket.class),
+		NEIGHBOR_UPDATE_SCHEDULER(7, NeighborUpdateSchedulerPacket.class),
+		WORLD_SYNC(8, WorldSyncPacket.class),
+		TASK_SYNC(9, TaskSyncPacket.class),
+		UNFINISHED_EVENT(10, IncompleteBlockActionPacket.class),
+		WORLD_TIME_SYNC(11, WorldTimeSyncPacket.class),
+		TICK_STATUS(12, TickStatusPacket.class),
+		TICK_BLOCK_ENTITY(13, TickBlockEntityPacket.class),
+		DO_WORLD_TICKS(14, DoWorldTicksPacket.class),
+		TICK_PAUSE(15, TickPausePacket.class),
+		SERVER_INFO(16, ServerInfoPacket.class),
+		PRESET(17, PresetPacket.class),
+		PRESETS(18, PresetsPacket.class),
+		RELOAD_PRESETS(19, ReloadPresetsPacket.class),
+		REMOVE_PRESET(20, RemovePresetPacket.class),
+		APPLY_PRESET(21, ApplyPresetPacket.class),
+		LOCK_SETTING(22, LockSettingPacket.class),
+		LOCK_PACK(23, LockPackPacket.class),
+		LOCK_CATEGORY(24, LockCategoryPacket.class),
+		OPEN_MENU(25, OpenMenuPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends RedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;

@@ -26,7 +26,6 @@ import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.gui.widget.RTTexturedButtonWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
-import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
@@ -115,10 +114,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		}
 	}
 	
-	public boolean canChangeSettings() {
-		return category == ServerConfig.SERVER_CONFIG ? PermissionManager.canManageSettings() : PermissionManager.canChangeSettings();
-	}
-	
 	public boolean canLockSettings() {
 		return PermissionManager.canManageSettings();
 	}
@@ -127,8 +122,16 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		for (Entry entry : children()) {
 			if (entry instanceof SettingEntry) {
 				SettingEntry settingEntry = (SettingEntry)entry;
+				
 				if (settingEntry.setting == setting || setting == null) {
 					settingEntry.onSettingChanged();
+				}
+			} else
+			if (entry instanceof SettingsPackEntry) {
+				SettingsPackEntry packEntry = (SettingsPackEntry)entry;
+				
+				if (packEntry.pack.getSettings().contains(setting) || setting == null) {
+					packEntry.onSettingChanged();
 				}
 			}
 		}
@@ -157,19 +160,61 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	public class SettingsPackEntry extends Entry {
 		
 		private final Text title;
+		private final SettingsPack pack;
+		private final List<RTElement> children;
+		private final RTLockButtonWidget lockButton;
+		private final RTButtonWidget resetButton;
 		
 		public SettingsPackEntry(SettingsPack pack) {
-			title = new TranslatableText(pack.getName()).formatted(Formatting.UNDERLINE);
+			this.title = new TranslatableText(pack.getName()).formatted(Formatting.UNDERLINE);
+			this.pack = pack;
+			this.children = new ArrayList<>();
+			
+			this.lockButton = new RTLockButtonWidget(0, 0, this.pack.isLocked(), (button) -> {
+				button.toggleLocked();
+				
+				((RTIMinecraftClient)client).getSettingsManager().lockPack(this.pack, button.isLocked());
+			});
+			this.children.add(lockButton);
+			
+			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (button) -> {
+				((RTIMinecraftClient)client).getSettingsManager().resetPack(this.pack);
+			});
+			this.children.add(resetButton);
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
+			
+			if (!category.opOnly()) {
+				lockButton.setY(y);
+				lockButton.render(matrices, mouseX, mouseY, tickDelta);
+			}
+			
+			resetButton.setY(y);
+			resetButton.render(matrices, mouseX, mouseY, tickDelta);
 		}
 		
 		@Override
 		public List<? extends RTElement> getChildren() {
-			return Collections.emptyList();
+			return children;
+		}
+		
+		@Override
+		public void init(int titleWidth) {
+			int x = getX() + titleWidth + 105;
+			
+			if (category.opOnly()) {
+				children.remove(lockButton);
+			} else {
+				lockButton.setX(x);
+				x += lockButton.getWidth() + 2;
+			}
+			
+			resetButton.setX(x);
+			
+			updateButtonsActive();
 		}
 		
 		@Override
@@ -180,6 +225,17 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		@Override
 		protected boolean hasFocusedTextField() {
 			return false;
+		}
+		
+		private void updateButtonsActive() {
+			boolean canManageSettings = PermissionManager.canManageSettings();
+			
+			lockButton.setActive(canManageSettings);
+			resetButton.setActive(canManageSettings && !pack.isDefault());
+		}
+		
+		public void onSettingChanged() {
+			updateButtonsActive();
 		}
 	}
 	
@@ -241,7 +297,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.children.add(resetButton);
 			
 			this.buttonPanel = new ButtonPanel();
-			this.populateButtonPanel();
+			this.populateButtonPanels();
 			this.children.add(buttonPanel);
 			
 			this.hoverAnimation = 0.0D;
@@ -255,15 +311,17 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			} else {
 				hoverAnimation = hoverAnimation / Math.pow(2, speed);
 			}
-			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
+			fillGradient(matrices, 2, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
 			buttonPanel.setY(y);
 			buttonPanel.render(matrices, mouseX, mouseY, tickDelta);
 			
-			lockButton.setY(y);
-			lockButton.render(matrices, mouseX, mouseY, tickDelta);
+			if (!category.opOnly()) {
+				lockButton.setY(y);
+				lockButton.render(matrices, mouseX, mouseY, tickDelta);
+			}
 			
 			resetButton.setY(y);
 			resetButton.render(matrices, mouseX, mouseY, tickDelta);
@@ -280,9 +338,19 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		
 		@Override
 		public void init(int titleWidth) {
-			buttonPanel.setX(getX() + titleWidth);
-			lockButton.setX(buttonPanel.getX() + buttonPanel.getWidth() + 5);
-			resetButton.setX(lockButton.getX() + lockButton.getWidth() + 2);
+			int x = getX() + titleWidth;
+			
+			buttonPanel.setX(x);
+			x += buttonPanel.getWidth() + 5;
+			
+			if (category.opOnly()) {
+				children.remove(lockButton);
+			} else {
+				lockButton.setX(x);
+				x += lockButton.getWidth() + 2;
+			}
+			
+			resetButton.setX(x);
 			
 			updateButtonsActive();
 		}
@@ -304,13 +372,15 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		
 		private List<Text> createTooltip() {
 			List<Text> tooltip = new ArrayList<>();
+			
 			for (String line : TextFormatting.getAsLines(setting.getDescription())) {
 				tooltip.add(new TranslatableText(line));
 			}
+			
 			return tooltip;
 		}
 		
-		private void populateButtonPanel() {
+		private void populateButtonPanels() {
 			if (setting instanceof DirectionToBooleanSetting) {
 				DirectionToBooleanSetting dSetting = (DirectionToBooleanSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
@@ -318,7 +388,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!canChangeSettings() || category.isLocked() || setting.isLocked()) {
+					if (!PermissionManager.canChangeSettings(category) || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -330,7 +400,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!canChangeSettings() || category.isLocked() || setting.isLocked()) {
+					if (!PermissionManager.canChangeSettings(category) || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -412,7 +482,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!canChangeSettings() || category.isLocked() || setting.isLocked()) {
+					if (!PermissionManager.canChangeSettings(category) || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -424,7 +494,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!canChangeSettings() || category.isLocked() || setting.isLocked()) {
+					if (!PermissionManager.canChangeSettings(category) || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -436,12 +506,13 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		}
 		
 		private void updateButtonsActive() {
-			boolean canChangeSettings = canChangeSettings();
-			boolean canLockSettings = canLockSettings();
+			boolean canChangeSettings = PermissionManager.canChangeSettings(category);
+			boolean canManageSettings = PermissionManager.canManageSettings();
+			boolean locked = setting.isLocked() || setting.getPack().isLocked() || category.isLocked();
 			
-			buttonPanel.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked());
-			lockButton.setActive(canLockSettings && !category.isLocked());
-			resetButton.setActive(canChangeSettings && !category.isLocked() && !setting.isLocked() && !setting.isDefault());
+			buttonPanel.setActive(canChangeSettings && (!locked || canManageSettings));
+			lockButton.setActive(canManageSettings);
+			resetButton.setActive(canChangeSettings && !setting.isDefault() && (!locked || canManageSettings));
 		}
 		
 		private boolean titleHovered(int mouseX, int mouseY) {

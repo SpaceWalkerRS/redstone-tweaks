@@ -13,6 +13,10 @@ public interface ISetting {
 	
 	public String getDescription();
 	
+	default boolean opOnly() {
+		return getPack().opOnly();
+	}
+	
 	public boolean isEnabled();
 	
 	public void setEnabled(boolean enabled);

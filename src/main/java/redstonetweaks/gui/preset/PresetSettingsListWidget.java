@@ -3,12 +3,14 @@ package redstonetweaks.gui.preset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.TickPriority;
+
 import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTElement;
@@ -34,7 +36,9 @@ import redstonetweaks.util.TextFormatting;
 public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWidget.Entry> {
 	
 	private final PresetsTab parent;
+	private final Predicate<ISetting> viewModePredicate;
 	
+	private ViewMode viewMode;
 	private boolean addSettingsMode;
 	private boolean settingsChanged;
 	
@@ -42,7 +46,22 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		super(parent.screen, x, y, width, height, 22, "Preset Settings");
 		
 		this.parent = parent;
+		this.viewModePredicate = (setting) -> {
+			if (viewMode == ViewMode.ALL) {
+				return true;
+			}
+			if (viewMode == ViewMode.IN && parent.getPresetEditor().hasSetting(setting)) {
+				return true;
+			}
+			if (viewMode == ViewMode.OUT && !parent.getPresetEditor().hasSetting(setting)) {
+				return true;
+			}
+			
+			return false;
+		};
 		this.addSettingsMode = false;
+		
+		this.viewMode = ViewMode.ALL;
 	}
 	
 	@Override
@@ -56,7 +75,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			List<Entry> settingEntries = new ArrayList<>();
 			
 			for (ISetting setting : pack.getSettings()) {
-				if (addSettingsMode || parent.getPresetEditor().hasSetting(setting)) {
+				if (addSettingsMode ? viewModePredicate.test(setting) : parent.getPresetEditor().hasSetting(setting)) {
 					settingEntries.add(addSettingsMode ? new AddSettingEntry(setting) : new EditSettingEntry(setting));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
@@ -81,7 +100,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			List<Entry> settingEntries = new ArrayList<>();
 			
 			for (ISetting setting : pack.getSettings()) {
-				if ((addSettingsMode || parent.getPresetEditor().hasSetting(setting)) && (packMatchesQuery || setting.getName().toLowerCase().contains(query))) {
+				if ((addSettingsMode ? viewModePredicate.test(setting) : parent.getPresetEditor().hasSetting(setting)) && (packMatchesQuery || setting.getName().toLowerCase().contains(query))) {
 					settingEntries.add(addSettingsMode ? new AddSettingEntry(setting) : new EditSettingEntry(setting));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
@@ -126,6 +145,20 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		for (Entry e : children()) {
 			e.updateButtonsActive();
 		}
+	}
+	
+	public ViewMode getViewMode() {
+		return viewMode;
+	}
+	
+	public void updateViewMode(boolean next) {
+		setViewMode(next ? viewMode.next() : viewMode.previous());
+	}
+	
+	public void setViewMode(ViewMode mode) {
+		this.viewMode = mode;
+		
+		init();
 	}
 	
 	public class SettingsPackEntry extends Entry {
@@ -222,7 +255,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			} else {
 				hoverAnimation = hoverAnimation / Math.pow(2, speed);
 			}
-			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
+			fillGradient(matrices, 2, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
@@ -480,6 +513,48 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		
 		public void updateButtonsActive() {
 			
+		}
+	}
+	
+	public enum ViewMode {
+		
+		ALL(0),
+		IN(1),
+		OUT(2);
+		
+		private static final ViewMode[] MODES;
+		
+		static {
+			MODES = new ViewMode[values().length];
+			
+			for (ViewMode mode : values()) {
+				MODES[mode.index] = mode;
+			}
+		}
+		
+		private final int index;
+		
+		private ViewMode(int index) {
+			this.index = index;
+		}
+		
+		public static ViewMode fromIndex(int index) {
+			if (index < 0) {
+				return MODES[MODES.length - 1];
+			}
+			if (index >= MODES.length) {
+				return MODES[0];
+			}
+			
+			return MODES[index];
+		}
+		
+		public ViewMode next() {
+			return fromIndex(index + 1);
+		}
+		
+		public ViewMode previous() {
+			return fromIndex(index - 1);
 		}
 	}
 }

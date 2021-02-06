@@ -24,6 +24,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
 import redstonetweaks.interfaces.mixin.RTIWorld;
@@ -441,13 +442,7 @@ public class BlockEventHandler {
 					mergingBlockEntity = PistonHelper.getBlockEntityToMove(world, toPos);
 				}
 				
-				if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get()) {
-					// This ensures the block entity gets placed
-					world.setBlockState(toPos, Blocks.AIR.getDefaultState(), 80);
-				}
-				
-				((RTIWorld)world).queueBlockEntityPlacement(toPos, PistonHelper.createPistonBlockEntity(extend, facing, sticky, false, false, movedState, movedBlockEntity, mergingState, mergingBlockEntity));
-				world.setBlockState(toPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing), 68);
+				WorldHelper.setBlockWithEntity(world, toPos, Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing), PistonHelper.createPistonBlockEntity(extend, facing, sticky, false, false, movedState, movedBlockEntity, mergingState, mergingBlockEntity), 68);
 				
 				movedStatesMap.remove(toPos);
 				removedStates[removedIndex++] = removedState;
@@ -466,8 +461,7 @@ public class BlockEventHandler {
 				BlockState movingPiston = Blocks.MOVING_PISTON.getDefaultState().with(Properties.FACING, facing).with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT);
 				PistonBlockEntity pistonBlockEntity = PistonHelper.createPistonBlockEntity(true, facing, sticky, true, false, pistonHead);
 				
-				((RTIWorld)world).queueBlockEntityPlacement(headPos, pistonBlockEntity);
-				world.setBlockState(headPos, movingPiston, 68);
+				WorldHelper.setBlockWithEntity(world, headPos, movingPiston, pistonBlockEntity, 68);
 				
 				movedStatesMap.remove(headPos);
 			}

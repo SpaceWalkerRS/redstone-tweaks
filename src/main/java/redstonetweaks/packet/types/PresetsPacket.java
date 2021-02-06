@@ -63,10 +63,10 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 			names[presetIndex] = preset.getName();
 			descriptions[presetIndex] = preset.getDescription();
 			modes[presetIndex] = preset.getMode();
-			removed[presetIndex] = !Presets.ACTIVE.containsValue(preset);
+			removed[presetIndex] = !Presets.isActive(preset);
 					
 			List<ISetting> list = new ArrayList<>();
-			for (ISetting setting : Settings.ALL.values()) {
+			for (ISetting setting : Settings.getSettings()) {
 				if (setting.hasPreset(preset)) {
 					list.add(setting);
 				}

@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTMenuTab;
@@ -45,6 +47,7 @@ public class PresetsTab extends RTMenuTab {
 	private RTButtonWidget propertiesButton;
 	private RTButtonWidget warningButton;
 	private RTButtonWidget[] categoryButtons;
+	private RTButtonWidget viewModeButton;
 	private RTButtonWidget toggleListButton;
 	
 	private int selectedCategoryIndex;
@@ -113,9 +116,7 @@ public class PresetsTab extends RTMenuTab {
 			if (getPresetEditor().canSave()) {
 				savePreset();
 			} else {
-				if (!Presets.isValidName(getPresetEditor().getName())) {
-					screen.openWindow(new InvalidNameWindow(this));
-				}
+				screen.openWindow(new InvalidNameWindow(this));
 			}
 		});
 		addEditorContent(saveButton);
@@ -130,11 +131,22 @@ public class PresetsTab extends RTMenuTab {
 		});
 		addEditorContent(warningButton);
 		
-		categoryButtons = new RTButtonWidget[Settings.CATEGORIES.size()];
+		int size = 0;
+		for (SettingsCategory category : Settings.getCategories()) {
+			if (!category.opOnly()) {
+				size++;
+			};
+		};
+		categoryButtons = new RTButtonWidget[size];
+		
 		int i = 0;
 		int x = 5;
 		int y = propertiesButton.getY() + 22;
-		for (SettingsCategory category : Settings.CATEGORIES.values()) {
+		for (SettingsCategory category : Settings.getCategories()) {
+			if (category.opOnly()) {
+				continue;
+			}
+			
 			int index = i;
 			
 			Text text = new TranslatableText(category.getName());
@@ -161,16 +173,23 @@ public class PresetsTab extends RTMenuTab {
 			
 			i++;
 		}
-		selectedCategoryIndex = 0;
-		selectedCategory = Settings.CATEGORIES.values().iterator().next();
-		categoryButtons[selectedCategoryIndex].setActive(false);
 		
 		toggleListButton = new RTButtonWidget(screen.getWidth() - 90, categoryButtons[categoryButtons.length - 1].getY() + 25, 80, 20, () -> new TranslatableText(settingsList.addSettingsMode() ? "Edit Settings" : "Add Settings"), (button) -> {
 			settingsList.toggleList();
 			
+			viewModeChanged();
+			
 			button.updateMessage();
 		});
 		addEditorContent(toggleListButton);
+		
+		viewModeButton = new RTButtonWidget(toggleListButton.getX() - 82, toggleListButton.getY(), 80, 20, () -> new TranslatableText(String.format("View: %s", settingsList.getViewMode())), (button) -> {
+			settingsList.updateViewMode(!Screen.hasShiftDown());
+			settingsList.filter(searchBox.getText());
+			
+			button.updateMessage();
+		});
+		addEditorContent(viewModeButton);
 		
 		
 		if (isEditingPreset()) {
@@ -205,6 +224,9 @@ public class PresetsTab extends RTMenuTab {
 			
 			searchBox.render(matrices, mouseX, mouseY, delta);
 			clearSearchBoxButton.render(matrices, mouseX, mouseY, delta);
+			if (settingsList.addSettingsMode()) {
+				viewModeButton.render(matrices, mouseX, mouseY, delta);
+			}
 			toggleListButton.render(matrices, mouseX, mouseY, delta);
 			
 			warningButton.render(matrices, mouseX, mouseY, delta);
@@ -301,14 +323,9 @@ public class PresetsTab extends RTMenuTab {
 	}
 	
 	private void initEditorContent() {
-		int y = categoryButtons[categoryButtons.length - 1].getY() + 25;
+		viewModeChanged();
 		
-		clearSearchBoxButton.setX(toggleListButton.getX() - clearSearchBoxButton.getWidth() - 5);
-		clearSearchBoxButton.setY(y);
-		
-		searchBox.setX(5);
-		searchBox.setY(y);
-		searchBox.setWidth(clearSearchBoxButton.getX() - searchBox.getX() - 2);
+		categoryButtons[0].onPress();
 		searchBox.setText("");
 		
 		warningButton.setVisible(false);
@@ -321,8 +338,22 @@ public class PresetsTab extends RTMenuTab {
 		updateButtonsActive();
 	}
 	
+	private void viewModeChanged() {
+		int x = settingsList.addSettingsMode() ? viewModeButton.getX() : toggleListButton.getX();
+		int y = categoryButtons[categoryButtons.length - 1].getY() + 25;
+		
+		clearSearchBoxButton.setX(x - clearSearchBoxButton.getWidth() - 5);
+		clearSearchBoxButton.setY(y);
+		
+		searchBox.setX(5);
+		searchBox.setY(y);
+		searchBox.setWidth(clearSearchBoxButton.getX() - searchBox.getX() - 2);
+		
+		viewModeButton.setActive(settingsList.addSettingsMode());
+	}
+	
 	public void updateButtonsActive() {
-		boolean canEditPresets = ((RTIMinecraftClient)screen.client).getPresetsManager().canEditPresets();
+		boolean canEditPresets = PermissionManager.canEditPresets();
 		boolean editable = isEditingPreset() ? getPresetEditor().isEditable() : false;
 		
 		reloadPresetsButton.setActive(canEditPresets);

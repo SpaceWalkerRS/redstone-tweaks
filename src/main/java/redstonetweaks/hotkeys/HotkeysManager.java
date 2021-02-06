@@ -14,10 +14,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.InputUtil.Key;
 
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.packet.types.TickPausePacket;
-import redstonetweaks.setting.ServerConfig;
 
 public class HotkeysManager {
 	
@@ -70,7 +70,7 @@ public class HotkeysManager {
 			}
 		} else
 		if (keyBinding == hotkeys.pauseWorldTicking) {
-			if (client.currentScreen == null && client.player.hasPermissionLevel(ServerConfig.TickCommand.PERMISSION_LEVEL.get())) {
+			if (client.currentScreen == null && PermissionManager.canUseTickCommand()) {
 				TickPausePacket packet = new TickPausePacket(TickPausePacket.PAUSE);
 				((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 				
@@ -78,7 +78,7 @@ public class HotkeysManager {
 			}
 		} else
 		if (keyBinding == hotkeys.advanceWorldTicking) {
-			if (client.currentScreen == null && client.player.hasPermissionLevel(ServerConfig.TickCommand.PERMISSION_LEVEL.get())) {
+			if (client.currentScreen == null && PermissionManager.canUseTickCommand()) {
 				TickPausePacket packet = new TickPausePacket(TickPausePacket.ADVANCE);
 				((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
 				

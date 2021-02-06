@@ -15,7 +15,7 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.util.math.BlockPos;
 
-import redstonetweaks.helper.BlockEntityHelper;
+import redstonetweaks.block.entity.BlockEntityTypes;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.packet.AbstractPacketHandler;
 
@@ -33,9 +33,9 @@ public class ClientPlayNetworkHandlerMixin {
 		}
 	}
 	
-	@Inject(method = "onBlockEntityUpdate", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/network/packet/s2c/play/BlockEntityUpdateS2CPacket;getBlockEntityType()I"))
-	private void onOnBlockEntityUpdateInjectAfterGetType(BlockEntityUpdateS2CPacket packet, CallbackInfo ci, BlockPos pos, BlockEntity blockEntity) {
-		if (BlockEntityHelper.getId(blockEntity.getType()) == packet.getBlockEntityType()) {
+	@Inject(method = "onBlockEntityUpdate", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/network/packet/s2c/play/BlockEntityUpdateS2CPacket;getBlockEntityType()I"))
+	private void onOnBlockEntityUpdateInjectBeforeGetType(BlockEntityUpdateS2CPacket packet, CallbackInfo ci, BlockPos pos, BlockEntity blockEntity) {
+		if (BlockEntityTypes.getId(blockEntity.getType()) == packet.getBlockEntityType()) {
 			blockEntity.fromTag(client.world.getBlockState(pos), packet.getCompoundTag());
 			
 			ci.cancel();

@@ -7,9 +7,6 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
-
-import redstonetweaks.changelisteners.IPermissionChangeListener;
-import redstonetweaks.changelisteners.ISettingChangeListener;
 import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.ConfirmWindow;
 import redstonetweaks.gui.RTMenuScreen;
@@ -18,12 +15,14 @@ import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTLockButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.listeners.IPermissionListener;
+import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.ISetting;
 
-public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IPermissionChangeListener {
+public class SettingsTab extends RTMenuTab implements ISettingListener, IPermissionListener {
 	
 	private static final int HEADER_HEIGHT = 25;
 	private static final Map<SettingsCategory, String> LAST_SEARCH_QUERIES = new HashMap<>();
@@ -63,7 +62,7 @@ public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IP
 		int y = screen.getHeaderHeight();
 		
 		resetButton = new RTButtonWidget(screen.getWidth() - 50, y, 40, 20, () -> new TranslatableText("RESET"), (button) -> {
-			screen.openWindow(new ConfirmWindow(screen, "Are you sure you want to reset all settings in this category?", 300, () -> ((RTIMinecraftClient)screen.client).getSettingsManager().resetSettings(category), () -> {}));
+			screen.openWindow(new ConfirmWindow(screen, "Are you sure you want to reset all settings in this category?", 300, () -> ((RTIMinecraftClient)screen.client).getSettingsManager().resetCategory(category), () -> {}));
 		});
 		addContent(resetButton);
 		
@@ -96,8 +95,8 @@ public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IP
 		
 		updateButtonsActive();
 		
-		Settings.addChangeListener(this);
-		PermissionManager.addChangeListener(this);
+		Settings.addListener(this);
+		PermissionManager.addListener(this);
 	}
 	
 	@Override
@@ -112,8 +111,8 @@ public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IP
 	
 	@Override
 	public void onTabClosed() {
-		Settings.removeChangeListener(this);
-		PermissionManager.removeChangeListener(this);
+		Settings.removeListener(this);
+		PermissionManager.removeListener(this);
 		
 		settingsList.saveScrollAmount();
 	}
@@ -139,11 +138,10 @@ public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IP
 	}
 	
 	public void updateButtonsActive() {
-		boolean canChangeSettings = settingsList.canChangeSettings();
-		boolean canLockSettings = settingsList.canLockSettings();
+		boolean canManageSettings = PermissionManager.canManageSettings();
 		
-		lockButton.setActive(canLockSettings);
-		resetButton.setActive(canChangeSettings && !category.isLocked());
+		lockButton.setActive(canManageSettings);
+		resetButton.setActive(canManageSettings && !category.isDefault());
 	}
 	
 	public SettingsCategory getCategory() {
@@ -177,7 +175,7 @@ public class SettingsTab extends RTMenuTab implements ISettingChangeListener, IP
 	}
 	
 	@Override
-	public void permissionLevelChanged() {
-		
+	public void permissionsChanged() {
+		onSettingChanged(null);
 	}
 }

@@ -1,5 +1,7 @@
 package redstonetweaks.setting.preset;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -9,7 +11,7 @@ import java.util.Set;
 import net.minecraft.world.TickPriority;
 
 import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.changelisteners.IPresetChangeListener;
+import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.Tweaks;
@@ -22,10 +24,10 @@ import redstonetweaks.world.common.WorldTickOptions;
 
 public class Presets {
 	
-	public static final Map<Integer, Preset> ALL = new HashMap<>();
-	public static final Map<String, Preset> ACTIVE = new LinkedHashMap<>();
+	private static final Map<Integer, Preset> ALL = new HashMap<>();
+	private static final Map<String, Preset> ACTIVE = new LinkedHashMap<>();
 	
-	private static final Set<IPresetChangeListener> CHANGE_LISTENERS = new HashSet<>();
+	private static final Set<IPresetListener> LISTENERS = new HashSet<>();
 	
 	public static void register(Preset preset) {
 		int id = preset.getId();
@@ -52,8 +54,12 @@ public class Presets {
 		ALL.values().forEach((preset) -> remove(preset));
 	}
 
-	public static boolean isValidName(String name) {
-		return name != null && !name.isEmpty() && ACTIVE.containsKey(name);
+	public static boolean isNameValid(String name) {
+		return name != null && !name.isEmpty();
+	}
+	
+	public static boolean isNameAvailable(String name) {
+		return !ACTIVE.containsKey(name);
 	}
 	
 	public static Preset fromId(int id) {
@@ -62,6 +68,18 @@ public class Presets {
 	
 	public static Preset fromName(String name) {
 		return ACTIVE.get(name);
+	}
+	
+	public static Collection<Preset> getAllPresets() {
+		return Collections.unmodifiableCollection(ALL.values());
+	}
+	
+	public static Collection<Preset> getActivePresets() {
+		return Collections.unmodifiableCollection(ACTIVE.values());
+	}
+	
+	public static boolean isActive(Preset preset) {
+		return ACTIVE.containsValue(preset);
 	}
 	
 	public static Preset create(String name, String description, Preset.Mode mode) {
@@ -78,7 +96,7 @@ public class Presets {
 		PresetEditor editor = editPreset(create("", "", Preset.Mode.SET));
 		
 		if (fromSettings) {
-			for (ISetting setting : Settings.ALL.values()) {
+			for (ISetting setting : Settings.getSettings()) {
 				if (!setting.isDefault()) {
 					editor.addSetting(setting, true);
 				}
@@ -91,7 +109,7 @@ public class Presets {
 	public static PresetEditor duplicatePreset(Preset preset) {
 		PresetEditor editor = editPreset(create(String.format("%s - copy", preset.getName()), preset.getDescription(), preset.getMode()));
 		
-		for (ISetting setting : Settings.ALL.values()) {
+		for (ISetting setting : Settings.getSettings()) {
 			if (setting.hasPreset(preset)) {
 				editor.addSetting(setting);
 				editor.copyPresetValue(setting, preset);
@@ -133,25 +151,27 @@ public class Presets {
 		ALL.values().removeIf((preset) -> !ACTIVE.containsValue(preset));
 	}
 	
-	public static void addChangeListener(IPresetChangeListener listener) {
-		CHANGE_LISTENERS.add(listener);
+	public static void addListener(IPresetListener listener) {
+		LISTENERS.add(listener);
 	}
 	
-	public static void removeChangeListener(IPresetChangeListener listener) {
-		CHANGE_LISTENERS.remove(listener);
+	public static void removeListener(IPresetListener listener) {
+		LISTENERS.remove(listener);
 	}
 	
 	public static void presetChanged(PresetEditor editor) {
 		Preset preset = editor.getPreset();
 		
 		ACTIVE.values().remove(preset);
-		if (ACTIVE.putIfAbsent(preset.getName(), preset) == null) {
-			CHANGE_LISTENERS.forEach((listener) -> listener.presetChanged(editor));
+		register(preset);
+		
+		if (isActive(preset)) {
+			LISTENERS.forEach((listener) -> listener.presetChanged(editor));
 		}
 	}
 	
 	public static void presetRemoved(Preset preset) {
-		CHANGE_LISTENERS.forEach((listener) -> listener.presetRemoved(preset));
+		LISTENERS.forEach((listener) -> listener.presetRemoved(preset));
 	}
 	
 	public static class Default {
@@ -603,18 +623,12 @@ public class Presets {
 			Tweaks.WoodenPressurePlate.TICK_PRIORITY_FALLING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
 			
-			ServerConfig.Settings.EDIT_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
-			ServerConfig.Settings.LOCK_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
-			ServerConfig.Settings.EDIT_GAME_MODES.setPresetValue(DEFAULT, new Boolean[] {false, true, false, true});
-			ServerConfig.Settings.LOCK_GAME_MODES.setPresetValue(DEFAULT, new Boolean[] {false, true, false, true});
+			ServerConfig.Permissions.EDIT_SETTINGS.setPresetValue(DEFAULT, true);
+			ServerConfig.Permissions.EDIT_PRESETS.setPresetValue(DEFAULT, true);
+			ServerConfig.Permissions.TICK_COMMAND.setPresetValue(DEFAULT, true);
 			
-			ServerConfig.Presets.EDIT_PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
-			ServerConfig.Presets.EDIT_GAME_MODES.setPresetValue(DEFAULT, new Boolean[] {false, true, false, true});
 			
-			ServerConfig.TickCommand.PERMISSION_LEVEL.setPresetValue(DEFAULT, 2);
-			
-			// Check if every setting has a default value, otherwise log a warning
-			for (ISetting setting : Settings.ALL.values()) {
+			for (ISetting setting : Settings.getSettings()) {
 				if (!setting.hasPreset(DEFAULT)) {
 					RedstoneTweaks.LOGGER.warn(String.format("%s with id %s does not have a default value!", setting.getClass(), setting.getId()));
 				}

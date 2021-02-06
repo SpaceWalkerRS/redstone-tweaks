@@ -212,7 +212,7 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	public void setPresetValue(Preset preset, T value) {
-		if (preset.isEditable() || !hasPreset(preset)) {
+		if (preset.isEditable() ? !opOnly() : !hasPreset(preset)) {
 			presetValues.put(preset, value);
 		}
 	}

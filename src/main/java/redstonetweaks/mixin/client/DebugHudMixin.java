@@ -19,7 +19,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.util.math.BlockPos;
 
-import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.block.entity.BlockEntityTypes;
 import redstonetweaks.block.entity.PowerBlockEntity;
 
 @Mixin(DebugHud.class)
@@ -31,17 +31,17 @@ public class DebugHudMixin {
 	private void onGetRightTextInjectBeforeGetBlock1(CallbackInfoReturnable<List<String>> cir, long l, long m, long n, long o, List<String> text, BlockPos pos) {
 		BlockState state = client.world.getBlockState(pos);
 		
-		if (RedstoneTweaks.POWER_BLOCK_ENTITY_TYPE.supports(state.getBlock())) {
+		if (BlockEntityTypes.POWER_COMPONENT.supports(state.getBlock())) {
 			BlockEntity blockEntity = client.world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PowerBlockEntity) {
-				text.add("real power: " + ((PowerBlockEntity)blockEntity).getPower());
+				text.add(String.format("real power: ", ((PowerBlockEntity)blockEntity).getPower()));
 			}
 		} else if (BlockEntityType.COMPARATOR.supports(state.getBlock())) {
 			BlockEntity blockEntity = client.world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof ComparatorBlockEntity) {
-				text.add("power: " + ((ComparatorBlockEntity)blockEntity).getOutputSignal());
+				text.add(String.format("power: ", ((ComparatorBlockEntity)blockEntity).getOutputSignal()));
 			}
 		}
 	}

@@ -3,10 +3,13 @@ package redstonetweaks.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
+
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.world.server.ServerWorldTickHandler;
@@ -16,7 +19,7 @@ public class TickCommand {
 	public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
 		LiteralArgumentBuilder<ServerCommandSource> builder = CommandManager.
 			literal("tick").
-			requires(context -> context.hasPermissionLevel(ServerConfig.TickCommand.PERMISSION_LEVEL.get())).
+			requires(source -> canUseTickCommand(source)).
 			then(CommandManager.
 				literal("pause").
 				executes(context -> pause(context.getSource()))).
@@ -55,6 +58,7 @@ public class TickCommand {
 			worldTickHandler.resume();
 			source.sendFeedback(new TranslatableText("World ticking has been resumed"), false);
 		}
+		
 		return 1;
 	}
 	
@@ -65,8 +69,21 @@ public class TickCommand {
 			source.sendFeedback(new TranslatableText("Cannot advance as world ticking is not paused"), false);
 		} else {
 			worldTickHandler.advance(count);
-			source.sendFeedback(new TranslatableText("Worlds will tick %s time%s", count, count == 1 ? "" : "s"), false);
+			source.sendFeedback(new TranslatableText("Worlds will tick %s %s", count, count == 1 ? "time" : "times"), false);
 		}
+		
 		return 1;
+	}
+	
+	private static boolean canUseTickCommand(ServerCommandSource source) {
+		try {
+			ServerPlayerEntity player = source.getPlayer();
+			
+			return player.hasPermissionLevel(2) || ServerConfig.Permissions.TICK_COMMAND.get();
+		} catch (CommandSyntaxException e) {
+			e.printStackTrace();
+		}
+		
+		return true;
 	}
 }

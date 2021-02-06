@@ -19,6 +19,6 @@ public class ClientPlayerEntityMixin {
 	
 	@Inject(method = "setClientPermissionLevel", at = @At(value = "RETURN"))
 	private void onSetClientPermissionLevelInjectAtReturn(int newPermissionLevel, CallbackInfo ci) {
-		PermissionManager.permissionLevelChanged();
+		PermissionManager.permissionsChanged();
 	}
 }

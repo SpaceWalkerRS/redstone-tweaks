@@ -11,8 +11,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import redstonetweaks.changelisteners.IPresetChangeListener;
-import redstonetweaks.changelisteners.ISettingChangeListener;
 import redstonetweaks.gui.hotkeys.HotkeysTab;
 import redstonetweaks.gui.info.InfoTab;
 import redstonetweaks.gui.preset.PresetsTab;
@@ -21,6 +19,8 @@ import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.hotkeys.RTKeyBinding;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.listeners.IPresetListener;
+import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
@@ -29,7 +29,7 @@ import redstonetweaks.setting.preset.PresetEditor;
 import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.setting.types.ISetting;
 
-public class RTMenuScreen extends Screen implements ISettingChangeListener, IPresetChangeListener {
+public class RTMenuScreen extends Screen implements ISettingListener, IPresetListener {
 	
 	private static final int TITLE_MARGIN = 8;
 	private static final int TITLE_HEIGHT = 15;
@@ -50,8 +50,8 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener, IPre
 		this.tabs = new ArrayList<>();
 		this.tabButtons = new ArrayList<>();
 		
-		Settings.addChangeListener(this);
-		Presets.addChangeListener(this);
+		Settings.addListener(this);
+		Presets.addListener(this);
 	}
 	
 	@Override
@@ -108,8 +108,8 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener, IPre
 	
 	@Override
 	public void onClose() {
-		Settings.removeChangeListener(this);
-		Presets.removeChangeListener(this);
+		Settings.removeListener(this);
+		Presets.removeListener(this);
 		
 		RTMenuTab selectedTab = getSelectedTab();
 		if (!selectedTab.closeTopWindow()) {
@@ -170,7 +170,7 @@ public class RTMenuScreen extends Screen implements ISettingChangeListener, IPre
 	}
 	
 	private void createTabs() {
-		for (SettingsCategory category : Settings.CATEGORIES.values()) {
+		for (SettingsCategory category : Settings.getCategories()) {
 			tabs.add(new SettingsTab(this, category));
 		}
 		tabs.add(new PresetsTab(this));

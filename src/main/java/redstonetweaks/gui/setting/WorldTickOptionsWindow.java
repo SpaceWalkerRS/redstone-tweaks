@@ -77,9 +77,11 @@ public class WorldTickOptionsWindow extends RTWindow {
 			try {
 				int newInterval = Integer.parseInt(text);
 				
-				worldTickOptions.setInterval(newInterval);
-				
-				changeListener.accept(setting);
+				if (newInterval != worldTickOptions.getInterval()) {
+					worldTickOptions.setInterval(newInterval);
+					
+					changeListener.accept(setting);
+				}
 			} catch (Exception e) {
 				
 			}

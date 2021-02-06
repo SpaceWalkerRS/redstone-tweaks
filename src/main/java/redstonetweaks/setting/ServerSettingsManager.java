@@ -13,21 +13,22 @@ import net.minecraft.util.WorldSavePath;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.changelisteners.ISettingChangeListener;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
+import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.types.ApplyPresetPacket;
 import redstonetweaks.packet.types.LockCategoryPacket;
 import redstonetweaks.packet.types.LockPackPacket;
 import redstonetweaks.packet.types.LockSettingPacket;
 import redstonetweaks.packet.types.ResetSettingPacket;
-import redstonetweaks.packet.types.ResetSettingsPacket;
+import redstonetweaks.packet.types.ResetCategoryPacket;
+import redstonetweaks.packet.types.ResetPackPacket;
 import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.packet.types.SettingsPacket;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 
-public class ServerSettingsManager implements ISettingChangeListener {
+public class ServerSettingsManager implements ISettingListener {
 	
 	private static final String CACHE_DIRECTORY = "redstonetweaks";
 	private static final String SETTINGS_PATH = "settings.txt";
@@ -68,23 +69,34 @@ public class ServerSettingsManager implements ISettingChangeListener {
 		}
 	}
 	
+	public void resetCategory(SettingsCategory category) {
+		deaf = true;
+		
+		category.resetAll();
+		if (server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new ResetCategoryPacket(category));
+		}
+		
+		deaf = false;
+	}
+	
+	public void resetPack(SettingsPack pack) {
+		deaf = true;
+		
+		pack.resetAll();
+		if (server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new ResetPackPacket(pack));
+		}
+		
+		deaf = false;
+	}
+	
 	public void resetSetting(ISetting setting) {
 		deaf = true;
 		
 		setting.reset();
 		if (server.isRemote()) {
 			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new ResetSettingPacket(setting));
-		}
-		
-		deaf = false;
-	}
-	
-	public void resetSettings(SettingsCategory category) {
-		deaf = true;
-		
-		category.resetAll();
-		if (server.isRemote()) {
-			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new ResetSettingsPacket(category));
 		}
 		
 		deaf = false;
@@ -111,11 +123,11 @@ public class ServerSettingsManager implements ISettingChangeListener {
 		
 		loadSettings();
 		
-		Settings.addChangeListener(this);
+		Settings.addListener(this);
 	}
 	
 	public void onShutdown() {
-		Settings.removeChangeListener(this);
+		Settings.removeListener(this);
 		
 		saveSettings();
 	}
@@ -128,7 +140,7 @@ public class ServerSettingsManager implements ISettingChangeListener {
 	
 	private void updateSettingsOfPlayer(ServerPlayerEntity player) {
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
-		SettingsPacket packet = new SettingsPacket(Settings.ALL.values());
+		SettingsPacket packet = new SettingsPacket(Settings.getSettings());
 		
 		if (player == null) {
 			packetHandler.sendPacket(packet);
@@ -156,7 +168,9 @@ public class ServerSettingsManager implements ISettingChangeListener {
 						String[] args = line.split(" = ", 2);
 						
 						ISetting setting = Settings.getSettingFromId(args[0]);
-						if (setting != null) {
+						if (setting == null) {
+							RedstoneTweaks.LOGGER.warn(String.format("Could not find setting with id %s", args[0]));
+						} else {
 							setting.setFromString(args[1]);
 						}
 					} catch (Exception e) {
@@ -184,7 +198,7 @@ public class ServerSettingsManager implements ISettingChangeListener {
 			bw.write(RedstoneTweaks.SETTINGS_VERSION.toString());
 			bw.newLine();
 			
-			for (ISetting setting : Settings.ALL.values()) {
+			for (ISetting setting : Settings.getSettings()) {
 				bw.write(String.format("%s = %s", setting.getId(), setting.getAsString()));
 				
 				bw.newLine();

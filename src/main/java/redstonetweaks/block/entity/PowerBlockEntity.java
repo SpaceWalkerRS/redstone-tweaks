@@ -5,8 +5,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.state.property.Properties;
-import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.helper.BlockEntityHelper;
 
 public class PowerBlockEntity extends BlockEntity {
 	
@@ -14,25 +12,28 @@ public class PowerBlockEntity extends BlockEntity {
 	private boolean powerCorrected;
 	
 	public PowerBlockEntity() {
-		super(RedstoneTweaks.POWER_BLOCK_ENTITY_TYPE);
+		super(BlockEntityTypes.POWER_COMPONENT);
 	}
 	
 	@Override
 	public CompoundTag toTag(CompoundTag tag) {
 		super.toTag(tag);
+		
 		tag.putInt("Power", power);
+		
 		return tag;
 	}
 	
 	@Override
 	public void fromTag(BlockState state, CompoundTag tag) {
 		super.fromTag(state, tag);
+		
 		power = tag.getInt("Power");
 	}
 	
 	@Override
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return new BlockEntityUpdateS2CPacket(pos, BlockEntityHelper.getId(getType()), toTag(new CompoundTag()));
+		return new BlockEntityUpdateS2CPacket(pos, BlockEntityTypes.getId(getType()), toTag(new CompoundTag()));
 	}
 	
 	public int getPower() {

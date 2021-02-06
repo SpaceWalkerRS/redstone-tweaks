@@ -1,5 +1,6 @@
 package redstonetweaks.setting;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -7,12 +8,18 @@ public class SettingsCategory {
 	
 	private final String name;
 	private final Set<SettingsPack> packs;
+	// true if only OP players can change settings in this category
+	private final boolean opOnly;
 	
 	private boolean locked;
 	
 	public SettingsCategory(String name) {
+		this(name, false);
+	}
+	public SettingsCategory(String name, boolean opOnly) {
 		this.name = name;
 		this.packs = new LinkedHashSet<>();
+		this.opOnly = opOnly;
 	}
 	
 	@Override
@@ -34,7 +41,11 @@ public class SettingsCategory {
 	}
 	
 	public Set<SettingsPack> getPacks() {
-		return packs;
+		return Collections.unmodifiableSet(packs);
+	}
+	
+	public boolean opOnly() {
+		return opOnly;
 	}
 	
 	public boolean isLocked() {

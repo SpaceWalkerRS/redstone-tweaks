@@ -64,6 +64,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 				if (!stepByStep || server.getTicks() % Tweaks.Global.WORLD_TICK_OPTIONS.get().getInterval() == 0) {
 					tickStepByStep(shouldKeepTicking);
 				}
+				
 				broadcastChunkData();
 			} else {
 				tickWorldsNormally(shouldKeepTicking);

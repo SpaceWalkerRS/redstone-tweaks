@@ -29,7 +29,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	
 	@Override
 	protected void initList() {
-		for (Preset preset : Presets.ACTIVE.values()) {
+		for (Preset preset : Presets.getActivePresets()) {
 			addEntry(new PresetEntry(preset));
 			
 			updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
@@ -40,13 +40,14 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	
 	@Override
 	protected void filterEntries(String query) {
-		for (Preset preset : Presets.ACTIVE.values()) {
+		for (Preset preset : Presets.getActivePresets()) {
 			if (preset.getName().toLowerCase().contains(query)) {
 				addEntry(new PresetEntry(preset));
 				
 				updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
 			}
 		}
+		
 		addEntry(new AddPresetEntry());
 	}
 	
@@ -104,7 +105,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditPresets = ((RTIMinecraftClient)client).getPresetsManager().canEditPresets();
+			boolean canEditPresets = PermissionManager.canEditPresets();
 			
 			addButton.setActive(canEditPresets);
 			oopsButton.setActive(canEditPresets);
@@ -134,7 +135,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.children = new ArrayList<>();
 			
 			this.applyButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("Apply"), (button) -> {
-				this.preset.apply();
+				((RTIMinecraftClient)screen.client).getPresetsManager().applyPreset(this.preset);
 			});
 			this.children.add(this.applyButton);
 			
@@ -143,7 +144,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			});
 			this.children.add(this.duplicateButton);
 			
-			this.editButton = new RTButtonWidget(0, 0, 34, 20, () -> new TranslatableText(((RTIMinecraftClient)client).getPresetsManager().canEditPresets() && this.preset.isEditable() ? "Edit" : "View"), (button) -> {
+			this.editButton = new RTButtonWidget(0, 0, 34, 20, () -> new TranslatableText(PermissionManager.canEditPresets() && this.preset.isEditable() ? "Edit" : "View"), (button) -> {
 				parent.editPreset(this.preset);
 			});
 			this.children.add(this.editButton);
@@ -195,7 +196,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			} else {
 				hoverAnimation = hoverAnimation / Math.pow(2, speed);
 			}
-			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + entryHeight - 1, -2146365166, -2146365166);
+			fillGradient(matrices, 2, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + entryHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			client.textRenderer.draw(matrices, description, x + getEntryTitleWidth() + 10, y + itemHeight / 2 - 5, TEXT_COLOR);
@@ -235,10 +236,9 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditSettings = PermissionManager.canChangeSettings();
-			boolean canEditPresets = PermissionManager.canManageSettings();
+			boolean canEditPresets = PermissionManager.canEditPresets();
 			
-			applyButton.setActive(canEditSettings);
+			applyButton.setActive(canEditPresets);
 			duplicateButton.setActive(canEditPresets);
 			editButton.updateMessage();
 			deleteButton.setActive(preset.isEditable() && canEditPresets);

@@ -1,5 +1,6 @@
 package redstonetweaks.setting;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -48,7 +49,11 @@ public class SettingsPack {
 	}
 	
 	public Set<ISetting> getSettings() {
-		return settings;
+		return Collections.unmodifiableSet(settings);
+	}
+	
+	public boolean opOnly() {
+		return category.opOnly();
 	}
 	
 	public boolean isLocked() {
