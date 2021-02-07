@@ -10,8 +10,6 @@ import java.io.IOException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.packet.ServerPacketHandler;
@@ -74,13 +72,6 @@ public class ServerPresetsManager implements IPresetListener {
 	private void loadPreset(File file) {
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 			String line;
-			
-			if ((line = br.readLine()) == null) {
-				return;
-			}
-			if (!RedstoneTweaks.SETTINGS_VERSION.equals(RedstoneTweaksVersion.parseVersion(line))) {
-				return;
-			}
 			
 			String name = getPresetNameFromFile(file);
 			Preset preset = Presets.fromName(name);
@@ -160,9 +151,6 @@ public class ServerPresetsManager implements IPresetListener {
 		}
 		
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-			bw.write(RedstoneTweaks.SETTINGS_VERSION.toString());
-			bw.newLine();
-			
 			bw.write(preset.getDescription());
 			bw.newLine();
 			bw.write(preset.getMode().toString());

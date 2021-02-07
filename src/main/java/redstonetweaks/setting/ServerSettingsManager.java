@@ -12,7 +12,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
 
 import redstonetweaks.RedstoneTweaks;
-import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.packet.ServerPacketHandler;
@@ -156,13 +155,6 @@ public class ServerSettingsManager implements ISettingListener {
 			try (BufferedReader br = new BufferedReader(new FileReader(settingsFile))) {
 				String line;
 				
-				if ((line = br.readLine()) == null) {
-					return;
-				}
-				if (!RedstoneTweaks.SETTINGS_VERSION.equals(RedstoneTweaksVersion.parseVersion(line))) {
-					return;
-				}
-				
 				while ((line = br.readLine()) != null) {
 					try {
 						String[] args = line.split(" = ", 2);
@@ -195,9 +187,6 @@ public class ServerSettingsManager implements ISettingListener {
 		}
 		
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(settingsFile))) {
-			bw.write(RedstoneTweaks.SETTINGS_VERSION.toString());
-			bw.newLine();
-			
 			for (ISetting setting : Settings.getSettings()) {
 				bw.write(String.format("%s = %s", setting.getId(), setting.getAsString()));
 				
