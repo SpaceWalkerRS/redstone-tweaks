@@ -94,6 +94,7 @@ public class SettingsTab extends RTMenuTab implements ISettingListener, IPermiss
 		addContent(searchBox);
 		
 		updateButtonsActive();
+		updateButtonPlacements();
 		
 		Settings.addListener(this);
 		PermissionManager.addListener(this);
@@ -105,8 +106,10 @@ public class SettingsTab extends RTMenuTab implements ISettingListener, IPermiss
 		searchBox.render(matrices, mouseX, mouseY, delta);
 		clearSearchBoxButton.render(matrices, mouseX, mouseY, delta);
 		viewModeButton.render(matrices, mouseX, mouseY, delta);
-		lockButton.render(matrices, mouseX, mouseY, delta);
-		resetButton.render(matrices, mouseX, mouseY, delta);
+		if (lockButton.active) {
+			lockButton.render(matrices, mouseX, mouseY, delta);
+			resetButton.render(matrices, mouseX, mouseY, delta);
+		}
 	}
 	
 	@Override
@@ -131,6 +134,7 @@ public class SettingsTab extends RTMenuTab implements ISettingListener, IPermiss
 	
 	public void onSettingChanged(ISetting setting) {
 		updateButtonsActive();
+		updateButtonPlacements();
 		
 		settingsList.onSettingChanged(setting);
 		
@@ -140,8 +144,19 @@ public class SettingsTab extends RTMenuTab implements ISettingListener, IPermiss
 	public void updateButtonsActive() {
 		boolean canManageSettings = PermissionManager.canManageSettings();
 		
-		lockButton.setActive(canManageSettings);
-		resetButton.setActive(canManageSettings && !category.isDefault());
+		lockButton.setActive(canManageSettings && !category.opOnly());
+		resetButton.setActive(canManageSettings && !category.opOnly() && !category.isDefault());
+	}
+	
+	private void updateButtonPlacements() {
+		if (lockButton.active) {
+			viewModeButton.setX(lockButton.getX() - viewModeButton.getWidth() - 5);
+		} else {
+			viewModeButton.setX(resetButton.getX() + resetButton.getWidth() - viewModeButton.getWidth());
+		}
+		
+		clearSearchBoxButton.setX(viewModeButton.getX() - clearSearchBoxButton.getWidth() - 2);
+		searchBox.setWidth(clearSearchBoxButton.getX() - searchBox.getX() - 2);
 	}
 	
 	public SettingsCategory getCategory() {

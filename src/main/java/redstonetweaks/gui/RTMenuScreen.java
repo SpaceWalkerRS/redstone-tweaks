@@ -132,9 +132,7 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		createTabs();
 		createTabButtons();
 		
-		selectedTabIndex = lastOpenedTabIndex;
-		getSelectedTab().init();
-		tabButtons.get(selectedTabIndex).setActive(false);
+		openTab(lastOpenedTabIndex);
 	}
 	
 	@Override
@@ -207,12 +205,20 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	}
 	
 	private void switchTab(int newIndex) {
+		closeSelectedTab();
+		openTab(newIndex);
+	}
+	
+	private void closeSelectedTab() {
 		tabButtons.get(selectedTabIndex).setActive(true);
-		tabButtons.get(newIndex).setActive(false);
-		
 		getSelectedTab().onTabClosed();
-		selectedTabIndex = newIndex;
-		lastOpenedTabIndex = newIndex;
+	}
+	
+	private void openTab(int index) {
+		selectedTabIndex = index;
+		lastOpenedTabIndex = index;
+		
+		tabButtons.get(index).setActive(false);
 		getSelectedTab().init();
 	}
 	

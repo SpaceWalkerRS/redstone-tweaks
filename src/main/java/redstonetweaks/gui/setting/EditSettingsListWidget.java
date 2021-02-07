@@ -187,13 +187,13 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
-			if (!category.opOnly()) {
+			if (lockButton.active) {
 				lockButton.setY(y);
 				lockButton.render(matrices, mouseX, mouseY, tickDelta);
+				
+				resetButton.setY(y);
+				resetButton.render(matrices, mouseX, mouseY, tickDelta);
 			}
-			
-			resetButton.setY(y);
-			resetButton.render(matrices, mouseX, mouseY, tickDelta);
 		}
 		
 		@Override
@@ -203,16 +203,8 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		
 		@Override
 		public void init(int titleWidth) {
-			int x = getX() + titleWidth + 105;
-			
-			if (category.opOnly()) {
-				children.remove(lockButton);
-			} else {
-				lockButton.setX(x);
-				x += lockButton.getWidth() + 2;
-			}
-			
-			resetButton.setX(x);
+			lockButton.setX(getX() + titleWidth + 105);
+			resetButton.setX(lockButton.getX() + lockButton.getWidth() + 2);
 			
 			updateButtonsActive();
 		}
@@ -230,8 +222,8 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		private void updateButtonsActive() {
 			boolean canManageSettings = PermissionManager.canManageSettings();
 			
-			lockButton.setActive(canManageSettings);
-			resetButton.setActive(canManageSettings && !pack.isDefault());
+			lockButton.setActive(canManageSettings && !category.opOnly());
+			resetButton.setActive(canManageSettings && !category.opOnly() && !pack.isDefault());
 		}
 		
 		public void onSettingChanged() {
@@ -318,7 +310,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			buttonPanel.setY(y);
 			buttonPanel.render(matrices, mouseX, mouseY, tickDelta);
 			
-			if (!category.opOnly()) {
+			if (lockButton.active) {
 				lockButton.setY(y);
 				lockButton.render(matrices, mouseX, mouseY, tickDelta);
 			}
@@ -338,21 +330,11 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		
 		@Override
 		public void init(int titleWidth) {
-			int x = getX() + titleWidth;
-			
-			buttonPanel.setX(x);
-			x += buttonPanel.getWidth() + 5;
-			
-			if (category.opOnly()) {
-				children.remove(lockButton);
-			} else {
-				lockButton.setX(x);
-				x += lockButton.getWidth() + 2;
-			}
-			
-			resetButton.setX(x);
+			buttonPanel.setX(getX() + titleWidth);
+			lockButton.setX(buttonPanel.getX() + buttonPanel.getWidth() + 5);
 			
 			updateButtonsActive();
+			setResetButtonX();
 		}
 		
 		@Override
@@ -511,8 +493,12 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			boolean locked = setting.isLocked() || setting.getPack().isLocked() || category.isLocked();
 			
 			buttonPanel.setActive(canChangeSettings && (!locked || canManageSettings));
-			lockButton.setActive(canManageSettings);
+			lockButton.setActive(canManageSettings && !category.opOnly());
 			resetButton.setActive(canChangeSettings && !setting.isDefault() && (!locked || canManageSettings));
+		}
+		
+		private void setResetButtonX() {
+			resetButton.setX(lockButton.getX() + (lockButton.active ? lockButton.getWidth() + 2 : 0));
 		}
 		
 		private boolean titleHovered(int mouseX, int mouseY) {
@@ -526,6 +512,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			buttonPanel.updateButtonLabels();
 			
 			updateButtonsActive();
+			setResetButtonX();
 		}
 	}
 	
