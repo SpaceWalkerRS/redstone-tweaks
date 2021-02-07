@@ -135,8 +135,8 @@ public class PresetsTab extends RTMenuTab {
 		for (SettingsCategory category : Settings.getCategories()) {
 			if (!category.opOnly()) {
 				size++;
-			};
-		};
+			}
+		}
 		categoryButtons = new RTButtonWidget[size];
 		
 		int i = 0;

@@ -32,7 +32,7 @@ public class PermissionManager {
 	}
 	
 	public static boolean isOp() {
-		return client.player != null && client.player.hasPermissionLevel(2);
+		return client.player.hasPermissionLevel(2);
 	}
 	
 	public static boolean canChangeSettings(SettingsCategory category) {

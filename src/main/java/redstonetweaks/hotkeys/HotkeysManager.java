@@ -145,9 +145,7 @@ public class HotkeysManager {
 		
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(hotkeysFile))) {
 			for (RTKeyBinding keyBinding : hotkeys.getKeyBindings()) {
-				bw.write(keyBinding.getName());
-				bw.write(": ");
-				bw.write(keyBinding.getKey().getTranslationKey());
+				bw.write(String.format("%s: %s", keyBinding.getName(), keyBinding.getKey().getTranslationKey()));
 				bw.newLine();
 			}
 		} catch (IOException e) {

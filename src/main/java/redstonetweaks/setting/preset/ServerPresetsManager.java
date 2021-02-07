@@ -170,9 +170,7 @@ public class ServerPresetsManager implements IPresetListener {
 			
 			for (ISetting setting : Settings.getSettings()) {
 				if (setting.hasPreset(preset)) {
-					bw.write(setting.getId());
-					bw.write(" = ");
-					bw.write(setting.getValueAsString());
+					bw.write(String.format("%s = %s", setting.getId(), setting.getPresetValueAsString(preset)));
 					
 					bw.newLine();
 				}
