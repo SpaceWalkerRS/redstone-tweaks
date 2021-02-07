@@ -6,11 +6,14 @@
   "name": "Redstone Tweaks",
   "description": "Redstone Tweaks adds customizability to nearly every aspect of redstone and adds a handful of new features as well.",
   "authors": [
-    "Space Walker",
-    "G4me4u"
+    "Space Walker"
+  ],
+  "contributors": [
+  	"G4me4u"
   ],
   "contact": {
-    "homepage": "https://github.com/SpaceWalkerRS/redstone-tweaks"
+    "sources": "https://github.com/SpaceWalkerRS/redstone-tweaks",
+    "issues": "https://github.com/SpaceWalkerRS/redstone-tweaks/issues"
   },
 
   "license": "MIT License",
@@ -28,5 +31,13 @@
 
   "depends": {
     "minecraft": "1.16.x"
+  },
+  
+  "custom": {
+  	"modmenu": {
+  	  "links": {
+  	    "modmenu.discord": "https://discord.gg/EJC9zkX"
+  	  }
+  	}
   }
 }
