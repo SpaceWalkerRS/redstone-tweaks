@@ -2,9 +2,9 @@ package redstonetweaks.setting;
 
 import net.minecraft.client.MinecraftClient;
 
-import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
+import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.packet.types.ApplyPresetPacket;
 import redstonetweaks.packet.types.LockCategoryPacket;
 import redstonetweaks.packet.types.LockPackPacket;
@@ -13,12 +13,10 @@ import redstonetweaks.packet.types.ResetSettingPacket;
 import redstonetweaks.packet.types.ResetCategoryPacket;
 import redstonetweaks.packet.types.ResetPackPacket;
 import redstonetweaks.packet.types.SettingPacket;
-import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
-import redstonetweaks.setting.types.Setting;
 
-public class ClientSettingsManager {
+public class ClientSettingsManager implements ISettingListener {
 	
 	private final MinecraftClient client;
 	
@@ -26,44 +24,36 @@ public class ClientSettingsManager {
 		this.client = client;
 	}
 	
-	public void lockCategory(SettingsCategory category, boolean locked) {
-		if (client.isInSingleplayer()) {
-			category.setLocked(locked);
-		} else {
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new LockCategoryPacket(category, locked));
+	@Override
+	public void categoryLockedChanged(SettingsCategory category) {
+		if (!client.isInSingleplayer()) {
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new LockCategoryPacket(category));
 		}
 	}
 	
-	public void lockPack(SettingsPack pack, boolean locked) {
-		if (client.isInSingleplayer()) {
-			pack.setLocked(locked);
-		} else {
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new LockPackPacket(pack, locked));
+	@Override
+	public void packLockedChanged(SettingsPack pack) {
+		if (!client.isInSingleplayer()) {
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new LockPackPacket(pack));
 		}
 	}
 	
-	public void lockSetting(ISetting setting, boolean locked) {
-		if (client.isInSingleplayer()) {
-			setting.setLocked(locked);
-		} else {
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new LockSettingPacket(setting, locked));
+	@Override
+	public void settingLockedChanged(ISetting setting) {
+		if (!client.isInSingleplayer()) {
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new LockSettingPacket(setting));
 		}
 	}
 	
-	public <T> void changeSetting(Setting<T> setting, T value) {
-		if (client.isInSingleplayer()) {
-			setting.set(value);
-		} else {
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new SettingPacket(setting, value));
+	@Override
+	public void settingValueChanged(ISetting setting) {
+		if (!client.isInSingleplayer()) {
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new SettingPacket(setting));
 		}
 	}
 	
 	public void resetCategory(SettingsCategory category) {
-		if (client.isInSingleplayer()) {
-			((RTIMinecraftServer)client.getServer()).getSettingsManager().resetCategory(category);
-		} else {
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new ResetCategoryPacket(category));
-		}
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(new ResetCategoryPacket(category));
 	}
 	
 	public void resetPack(SettingsPack pack) {
@@ -87,12 +77,6 @@ public class ClientSettingsManager {
 			((RTIMinecraftServer)client.getServer()).getSettingsManager().applyPreset(preset);
 		} else {
 			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new ApplyPresetPacket(preset));
-		}
-	}
-	
-	public void onServerInfoUpdated() {
-		if (ServerInfo.getModVersion().equals(RedstoneTweaks.MOD_VERSION)) {
-			Settings.enableAll();
 		}
 	}
 	

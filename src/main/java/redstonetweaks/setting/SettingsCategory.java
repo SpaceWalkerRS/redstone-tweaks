@@ -53,11 +53,9 @@ public class SettingsCategory {
 	}
 	
 	public void setLocked(boolean locked) {
-		boolean changed = this.locked != locked;
-		
-		this.locked = locked;
-		
-		if (changed) {
+		if (this.locked != locked) {
+			this.locked = locked;
+			
 			Settings.categoryLockedChanged(this);
 		}
 	}

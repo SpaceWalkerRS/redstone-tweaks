@@ -34,7 +34,7 @@ public class WorldTimeSyncPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((RTIMinecraftClient)client).getTickInfoLabelRenderer().onWorldTimeSyncPacketReceived(this);
+		((RTIMinecraftClient)client).getTickInfoLabelRenderer().syncWorldTime(worldTime);
 	}
 
 }

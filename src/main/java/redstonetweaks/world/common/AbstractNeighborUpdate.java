@@ -3,6 +3,7 @@ package redstonetweaks.world.common;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -16,6 +17,11 @@ public class AbstractNeighborUpdate {
 	private RelativePos updatePos;
 	
 	private BlockPos hashPos;
+	
+	// FOR PACKET DECODING ONLY
+	public AbstractNeighborUpdate() {
+		
+	}
 	
 	public AbstractNeighborUpdate(Mode mode, RelativePos notifierPos, RelativePos updatePos) {
 		this.mode = mode;
@@ -41,6 +47,18 @@ public class AbstractNeighborUpdate {
 	@Override
 	public String toString() {
 		return mode + ":" + notifierPos + ":" + updatePos;
+	}
+	
+	public void encode(PacketByteBuf buffer) {
+		buffer.writeByte(mode.getIndex());
+		buffer.writeByte(notifierPos.getIndex());
+		buffer.writeByte(updatePos.getIndex());
+	}
+	
+	public void decode(PacketByteBuf buffer) {
+		mode = Mode.fromIndex(buffer.readByte());
+		notifierPos = RelativePos.fromIndex(buffer.readByte());
+		updatePos = RelativePos.fromIndex(buffer.readByte());
 	}
 	
 	public static AbstractNeighborUpdate parseRelativeNeighborUpdate(String string) {

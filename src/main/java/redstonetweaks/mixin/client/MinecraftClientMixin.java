@@ -15,6 +15,7 @@ import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.setting.EditSettingsListWidget;
 import redstonetweaks.hotkeys.HotkeysManager;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.listeners.Listeners;
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.ClientSettingsManager;
@@ -56,10 +57,11 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "RETURN"))
 	private void onDisconnect(Screen screen, CallbackInfo ci) {
+		Listeners.clear();
 		ServerInfo.clear();
 		worldTickHandler.onDisconnect();
-		settingsManager.onDisconnect();
 		presetsManager.onDisconnect();
+		settingsManager.onDisconnect();
 		RTMenuScreen.clearLastSearchQueries();
 		RTMenuScreen.resetLastOpenedTabIndex();
 		EditSettingsListWidget.resetLastModes();

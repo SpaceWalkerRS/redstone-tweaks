@@ -36,7 +36,7 @@ public class TickStatusPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((RTIMinecraftClient)client).getWorldTickHandler().onTickStatusPacketReceived(this);
+		((RTIMinecraftClient)client).getWorldTickHandler().syncStatus(status);
 	}
 
 }

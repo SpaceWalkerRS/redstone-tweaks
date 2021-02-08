@@ -6,6 +6,7 @@ import net.minecraft.server.MinecraftServer;
 
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.util.PacketUtils;
 
 public class LockCategoryPacket extends RedstoneTweaksPacket {
 	
@@ -33,7 +34,7 @@ public class LockCategoryPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		category = Settings.getCategoryFromName(buffer.readString(MAX_STRING_LENGTH));
+		category = Settings.getCategoryFromName(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
 		locked = buffer.readBoolean();
 	}
 	
@@ -46,7 +47,7 @@ public class LockCategoryPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (category != null && !client.isInSingleplayer()) {
+		if (!client.isInSingleplayer() && category != null) {
 			category.setLocked(locked);
 		}
 	}

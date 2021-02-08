@@ -1,5 +1,7 @@
 package redstonetweaks.world.common;
 
+import net.minecraft.network.PacketByteBuf;
+
 public class WorldTickOptions {
 	
 	private Mode mode;
@@ -30,6 +32,18 @@ public class WorldTickOptions {
 	@Override
 	public String toString() {
 		return mode + ";" + dimensionFilter + ";" + interval;
+	}
+	
+	public void encode(PacketByteBuf buffer) {
+		buffer.writeByte(mode.getIndex());
+		buffer.writeByte(dimensionFilter.getIndex());
+		buffer.writeInt(interval);
+	}
+	
+	public void decode(PacketByteBuf buffer) {
+		mode = Mode.fromIndex(buffer.readByte());
+		dimensionFilter = DimensionFilter.fromIndex(buffer.readByte());
+		interval = buffer.readInt();
 	}
 	
 	public static WorldTickOptions parseWorldTickOptions(String string) {

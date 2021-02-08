@@ -58,6 +58,7 @@
 	"server.LecternBlockMixin",
 	"server.LeverBlockMixin",
 	"server.MagmaBlockMixin",
+	"server.MinecraftDedicatedServerMixin",
 	"server.MinecraftServerMixin",
 	"server.NoteBlockMixin",
 	"server.ObserverBlockMixin",

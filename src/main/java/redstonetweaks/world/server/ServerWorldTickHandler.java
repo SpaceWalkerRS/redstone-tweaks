@@ -5,7 +5,6 @@ import java.util.function.BooleanSupplier;
 
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameRules;
 
@@ -17,7 +16,6 @@ import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.packet.types.DoWorldTicksPacket;
 import redstonetweaks.packet.types.TaskSyncPacket;
-import redstonetweaks.packet.types.TickPausePacket;
 import redstonetweaks.packet.types.TickStatusPacket;
 import redstonetweaks.packet.types.WorldSyncPacket;
 import redstonetweaks.packet.types.WorldTimeSyncPacket;
@@ -365,45 +363,38 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	
 	private void broadcastChunkData() {
 		for (ServerWorld world : server.getWorlds()) {
-			ServerChunkManager chunkManager = world.getChunkManager();
-			((RTIServerChunkManager)chunkManager).broadcastChunkData();
+			((RTIServerChunkManager)world.getChunkManager()).broadcastChunkData();
 		}
 	}
 	
 	private void syncPause() {
-		DoWorldTicksPacket packet = new DoWorldTicksPacket(doWorldTicks());
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(new DoWorldTicksPacket(doWorldTicks()));
 	}
 	
 	private void syncStatus() {
-		TickStatusPacket packet = new TickStatusPacket(status);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(new TickStatusPacket(status));
 	}
 	
 	private void syncCurrentWorld() {
-		WorldSyncPacket packet = new WorldSyncPacket(currentWorld);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(new WorldSyncPacket(currentWorld));
 	}
 	
 	private void syncClientWorldTime() {
-		WorldTimeSyncPacket packet = new WorldTimeSyncPacket(getWorldTime());
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(new WorldTimeSyncPacket(getWorldTime()));
 	}
 	
 	private void syncCurrentTask() {
-		TaskSyncPacket packet = new TaskSyncPacket(currentTask);
-		((RTIMinecraftServer)server).getPacketHandler().sendPacket(packet);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacket(new TaskSyncPacket(currentTask));
 	}
 	
-	public void onTickPausePacketReceived(TickPausePacket packet) {
-		if (packet.event == TickPausePacket.PAUSE) {
+	public void pauseWorldTicking(boolean pause) {
+		if (pause) {
 			if (doWorldTicks()) {
 				pause();
 			} else {
 				resume();
 			}
-		} else
-		if (packet.event == TickPausePacket.ADVANCE) {
+		} else {
 			if (!doWorldTicks()) {
 				advance(1);
 			}

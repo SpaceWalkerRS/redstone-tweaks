@@ -80,7 +80,7 @@ public class RedstoneTweaksVersion {
 		return create(Type.SNAPSHOT, major, minor, patch, snapshot);
 	}
 	
-	private static RedstoneTweaksVersion create(Type type, int major, int minor, int patch, int snapshot) {
+	public static RedstoneTweaksVersion create(Type type, int major, int minor, int patch, int snapshot) {
 		if (type != Type.INVALID && major >= 0 && minor >= 0 && patch >= 0 && snapshot >= (type == Type.SNAPSHOT ? 1 : 0)) {
 			return new RedstoneTweaksVersion(type, major, minor, patch, snapshot);
 		}
@@ -88,34 +88,38 @@ public class RedstoneTweaksVersion {
 		return INVALID_VERSION;
 	}
 	
-	public static RedstoneTweaksVersion parseVersion(String string) {
-		try {
-			String[] args = string.split("-pre");
-			String[] version = args[0].split("[.]");
-			
-			if (version.length == 3) {
-				int major = Integer.parseInt(version[0]);
-				int minor = Integer.parseInt(version[1]);
-				int patch = Integer.parseInt(version[2]);
-				
-				if (args.length == 1) {
-					return createRelease(major, minor, patch);
-				} else if (args.length == 2) {
-					return createSnapshot(major, minor, patch, Integer.parseInt(args[1]));
-				}
-			}
-		} catch (Exception e) {
-			
-		}
-		
-		return INVALID_VERSION;
-	}
-	
 	public enum Type {
 		
-		INVALID,
-		RELEASE,
-		SNAPSHOT;
+		INVALID(0),
+		RELEASE(1),
+		SNAPSHOT(2);
 		
+		private static final Type[] TYPES;
+		
+		static {
+			TYPES = new Type[values().length];
+			
+			for (Type type : values()) {
+				TYPES[type.index] = type;
+			}
+		}
+		
+		private final int index;
+		
+		private Type(int index) {
+			this.index = index;
+		}
+		
+		public int getIndex() {
+			return index;
+		}
+		
+		public static Type fromIndex(int index) {
+			if (index < 0 || index >= TYPES.length) {
+				return INVALID;
+			}
+			
+			return TYPES[index];
+		}
 	}
 }

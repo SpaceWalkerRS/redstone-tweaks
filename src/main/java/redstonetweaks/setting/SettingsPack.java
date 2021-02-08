@@ -61,11 +61,9 @@ public class SettingsPack {
 	}
 	
 	public void setLocked(boolean locked) {
-		boolean changed = this.locked != locked;
-		
-		this.locked = locked;
-		
-		if (changed) {
+		if (this.locked != locked) {
+			this.locked = locked;
+			
 			Settings.packLockedChanged(this);
 		}
 	}

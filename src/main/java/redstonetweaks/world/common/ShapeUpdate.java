@@ -4,8 +4,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-import redstonetweaks.util.UpdateType;
-
 public class ShapeUpdate extends NeighborUpdate {
 	
 	private final BlockState notifierState;

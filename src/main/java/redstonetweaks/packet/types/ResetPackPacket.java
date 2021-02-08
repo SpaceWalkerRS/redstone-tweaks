@@ -7,10 +7,11 @@ import net.minecraft.server.MinecraftServer;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsPack;
+import redstonetweaks.util.PacketUtils;
 
 public class ResetPackPacket extends RedstoneTweaksPacket {
 	
-	public SettingsPack pack;
+	private SettingsPack pack;
 	
 	public ResetPackPacket() {
 		
@@ -27,7 +28,7 @@ public class ResetPackPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		pack = Settings.getPackFromId(buffer.readString(MAX_STRING_LENGTH));
+		pack = Settings.getPackFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
 	}
 	
 	@Override
@@ -39,7 +40,7 @@ public class ResetPackPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (pack != null && !client.isInSingleplayer()) {
+		if (!client.isInSingleplayer() && pack != null) {
 			pack.resetAll();
 		}
 	}

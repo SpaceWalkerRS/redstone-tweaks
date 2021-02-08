@@ -12,8 +12,8 @@ import redstonetweaks.world.common.IncompleteBlockAction;
 public class IncompleteBlockActionPacket extends RedstoneTweaksPacket {
 	
 	public BlockPos pos;
-	public Block block;
 	public int type;
+	public Block block;
 	
 	public IncompleteBlockActionPacket() {
 		
@@ -29,14 +29,14 @@ public class IncompleteBlockActionPacket extends RedstoneTweaksPacket {
 	public void encode(PacketByteBuf buffer) {
 		buffer.writeBlockPos(pos);
 		buffer.writeByte(type);
-		buffer.writeVarInt(Registry.BLOCK.getRawId(block));
+		buffer.writeInt(Registry.BLOCK.getRawId(block));
 	}
 
 	@Override
 	public void decode(PacketByteBuf buffer) {
 		pos = buffer.readBlockPos();
 		type = buffer.readByte();
-		block = Registry.BLOCK.get(buffer.readVarInt());
+		block = Registry.BLOCK.get(buffer.readInt());
 	}
 
 	@Override
@@ -46,6 +46,6 @@ public class IncompleteBlockActionPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((RTIClientWorld)client.world).getIncompleteActionScheduler().onIncompleteActionPacketReceived(this);
+		((RTIClientWorld)client.world).getIncompleteActionScheduler().scheduleBlockAction(pos, type, block);
 	}
 }

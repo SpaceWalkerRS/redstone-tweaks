@@ -3,6 +3,7 @@ package redstonetweaks.setting.types;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.minecraft.network.PacketByteBuf;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
@@ -83,11 +84,9 @@ public abstract class Setting<T> implements ISetting {
 	
 	@Override
 	public void setLocked(boolean locked) {
-		boolean changed = this.locked != locked;
-		
-		this.locked = locked;
-		
-		if (changed) {
+		if (this.locked != locked) {
+			this.locked = locked;
+			
 			Settings.settingLockedChanged(this);
 		}
 	}
@@ -103,48 +102,33 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	@Override
-	public String getAsString() {
-		return (isLocked() ? "1" : "0") + getValueAsString();
+	public void encode(PacketByteBuf buffer) {
+		write(buffer, get());
 	}
 	
 	@Override
-	public void setFromString(String string) {
-		setLocked(string.charAt(0) == '1');
-		setValueFromString(string.substring(1));
+	public void decode(PacketByteBuf buffer) {
+		set(read(buffer));
 	}
 	
 	@Override
-	public String getValueAsString() {
-		return valueToString(get());
+	public void encodePreset(PacketByteBuf buffer, Preset preset) {
+		write(buffer, getPresetValue(preset));
 	}
 	
 	@Override
-	public void setValueFromString(String string) {
-		try {
-			set(stringToValue(string));
-		} catch (Exception e) {
-			
-		}
-	}
-	
-	@Override
-	public String getPresetValueAsString(Preset preset) {
-		return valueToString(getPresetValueOrDefault(preset));
-	}
-	
-	@Override
-	public void setPresetValueFromString(Preset preset, String string) {
-		try {
-			setPresetValue(preset, stringToValue(string));
-		} catch (Exception e) {
-			
-		}
+	public void decodePreset(PacketByteBuf buffer, Preset preset) {
+		setPresetValue(preset, read(buffer));
 	}
 	
 	@Override
 	public void applyPreset(Preset preset) {
 		T value = getPresetValue(preset);
-		if (value != null) {
+		if (value == null) {
+			if (preset.getMode() == Preset.Mode.SET_OR_DEFAULT) {
+				reset();
+			}
+		} else {
 			set(value);
 		}
 	}
@@ -179,17 +163,15 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	public void set(T newValue) {
-		boolean changed = !valueEquals(value, newValue);
-		
-		value = newValue;
-		
-		if (changed) {
+		if (!valueEquals(value, newValue)) {
+			value = newValue;
+			
 			Settings.settingValueChanged(this);
 		}
 	}
 	
 	public T getDefault() {
-		T value = getPresetValue(Presets.Default.DEFAULT);
+		T value = getPresetValue(Presets.fromId(0));
 		if (value == null) {
 			return getBackupValue();
 		}
@@ -197,11 +179,9 @@ public abstract class Setting<T> implements ISetting {
 		return value;
 	}
 	
-	public String valueToString(T value) {
-		return value.toString();
-	}
+	public abstract void write(PacketByteBuf buffer, T value);
 	
-	public abstract T stringToValue(String string);
+	public abstract T read(PacketByteBuf buffer);
 	
 	public T getPresetValue(Preset preset) {
 		return presetValues.get(preset);

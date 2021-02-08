@@ -1,9 +1,7 @@
 package redstonetweaks.mixin.server;
 
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -11,12 +9,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
+import redstonetweaks.listeners.Listeners;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.ServerSettingsManager;
@@ -35,14 +33,6 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	
 	@Shadow public abstract Iterable<ServerWorld> getWorlds();
 	
-	@Inject(method = "startServer", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "RETURN"))
-	private static <S extends MinecraftServer> void onStartServerInjectAtReturn(Function<Thread, S> serverFactory, CallbackInfoReturnable<MinecraftServer> cir,
-			AtomicReference<S> atomicReference, Thread thread, S server) 
-	{
-		((RTIMinecraftServer)server).getSettingsManager().onStartUp();
-		((RTIMinecraftServer)server).getPresetsManager().onStartUp();
-	}
-	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(CallbackInfo ci) {
 		ServerInfo.onServerStart();
@@ -59,8 +49,12 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	
 	@Inject(method = "shutdown", at = @At(value = "RETURN"))
 	private void onShutdown(CallbackInfo ci) {
+		Listeners.clear();
+		
 		settingsManager.onShutdown();
 		presetsManager.onShutdown();
+		
+		ServerInfo.onServerStop();
 	}
 	
 	@Redirect(method = "tickWorlds", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z"))

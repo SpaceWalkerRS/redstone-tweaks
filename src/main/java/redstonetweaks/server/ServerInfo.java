@@ -12,6 +12,10 @@ public class ServerInfo {
 		modVersion = RedstoneTweaks.MOD_VERSION;
 	}
 	
+	public static void onServerStop() {
+		clear();
+	}
+	
 	public static void clear() {
 		modVersion = RedstoneTweaksVersion.INVALID_VERSION;
 	}

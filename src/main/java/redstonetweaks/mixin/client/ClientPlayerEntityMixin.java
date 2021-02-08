@@ -16,6 +16,7 @@ import redstonetweaks.client.PermissionManager;
 public class ClientPlayerEntityMixin {
 	
 	@Shadow @Final protected MinecraftClient client;
+	@Shadow protected int clientPermissionLevel;
 	
 	@Inject(method = "setClientPermissionLevel", at = @At(value = "RETURN"))
 	private void onSetClientPermissionLevelInjectAtReturn(int newPermissionLevel, CallbackInfo ci) {

@@ -1,9 +1,9 @@
 package redstonetweaks.world.client;
 
 import net.minecraft.client.world.ClientWorld;
-import redstonetweaks.packet.types.IncompleteBlockActionPacket;
+
+import redstonetweaks.world.common.IIncompleteAction;
 import redstonetweaks.world.common.IIncompleteActionScheduler;
-import redstonetweaks.world.common.IncompleteBlockAction;
 
 public class ClientIncompleteActionScheduler implements IIncompleteActionScheduler {
 	
@@ -20,7 +20,8 @@ public class ClientIncompleteActionScheduler implements IIncompleteActionSchedul
 		return hasScheduledActions;
 	}
 	
-	public void onIncompleteActionPacketReceived(IncompleteBlockActionPacket packet) {
-		new IncompleteBlockAction(packet.pos, packet.type, packet.block).tryContinue(world);
+	@Override
+	public void scheduleAction(IIncompleteAction action) {
+		action.tryContinue(world);
 	}
 }

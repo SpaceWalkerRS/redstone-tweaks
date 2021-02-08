@@ -31,7 +31,7 @@ public class DebugHudMixin {
 	private void onGetRightTextInjectBeforeGetBlock1(CallbackInfoReturnable<List<String>> cir, long l, long m, long n, long o, List<String> text, BlockPos pos) {
 		BlockState state = client.world.getBlockState(pos);
 		
-		if (BlockEntityTypes.POWER_COMPONENT.supports(state.getBlock())) {
+		if (BlockEntityTypes.POWER_BLOCK.supports(state.getBlock())) {
 			BlockEntity blockEntity = client.world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PowerBlockEntity) {

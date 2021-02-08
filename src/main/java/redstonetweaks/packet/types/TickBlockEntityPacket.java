@@ -22,20 +22,19 @@ public class TickBlockEntityPacket extends RedstoneTweaksPacket {
 	public void encode(PacketByteBuf buffer) {
 		buffer.writeBlockPos(pos);
 	}
-
+	
 	@Override
 	public void decode(PacketByteBuf buffer) {
 		pos = buffer.readBlockPos();
 	}
-
+	
 	@Override
 	public void execute(MinecraftServer server) {
 		
 	}
-
+	
 	@Override
 	public void execute(MinecraftClient client) {
-		((RTIMinecraftClient)client).getWorldTickHandler().onTickBlockEntityPacketReveiced(this);
+		((RTIMinecraftClient)client).getWorldTickHandler().tickBlockEntity(pos);
 	}
-
 }

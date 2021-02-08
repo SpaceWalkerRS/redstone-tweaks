@@ -2,8 +2,6 @@ package redstonetweaks.world.common;
 
 import net.minecraft.util.math.BlockPos;
 
-import redstonetweaks.util.UpdateType;
-
 // A neighbor update object with absolute positions
 public class NeighborUpdate {
 	

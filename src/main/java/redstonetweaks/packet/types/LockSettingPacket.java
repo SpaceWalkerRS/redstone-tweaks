@@ -6,6 +6,7 @@ import net.minecraft.server.MinecraftServer;
 
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
+import redstonetweaks.util.PacketUtils;
 
 public class LockSettingPacket extends RedstoneTweaksPacket {
 	
@@ -33,7 +34,7 @@ public class LockSettingPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		setting = Settings.getSettingFromId(buffer.readString(MAX_STRING_LENGTH));
+		setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
 		locked = buffer.readBoolean();
 	}
 	
@@ -46,7 +47,7 @@ public class LockSettingPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (setting != null && !client.isInSingleplayer()) {
+		if (!client.isInSingleplayer() && setting != null) {
 			setting.setLocked(locked);
 		}
 	}

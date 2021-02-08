@@ -12,10 +12,10 @@ public class BlockEntityTypes {
 	
 	private static final Map<BlockEntityType<? extends BlockEntity>, Integer> IDS;
 	
-	public static BlockEntityType<PowerBlockEntity> POWER_COMPONENT;
+	public static BlockEntityType<PowerBlockEntity> POWER_BLOCK;
 	
 	public static void register() {
-		POWER_COMPONENT = Registry.register(Registry.BLOCK_ENTITY_TYPE, "redstonetweaks", BlockEntityType.Builder.create(() -> new PowerBlockEntity(), Blocks.REDSTONE_WIRE, Blocks.TARGET, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE).build(null));
+		POWER_BLOCK = Registry.register(Registry.BLOCK_ENTITY_TYPE, "redstonetweaks", BlockEntityType.Builder.create(() -> new PowerBlockEntity(), Blocks.REDSTONE_WIRE, Blocks.TARGET, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE).build(null));
 	}
 	
 	public static int getId(BlockEntityType<? extends BlockEntity> blockEntityType) {
@@ -33,7 +33,7 @@ public class BlockEntityTypes {
 		// 1-14 are used by some vanilla block entities
 		// In case they add more, just make the numbers sufficiently large
 		IDS.put(BlockEntityType.COMPARATOR, 101);
-		IDS.put(BlockEntityTypes.POWER_COMPONENT, 102);
+		IDS.put(BlockEntityTypes.POWER_BLOCK, 102);
 		
 	}
 }

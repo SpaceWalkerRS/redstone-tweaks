@@ -47,15 +47,13 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 	
 	@Inject(method = "schedule", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
 	private void onScheduledInjectBeforeAddScheduledTick(BlockPos pos, T object, int delay, TickPriority priority, CallbackInfo ci) {
-		if (Tweaks.Global.DELAY_MULTIPLIER.get() == 0) {
-			tickConsumer.accept(new ScheduledTick<>(pos, object, 0, priority));
-		} else {
+		if (Tweaks.Global.DELAY_MULTIPLIER.get() != 0) {
 			if (Tweaks.Global.RANDOMIZE_TICK_PRIORITIES.get()) {
 				int index = world.getRandom().nextInt(TickPriority.values().length) + TickPriority.values()[0].getIndex();
 				priority = TickPriority.byIndex(index);
 			}
 			
-			addScheduledTick(new ScheduledTick<>(pos, object, world.getTime() + getRandomDelay(delay), priority));
+			addScheduledTick(new ScheduledTick<>(pos, object, world.getTime() + getDelay(delay), priority));
 		}
 		
 		ci.cancel();
@@ -64,11 +62,13 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 	@Override
 	public boolean hasScheduledTickAtTime(BlockPos pos, Object object, int delay) {
 		long time = world.getTime() + delay;
+		
 		for (ScheduledTick<T> tick : scheduledTickActions) {
 			if (tick.pos.equals(pos) && tick.getObject() == object && tick.time == time) {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 	
@@ -141,13 +141,14 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 		}
 	}
 	
-	private int getRandomDelay(int delay) {
-		int min = 1;
-		int max = 127;
-		
+	private int getDelay(int delay) {
 		if (Tweaks.Global.RANDOMIZE_DELAYS.get()) {
+			int min = 1;
+			int max = 127;
+			
 			delay = min + world.getRandom().nextInt(max);
 		}
+		
 		return Tweaks.Global.DELAY_MULTIPLIER.get() * delay;
 	}
 }

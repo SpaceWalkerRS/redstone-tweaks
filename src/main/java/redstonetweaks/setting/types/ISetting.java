@@ -1,5 +1,7 @@
 package redstonetweaks.setting.types;
 
+import net.minecraft.network.PacketByteBuf;
+
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 
@@ -29,17 +31,13 @@ public interface ISetting {
 	
 	public void reset();
 	
-	public String getAsString();
+	public void encode(PacketByteBuf buffer);
 	
-	public void setFromString(String string);
+	public void decode(PacketByteBuf buffer);
 	
-	public String getValueAsString();
+	public void encodePreset(PacketByteBuf buffer, Preset preset);
 	
-	public void setValueFromString(String string);
-	
-	public String getPresetValueAsString(Preset preset);
-	
-	public void setPresetValueFromString(Preset preset, String string) ;
+	public void decodePreset(PacketByteBuf buffer, Preset preset);
 	
 	public void applyPreset(Preset preset);
 	

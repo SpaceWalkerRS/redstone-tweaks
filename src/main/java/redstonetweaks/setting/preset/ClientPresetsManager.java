@@ -18,7 +18,7 @@ public class ClientPresetsManager {
 	}
 	
 	public void onDisconnect() {
-		Presets.toDefault();
+		Presets.reset();
 	}
 	
 	public void applyPreset(Preset preset) {

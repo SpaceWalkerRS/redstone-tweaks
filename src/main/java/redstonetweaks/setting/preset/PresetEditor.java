@@ -3,13 +3,16 @@ package redstonetweaks.setting.preset;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.minecraft.network.PacketByteBuf;
+
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.Setting;
+import redstonetweaks.util.PacketUtils;
 
 public class PresetEditor {
 	
-	private final Preset TEMP = new Preset("TEMP", "A preset used to temporarily store values while a preset is being edited.", Preset.Mode.SET, true);
+	private final Preset TEMP = new Preset(true, "TEMP", "A preset used to temporarily store values while a preset is being edited.", Preset.Mode.SET);
 	
 	private final Preset preset;
 	
@@ -131,7 +134,7 @@ public class PresetEditor {
 		if (useCurrentValue) {
 			setting.copyValueToPreset(TEMP);
 		} else {
-			setting.copyPresetValue(Presets.Default.DEFAULT, TEMP);
+			setting.copyPresetValue(Presets.fromId(0), TEMP);
 		}
 	}
 	
@@ -149,10 +152,6 @@ public class PresetEditor {
 		return (saved || !setting.hasPreset(TEMP)) ? setting.getPresetValueOrDefault(preset) : setting.getPresetValueOrDefault(TEMP);
 	}
 	
-	public String getValueAsString(ISetting setting) {
-		return (saved || !setting.hasPreset(TEMP)) ? setting.getPresetValueAsString(preset) : setting.getPresetValueAsString(TEMP);
-	}
-	
 	public <T> void setValue(Setting<T> setting, T value) {
 		if (hasSetting(setting)) {
 			setting.setPresetValue(TEMP, value);
@@ -163,14 +162,59 @@ public class PresetEditor {
 		}
 	}
 	
-	public void setValueFromString(ISetting setting, String value) {
-		if (hasSetting(setting)) {
-			setting.setPresetValueFromString(TEMP, value);
-			
-			if (currentSettings.contains(setting)) {
-				changedSettings.add(setting);
+	public void encode(PacketByteBuf buffer) {
+		buffer.writeInt(changedSettings.size());
+		for (ISetting setting : changedSettings) {
+			buffer.writeString(setting.getId());
+			encodeSetting(buffer, setting);
+		}
+		
+		buffer.writeInt(addedSettings.size());
+		for (ISetting setting : addedSettings) {
+			buffer.writeString(setting.getId());
+			encodeSetting(buffer, setting);
+		}
+		
+		buffer.writeInt(removedSettings.size());
+		for (ISetting setting : removedSettings) {
+			buffer.writeString(setting.getId());
+		}
+	}
+	
+	private void encodeSetting(PacketByteBuf buffer, ISetting setting) {
+		setting.encodePreset(buffer, saved || !setting.hasPreset(TEMP) ? preset : TEMP);
+	}
+	
+	public void decode(PacketByteBuf buffer) {
+		int changedCount = buffer.readInt();
+		for (int i = 0; i < changedCount; i++) {
+			ISetting setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
+			if (setting != null) {
+				addSetting(setting);
+				decodeSetting(buffer, setting);
 			}
 		}
+		
+		int addedCount = buffer.readInt();
+		for (int i = 0; i < addedCount; i++) {
+			ISetting setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
+			if (setting != null) {
+				addSetting(setting);
+				decodeSetting(buffer, setting);
+			}
+		}
+		
+		int removedCount = buffer.readInt();
+		for (int i = 0; i < removedCount; i++) {
+			ISetting setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
+			if (setting != null) {
+				removeSetting(setting);
+			}
+		}
+	}
+	
+	private void decodeSetting(PacketByteBuf buffer, ISetting setting) {
+		setting.decodePreset(buffer, TEMP);
 	}
 	
 	public void copyPresetValue(ISetting setting, Preset preset) {
@@ -184,7 +228,7 @@ public class PresetEditor {
 	}
 	
 	public boolean canSave() {
-		return Presets.isNameValid(name) && (name.equals(previousName) || Presets.isNameAvailable(name));
+		return !saved && Presets.isNameValid(name) && (name.equals(previousName) || Presets.isNameAvailable(name));
 	}
 	
 	public void trySaveChanges() {
@@ -202,31 +246,23 @@ public class PresetEditor {
 		
 		for (ISetting setting : changedSettings) {
 			setting.copyPresetValue(TEMP, preset);
-			setting.removePreset(TEMP);
 		}
 		for (ISetting setting : addedSettings) {
 			setting.copyPresetValue(TEMP, preset);
-			setting.removePreset(TEMP);
 		}
 		for (ISetting setting : removedSettings) {
 			setting.removePreset(preset);
-			setting.removePreset(TEMP);
 		}
 		
+		TEMP.remove();
+		
 		saved = true;
+		
 		Presets.presetChanged(this);
 	}
 	
 	public void discardChanges() {
-		for (ISetting setting : changedSettings) {
-			setting.removePreset(TEMP);
-		}
-		for (ISetting setting : addedSettings) {
-			setting.removePreset(TEMP);
-		}
-		for (ISetting setting : removedSettings) {
-			setting.removePreset(TEMP);
-		}
+		TEMP.remove();
 		
 		saved = true;
 	}

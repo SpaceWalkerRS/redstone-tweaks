@@ -2,12 +2,10 @@ package redstonetweaks.world.client;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.BlockPos;
+
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.packet.types.DoWorldTicksPacket;
-import redstonetweaks.packet.types.TaskSyncPacket;
-import redstonetweaks.packet.types.TickBlockEntityPacket;
-import redstonetweaks.packet.types.TickStatusPacket;
-import redstonetweaks.packet.types.WorldSyncPacket;
 import redstonetweaks.world.common.WorldTickHandler;
 
 public class ClientWorldTickHandler extends WorldTickHandler {
@@ -32,12 +30,12 @@ public class ClientWorldTickHandler extends WorldTickHandler {
 		doWorldTicks = packet.doWorldTicks;
 	}
 	
-	public void onTickStatusPacketReceived(TickStatusPacket packet) {
-		setStatus(packet.status);
+	public void syncStatus(Status status) {
+		setStatus(status);
 	}
 	
-	public void onWorldSyncPacketReceived(WorldSyncPacket packet) {
-		if (packet.worldName.equals(client.world.getRegistryKey().getValue().toString())) {
+	public void syncWorld(String worldName) {
+		if (worldName.equals(client.world.getRegistryKey().getValue().toString())) {
 			setCurrentWorld(client.world);
 		} else {
 			setCurrentWorld(null);
@@ -46,7 +44,7 @@ public class ClientWorldTickHandler extends WorldTickHandler {
 		setCurrentTask(Task.NONE);
 	}
 	
-	public void onTaskSyncPacketReceived(TaskSyncPacket packet) {
+	public void syncTask(Task task) {
 		if (currentWorld != null) {
 			
 			// Ending the previous task
@@ -78,7 +76,7 @@ public class ClientWorldTickHandler extends WorldTickHandler {
 				break;
 			}
 			
-			setCurrentTask(packet.currentTask);
+			setCurrentTask(task);
 			
 			// Starting the new task
 			switch (currentTask) {
@@ -111,9 +109,10 @@ public class ClientWorldTickHandler extends WorldTickHandler {
 		}
 	}
 	
-	public void onTickBlockEntityPacketReveiced(TickBlockEntityPacket packet) {
+	public void tickBlockEntity(BlockPos pos) {
 		if (currentWorld != null) {
-			BlockEntity blockEntity = currentWorld.getBlockEntity(packet.pos);
+			BlockEntity blockEntity = currentWorld.getBlockEntity(pos);
+			
 			if (blockEntity != null) {
 				((RTIWorld)currentWorld).tickBlockEntity(blockEntity, profiler);
 			}

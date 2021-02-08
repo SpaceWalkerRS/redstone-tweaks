@@ -27,6 +27,10 @@ public class PermissionManager {
 		LISTENERS.remove(listener);
 	}
 	
+	public static void clearListeners() {
+		LISTENERS.clear();
+	}
+	
 	public static void permissionsChanged() {
 		LISTENERS.forEach((listener) -> listener.permissionsChanged());
 	}

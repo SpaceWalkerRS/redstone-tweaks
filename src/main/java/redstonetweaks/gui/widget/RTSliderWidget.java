@@ -30,7 +30,8 @@ public class RTSliderWidget extends SliderWidget implements IAbstractButtonWidge
 	
 	@Override
 	public void updateMessage() {
-		this.setMessage(messageSupplier.get());
+		setMessage(messageSupplier.get());
+		snap();
 	}
 	
 	@Override

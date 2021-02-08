@@ -1,16 +1,14 @@
 package redstonetweaks.world.server;
 
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import net.minecraft.block.Block;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.types.RedstoneTweaksPacket;
 import redstonetweaks.world.common.IIncompleteAction;
 import redstonetweaks.world.common.IIncompleteActionScheduler;
-import redstonetweaks.world.common.IncompleteBlockAction;
 
 public class ServerIncompleteActionScheduler implements IIncompleteActionScheduler {
 	
@@ -27,6 +25,11 @@ public class ServerIncompleteActionScheduler implements IIncompleteActionSchedul
 		return !incompleteActions.isEmpty();
 	}
 	
+	@Override
+	public void scheduleAction(IIncompleteAction action) {
+		incompleteActions.add(action);
+	}
+	
 	public void tick() {
 		ServerNeighborUpdateScheduler neighborUpdateScheduler = ((RTIServerWorld)world).getNeighborUpdateScheduler();
 		
@@ -37,18 +40,6 @@ public class ServerIncompleteActionScheduler implements IIncompleteActionSchedul
 				syncClientIncompleteActionScheduler(action);
 			}
 		}
-	}
-	
-	public void scheduleBlockAction(BlockPos pos, int type, Block block) {
-		scheduleBlockAction(pos, type, -1, block);
-	}
-	
-	public void scheduleBlockAction(BlockPos pos, int type, double viewDistance, Block block) {
-		scheduleAction(new IncompleteBlockAction(pos, type, viewDistance, block));
-	}
-	
-	private void scheduleAction(IIncompleteAction action) {
-		incompleteActions.add(action);
 	}
 	
 	private void syncClientIncompleteActionScheduler(IIncompleteAction action) {

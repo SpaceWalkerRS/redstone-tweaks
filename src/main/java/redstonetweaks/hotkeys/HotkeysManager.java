@@ -71,16 +71,14 @@ public class HotkeysManager {
 		} else
 		if (keyBinding == hotkeys.pauseWorldTicking) {
 			if (client.currentScreen == null && PermissionManager.canUseTickCommand()) {
-				TickPausePacket packet = new TickPausePacket(TickPausePacket.PAUSE);
-				((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+				((RTIMinecraftClient)client).getPacketHandler().sendPacket(new TickPausePacket(true));
 				
 				return true;
 			}
 		} else
 		if (keyBinding == hotkeys.advanceWorldTicking) {
 			if (client.currentScreen == null && PermissionManager.canUseTickCommand()) {
-				TickPausePacket packet = new TickPausePacket(TickPausePacket.ADVANCE);
-				((RTIMinecraftClient)client).getPacketHandler().sendPacket(packet);
+				((RTIMinecraftClient)client).getPacketHandler().sendPacket(new TickPausePacket(false));
 				
 				return true;
 			}

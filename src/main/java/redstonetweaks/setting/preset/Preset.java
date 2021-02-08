@@ -1,36 +1,44 @@
 package redstonetweaks.setting.preset;
 
+import net.minecraft.network.PacketByteBuf;
+
 import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.types.ISetting;
+import redstonetweaks.util.PacketUtils;
 
 public class Preset {
 	
 	private static int idCounter = 0;
 	
-	private final boolean editable;
 	private final int id;
 	// The name of the preset when it was loaded from file, or null if it was not loaded from file
 	private final String savedName;
+	private final boolean editable;
 	
 	private String name;
 	private String description;
 	private Mode mode;
 	
-	public Preset(String name, String description, Mode mode, boolean editable) {
-		this(null, name, description, mode, editable);
+	public Preset(boolean editable, String name, String description, Mode mode) {
+		this(idCounter++, null, editable, name, description, mode);
 	}
 	
-	public Preset(String savedName, String name, String description, Mode mode, boolean editable) {
-		this(idCounter++, savedName, name, description, mode, editable);
+	public Preset(String savedName, String name, String description, Mode mode) {
+		this(idCounter++, savedName, true, name, description, mode);
 	}
 	
-	public Preset(int id, String savedName, String name, String description, Mode mode, boolean editable) {
-		this.editable = editable;
+	public Preset(int id, String savedName, boolean editable, String name, String description, Mode mode) {
 		this.id = id;
 		this.savedName = savedName;
+		this.editable = editable;
 		
 		this.name = name;
 		this.description = description;
 		this.mode = mode;
+	}
+	
+	public static void resetIdCounter() {
+		idCounter = 0;
 	}
 	
 	@Override
@@ -47,16 +55,16 @@ public class Preset {
 		return id;
 	}
 	
-	public boolean isEditable() {
-		return editable;
-	}
-	
 	public int getId() {
 		return id;
 	}
 	
 	public String getSavedName() {
 		return savedName;
+	}
+	
+	public boolean isEditable() {
+		return editable;
 	}
 	
 	public String getName() {
@@ -85,6 +93,39 @@ public class Preset {
 	
 	public void apply() {
 		Settings.applyPreset(this);
+	}
+	
+	public void remove() {
+		Settings.removePreset(this);
+	}
+	
+	public void encode(PacketByteBuf buffer) {
+		int count = 0;
+		for (ISetting setting : Settings.getSettings()) {
+			if (setting.hasPreset(this)) {
+				count++;
+			}
+		}
+		
+		buffer.writeInt(count);
+		
+		for (ISetting setting : Settings.getSettings()) {
+			if (setting.hasPreset(this)) {
+				buffer.writeString(setting.getId());
+				setting.encodePreset(buffer, this);
+			}
+		}
+	}
+	
+	public void decode(PacketByteBuf buffer) {
+		int count = buffer.readInt();
+		
+		for (int i = 0; i < count; i++) {
+			ISetting setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
+			if (setting != null) {
+				setting.decodePreset(buffer, this);
+			}
+		}
 	}
 	
 	public enum Mode {

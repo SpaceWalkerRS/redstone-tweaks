@@ -8,24 +8,24 @@ import redstonetweaks.world.common.WorldTickHandler.Task;
 
 public class TaskSyncPacket extends RedstoneTweaksPacket {
 	
-	public Task currentTask;
+	public Task task;
 	
 	public TaskSyncPacket() {
 		
 	}
 	
 	public TaskSyncPacket(Task currentTask) {
-		this.currentTask = currentTask;
+		this.task = currentTask;
 	}
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		buffer.writeByte(currentTask.getIndex());
+		buffer.writeByte(task.getIndex());
 	}
 
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		currentTask = Task.fromIndex(buffer.readByte());
+		task = Task.fromIndex(buffer.readByte());
 	}
 
 	@Override
@@ -35,8 +35,8 @@ public class TaskSyncPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((RTIMinecraftClient)client).getWorldTickHandler().onTaskSyncPacketReceived(this);
-		((RTIMinecraftClient)client).getTickInfoLabelRenderer().onTaskSyncPacketReceived(this);
+		((RTIMinecraftClient)client).getWorldTickHandler().syncTask(task);
+		((RTIMinecraftClient)client).getTickInfoLabelRenderer().syncTask(task);
 	}
 
 }

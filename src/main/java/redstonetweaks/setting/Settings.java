@@ -110,6 +110,10 @@ public class Settings {
 		LISTENERS.remove(listener);
 	}
 	
+	public static void clearListeners() {
+		LISTENERS.clear();
+	}
+	
 	public static void categoryLockedChanged(SettingsCategory category) {
 		LISTENERS.forEach((listener) -> listener.categoryLockedChanged(category));
 	}

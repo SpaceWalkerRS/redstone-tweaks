@@ -65,10 +65,9 @@ public class PistonExtensionBlockMixin extends Block {
 						} else {
 							BlockPos frontPos = pos.offset(facing);
 							BlockState frontState = world.getBlockState(frontPos);
-							System.out.println("try drop " + frontState);
+							
 							if (frontState.isOf(Blocks.MOVING_PISTON) && frontState.get(Properties.FACING) == facing) {
 								blockEntity = world.getBlockEntity(frontPos);
-								System.out.println("try drop " + blockEntity);
 								
 								if (blockEntity instanceof PistonBlockEntity) {
 									((RTIPistonBlockEntity)blockEntity).finishSource();

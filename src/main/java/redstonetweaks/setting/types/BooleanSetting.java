@@ -1,5 +1,6 @@
 package redstonetweaks.setting.types;
 
+import net.minecraft.network.PacketByteBuf;
 import redstonetweaks.setting.SettingsPack;
 
 public class BooleanSetting extends Setting<Boolean> {
@@ -9,12 +10,17 @@ public class BooleanSetting extends Setting<Boolean> {
 	}
 	
 	@Override
-	public Boolean getBackupValue() {
-		return false;
+	public void write(PacketByteBuf buffer, Boolean value) {
+		buffer.writeBoolean(value);
 	}
 	
 	@Override
-	public Boolean stringToValue(String string) {
-		return Boolean.parseBoolean(string);
+	public Boolean read(PacketByteBuf buffer) {
+		return buffer.readBoolean();
+	}
+	
+	@Override
+	public Boolean getBackupValue() {
+		return false;
 	}
 }

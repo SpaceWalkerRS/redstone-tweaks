@@ -1,8 +1,10 @@
 package redstonetweaks.setting.types;
 
+import net.minecraft.network.PacketByteBuf;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.util.Directionality;
+import redstonetweaks.util.PacketUtils;
 import redstonetweaks.world.common.UpdateOrder;
 
 public class UpdateOrderSetting extends Setting<UpdateOrder> {
@@ -17,8 +19,13 @@ public class UpdateOrderSetting extends Setting<UpdateOrder> {
 	}
 	
 	@Override
-	public UpdateOrder stringToValue(String string) {
-		return UpdateOrder.parseUpdateOrder(string);
+	public void write(PacketByteBuf buffer, UpdateOrder value) {
+		PacketUtils.writeUpdateOrder(buffer, value);
+	}
+	
+	@Override
+	public UpdateOrder read(PacketByteBuf buffer) {
+		return PacketUtils.readUpdateOrder(buffer);
 	}
 	
 	@Override

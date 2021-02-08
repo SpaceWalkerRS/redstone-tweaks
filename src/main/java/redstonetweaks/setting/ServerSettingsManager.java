@@ -1,17 +1,17 @@
 package redstonetweaks.setting;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
+import org.apache.commons.io.IOUtils;
+
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
 
-import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.packet.ServerPacketHandler;
@@ -26,11 +26,13 @@ import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.packet.types.SettingsPacket;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
+import redstonetweaks.util.PacketUtils;
 
 public class ServerSettingsManager implements ISettingListener {
 	
 	private static final String CACHE_DIRECTORY = "redstonetweaks";
-	private static final String SETTINGS_PATH = "settings.txt";
+	private static final String SETTINGS_PATH = "settings";
+	private static final String FILE_EXTENSION = "rts";
 	
 	private final MinecraftServer server;
 	
@@ -133,11 +135,11 @@ public class ServerSettingsManager implements ISettingListener {
 
 	public void onPlayerJoined(ServerPlayerEntity player) {
 		if (server.isRemote()) {
-			updateSettingsOfPlayer(player);
+			sendSettingsToPlayer(player);
 		}
 	}
 	
-	private void updateSettingsOfPlayer(ServerPlayerEntity player) {
+	private void sendSettingsToPlayer(ServerPlayerEntity player) {
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
 		SettingsPacket packet = new SettingsPacket(Settings.getSettings());
 		
@@ -149,51 +151,97 @@ public class ServerSettingsManager implements ISettingListener {
 	}
 	
 	private void loadSettings() {
-		File settingsFile = getSettingsFile();
-
-		if (settingsFile.isFile()) {
-			try (BufferedReader br = new BufferedReader(new FileReader(settingsFile))) {
-				String line;
+		File directory = getSettingsFolder();
+		
+		for (File file : directory.listFiles()) {
+			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION)) {
+				loadSettings(file);
+			}
+		}
+	}
+	
+	private void loadSettings(File file) {
+		try (FileInputStream stream = new FileInputStream(file)) {
+			byte[] data = IOUtils.toByteArray(stream);
+			PacketByteBuf buffer = new PacketByteBuf(Unpooled.wrappedBuffer(data));
+			
+			readSettings(buffer);
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	private void readSettings(PacketByteBuf buffer) {
+		SettingsCategory category = Settings.getCategoryFromName(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
+		
+		if (category != null) {
+			category.setLocked(buffer.readBoolean());
+			
+			int packsCount = buffer.readInt();
+			for (int i = 0; i < packsCount; i++) {
+				SettingsPack pack = Settings.getPackFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
 				
-				while ((line = br.readLine()) != null) {
-					try {
-						String[] args = line.split(" = ", 2);
+				if (pack != null) {
+					pack.setLocked(buffer.readBoolean());
+					
+					int settingsCount = buffer.readInt();
+					for (int j = 0; j < settingsCount; j++) {
+						ISetting setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
 						
-						ISetting setting = Settings.getSettingFromId(args[0]);
-						if (setting == null) {
-							RedstoneTweaks.LOGGER.warn(String.format("Could not find setting with id %s", args[0]));
-						} else {
-							setting.setFromString(args[1]);
+						if (setting != null) {
+							setting.setLocked(buffer.readBoolean());
+							setting.decode(buffer);
 						}
-					} catch (Exception e) {
-						
 					}
 				}
-			} catch (IOException e) {
-				
 			}
 		}
 	}
 	
 	private void saveSettings() {
-		File settingsFile = getSettingsFile();
-		
-		try {
-			if (!settingsFile.isFile()) {
-				settingsFile.createNewFile();
-			}
-		} catch (IOException e) {
-			
+		for (SettingsCategory category : Settings.getCategories()) {
+			saveSettings(category);
 		}
+	}
+	
+	private void saveSettings(SettingsCategory category) {
+		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 		
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(settingsFile))) {
-			for (ISetting setting : Settings.getSettings()) {
-				bw.write(String.format("%s = %s", setting.getId(), setting.getAsString()));
-				
-				bw.newLine();
-			}
-		} catch (IOException e) {
+		writeSettings(category, buffer);
+		
+		if (buffer.hasArray()) {
+			File file = getSettingsFile(category);
 			
+			try {
+				if (!file.isFile()) {
+					file.createNewFile();
+				}
+				
+				try (FileOutputStream stream = new FileOutputStream(file)) {
+					stream.write(buffer.array());
+				}
+			} catch (Exception e) {
+				
+			}
+		}
+	}
+	
+	private void writeSettings(SettingsCategory category, PacketByteBuf buffer) {
+		buffer.writeString(category.getName());
+		buffer.writeBoolean(category.isLocked());
+		
+		buffer.writeInt(category.getPacks().size());
+		for (SettingsPack pack : category.getPacks()) {
+			buffer.writeString(pack.getId());
+			buffer.writeBoolean(pack.isLocked());
+			
+			buffer.writeInt(pack.getSettings().size());
+			for (ISetting setting : pack.getSettings()) {
+				buffer.writeString(setting.getId());
+				buffer.writeBoolean(setting.isLocked());
+				
+				setting.encode(buffer);
+			}
 		}
 	}
 	
@@ -207,7 +255,17 @@ public class ServerSettingsManager implements ISettingListener {
 		return directory;
 	}
 	
-	private File getSettingsFile() {
-		return new File(getCacheDir(), SETTINGS_PATH);
+	private File getSettingsFolder() {
+		File directory = new File(getCacheDir(), SETTINGS_PATH);
+
+		if (!directory.exists()) {
+			directory.mkdirs();
+		}
+		
+		return directory;
+	}
+	
+	private File getSettingsFile(SettingsCategory category) {
+		return new File(getSettingsFolder(), String.format("%s.%s", category.getName(), FILE_EXTENSION));
 	}
 }

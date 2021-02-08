@@ -1,175 +1,57 @@
 package redstonetweaks.packet.types;
 
-import java.util.Set;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 
-import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
 import redstonetweaks.setting.preset.Presets;
-import redstonetweaks.setting.types.ISetting;
+import redstonetweaks.util.PacketUtils;
 
 public class PresetPacket extends RedstoneTweaksPacket {
 	
-	private int id;
-	private String name;
-	private String description;
-	private Preset.Mode mode;
-	
-	private int changedCount;
-	private int addedCount;
-	private int removedCount;
-	private ISetting[] changedSettings;
-	private String[] changedValues;
-	private ISetting[] addedSettings;
-	private String[] addedValues;
-	private ISetting[] removedSettings;
+	private PresetEditor editor;
 	
 	public PresetPacket() {
 		
 	}
 	
 	public PresetPacket(PresetEditor editor) {
-		id = editor.getId();
-		name = editor.getName();
-		description = editor.getDescription();
-		mode = editor.getMode();
-		
-		Set<ISetting> changed = editor.getChangedSettings();
-		Set<ISetting> added = editor.getAddedSettings();
-		Set<ISetting> removed = editor.getRemovedSettings();
-		
-		changedCount = changed.size();
-		addedCount = added.size();
-		removedCount = removed.size();
-		
-		changedSettings = new ISetting[changedCount];
-		changedValues = new String[changedCount];
-		addedSettings = new ISetting[addedCount];
-		addedValues = new String[addedCount];
-		removedSettings = new ISetting[removedCount];
-		
-		int index = 0;
-		for (ISetting setting : changed) {
-			changedSettings[index] = setting;
-			changedValues[index] = editor.getValueAsString(setting);
-			
-			index++;
-		}
-		index = 0;
-		for (ISetting setting : added) {
-			addedSettings[index] = setting;
-			addedValues[index] = editor.getValueAsString(setting);
-			
-			index++;
-		}
-		index = 0;
-		for (ISetting setting : removed) {
-			removedSettings[index] = setting;
-			
-			index++;
-		}
+		this.editor = editor;
 	}
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		buffer.writeInt(id);
-		buffer.writeString(name);
-		buffer.writeString(description);
-		buffer.writeShort(mode.getIndex());
+		buffer.writeInt(editor.getId());
+		buffer.writeString(editor.getName());
+		buffer.writeString(editor.getDescription());
+		buffer.writeByte(editor.getMode().getIndex());
 		
-		buffer.writeInt(changedCount);
-		buffer.writeInt(addedCount);
-		buffer.writeInt(removedCount);
-		
-		for (int index = 0; index < changedCount; index++) {
-			buffer.writeString(changedSettings[index].getId());
-			buffer.writeString(changedValues[index]);
-		}
-		for (int index = 0; index < addedCount; index++) {
-			buffer.writeString(addedSettings[index].getId());
-			buffer.writeString(addedValues[index]);
-		}
-		for (int index = 0; index < removedCount; index++) {
-			buffer.writeString(removedSettings[index].getId());
-		}
+		editor.encode(buffer);
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		id = buffer.readInt();
-		name = buffer.readString(MAX_STRING_LENGTH);
-		description = buffer.readString(MAX_STRING_LENGTH);
-		mode = Preset.Mode.fromIndex(buffer.readShort());
+		int id = buffer.readInt();
+		String name = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
+		String description = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
+		Preset.Mode mode = Preset.Mode.fromIndex(buffer.readByte());
 		
-		changedCount = buffer.readInt();
-		addedCount = buffer.readInt();
-		removedCount = buffer.readInt();
+		editor = Presets.editPreset(Presets.fromIdOrCreate(id, name, description, mode));
 		
-		changedSettings = new ISetting[changedCount];
-		changedValues = new String[changedCount];
-		addedSettings = new ISetting[addedCount];
-		addedValues = new String[addedCount];
-		removedSettings = new ISetting[removedCount];
-		
-		for (int index = 0; index < changedCount; index++) {
-			changedSettings[index] = Settings.getSettingFromId(buffer.readString(MAX_STRING_LENGTH));
-			changedValues[index] = buffer.readString(MAX_STRING_LENGTH);
-		}
-		for (int index = 0; index < addedCount; index++) {
-			addedSettings[index] = Settings.getSettingFromId(buffer.readString(MAX_STRING_LENGTH));
-			addedValues[index] = buffer.readString(MAX_STRING_LENGTH);
-		}
-		for (int index = 0; index < removedCount; index++) {
-			removedSettings[index] = Settings.getSettingFromId(buffer.readString(MAX_STRING_LENGTH));
-		}
+		editor.decode(buffer);
 	}
 	
 	@Override
 	public void execute(MinecraftServer server) {
-		constructPresetEditor().trySaveChanges();
+		editor.trySaveChanges();
 	}
 	
 	@Override
 	public void execute(MinecraftClient client) {
 		if (!client.isInSingleplayer()) {
-			constructPresetEditor().trySaveChanges();
+			editor.trySaveChanges();
 		}
-	}
-	
-	private PresetEditor constructPresetEditor() {
-		PresetEditor editor = Presets.editPreset(Presets.fromIdOrCreate(id, name, description, mode));
-		
-		while (changedCount > 0) {
-			changedCount--;
-			
-			ISetting setting = changedSettings[changedCount];
-			if (setting != null) {
-				editor.addSetting(setting);
-				editor.setValueFromString(setting, changedValues[changedCount]);
-			}
-		}
-		while (addedCount > 0) {
-			addedCount--;
-			
-			ISetting setting = addedSettings[addedCount];
-			if (setting != null) {
-				editor.addSetting(setting);
-				editor.setValueFromString(setting, addedValues[addedCount]);
-			}
-		}
-		while (removedCount > 0) {
-			removedCount--;
-			
-			ISetting setting = removedSettings[removedCount];
-			if (setting != null) {
-				editor.removeSetting(setting);
-			}
-		}
-		
-		return editor;
 	}
 }

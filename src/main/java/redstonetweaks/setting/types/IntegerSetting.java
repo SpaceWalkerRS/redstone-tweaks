@@ -1,5 +1,6 @@
 package redstonetweaks.setting.types;
 
+import net.minecraft.network.PacketByteBuf;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 
@@ -16,13 +17,18 @@ public class IntegerSetting extends Setting<Integer> {
 	}
 	
 	@Override
-	public Integer getBackupValue() {
-		return 0;
+	public void write(PacketByteBuf buffer, Integer value) {
+		buffer.writeInt(value);
 	}
 	
 	@Override
-	public Integer stringToValue(String string) {
-		return Integer.parseInt(string);
+	public Integer read(PacketByteBuf buffer) {
+		return buffer.readInt();
+	}
+	
+	@Override
+	public Integer getBackupValue() {
+		return 0;
 	}
 	
 	@Override

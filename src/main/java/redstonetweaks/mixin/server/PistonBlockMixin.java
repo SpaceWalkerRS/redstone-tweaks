@@ -368,7 +368,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 			if (Tweaks.Global.MOVABLE_BLOCK_ENTITIES.get()) {
 				return !PistonHelper.canMoveBlockEntityOf(block);
 			}
-			if (BlockEntityTypes.POWER_COMPONENT.supports(block)) {
+			if (BlockEntityTypes.POWER_BLOCK.supports(block)) {
 				return false;
 			}
 			

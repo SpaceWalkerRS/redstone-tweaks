@@ -12,7 +12,7 @@ public class PowerBlockEntity extends BlockEntity {
 	private boolean powerCorrected;
 	
 	public PowerBlockEntity() {
-		super(BlockEntityTypes.POWER_COMPONENT);
+		super(BlockEntityTypes.POWER_BLOCK);
 	}
 	
 	@Override

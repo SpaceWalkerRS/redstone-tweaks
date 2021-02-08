@@ -3,8 +3,6 @@ package redstonetweaks.world.common;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 
-import redstonetweaks.util.UpdateType;
-
 public class ComparatorUpdate extends NeighborUpdate {
 	
 	private final Block sourceBlock;

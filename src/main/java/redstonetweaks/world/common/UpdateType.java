@@ -1,4 +1,4 @@
-package redstonetweaks.util;
+package redstonetweaks.world.common;
 
 public enum UpdateType {
 	NONE(-1, "none"),

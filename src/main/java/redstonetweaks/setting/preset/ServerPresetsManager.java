@@ -1,12 +1,13 @@
 package redstonetweaks.setting.preset;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
+import org.apache.commons.io.IOUtils;
+
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -16,13 +17,12 @@ import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
 import redstonetweaks.packet.types.RemovePresetPacket;
-import redstonetweaks.setting.Settings;
-import redstonetweaks.setting.types.ISetting;
 
 public class ServerPresetsManager implements IPresetListener {
 	
 	private static final String CACHE_DIRECTORY = "redstonetweaks";
 	private static final String PRESETS_PATH = "presets";
+	private static final String FILE_EXTENSION = "rtp";
 	
 	private final MinecraftServer server;
 	
@@ -41,10 +41,14 @@ public class ServerPresetsManager implements IPresetListener {
 	
 	@Override
 	public void presetRemoved(Preset preset) {
-		System.out.println(preset.getName() + " removed");
 		if (!deaf && server.isRemote()) {
 			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new RemovePresetPacket(preset));
 		}
+	}
+	
+	@Override
+	public void presetAdded(Preset preset) {
+		
 	}
 	
 	public void onStartUp() {
@@ -59,59 +63,53 @@ public class ServerPresetsManager implements IPresetListener {
 		savePresets();
 	}
 	
+	public void onPlayerJoined(ServerPlayerEntity player) {
+		sendPresetsToPlayer(player);
+	}
+	
+	private void sendPresetsToPlayer(ServerPlayerEntity player) {
+		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
+		PresetsPacket packet = new PresetsPacket(Presets.getAllPresets());
+		
+		if (player == null) {
+			packetHandler.sendPacket(packet);
+		} else {
+			packetHandler.sendPacketToPlayer(packet, player);
+		}
+	}
+	
 	private void loadPresets() {
+		Presets.init();
+		
 		File directory = getPresetsFolder();
 		
 		for (File file : directory.listFiles()) {
-			if (file.isFile()) {
+			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION)) {
 				loadPreset(file);
 			}
 		}
 	}
 	
 	private void loadPreset(File file) {
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-			String line;
+		try (FileInputStream stream = new FileInputStream(file)) {
+			byte[] data = IOUtils.toByteArray(stream);
+			PacketByteBuf buffer = new PacketByteBuf(Unpooled.wrappedBuffer(data));
 			
-			String name = getPresetNameFromFile(file);
-			Preset preset = Presets.fromName(name);
-			if (preset == null) {
-				preset = new Preset(name, name, "", Preset.Mode.SET, true);
-			}
+			readPreset(buffer);
+		} catch (Exception e) {
 			
-			PresetEditor editor = Presets.editPreset(preset);
-			
-			if ((line = br.readLine()) == null) {
-				return;
-			}
-			editor.setDescription(line);
-			
-			if ((line = br.readLine()) == null) {
-				return;
-			}
-			try {
-				editor.setMode(Preset.Mode.valueOf(line));
-			} catch (Exception e) {
-				
-			}
-			
-			while ((line = br.readLine()) != null) {
-				try {
-					String[] args = line.split(" = ", 2);
-					
-					ISetting setting = Settings.getSettingFromId(args[0]);
-					if (setting != null) {
-						editor.addSetting(setting);
-						editor.setValueFromString(setting, args[1]);
-					}
-				} catch (Exception e) {
-					
-				}
-			}
-			
-			editor.trySaveChanges();
-		} catch (IOException e) {
-			
+		}
+	}
+	
+	private void readPreset(PacketByteBuf buffer) {
+		String name = buffer.readString();
+		String description = buffer.readString();
+		Preset.Mode mode = Preset.Mode.fromIndex(buffer.readByte());
+		
+		Preset preset = new Preset(name, name, description, mode);
+		
+		if (Presets.register(preset)) {
+			preset.decode(buffer);
 		}
 	}
 	
@@ -119,63 +117,84 @@ public class ServerPresetsManager implements IPresetListener {
 		savePresets();
 		loadPresets();
 		
-		updatePresetsOfPlayer(null);
+		sendPresetsToPlayer(null);
 	}
 	
 	private void savePresets() {
-		File directory = getPresetsFolder();
-		
-		for (File file : directory.listFiles()) {
-			if (!file.isDirectory() && Presets.getRemovedPresetFromSavedName(getPresetNameFromFile(file)) != null) {
-				file.delete();
-			}
-		}
-		Presets.cleanUp();
+		cleanUpPresetFiles();
 		
 		for (Preset preset : Presets.getAllPresets()) {
 			if (preset.isEditable()) {
 				savePreset(preset);
 			}
 		}
+		
+		Presets.reset();
+	}
+	
+	private void cleanUpPresetFiles() {
+		File presetsFolder = getPresetsFolder();
+		
+		for (File file : presetsFolder.listFiles()) {
+			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION) && shouldDeleteFile(file)) {
+				file.delete();
+			}
+		}
+		
+		Presets.cleanUp();
+	}
+	
+	private boolean shouldDeleteFile(File file) {
+		try (FileInputStream stream = new FileInputStream(file)) {
+			byte[] data = IOUtils.toByteArray(stream);
+			PacketByteBuf buffer = new PacketByteBuf(Unpooled.wrappedBuffer(data));
+			
+			String savedName = buffer.readString();
+			
+			for (Preset preset : Presets.getAllPresets()) {
+				try {
+					if (preset.isEditable() && !Presets.isActive(preset) && preset.getSavedName().equals(savedName)) {
+						return true;
+					}
+				} catch (Exception e) {
+					
+				}
+			}
+		} catch (Exception e) {
+			
+		}
+		
+		return false;
 	}
 	
 	private void savePreset(Preset preset) {
-		File file = getPresetFile(preset);
+		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 		
-		try {
-			if (!file.isFile()) {
-				file.createNewFile();
-			}
-		} catch (IOException e) {
-			
-		}
+		writePreset(preset, buffer);
 		
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-			bw.write(preset.getDescription());
-			bw.newLine();
-			bw.write(preset.getMode().toString());
-			bw.newLine();
+		if (buffer.hasArray()) {
+			File file = getPresetFile(preset);
 			
-			for (ISetting setting : Settings.getSettings()) {
-				if (setting.hasPreset(preset)) {
-					bw.write(String.format("%s = %s", setting.getId(), setting.getPresetValueAsString(preset)));
-					
-					bw.newLine();
+			try {
+				if (!file.isFile()) {
+					file.createNewFile();
 				}
+				
+				try (FileOutputStream stream = new FileOutputStream(file)) {
+					stream.write(buffer.array());
+				}
+			} catch (Exception e) {
+				
 			}
-		} catch (IOException e) {
-			
 		}
 	}
 	
-	private String getPresetNameFromFile(File file) {
-		String name = file.getName();
+	private void writePreset(Preset preset, PacketByteBuf buffer) {
+		buffer.writeString(preset.getName());
+		buffer.writeString(preset.getDescription());
+		buffer.writeByte(preset.getMode().getIndex());
 		
-		if (name.length() <= 4) {
-			return "";
-		}
-		
-		return name.substring(0, name.length() - 4);
+		preset.encode(buffer);
 	}
 	
 	private File getCacheDir() {
@@ -199,21 +218,6 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	private File getPresetFile(Preset preset) {
-		return new File(getPresetsFolder(), String.format("%s.txt", preset.getName()));
-	}
-	
-	public void onPlayerJoined(ServerPlayerEntity player) {
-		updatePresetsOfPlayer(player);
-	}
-	
-	private void updatePresetsOfPlayer(ServerPlayerEntity player) {
-		ServerPacketHandler packetHandler = ((RTIMinecraftServer)server).getPacketHandler();
-		PresetsPacket packet = new PresetsPacket(Presets.getAllPresets());
-		
-		if (player == null) {
-			packetHandler.sendPacket(packet);
-		} else {
-			packetHandler.sendPacketToPlayer(packet, player);
-		}
+		return new File(getPresetsFolder(), String.format("%s.%s", preset.getName(), FILE_EXTENSION));
 	}
 }

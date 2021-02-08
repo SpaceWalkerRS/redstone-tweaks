@@ -60,6 +60,7 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		if (selectedTab.isMouseOver(mouseX, mouseY)) {
 			return Optional.of(selectedTab);
 		}
+		
 		return super.hoveredElement(mouseX, mouseY);
 	}
 	
@@ -103,6 +104,7 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		for (IAbstractButtonWidget tabButton : tabButtons) {
 			tabButton.render(matrices, mouseX, mouseY, delta);
 		}
+		
 		getSelectedTab().render(matrices, mouseX, mouseY, delta);
 	}
 	
@@ -265,6 +267,11 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	
 	@Override
 	public void presetRemoved(Preset preset) {
+		onPresetChanged(preset);
+	}
+	
+	@Override
+	public void presetAdded(Preset preset) {
 		onPresetChanged(preset);
 	}
 	

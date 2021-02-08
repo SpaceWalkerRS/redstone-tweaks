@@ -6,8 +6,6 @@ import net.minecraft.server.MinecraftServer;
 
 public abstract class RedstoneTweaksPacket {
 	
-	protected static final int MAX_STRING_LENGTH = 32767;
-	
 	public abstract void encode(PacketByteBuf buffer);
 	
 	public abstract void decode(PacketByteBuf buffer);
@@ -15,4 +13,5 @@ public abstract class RedstoneTweaksPacket {
 	public abstract void execute(MinecraftServer server);
 	
 	public abstract void execute(MinecraftClient client);
+	
 }

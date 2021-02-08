@@ -31,10 +31,8 @@ import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.BugFixSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
-import redstonetweaks.setting.types.GameModeToBooleanSetting;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.IntegerSetting;
-import redstonetweaks.setting.types.Setting;
 import redstonetweaks.setting.types.TickPrioritySetting;
 import redstonetweaks.setting.types.UpdateOrderSetting;
 import redstonetweaks.setting.types.WorldTickOptionsSetting;
@@ -54,6 +52,9 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		
 		this.category = category;
 		this.modePredicate = (setting) -> {
+			if (!setting.isEnabled()) {
+				return false;
+			}
 			if (mode == ViewMode.ALL) {
 				return true;
 			}
@@ -77,15 +78,23 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	@Override
 	protected void initList() {
 		for (SettingsPack pack : category.getPacks()) {
-			addEntry(new SettingsPackEntry(pack));
+			List<Entry> settingEntries = new ArrayList<>();
 			
 			for (ISetting setting : pack.getSettings()) {
-				addEntry(new SettingEntry(setting));
-				
-				updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
+				if (modePredicate.test(setting)) {
+					settingEntries.add(new SettingEntry(setting));
+					
+					updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
+				}
 			}
 			
-			addEntry(new SeparatorEntry());
+			if (!settingEntries.isEmpty()) {
+				addEntry(new SettingsPackEntry(pack));
+				
+				settingEntries.forEach((entry) -> addEntry(entry));
+				
+				addEntry(new SeparatorEntry());
+			}
 		}
 	}
 	
@@ -173,7 +182,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.lockButton = new RTLockButtonWidget(0, 0, this.pack.isLocked(), (button) -> {
 				button.toggleLocked();
 				
-				((RTIMinecraftClient)client).getSettingsManager().lockPack(this.pack, button.isLocked());
+				this.pack.setLocked(button.isLocked());
 			});
 			this.children.add(lockButton);
 			
@@ -279,7 +288,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.lockButton = new RTLockButtonWidget(0, 0, setting.isLocked(), (button) -> {
 				button.toggleLocked();
 				
-				((RTIMinecraftClient)client).getSettingsManager().lockSetting(setting, button.isLocked());
+				setting.setLocked(button.isLocked());
 			});
 			this.children.add(lockButton);
 			
@@ -366,19 +375,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof DirectionToBooleanSetting) {
 				DirectionToBooleanSetting dSetting = (DirectionToBooleanSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, () -> dSetting.get(), (setting) -> changeSetting(dSetting, dSetting.get()));
-					
-					screen.openWindow(window);
-					
-					if (!PermissionManager.canChangeSettings(category) || category.isLocked() || setting.isLocked()) {
-						window.disableButtons();
-					}
-				})).alwaysActive());
-			} else
-			if (setting instanceof GameModeToBooleanSetting) {
-				GameModeToBooleanSetting gSetting = (GameModeToBooleanSetting)setting;
-				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, gSetting, () -> gSetting.get(), (setting) -> changeSetting(gSetting, gSetting.get()));
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, () -> dSetting.get(), (setting) -> dSetting.set(dSetting.get()));
 					
 					screen.openWindow(window);
 					
@@ -392,9 +389,9 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					BugFixSetting bSetting = (BugFixSetting)setting;
 					buttonPanel.addButton(new RTButtonWidget(0, 0, 78, 20, () -> {
 						Formatting formatting = bSetting.get() ? Formatting.GREEN : Formatting.RED;
-						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
+						return new TranslatableText(String.valueOf(bSetting.get())).formatted(formatting);
 					}, (button) -> {
-						changeSetting(bSetting, !bSetting.get());
+						bSetting.set(!bSetting.get());
 					}));
 					buttonPanel.addButton(new RTTexturedButtonWidget(0, 0, 20, 20, RTTexturedButtonWidget.WIDGETS_LOCATION, 0, 106, 256, 256, 20, (button) -> {
 						saveScrollAmount();
@@ -412,30 +409,30 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					BooleanSetting bSetting = (BooleanSetting)setting;
 					buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> {
 						Formatting formatting = bSetting.get() ? Formatting.GREEN : Formatting.RED;
-						return new TranslatableText(bSetting.getValueAsString()).formatted(formatting);
+						return new TranslatableText(String.valueOf(bSetting.get())).formatted(formatting);
 					}, (button) -> {
-						changeSetting(bSetting, !bSetting.get());
+						bSetting.set(!bSetting.get());
 					}));
 				}
 			} else
 			if (setting instanceof IntegerSetting) {
 				IntegerSetting iSetting = (IntegerSetting)setting;
 				if (iSetting.getRange() < 10) {
-					buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(iSetting.getValueAsString()), (slider) -> {
+					buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(String.valueOf(iSetting.get())), (slider) -> {
 						int min = iSetting.getMin();
 						int steps = (int)(slider.getValue() * (iSetting.getRange() + 1));
 						
-						changeSetting(iSetting, min + steps);
+						iSetting.set(min + steps);
 					}, (slider) -> {
 						double steps = iSetting.get() - iSetting.getMin();
 						slider.setValue(steps / (iSetting.getRange()));
 					}));
 				} else {
 					buttonPanel.addButton(new RTTextFieldWidget(client.textRenderer, 0, 0, 100, 20, (textField) -> {
-						textField.setText(iSetting.getValueAsString());
+						textField.setText(String.valueOf(iSetting.get()));
 					}, (text) -> {
 						try{
-							changeSetting(iSetting, Integer.parseInt(text));
+							iSetting.set(Integer.parseInt(text));
 						} catch (Exception e) {
 							
 						}
@@ -444,13 +441,13 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			} else
 			if (setting instanceof TickPrioritySetting) {
 				TickPrioritySetting tSetting = (TickPrioritySetting)setting;
-				buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(tSetting.getValueAsString()), (slider) -> {
+				buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(String.valueOf(tSetting.get())), (slider) -> {
 					TickPriority[] priorities = TickPriority.values();
 					
 					int min = priorities[0].getIndex();
 					int steps = (int)Math.round((priorities.length - 1) * slider.getValue());
 					
-					changeSetting(tSetting, TickPriority.byIndex(min + steps));
+					tSetting.set(TickPriority.byIndex(min + steps));
 				}, (slider) -> {
 					TickPriority[] priorities = TickPriority.values();
 					double steps = tSetting.get().getIndex() - priorities[0].getIndex();
@@ -460,7 +457,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof UpdateOrderSetting) {
 				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, () -> uSetting.get(), (setting) -> changeSetting(uSetting, uSetting.get()));
+					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, () -> uSetting.get(), (setting) -> uSetting.set(uSetting.get()));
 					
 					screen.openWindow(window);
 					
@@ -472,7 +469,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof WorldTickOptionsSetting) {
 				WorldTickOptionsSetting wSetting = (WorldTickOptionsSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					WorldTickOptionsWindow window = new WorldTickOptionsWindow(screen, wSetting, () -> wSetting.get(), (setting) -> changeSetting(wSetting, wSetting.get()));
+					WorldTickOptionsWindow window = new WorldTickOptionsWindow(screen, wSetting, () -> wSetting.get(), (setting) -> wSetting.set(wSetting.get()));
 					
 					screen.openWindow(window);
 					
@@ -481,10 +478,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					}
 				})).alwaysActive());
 			}
-		}
-		
-		private <T> void changeSetting(Setting<T> setting, T value) {
-			((RTIMinecraftClient)client).getSettingsManager().changeSetting(setting, value);
 		}
 		
 		private void updateButtonsActive() {

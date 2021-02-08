@@ -10,30 +10,28 @@ import redstonetweaks.setting.preset.Presets;
 
 public class ApplyPresetPacket extends RedstoneTweaksPacket {
 	
-	private String name;
+	private Preset preset;
 	
 	public ApplyPresetPacket() {
 		
 	}
 	
 	public ApplyPresetPacket(Preset preset) {
-		name = preset.getName();
+		this.preset = preset;
 	}
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		buffer.writeString(name);
+		buffer.writeInt(preset.getId());
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		name = buffer.readString(MAX_STRING_LENGTH);
+		preset = Presets.fromId(buffer.readInt());
 	}
 	
 	@Override
 	public void execute(MinecraftServer server) {
-		Preset preset = Presets.fromName(name);
-		
 		if (preset != null) {
 			((RTIMinecraftServer)server).getSettingsManager().applyPreset(preset);
 		}
@@ -41,9 +39,7 @@ public class ApplyPresetPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		Preset preset = Presets.fromName(name);
-		
-		if (preset != null) {
+		if (!client.isInSingleplayer() && preset != null) {
 			preset.apply();
 		}
 	}

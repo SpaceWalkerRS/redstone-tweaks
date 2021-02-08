@@ -6,10 +6,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 import redstonetweaks.util.Directionality;
+import redstonetweaks.util.PacketUtils;
 import redstonetweaks.util.RelativePos;
 
 public class UpdateOrder {
@@ -86,6 +88,34 @@ public class UpdateOrder {
 		}
 		
 		return string.substring(0, string.length() - 1);
+	}
+	
+	public void encode(PacketByteBuf buffer) {
+		buffer.writeByte(directionality.getIndex());
+		buffer.writeByte(defaultMode.getIndex());
+		buffer.writeBoolean(forceDefaultMode);
+		
+		buffer.writeInt(offsetX);
+		buffer.writeInt(offsetY);
+		buffer.writeInt(offsetZ);
+		buffer.writeByte(notifierOrder.getIndex());
+		
+		buffer.writeInt(neighborUpdates.size());
+		for (AbstractNeighborUpdate update : neighborUpdates) {
+			PacketUtils.writeAbstractNeighborUpdate(buffer, update);
+		}
+	}
+	
+	public void decode(PacketByteBuf buffer) {
+		offsetX = buffer.readInt();
+		offsetY = buffer.readInt();
+		offsetZ = buffer.readInt();
+		notifierOrder = NotifierOrder.fromIndex(buffer.readByte());
+		
+		int size = buffer.readInt();
+		for (int i = 0; i < size; i++) {
+			add(PacketUtils.readAbstractNeighborUpdate(buffer));
+		}
 	}
 	
 	public static UpdateOrder parseUpdateOrder(String string) {

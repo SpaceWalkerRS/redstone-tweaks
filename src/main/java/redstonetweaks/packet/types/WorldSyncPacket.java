@@ -5,6 +5,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.util.PacketUtils;
 
 public class WorldSyncPacket extends RedstoneTweaksPacket {
 	
@@ -25,7 +26,7 @@ public class WorldSyncPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		worldName = buffer.readString(MAX_STRING_LENGTH);
+		worldName = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 	}
 
 	@Override
@@ -35,7 +36,7 @@ public class WorldSyncPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		((RTIMinecraftClient)client).getWorldTickHandler().onWorldSyncPacketReceived(this);
-		((RTIMinecraftClient)client).getTickInfoLabelRenderer().onWorldSyncPacketReceived(this);
+		((RTIMinecraftClient)client).getWorldTickHandler().syncWorld(worldName);
+		((RTIMinecraftClient)client).getTickInfoLabelRenderer().syncWorld(worldName);
 	}
 }

@@ -8,7 +8,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
-import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.packet.types.ApplyPresetPacket;
 import redstonetweaks.packet.types.DoWorldTicksPacket;
@@ -36,15 +35,17 @@ import redstonetweaks.packet.types.TickPausePacket;
 import redstonetweaks.packet.types.TickStatusPacket;
 import redstonetweaks.packet.types.WorldSyncPacket;
 import redstonetweaks.packet.types.WorldTimeSyncPacket;
+import redstonetweaks.util.PacketUtils;
 
 public abstract class AbstractPacketHandler {
 	
 	public static final Identifier PACKET_IDENTIFIER = new Identifier("redstonetweaks");
+	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.createRelease(1, 0, 5);
 	
 	protected Packet<?> encodePacket(RedstoneTweaksPacket packet) {
 		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 		
-		buffer.writeString(RedstoneTweaks.PACKET_PROTOCOL.toString());
+		PacketUtils.writeRedstoneTweaksVersion(buffer, PACKET_PROTOCOL);
 		
 		PacketType packetType = PacketType.fromPacket(packet);
 		if (packetType == PacketType.INVALID) {
@@ -71,9 +72,9 @@ public abstract class AbstractPacketHandler {
 	public abstract void sendPacket(RedstoneTweaksPacket redstoneTweaksPacket);
 	
 	public void onPacketReceived(PacketByteBuf buffer) {
-		RedstoneTweaksVersion packetProtocol = RedstoneTweaksVersion.parseVersion(buffer.readString(32767));
+		RedstoneTweaksVersion packetProtocol = PacketUtils.readRedstoneTweaksVersion(buffer);
 		
-		if (RedstoneTweaks.PACKET_PROTOCOL.equals(packetProtocol)) {
+		if (PACKET_PROTOCOL.equals(packetProtocol)) {
 			try {
 				execute(decodePacket(buffer));
 			} catch (Exception e) {

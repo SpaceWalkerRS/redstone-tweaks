@@ -3,10 +3,11 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
-import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.server.ServerInfo;
+import redstonetweaks.util.PacketUtils;
 
 public class ServerInfoPacket extends RedstoneTweaksPacket {
 	
@@ -18,12 +19,12 @@ public class ServerInfoPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		buffer.writeString(RedstoneTweaks.MOD_VERSION.toString());
+		PacketUtils.writeRedstoneTweaksVersion(buffer, RedstoneTweaks.MOD_VERSION);
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		modVersion = RedstoneTweaksVersion.parseVersion(buffer.readString(MAX_STRING_LENGTH));
+		modVersion = PacketUtils.readRedstoneTweaksVersion(buffer);
 	}
 	
 	@Override
@@ -34,7 +35,5 @@ public class ServerInfoPacket extends RedstoneTweaksPacket {
 	@Override
 	public void execute(MinecraftClient client) {
 		ServerInfo.updateFromPacket(this);
-		
-		((RTIMinecraftClient)client).getSettingsManager().onServerInfoUpdated();
 	}
 }

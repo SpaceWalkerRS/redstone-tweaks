@@ -1,7 +1,10 @@
 package redstonetweaks.setting.types;
 
+import net.minecraft.network.PacketByteBuf;
+
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
+import redstonetweaks.util.PacketUtils;
 import redstonetweaks.world.common.WorldTickOptions;
 
 public class WorldTickOptionsSetting extends Setting<WorldTickOptions> {
@@ -16,8 +19,13 @@ public class WorldTickOptionsSetting extends Setting<WorldTickOptions> {
 	}
 	
 	@Override
-	public WorldTickOptions stringToValue(String string) {
-		return WorldTickOptions.parseWorldTickOptions(string);
+	public void write(PacketByteBuf buffer, WorldTickOptions value) {
+		PacketUtils.writeWorldTickOptions(buffer, value);
+	}
+	
+	@Override
+	public WorldTickOptions read(PacketByteBuf buffer) {
+		return PacketUtils.readWorldTickOptions(buffer);
 	}
 	
 	@Override

@@ -8,12 +8,12 @@ import net.minecraft.server.MinecraftServer;
 
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
+import redstonetweaks.util.PacketUtils;
 
 public class SettingsPacket extends RedstoneTweaksPacket {
 	
 	public int count;
 	public ISetting[] settings;
-	public String[] values;
 	
 	public SettingsPacket() {
 		
@@ -22,14 +22,10 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 	public SettingsPacket(Collection<ISetting> collection) {
 		count = collection.size();
 		settings = new ISetting[count];
-		values = new String[count];
 		
 		int index = 0;
 		for (ISetting setting : collection) {
-			settings[index] = setting;
-			values[index] = setting.getAsString();
-			
-			index++;
+			settings[index++] = setting;
 		}
 	}
 	
@@ -37,21 +33,22 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 	public void encode(PacketByteBuf buffer) {
 		buffer.writeInt(count);
 		
-		for (int index = 0; index < count; index++) {
-			buffer.writeString(settings[index].getId());
-			buffer.writeString(values[index]);
+		for (ISetting setting : settings) {
+			buffer.writeString(setting.getId());
+			setting.encode(buffer);
 		}
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
 		count = buffer.readInt();
-		settings = new ISetting[count];
-		values = new String[count];
 		
-		for (int index = 0; index < count; index++) {
-			settings[index] = Settings.getSettingFromId(buffer.readString(MAX_STRING_LENGTH));
-			values[index] = buffer.readString(MAX_STRING_LENGTH);
+		for (int i = 0; i < count; i++) {
+			ISetting setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
+			if (setting != null) {
+				setting.setEnabled(true);
+				setting.decode(buffer);
+			}
 		}
 	}
 	
@@ -62,18 +59,6 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 
 	@Override
 	public void execute(MinecraftClient client) {
-		if (client.isInSingleplayer()) {
-			return;
-		}
 		
-		while (count >= 0) {
-			count--;
-			
-			ISetting setting = settings[count];
-			if (setting != null) {
-				setting.setEnabled(true);
-				setting.setFromString(values[count]);
-			}
-		}
 	}
 }

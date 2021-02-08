@@ -13,35 +13,35 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
-import redstonetweaks.packet.types.NeighborUpdateVisualizerPacket;
-import redstonetweaks.util.UpdateType;
+
+import redstonetweaks.world.common.UpdateType;
 
 public class NeighborUpdateVisualizer {
 	
-	private static final float BLOCK_UPDATE_RED = 1.0f;
-	private static final float BLOCK_UPDATE_GREEN = 0.9f;
-	private static final float BLOCK_UPDATE_BLUE = 0.4f;
-	private static final float BLOCK_UPDATE_ALPHA = 0.4f;
+	private static final float BLOCK_UPDATE_RED = 1.0F;
+	private static final float BLOCK_UPDATE_GREEN = 0.9F;
+	private static final float BLOCK_UPDATE_BLUE = 0.4F;
+	private static final float BLOCK_UPDATE_ALPHA = 0.4F;
 	
-	private static final float COMPARATOR_UPDATE_RED = 1.0f;
-	private static final float COMPARATOR_UPDATE_GREEN = 0.0f;
-	private static final float COMPARATOR_UPDATE_BLUE = 0.0f;
-	private static final float COMPARATOR_UPDATE_ALPHA = 0.4f;
+	private static final float COMPARATOR_UPDATE_RED = 1.0F;
+	private static final float COMPARATOR_UPDATE_GREEN = 0.0F;
+	private static final float COMPARATOR_UPDATE_BLUE = 0.0F;
+	private static final float COMPARATOR_UPDATE_ALPHA = 0.4F;
 	
-	private static final float OBSERVER_UPDATE_RED = 0.2f;
-	private static final float OBSERVER_UPDATE_GREEN = 0.3f;
-	private static final float OBSERVER_UPDATE_BLUE = 1.0f;
-	private static final float OBSERVER_UPDATE_ALPHA = 0.4f;
+	private static final float SHAPE_UPDATE_RED = 0.2F;
+	private static final float SHAPE_UPDATE_GREEN = 0.3F;
+	private static final float SHAPE_UPDATE_BLUE = 1.0F;
+	private static final float SHAPE_UPDATE_ALPHA = 0.4F;
 	
-	private static final float NOTIFIER_RED = 1.0f;
-	private static final float NOTIFIER_GREEN = 1.0f;
-	private static final float NOTIFIER_BLUE = 1.0f;
-	private static final float NOTIFIER_ALPHA = 0.4f;
+	private static final float NOTIFIER_RED = 1.0F;
+	private static final float NOTIFIER_GREEN = 1.0F;
+	private static final float NOTIFIER_BLUE = 1.0F;
+	private static final float NOTIFIER_ALPHA = 0.4F;
 	
-	private static final float SOURCE_RED = 1.0f;
-	private static final float SOURCE_GREEN = 1.0f;
-	private static final float SOURCE_BLUE = 1.0f;
-	private static final float SOURCE_ALPHA = 0.4f;
+	private static final float SOURCE_RED = 1.0F;
+	private static final float SOURCE_GREEN = 1.0F;
+	private static final float SOURCE_BLUE = 1.0F;
+	private static final float SOURCE_ALPHA = 0.4F;
 	
 	private final MinecraftClient client;
 	
@@ -99,7 +99,7 @@ public class NeighborUpdateVisualizer {
 	}
 	
 	private void drawFancyBoxOutline(BufferBuilder builder, MatrixStack matrices, BlockPos pos, float r, float g, float b, float a) {
-		Matrix4f modlMat = matrices.peek().getModel();
+		Matrix4f model = matrices.peek().getModel();
 
 		float x0 = pos.getX();
 		float y0 = pos.getY();
@@ -113,254 +113,254 @@ public class NeighborUpdateVisualizer {
 		float d = 0.02f;
 		
 		// Back face
-		builder.vertex(modlMat, x0, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + d, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + d, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + d, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y0, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + d, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + d, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + d, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + d, z1 - l).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y0, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + l, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + l, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + l, z1 - d).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y1 - l, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - l, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - d, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - l, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z1 - d).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y1 - d, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z1 - l).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y1 - d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - d, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y1 - l, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - l, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - d, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - l, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y0 + d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + d, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + l, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + d, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + l, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + l, z0).color(r, g, b, a).next();
 		
 		// Front face
-		builder.vertex(modlMat, x1, y0 + d, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + l, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + l, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + l, z0 + d).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y1 - l, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1 - l, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - l, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0 + d).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y1 - d, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1 - d, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - d, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - d, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0 + l).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y1 - d, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1 - d, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - d, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - d, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1 - d).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y1 - l, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1 - l, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - l, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y0 + d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + d, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + l, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + l, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + l, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + d, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y0, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + d, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z0 + l).color(r, g, b, a).next();
 		
 		// Right face
-		builder.vertex(modlMat, x0 + d, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + l, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0 + l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0 + l, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0 + d, y1 - l, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - l, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y1 - d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1 - l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1 - d, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0 + l, y1 - d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1 - d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y1 - d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y1, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1 - d, y1 - d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y1 - d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1 - d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y1 - d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y1 - l, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y1 - l, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1 - l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y0 + d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y0 + d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y0 + l, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0 + l, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + l, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y0 + d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + d, z0).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0 + l, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0 + d, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0 + d, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y0 + d, z0).color(r, g, b, a).next();
 		
 		// Left face
-		builder.vertex(modlMat, x0, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y0 + d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y0 + d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + d, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1 - l, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y0 + d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y0 + d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0 + d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y0 + d, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1 - d, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0 + l, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y0 + l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0 + l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0 + l, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1 - d, y1 - l, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1 - l, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1 - d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y1 - d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1 - l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1 - d, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1 - l, y1 - d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1 - d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y1 - d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1 - d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y1, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0 + d, y1 - d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y1 - d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1 - d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y1 - d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y1 - l, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y1 - l, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1 - l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1 - l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y0 + d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0 + d, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0 + l, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0 + l, z1).color(r, g, b, a).next();
-		
-		// Bottom face
-		builder.vertex(modlMat, x0, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y0, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0, z0 + d).color(r, g, b, a).next();
-		
-		builder.vertex(modlMat, x1 - l, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y0, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y0, z0 + d).color(r, g, b, a).next();
-		
-		builder.vertex(modlMat, x1 - d, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y0, z0 + l).color(r, g, b, a).next();
-		
-		builder.vertex(modlMat, x1 - d, y0, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y0, z1 - d).color(r, g, b, a).next();
-		
-		builder.vertex(modlMat, x1 - l, y0, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y0, z1).color(r, g, b, a).next();
-		
-		builder.vertex(modlMat, x0 + d, y0, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y0, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0, z1).color(r, g, b, a).next();
-		
-		builder.vertex(modlMat, x0, y0, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0, z1).color(r, g, b, a).next();
-		
-		builder.vertex(modlMat, x0, y0, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y0, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0 + d, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0 + l, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0 + l, z1).color(r, g, b, a).next();
 		
 		// Bottom face
-		builder.vertex(modlMat, x0, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y1, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y0, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0 + d).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y1, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y1, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y1, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y0, z0 + d).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0, y1, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y1, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0, z0 + l).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1 - l, y1, z1 - d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y1, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y0, z1 - d).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1 - d, y1, z1 - l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y0, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y0, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1 - d, y1, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - d, y1, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0 + l).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y0, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x1 - l, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1 - l, y1, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1).color(r, g, b, a).next();
 		
-		builder.vertex(modlMat, x0 + d, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + d, y1, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y1, z0 + d).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0 + l, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y0, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0 + l).color(r, g, b, a).next();
+		
+		// Top face
+		builder.vertex(model, x0, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1, z0).color(r, g, b, a).next();
+		
+		builder.vertex(model, x0, y1, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1, z1 - l).color(r, g, b, a).next();
+		
+		builder.vertex(model, x0, y1, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y1, z1 - d).color(r, g, b, a).next();
+		
+		builder.vertex(model, x1 - l, y1, z1 - d).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1, z1 - d).color(r, g, b, a).next();
+		
+		builder.vertex(model, x1 - d, y1, z1 - l).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1 - l).color(r, g, b, a).next();
+		
+		builder.vertex(model, x1 - d, y1, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1 - d, y1, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0 + l).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0 + d).color(r, g, b, a).next();
+		
+		builder.vertex(model, x1 - l, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1 - l, y1, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0).color(r, g, b, a).next();
+		
+		builder.vertex(model, x0 + d, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0 + d, y1, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y1, z0 + d).color(r, g, b, a).next();
+		builder.vertex(model, x0 + l, y1, z0).color(r, g, b, a).next();
 	}
 	
 	private void drawBox(BufferBuilder builder, MatrixStack matrices, BlockPos pos, float r, float g, float b, float a) {
-		Matrix4f modlMat = matrices.peek().getModel();
+		Matrix4f model = matrices.peek().getModel();
 
 		float x0 = pos.getX();
 		float y0 = pos.getY();
@@ -371,40 +371,40 @@ public class NeighborUpdateVisualizer {
 		float z1 = pos.getZ() + 1;
 
 		// Back Face
-		builder.vertex(modlMat, x0, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z0).color(r, g, b, a).next();
 
 		// Front Face
-		builder.vertex(modlMat, x1, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1).color(r, g, b, a).next();
 
 		// Right Face
-		builder.vertex(modlMat, x0, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z0).color(r, g, b, a).next();
 
 		// Left Face
-		builder.vertex(modlMat, x0, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z1).color(r, g, b, a).next();
 
 		// Bottom Face
-		builder.vertex(modlMat, x0, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y0, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z0).color(r, g, b, a).next();
+		builder.vertex(model, x1, y0, z1).color(r, g, b, a).next();
+		builder.vertex(model, x0, y0, z1).color(r, g, b, a).next();
 
 		// Top Face
-		builder.vertex(modlMat, x0, y1, z0).color(r, g, b, a).next();
-		builder.vertex(modlMat, x0, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z1).color(r, g, b, a).next();
-		builder.vertex(modlMat, x1, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z0).color(r, g, b, a).next();
+		builder.vertex(model, x0, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z1).color(r, g, b, a).next();
+		builder.vertex(model, x1, y1, z0).color(r, g, b, a).next();
 	}
 	
 	private float getRed() {
@@ -414,9 +414,9 @@ public class NeighborUpdateVisualizer {
 		case COMPARATOR_UPDATE:
 			return COMPARATOR_UPDATE_RED;
 		case SHAPE_UPDATE:
-			return OBSERVER_UPDATE_RED;
+			return SHAPE_UPDATE_RED;
 		default:
-			return 0.0f;
+			return 0.0F;
 		}
 	}
 	
@@ -427,9 +427,9 @@ public class NeighborUpdateVisualizer {
 		case COMPARATOR_UPDATE:
 			return COMPARATOR_UPDATE_GREEN;
 		case SHAPE_UPDATE:
-			return OBSERVER_UPDATE_GREEN;
+			return SHAPE_UPDATE_GREEN;
 		default:
-			return 0.0f;
+			return 0.0F;
 		}
 	}
 	
@@ -440,9 +440,9 @@ public class NeighborUpdateVisualizer {
 		case COMPARATOR_UPDATE:
 			return COMPARATOR_UPDATE_BLUE;
 		case SHAPE_UPDATE:
-			return OBSERVER_UPDATE_BLUE;
+			return SHAPE_UPDATE_BLUE;
 		default:
-			return 0.0f;
+			return 0.0F;
 		}
 	}
 	
@@ -453,14 +453,10 @@ public class NeighborUpdateVisualizer {
 		case COMPARATOR_UPDATE:
 			return COMPARATOR_UPDATE_ALPHA;
 		case SHAPE_UPDATE:
-			return OBSERVER_UPDATE_ALPHA;
+			return SHAPE_UPDATE_ALPHA;
 		default:
-			return 0.0f;
+			return 0.0F;
 		}
-	}
-	
-	public void updateBoxPositions(NeighborUpdateVisualizerPacket packet) {
-		updateBoxPositions(packet.pos, packet.notifierPos, packet.sourcePos, packet.updateType);
 	}
 	
 	public void updateBoxPositions(BlockPos pos, BlockPos notifierPos, BlockPos sourcePos, UpdateType updateType) {
@@ -468,9 +464,5 @@ public class NeighborUpdateVisualizer {
 		this.notifierPos = notifierPos;
 		this.sourcePos = sourcePos;
 		this.updateType = updateType;
-	}
-	
-	public void clearBoxPositions() {
-		updateBoxPositions(null, null, null, UpdateType.NONE);
 	}
 }

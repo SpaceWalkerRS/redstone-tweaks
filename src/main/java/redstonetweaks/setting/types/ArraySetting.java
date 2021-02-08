@@ -2,9 +2,10 @@ package redstonetweaks.setting.types;
 
 import java.util.Arrays;
 
+import net.minecraft.network.PacketByteBuf;
+
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
-import redstonetweaks.setting.preset.Presets;
 
 public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
@@ -13,27 +14,24 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	}
 	
 	@Override
-	public String valueToString(E[] values) {
-		String string = "";
+	public void write(PacketByteBuf buffer, E[] value) {
+		buffer.writeInt(value.length);
 		
-		for (E value : get()) {
-			string += elementToString(value) + ",";
+		for (E element : value) {
+			writeElement(buffer, element);
 		}
-		
-		return string.substring(0, string.length() - 1);
 	}
 	
 	@Override
-	public E[] stringToValue(String string) {
-		String[] args = string.split(",");
-		int size = args.length;
+	public E[] read(PacketByteBuf buffer) {
+		int size = buffer.readInt();
 		
-		E[] values = getEmptyArray(size);
+		E[] array = getEmptyArray(size);
 		for (int index = 0; index < size; index++) {
-			values[index] = stringToElement(args[index]);
+			array[index] = readElement(buffer);
 		}
 		
-		return values;
+		return array;
 	}
 	
 	@Override
@@ -45,7 +43,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	
 	@Override
 	public void setPresetValue(Preset preset, E[] newValue) {
-		if (preset == Presets.Default.DEFAULT || newValue.length == getSize()) {
+		if (newValue.length == getSize()) {
 			super.setPresetValue(preset, newValue.clone());
 		}
 	}
@@ -54,6 +52,10 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	public boolean valueEquals(E[] value1, E[] value2) {
 		return Arrays.equals(value1, value2);
 	}
+	
+	protected abstract void writeElement(PacketByteBuf buffer, E element);
+	
+	protected abstract E readElement(PacketByteBuf buffer);
 	
 	protected abstract E[] getEmptyArray(int size);
 	

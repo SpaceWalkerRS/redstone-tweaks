@@ -4,9 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
-import redstonetweaks.packet.types.TaskSyncPacket;
-import redstonetweaks.packet.types.WorldSyncPacket;
-import redstonetweaks.packet.types.WorldTimeSyncPacket;
+
 import redstonetweaks.world.common.WorldTickHandler.Task;
 
 public class TickInfoLabelRenderer extends DrawableHelper {
@@ -98,20 +96,20 @@ public class TickInfoLabelRenderer extends DrawableHelper {
 		return 3 * font.fontHeight + 2 * TEXT_SPACING;
 	}
 	
-	public void onWorldTimeSyncPacketReceived(WorldTimeSyncPacket packet) {
-		currentTime = packet.worldTime;
+	public void syncWorldTime(long worldTime) {
+		currentTime = worldTime;
 		
 		updateText();
 	}
 	
-	public void onWorldSyncPacketReceived(WorldSyncPacket packet) {
-		currentWorldName = packet.worldName;
+	public void syncWorld(String worldName) {
+		currentWorldName = worldName;
 		
 		updateText();
 	}
 	
-	public void onTaskSyncPacketReceived(TaskSyncPacket packet) {
-		currentTask = packet.currentTask;
+	public void syncTask(Task task) {
+		currentTask = task;
 		
 		updateText();
 	}

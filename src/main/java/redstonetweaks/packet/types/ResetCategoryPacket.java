@@ -7,6 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.util.PacketUtils;
 
 public class ResetCategoryPacket extends RedstoneTweaksPacket {
 	
@@ -22,12 +23,12 @@ public class ResetCategoryPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		buffer.writeString(category == null ? "null" : category.getName());
+		buffer.writeString(category.getName());
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		category = Settings.getCategoryFromName(buffer.readString(MAX_STRING_LENGTH));
+		category = Settings.getCategoryFromName(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
 	}
 	
 	@Override
@@ -39,7 +40,7 @@ public class ResetCategoryPacket extends RedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (category != null && !client.isInSingleplayer()) {
+		if (!client.isInSingleplayer() && category != null) {
 			category.resetAll();
 		}
 	}

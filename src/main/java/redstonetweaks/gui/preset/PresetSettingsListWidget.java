@@ -25,7 +25,6 @@ import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
-import redstonetweaks.setting.types.GameModeToBooleanSetting;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.IntegerSetting;
 import redstonetweaks.setting.types.TickPrioritySetting;
@@ -75,7 +74,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			List<Entry> settingEntries = new ArrayList<>();
 			
 			for (ISetting setting : pack.getSettings()) {
-				if (addSettingsMode ? viewModePredicate.test(setting) : parent.getPresetEditor().hasSetting(setting)) {
+				if (setting.isEnabled() && (addSettingsMode ? viewModePredicate.test(setting) : parent.getPresetEditor().hasSetting(setting))) {
 					settingEntries.add(addSettingsMode ? new AddSettingEntry(setting) : new EditSettingEntry(setting));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
@@ -100,7 +99,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			List<Entry> settingEntries = new ArrayList<>();
 			
 			for (ISetting setting : pack.getSettings()) {
-				if ((addSettingsMode ? viewModePredicate.test(setting) : parent.getPresetEditor().hasSetting(setting)) && (packMatchesQuery || setting.getName().toLowerCase().contains(query))) {
+				if (setting.isEnabled() && (addSettingsMode ? viewModePredicate.test(setting) : parent.getPresetEditor().hasSetting(setting)) && (packMatchesQuery || setting.getName().toLowerCase().contains(query))) {
 					settingEntries.add(addSettingsMode ? new AddSettingEntry(setting) : new EditSettingEntry(setting));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(setting.getName()));
@@ -399,23 +398,11 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 					}
 				})).alwaysActive());
 			} else
-			if (setting instanceof GameModeToBooleanSetting) {
-				GameModeToBooleanSetting gSetting = (GameModeToBooleanSetting)setting;
-				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(parent.getPresetEditor().isEditable() ? "EDIT" : "VIEW"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, gSetting, () -> parent.getPresetEditor().getValue(gSetting), (setting) -> {});
-					
-					screen.openWindow(window);
-					
-					if (!parent.getPresetEditor().isEditable()) {
-						window.disableButtons();
-					}
-				})).alwaysActive());
-			} else
 			if (setting instanceof BooleanSetting) {
 				BooleanSetting bSetting = (BooleanSetting)setting;
 				buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> {
 					Formatting color = parent.getPresetEditor().getValue(bSetting) ? Formatting.GREEN : Formatting.RED;
-					return new TranslatableText(parent.getPresetEditor().getValueAsString(bSetting)).formatted(color);
+					return new TranslatableText(String.valueOf(parent.getPresetEditor().getValue(bSetting))).formatted(color);
 				}, (button) -> {
 					parent.getPresetEditor().setValue(bSetting, !parent.getPresetEditor().getValue(bSetting));
 					
@@ -425,7 +412,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			if (setting instanceof IntegerSetting) {
 				IntegerSetting iSetting = (IntegerSetting)setting;
 				if (iSetting.getRange() < 10) {
-					buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(parent.getPresetEditor().getValueAsString(iSetting)), (slider) -> {
+					buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(String.valueOf(parent.getPresetEditor().getValue(iSetting))), (slider) -> {
 						int min = iSetting.getMin();
 						int steps = (int)(slider.getValue() * (iSetting.getRange() + 1));
 						
@@ -436,15 +423,15 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 					}));
 				} else {
 					buttonPanel.addButton(new RTTextFieldWidget(client.textRenderer, 0, 0, 100, 20, (textField) -> {
-						textField.setText(parent.getPresetEditor().getValueAsString(iSetting));
+						textField.setText(String.valueOf(parent.getPresetEditor().getValue(iSetting)));
 					}, (text) -> {
-						parent.getPresetEditor().setValueFromString(iSetting, text);
+						parent.getPresetEditor().setValue(iSetting, Integer.parseInt(text));
 					}));
 				}
 			} else
 			if (setting instanceof TickPrioritySetting) {
 				TickPrioritySetting tSetting = (TickPrioritySetting)setting;
-				buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(parent.getPresetEditor().getValueAsString(tSetting)), (slider) -> {
+				buttonPanel.addButton(new RTSliderWidget(0, 0, 100, 20, () -> new TranslatableText(String.valueOf(parent.getPresetEditor().getValue(tSetting))), (slider) -> {
 					TickPriority[] priorities = TickPriority.values();
 					
 					int min = priorities[0].getIndex();

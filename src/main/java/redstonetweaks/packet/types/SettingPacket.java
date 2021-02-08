@@ -6,53 +6,41 @@ import net.minecraft.server.MinecraftServer;
 
 import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.types.ISetting;
-import redstonetweaks.setting.types.Setting;
+import redstonetweaks.util.PacketUtils;
 
 public class SettingPacket extends RedstoneTweaksPacket {
 	
 	public ISetting setting;
-	public String value;
 	
 	public SettingPacket() {
 		
 	}
 	
 	public SettingPacket(ISetting setting) {
-		this(setting, setting.getValueAsString());
-	}
-	
-	public <T> SettingPacket(Setting<T> setting, T value) {
-		this(setting, setting.valueToString(value));
-	}
-	
-	public SettingPacket(ISetting setting, String value) {
 		this.setting = setting;
-		this.value = value;
 	}
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
 		buffer.writeString(setting.getId());
-		buffer.writeString(value);
+		setting.encode(buffer);
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		setting = Settings.getSettingFromId(buffer.readString(MAX_STRING_LENGTH));
-		value = buffer.readString(MAX_STRING_LENGTH);
+		setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
+		if (setting != null) {
+			setting.decode(buffer);
+		}
 	}
 	
 	@Override
 	public void execute(MinecraftServer server) {
-		if (setting != null) {
-			setting.setValueFromString(value);
-		}
+		
 	}
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (setting != null && !client.isInSingleplayer()) {
-			setting.setValueFromString(value);
-		}
+		
 	}
 }

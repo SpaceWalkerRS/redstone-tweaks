@@ -1,5 +1,6 @@
 package redstonetweaks.setting.types;
 
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.world.TickPriority;
 
 import redstonetweaks.setting.SettingsPack;
@@ -16,7 +17,12 @@ public class TickPrioritySetting extends Setting<TickPriority> {
 	}
 	
 	@Override
-	public TickPriority stringToValue(String string) {
-		return TickPriority.valueOf(string);
+	public void write(PacketByteBuf buffer, TickPriority value) {
+		buffer.writeByte(value.getIndex());
+	}
+	
+	@Override
+	public TickPriority read(PacketByteBuf buffer) {
+		return TickPriority.byIndex(buffer.readByte());
 	}
 }

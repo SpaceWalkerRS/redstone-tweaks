@@ -29,24 +29,26 @@ public class Presets {
 	
 	private static final Set<IPresetListener> LISTENERS = new HashSet<>();
 	
-	public static void register(Preset preset) {
+	public static boolean register(Preset preset) {
 		int id = preset.getId();
 		
 		if (ALL.containsKey(id) && ALL.get(id) != preset) {
 			RedstoneTweaks.LOGGER.warn(String.format("Preset %s could not be registered, as a preset with id %d has already been registered.", preset.getName(), id));
 			
-			return;
+			return false;
 		}
 		
 		ALL.putIfAbsent(id, preset);
-		ACTIVE.putIfAbsent(preset.getName(), preset);
+		if (ACTIVE.putIfAbsent(preset.getName(), preset) == null) {
+			presetAdded(preset);
+		}
+		
+		return true;
 	}
 	
 	public static void remove(Preset preset) {
-		if (preset.isEditable()) {
-			if (ACTIVE.remove(preset.getName(), preset)) {
-				presetRemoved(preset);
-			}
+		if (ACTIVE.remove(preset.getName(), preset)) {
+			presetRemoved(preset);
 		}
 	}
 	
@@ -83,13 +85,13 @@ public class Presets {
 	}
 	
 	public static Preset create(String name, String description, Preset.Mode mode) {
-		return new Preset(name, description, mode, true);
+		return new Preset(true, name, description, mode);
 	}
 	
 	public static Preset fromIdOrCreate(int id, String name, String description, Preset.Mode mode) {
 		Preset preset = fromId(id);
 		
-		return preset == null ? new Preset(id, null, name, description, mode, true) : preset;
+		return preset == null ? new Preset(id, null, true, name, description, mode) : preset;
 	}
 	
 	public static PresetEditor newPreset(boolean fromSettings) {
@@ -123,17 +125,10 @@ public class Presets {
 		return new PresetEditor(preset);
 	}
 	
-	public static Preset getRemovedPresetFromSavedName(String savedName) {
-		for (Preset preset : ALL.values()) {
-			if (!ACTIVE.containsValue(preset) && preset.getSavedName().equals(savedName)) {
-				return preset;
-			}
-		}
-		
-		return null;
-	}
-	
+	// Use on the server only
 	public static void init() {
+		Preset.resetIdCounter();
+		
 		Default.init();
 		Bedrock.init();
 		Debugging.init();
@@ -142,13 +137,21 @@ public class Presets {
 		PistonMadness.init();
 	}
 	
-	public static void toDefault() {
+	public static void reset() {
 		removeAll();
 		cleanUp();
 	}
 
 	public static void cleanUp() {
-		ALL.values().removeIf((preset) -> !ACTIVE.containsValue(preset));
+		ALL.values().removeIf((preset) -> {
+			if (!isActive(preset)) {
+				preset.remove();
+				
+				return true;
+			}
+			
+			return false;
+		});
 	}
 	
 	public static void addListener(IPresetListener listener) {
@@ -157,6 +160,10 @@ public class Presets {
 	
 	public static void removeListener(IPresetListener listener) {
 		LISTENERS.remove(listener);
+	}
+	
+	public static void clearListeners() {
+		LISTENERS.clear();
 	}
 	
 	public static void presetChanged(PresetEditor editor) {
@@ -174,11 +181,15 @@ public class Presets {
 		LISTENERS.forEach((listener) -> listener.presetRemoved(preset));
 	}
 	
-	public static class Default {
-		
-		public static final Preset DEFAULT = new Preset("Default", "The default values of all settings.", Preset.Mode.SET, false);
+	public static void presetAdded(Preset preset) {
+		LISTENERS.forEach((listener) -> listener.presetAdded(preset));
+	}
+	
+	private static class Default {
 		
 		private static void init() {
+			Preset DEFAULT = new Preset(false, "Default", "The default values of all settings.", Preset.Mode.SET);
+			
 			Presets.register(DEFAULT);
 			
 			Tweaks.Global.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
@@ -636,11 +647,11 @@ public class Presets {
 		}
 	}
 	
-	public static class Bedrock {
-		
-		public static final Preset BEDROCK = new Preset("Bedrock", "Features or behaviors that are present in the Bedrock Edition of Minecraft.", Preset.Mode.SET, false);
+	private static class Bedrock {
 		
 		private static void init() {
+			Preset BEDROCK = new Preset(false, "Bedrock", "Features or behaviors that are present in the Bedrock Edition of Minecraft.", Preset.Mode.SET);
+			
 			Presets.register(BEDROCK);
 			
 			Tweaks.Global.MOVABLE_BLOCK_ENTITIES.setPresetValue(BEDROCK, true);
@@ -680,11 +691,11 @@ public class Presets {
 		}
 	}
 	
-	public static class Debugging {
-		
-		public static final Preset DEBUGGING = new Preset("Debugging", "Debugging tools.", Preset.Mode.SET, false);
+	private static class Debugging {
 		
 		private static void init() {
+			Preset DEBUGGING = new Preset(false, "Debugging", "Debugging tools.", Preset.Mode.SET);
+			
 			Presets.register(DEBUGGING);
 			
 			Tweaks.Global.SHOW_NEIGHBOR_UPDATES.setPresetValue(DEBUGGING, true);
@@ -694,11 +705,11 @@ public class Presets {
 		}
 	}
 	
-	public static class Heaven {
-		
-		public static final Preset HEAVEN = new Preset("Heaven", "Bug fixes, quality of life changes and cool new features to make your redstoning experience a bliss.", Preset.Mode.SET, false);
+	private static class Heaven {
 		
 		private static void init() {
+			Preset HEAVEN = new Preset(false, "Heaven", "Bug fixes, quality of life changes and cool new features to make your redstoning experience a bliss.", Preset.Mode.SET);
+			
 			Presets.register(HEAVEN);
 			
 			Tweaks.Global.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
@@ -777,11 +788,11 @@ public class Presets {
 		}
 	}
 	
-	public static class Hell {
-		
-		public static final Preset HELL = new Preset("Hell", "The worst redstoning experience imaginable. Apply at your own risk.", Preset.Mode.SET, false);
+	private static class Hell {
 		
 		private static void init() {
+			Preset HELL = new Preset(false, "Hell", "The worst redstoning experience imaginable. Apply at your own risk.", Preset.Mode.SET);
+			
 			Presets.register(HELL);
 			
 			Tweaks.Global.BLOCK_UPDATE_ORDER.setPresetValue(HELL, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.RANDOM, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
@@ -893,11 +904,11 @@ public class Presets {
 		}
 	}
 	
-	public static class PistonMadness {
-		
-		public static final Preset PISTON_MADNESS = new Preset("Piston Madness", "Pistons as you've never seen them before! Sometimes in a good way, sometimes in a weird way...", Preset.Mode.SET, false);
+	private static class PistonMadness {
 		
 		private static void init() {
+			Preset PISTON_MADNESS = new Preset(false, "Piston Madness", "Pistons as you've never seen them before! Sometimes in a good way, sometimes in a weird way...", Preset.Mode.SET);
+			
 			Presets.register(PISTON_MADNESS);
 			
 			Tweaks.Global.CHAINSTONE.setPresetValue(PISTON_MADNESS, true);

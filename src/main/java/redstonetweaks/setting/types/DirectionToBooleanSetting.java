@@ -1,5 +1,6 @@
 package redstonetweaks.setting.types;
 
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.Direction;
 
 import redstonetweaks.setting.SettingsPack;
@@ -12,7 +13,17 @@ public class DirectionToBooleanSetting extends ArraySetting<Direction, Boolean> 
 	
 	@Override
 	public Boolean[] getBackupValue() {
-		return new Boolean[] {false};
+		return new Boolean[] {false, false, false, false, false, false};
+	}
+	
+	@Override
+	protected void writeElement(PacketByteBuf buffer, Boolean element) {
+		buffer.writeBoolean(element);
+	}
+	
+	@Override
+	protected Boolean readElement(PacketByteBuf buffer) {
+		return buffer.readBoolean();
 	}
 	
 	@Override

@@ -69,7 +69,7 @@ public class SettingsTab extends RTMenuTab implements ISettingListener, IPermiss
 		lockButton = new RTLockButtonWidget(resetButton.getX() - 22, y, category.isLocked(), (button) -> {
 			button.toggleLocked();
 			
-			((RTIMinecraftClient)screen.client).getSettingsManager().lockCategory(category, button.isLocked());
+			category.setLocked(button.isLocked());
 		});
 		addContent(lockButton);
 		
