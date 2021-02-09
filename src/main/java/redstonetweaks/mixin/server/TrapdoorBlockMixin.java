@@ -17,22 +17,23 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(TrapdoorBlock.class)
 public class TrapdoorBlockMixin {
 	
 	@Redirect(method = "onUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onOnUseRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		TickSchedulerHelper.scheduleWater(world, state, tickScheduler, pos, fluid, delay);
+		TickSchedulerHelper.scheduleFluidTick(world, pos, state.getFluidState(), delay, Tweaks.Water.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-		TickSchedulerHelper.scheduleWater(world, state, tickScheduler, pos, fluid, delay);
+		TickSchedulerHelper.scheduleFluidTick(world, pos, state.getFluidState(), delay, Tweaks.Water.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.scheduleWater(world, state, tickScheduler, pos, fluid, delay);
+		TickSchedulerHelper.scheduleFluidTick(world, pos, state.getFluidState(), delay, Tweaks.Water.TICK_PRIORITY.get());
 	}
 }

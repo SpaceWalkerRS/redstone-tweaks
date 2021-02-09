@@ -4,7 +4,6 @@ import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -16,8 +15,10 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.setting.Tweaks;
 
@@ -34,24 +35,16 @@ public class RedstoneLampBlockMixin {
 		return WorldHelper.isPowered(world, pos, state, false, Tweaks.RedstoneLamp.QC, Tweaks.RedstoneLamp.RANDOMIZE_QC.get());
 	}
 	
-	@Inject(method = "neighborUpdate", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private void onNeighborUpdateInjectBeforeSchedule(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
-		int delay = Tweaks.RedstoneLamp.DELAY_FALLING_EDGE.get();
-		if (delay == 0) {
-			world.setBlockState(pos, state.cycle(Properties.LIT), 2);
-		} else {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Tweaks.RedstoneLamp.TICK_PRIORITY_FALLING_EDGE.get());
-		}
-		ci.cancel();
+	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos blockPos, T obj, int oldDelay, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.RedstoneLamp.DELAY_FALLING_EDGE.get(), Tweaks.RedstoneLamp.TICK_PRIORITY_FALLING_EDGE.get());
 	}
 	
-	@Inject(method = "neighborUpdate", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
-	private void onNeighborUpdateInjectBeforeSetBlockState(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
-		int delay = Tweaks.RedstoneLamp.DELAY_RISING_EDGE.get();
-		if (delay > 0) {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Tweaks.RedstoneLamp.TICK_PRIORITY_RISING_EDGE.get());
-			ci.cancel();
-		}
+	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private boolean onNeighborUpdateRedirectSetBlockState(World world1, BlockPos pos1, BlockState newState, int flags, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.RedstoneLamp.DELAY_RISING_EDGE.get(), Tweaks.RedstoneLamp.TICK_PRIORITY_RISING_EDGE.get());
+		
+		return true;
 	}
 	
 	@Inject(method = "scheduledTick", at = @At(value = "HEAD"), cancellable = true)
@@ -62,10 +55,12 @@ public class RedstoneLampBlockMixin {
 
 		if (powered != shouldBePowered) {
 			world.setBlockState(pos, state.cycle(Properties.LIT), 2);
+			
 			if (shouldBePowered != isReceivingPower) {
 				world.updateNeighbor(pos, state.getBlock(), pos);
 			}
 		}
+		
 		ci.cancel();
 	}
 

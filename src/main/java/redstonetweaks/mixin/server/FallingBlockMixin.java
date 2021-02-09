@@ -35,12 +35,12 @@ public abstract class FallingBlockMixin {
 	
 	@Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onOnBlockAddedRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, delay, Tweaks.GravityBlock.TICK_PRIORITY.get());
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.GravityBlock.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T block, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, block, delay, Tweaks.GravityBlock.TICK_PRIORITY.get());
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.GravityBlock.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/FallingBlock;canFallThrough(Lnet/minecraft/block/BlockState;)Z"))
@@ -59,7 +59,6 @@ public abstract class FallingBlockMixin {
 				}
 			}
 		}
-		
 		
 		return false;
 	}

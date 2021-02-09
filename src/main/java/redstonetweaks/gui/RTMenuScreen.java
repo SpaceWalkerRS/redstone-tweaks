@@ -110,11 +110,11 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	
 	@Override
 	public void onClose() {
-		Settings.removeListener(this);
-		Presets.removeListener(this);
-		
 		RTMenuTab selectedTab = getSelectedTab();
 		if (!selectedTab.closeTopWindow()) {
+			Settings.removeListener(this);
+			Presets.removeListener(this);
+			
 			selectedTab.onTabClosed();
 			super.onClose();
 		}

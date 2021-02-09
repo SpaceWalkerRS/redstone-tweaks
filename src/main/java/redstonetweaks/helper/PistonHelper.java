@@ -621,10 +621,10 @@ public class PistonHelper {
 					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, PistonSettings.tickPriorityRisingEdge(sticky));
 				}
 			} else {
-				if (delay == 0 || onScheduledTick) {
+				if (onScheduledTick) {
 					world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
 				} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
-					world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, PistonSettings.tickPriorityRisingEdge(sticky));
+					TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, PistonSettings.tickPriorityRisingEdge(sticky));
 				}
 			}
 		} else if (!shouldExtend && extended && (!PistonSettings.looseHead(sticky) || PistonHelper.hasPistonHead(world, pos, sticky, facing))) {
@@ -639,7 +639,7 @@ public class PistonHelper {
 				}
 			}
 			
-			if (delay == 0 || onScheduledTick) {
+			if (onScheduledTick) {
 				if (PistonHelper.doDoubleRetraction(sticky)) {
 					state = getPiston(sticky, facing, false);
 					
@@ -648,7 +648,7 @@ public class PistonHelper {
 				
 				world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
 			} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, PistonSettings.tickPriorityFallingEdge(sticky));
+				TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, PistonSettings.tickPriorityFallingEdge(sticky));
 			}
 		}
 		

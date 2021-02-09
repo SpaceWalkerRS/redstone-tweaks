@@ -27,12 +27,15 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.interfaces.mixin.RTIBlock;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(AbstractButtonBlock.class)
-public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
+public abstract class AbstractButtonBlockMixin extends WallMountedBlock implements RTIBlock {
 	
 	@Shadow boolean wooden;
 	
@@ -40,6 +43,7 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 		super(settings);
 	}
 	
+	@Shadow protected abstract int getPressTicks();
 	@Shadow public abstract void powerOn(BlockState blockState, World world, BlockPos blockPos);
 	@Shadow protected abstract void playClickSound(PlayerEntity player, WorldAccess world, BlockPos pos, boolean powered);
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
@@ -59,10 +63,14 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 	// if the button has activation delay.
 	@Inject(method = "onUse", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/AbstractButtonBlock;powerOn(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
 	private void onOnUseInjectBeforePowerOn(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
-		int delay = wooden ? Tweaks.WoodenButton.DELAY_RISING_EDGE.get() : Tweaks.StoneButton.DELAY_RISING_EDGE.get();
-		if (delay > 0) {
+		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
+			cir.setReturnValue(ActionResult.FAIL);
+			cir.cancel();
+		} else {
+			int delay = wooden ? Tweaks.WoodenButton.DELAY_RISING_EDGE.get() : Tweaks.StoneButton.DELAY_RISING_EDGE.get();
 			TickPriority priority = wooden ? Tweaks.WoodenButton.TICK_PRIORITY_RISING_EDGE.get() : Tweaks.StoneButton.TICK_PRIORITY_RISING_EDGE.get();
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
 			
 			cir.setReturnValue(ActionResult.SUCCESS);
 			cir.cancel();
@@ -71,15 +79,13 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 	
 	@Redirect(method = "powerOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onPowerOnRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, World world, BlockPos pos) {
-		if (delay == 0) {
-			if (!world.isClient()) {
-				scheduledTick(world.getBlockState(pos), (ServerWorld)world, pos, world.getRandom());
-			}
-		} else {
+		if (((RTIWorld)world).immediateNeighborUpdates()) {
 			TickPriority priority = wooden ? Tweaks.WoodenButton.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.StoneButton.TICK_PRIORITY_FALLING_EDGE.get();
-			tickScheduler.schedule(pos, object, delay, priority);
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+		} else if (!world.isClient()) {
+			((RTIServerWorld)world).getIncompleteActionScheduler().scheduleBlockAction(pos, 0, state.getBlock());
 		}
-		
 	}
 	
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
@@ -102,10 +108,27 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock {
 		}
 	}
 	
+	@Redirect(method = "tryPowerWithProjectiles", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	private <T> void onTryPowerWithProjectilesRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay, BlockState state, World world, BlockPos pos) {
+		TickPriority priority = wooden ? Tweaks.WoodenButton.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.StoneButton.TICK_PRIORITY_FALLING_EDGE.get();
+		
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+	}
+	
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(BlockState state, World world, BlockPos pos, CallbackInfo ci) {
 		((RTIWorld)world).dispatchBlockUpdates(pos, getDirection(state).getOpposite(), state.getBlock(), updateOrder());
+		
 		ci.cancel();
+	}
+	
+	@Override
+	public boolean continueAction(World world, BlockPos pos, int type) {
+		TickPriority priority = wooden ? Tweaks.WoodenButton.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.StoneButton.TICK_PRIORITY_FALLING_EDGE.get();
+		
+		TickSchedulerHelper.scheduleBlockTick(world, pos, world.getBlockState(pos), getPressTicks(), priority);
+		
+		return false;
 	}
 	
 	private UpdateOrder updateOrder() {

@@ -18,6 +18,7 @@ import redstonetweaks.listeners.Listeners;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.ServerSettingsManager;
+import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.setting.preset.ServerPresetsManager;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
@@ -36,6 +37,7 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(CallbackInfo ci) {
 		ServerInfo.onServerStart();
+		Presets.init();
 		
 		packetHandler = new ServerPacketHandler((MinecraftServer)(Object)this);
 		settingsManager = new ServerSettingsManager((MinecraftServer)(Object)this);
@@ -51,9 +53,10 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	private void onShutdown(CallbackInfo ci) {
 		Listeners.clear();
 		
-		settingsManager.onShutdown();
 		presetsManager.onShutdown();
+		settingsManager.onShutdown();
 		
+		Presets.reset();
 		ServerInfo.onServerStop();
 	}
 	

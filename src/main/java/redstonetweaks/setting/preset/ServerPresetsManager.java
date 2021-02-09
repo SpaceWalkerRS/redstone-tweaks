@@ -17,6 +17,7 @@ import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
 import redstonetweaks.packet.types.RemovePresetPacket;
+import redstonetweaks.util.PacketUtils;
 
 public class ServerPresetsManager implements IPresetListener {
 	
@@ -64,7 +65,9 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	public void onPlayerJoined(ServerPlayerEntity player) {
-		sendPresetsToPlayer(player);
+		if (server.isRemote()) {
+			sendPresetsToPlayer(player);
+		}
 	}
 	
 	private void sendPresetsToPlayer(ServerPlayerEntity player) {
@@ -79,8 +82,6 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	private void loadPresets() {
-		Presets.init();
-		
 		File directory = getPresetsFolder();
 		
 		for (File file : directory.listFiles()) {
@@ -102,8 +103,8 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	private void readPreset(PacketByteBuf buffer) {
-		String name = buffer.readString();
-		String description = buffer.readString();
+		String name = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
+		String description = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 		Preset.Mode mode = Preset.Mode.fromIndex(buffer.readByte());
 		
 		Preset preset = new Preset(name, name, description, mode);
@@ -115,6 +116,10 @@ public class ServerPresetsManager implements IPresetListener {
 	
 	public void reloadPresets() {
 		savePresets();
+		
+		Presets.reset();
+		Presets.init();
+		
 		loadPresets();
 		
 		sendPresetsToPlayer(null);
@@ -128,8 +133,6 @@ public class ServerPresetsManager implements IPresetListener {
 				savePreset(preset);
 			}
 		}
-		
-		Presets.reset();
 	}
 	
 	private void cleanUpPresetFiles() {
@@ -149,7 +152,7 @@ public class ServerPresetsManager implements IPresetListener {
 			byte[] data = IOUtils.toByteArray(stream);
 			PacketByteBuf buffer = new PacketByteBuf(Unpooled.wrappedBuffer(data));
 			
-			String savedName = buffer.readString();
+			String savedName = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 			
 			for (Preset preset : Presets.getAllPresets()) {
 				try {

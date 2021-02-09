@@ -12,12 +12,13 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(SeaPickleBlock.class)
 public class SeaPickleBlockMixin {
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.scheduleWater(world, state, tickScheduler, pos, fluid, delay);
+		TickSchedulerHelper.scheduleFluidTick(world, pos, state.getFluidState(), delay, Tweaks.Water.TICK_PRIORITY.get());
 	}
 }

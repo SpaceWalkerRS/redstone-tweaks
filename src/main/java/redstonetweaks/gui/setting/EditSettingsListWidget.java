@@ -151,6 +151,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	}
 	
 	public void updateMode(boolean next) {
+		saveScrollAmount();
 		setMode(next ? mode.next() : mode.previous());
 	}
 	

@@ -24,6 +24,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 import redstonetweaks.block.entity.PowerBlockEntity;
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(TargetBlock.class)
@@ -47,6 +48,7 @@ public class TargetBlockMixin implements BlockEntityProvider {
 	@Inject(method = "setPower", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/WorldAccess;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private static void onSetPowerInjectBeforeSetBlockState(WorldAccess world, BlockState state, int power, BlockPos pos, int delay, CallbackInfo ci) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
+		
 		if (blockEntity instanceof PowerBlockEntity) {
 			((PowerBlockEntity)blockEntity).setPower(power);
 		}
@@ -60,16 +62,13 @@ public class TargetBlockMixin implements BlockEntityProvider {
 	
 	@Redirect(method = "setPower", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private static <T> void onSetPowerRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int delay1, WorldAccess world, BlockState state, int power, BlockPos pos, int delay) {
-		if (delay > 0) {
-			tickScheduler.schedule(pos, object, delay, Tweaks.TargetBlock.TICK_PRIORITY.get());
-		} else if (world instanceof ServerWorld) {
-			state.scheduledTick((ServerWorld)world, pos, world.getRandom());
-		}
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.TargetBlock.TICK_PRIORITY.get());
 	}
 	
 	@Inject(method = "scheduledTick", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onScheduledTickInjectBeforeSetBlockState(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
+		
 		if (blockEntity instanceof PowerBlockEntity) {
 			((PowerBlockEntity)blockEntity).setPower(0);
 		}
@@ -82,6 +81,7 @@ public class TargetBlockMixin implements BlockEntityProvider {
 			PowerBlockEntity powerBlockEntity = ((PowerBlockEntity)blockEntity);
 			
 			powerBlockEntity.ensureCorrectPower(state);
+			
 			cir.setReturnValue(powerBlockEntity.getPower());
 			cir.cancel();
 		}

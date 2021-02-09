@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.AbstractRedstoneGateBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -38,11 +39,15 @@ import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(AbstractRedstoneGateBlock.class)
-public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
-	
+public abstract class AbstractRedstoneGateBlockMixin extends AbstractBlock implements RTIBlock {
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract boolean hasPower(World world, BlockPos pos, BlockState state);
 	@Shadow protected abstract int getUpdateDelayInternal(BlockState state);
+	
+	
+	public AbstractRedstoneGateBlockMixin(Settings settings) {
+		super(settings);
+	}
 	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/AbstractRedstoneGateBlock;hasPower(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
 	private void onScheduledTickInjectBeforeHasPower(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
@@ -79,21 +84,10 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;isTicking(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;)Z"))
 	private <T> boolean onUpdatePoweredRedirectIsTicking(TickScheduler<T> scheduler, BlockPos pos, T block, World world, BlockPos blockPos, BlockState state) {
 		if (Tweaks.Repeater.MICRO_TICK_MODE.get()) {
-			return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(blockPos);
+			return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(pos);
 		}
 		
 		return scheduler.isTicking(pos, block);
-	}
-	
-	@Inject(method = "updatePowered", cancellable =  true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
-	private void updatePoweredInjectBeforePriorityHigh(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
-		if (getUpdateDelayInternal(state) == 0) {
-			if (!world.isClient()) {
-				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
-			}
-			
-			ci.cancel();
-		}
 	}
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
@@ -122,7 +116,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 				((ServerWorld)world).addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
 			}
 		} else {
-			scheduler.schedule(pos, block, delay, priority);
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
 		}
 	}
 	
@@ -161,6 +155,17 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 	}
 	
 	@Override
+	public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
+		if (type <= 1) {
+			state.scheduledTick((ServerWorld)world, pos, world.getRandom());
+		} else {
+			((ServerWorld)world).addSyncedBlockEvent(pos, state.getBlock(), type - 1, data);
+		}
+		
+		return false;
+	}
+	
+	@Override
 	public boolean continueAction(World world, BlockPos pos, int type) {
 		if (type == 0) {
 			scheduleTickOnScheduledTick((ServerWorld)world, pos, world.getBlockState(pos), world.getRandom());
@@ -180,7 +185,7 @@ public abstract class AbstractRedstoneGateBlockMixin implements RTIBlock {
 		} else {
 			TickPriority priority = powered ? Tweaks.Repeater.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.Repeater.TICK_PRIORITY_RISING_EDGE.get();
 			
-			TickSchedulerHelper.schedule(world, state, world.getBlockTickScheduler(), pos, state.getBlock(), delay, priority);
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package redstonetweaks.mixin.server;
 
+import java.util.Random;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -10,10 +12,12 @@ import net.minecraft.block.CommandBlock;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerTickScheduler;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.setting.Tweaks;
 
@@ -26,13 +30,13 @@ public class CommandBlockMixin {
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay) {
-		tickScheduler.schedule(pos, block, Tweaks.CommandBlock.DELAY.get(), Tweaks.CommandBlock.TICK_PRIORITY.get());
+	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos blockPos, T obj, int oldDelay, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.CommandBlock.DELAY.get(), Tweaks.CommandBlock.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay) {
-		tickScheduler.schedule(pos, block, Tweaks.CommandBlock.DELAY.get(), Tweaks.CommandBlock.TICK_PRIORITY.get());
+	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos blockPos, T obj, int oldDelay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.CommandBlock.DELAY.get(), Tweaks.CommandBlock.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "onPlaced", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))

@@ -35,6 +35,7 @@ import net.minecraft.world.WorldAccess;
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.RedstoneWireHelper;
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.world.common.ShapeUpdate;
@@ -128,6 +129,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	@Inject(method = "update", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
 		updatePowered(world, pos, state, false);
+		
 		ci.cancel();
 	}
 	
@@ -214,7 +216,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		if (power != powerReceived && world.getBlockState(pos) == state) {
 			int delay = Tweaks.RedstoneWire.DELAY.get();
 			
-			if (onScheduledTick || delay == 0) {
+			if (onScheduledTick) {
 				BlockEntity blockEntity = world.getBlockEntity(pos);
 				
 				if (blockEntity instanceof PowerBlockEntity) {
@@ -224,7 +226,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				
 				updateNeighborsOnStateChange(world, pos, state);
 			} else {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Tweaks.RedstoneWire.TICK_PRIORITY.get());
+				TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.RedstoneWire.TICK_PRIORITY.get());
 			}
 		}
 	}

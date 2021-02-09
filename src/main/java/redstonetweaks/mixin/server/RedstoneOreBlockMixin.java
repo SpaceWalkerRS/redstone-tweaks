@@ -19,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
@@ -81,12 +82,7 @@ public abstract class RedstoneOreBlockMixin extends AbstractBlock {
 	}
 	
 	private void update(World world, BlockState state, BlockPos pos) {
-		int delay = Tweaks.RedstoneOre.DELAY.get();
-		if (delay == 0) {
-			light(state, world, pos);
-		} else {
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Tweaks.RedstoneOre.TICK_PRIORITY.get());
-		}
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.RedstoneOre.DELAY.get(), Tweaks.RedstoneOre.TICK_PRIORITY.get());
 	}
 	
 	private static void updateNeighbors(World world, BlockPos pos, BlockState state) {

@@ -24,7 +24,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
-
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
@@ -57,15 +57,14 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 
 	@Inject(method = "updateBlockState", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onUpdateBlockStateInjectBeforeSetBlockState(BlockState state, World world, BlockPos pos, Block neighbor, CallbackInfo ci, boolean powered) {
-		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
-			ci.cancel();
-		} else {
+		if (!world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
 			int delay = getDelay(state, powered);
-			if (delay > 0) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, getTickPriority(state, powered));
-				ci.cancel();
-			}
+			TickPriority priority = getTickPriority(state, powered);
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
 		}
+		
+		ci.cancel();
 	}
 
 	@Override
@@ -75,6 +74,7 @@ public abstract class PoweredRailBlockMixin extends AbstractBlock {
 
 		if (powered != shouldBePowered) {
 			world.setBlockState(pos, state.with(Properties.POWERED, shouldBePowered), 3);
+			
 			world.updateNeighborsAlways(pos.down(), state.getBlock());
 			if ((state.get(Properties.STRAIGHT_RAIL_SHAPE)).isAscending()) {
 				world.updateNeighborsAlways(pos.up(), state.getBlock());

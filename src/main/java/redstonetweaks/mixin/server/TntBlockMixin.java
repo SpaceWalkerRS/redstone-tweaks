@@ -17,8 +17,10 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.TntBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
@@ -44,28 +46,26 @@ public abstract class TntBlockMixin extends AbstractBlock {
 
 	@Inject(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/TntBlock;primeTnt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V", shift = Shift.BEFORE), cancellable = true)
 	private void onOnBlockAddedInjectBeforePrimeTnt(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo ci) {
-		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
-			ci.cancel();
-		} else {
+		if (!world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
 			int delay = Tweaks.TNT.DELAY.get();
-			if (delay > 0) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Tweaks.TNT.TICK_PRIORITY.get());
-				ci.cancel();
-			}
+			TickPriority priority = Tweaks.TNT.TICK_PRIORITY.get();
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
 		}
+		
+		ci.cancel();
 	}
 	
 	@Inject(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/TntBlock;primeTnt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V", shift = Shift.BEFORE), cancellable = true)
 	private void onNeighborUpdateInjectBeforePrimeTnt(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify, CallbackInfo ci) {
-		if (world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
-			ci.cancel();
-		} else {
+		if (!world.getBlockTickScheduler().isTicking(pos, state.getBlock())) {
 			int delay = Tweaks.TNT.DELAY.get();
-			if (delay > 0) {
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, Tweaks.TNT.TICK_PRIORITY.get());
-				ci.cancel();
-			}
+			TickPriority priority = Tweaks.TNT.TICK_PRIORITY.get();
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
 		}
+		
+		ci.cancel();
 	}
 	
 	@ModifyArg(method = "onDestroyedByExplosion", index = 0, at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I"))

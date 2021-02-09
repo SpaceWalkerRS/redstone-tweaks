@@ -24,6 +24,7 @@ public class InfoTab extends RTMenuTab {
 	
 	@Override
 	protected void refreshContents() {
+		clearContents();
 		init();
 	}
 	

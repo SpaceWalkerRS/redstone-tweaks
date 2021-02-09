@@ -84,6 +84,7 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 			powerBlockEntity.ensureCorrectPower(state);
 			return powerBlockEntity.getPower();
 		}
+		
 		return state.get(Properties.POWER);
 	}
 	

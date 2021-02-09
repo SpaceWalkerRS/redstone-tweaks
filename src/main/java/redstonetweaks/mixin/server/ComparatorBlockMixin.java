@@ -9,8 +9,6 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -24,10 +22,14 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.TickPriority;
+import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
+
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIRedstoneDiode;
 import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.setting.Tweaks;
 
 @Mixin(ComparatorBlock.class)
@@ -74,15 +76,13 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 		return redstonetweaks.setting.Tweaks.Global.POWER_MAX.get();
 	}
 	
-	@Inject(method = "updatePowered", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
-	private void onUpdatePoweredInjectBeforePriorityHigh(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
-		if (getUpdateDelayInternal(state) == 0) {
-			if (!world.isClient()) {
-				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
-			}
-			
-			ci.cancel();
+	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;isTicking(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;)Z"))
+	private <T> boolean onUpdatePoweredRedirectIsTicking(TickScheduler<T> scheduler, BlockPos pos, T block, World world, BlockPos blockPos, BlockState state) {
+		if (Tweaks.Comparator.MICRO_TICK_MODE.get()) {
+			return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(pos);
 		}
+		
+		return scheduler.isTicking(pos, block);
 	}
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
@@ -99,9 +99,15 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 		return Tweaks.Comparator.TICK_PRIORITY.get();
 	}
 	
-	@ModifyConstant(method = "updatePowered", constant = @Constant(intValue = 2))
-	private int onUpdatePowerModifyDelay(int oldDelay) {
-		return Tweaks.Comparator.DELAY.get();
+	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;ILnet/minecraft/world/TickPriority;)V"))
+	private <T> void onUpdatePoweredRedirectSchedule(TickScheduler<T> scheduler, BlockPos pos, T block, int delay, TickPriority priority, World world, BlockPos blockPos, BlockState state) {
+		if (Tweaks.Comparator.MICRO_TICK_MODE.get()) {
+			if (!world.isClient()) {
+				((ServerWorld)world).addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
+			}
+		} else {
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.Comparator.DELAY.get(), priority);
+		}
 	}
 	
 	// To fix the chain bug without altering other behavior, we identify if the chain bug is occurring

@@ -587,6 +587,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	private void prepareBlockPlacement() {
+		if (!world.isClient() && pushedBlock.isOf(Blocks.OBSERVER) && !pushedBlock.get(Properties.POWERED)) {
+			// This fixes observers with 0 rising edge delay having the falling edge delay when placed after being moved
+			world.setBlockState(pos, pushedBlock, 16);
+		}
 		if (mergingState != null) {
 			if (SlabHelper.isSlab(pushedBlock)) {
 				if (mergingState.isOf(pushedBlock.getBlock())) {

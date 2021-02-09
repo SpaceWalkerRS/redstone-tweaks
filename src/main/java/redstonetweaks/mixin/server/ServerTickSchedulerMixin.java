@@ -11,10 +11,6 @@ import java.util.function.Predicate;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerChunkManager;
@@ -25,10 +21,9 @@ import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ScheduledTick;
-import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
+
 import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
-import redstonetweaks.setting.Tweaks;
 
 @Mixin(ServerTickScheduler.class)
 public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickScheduler, TickScheduler<T> {
@@ -44,20 +39,6 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 	private boolean isTicking;
 	
 	@Shadow abstract void addScheduledTick(ScheduledTick<T> scheduledTick);
-	
-	@Inject(method = "schedule", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
-	private void onScheduledInjectBeforeAddScheduledTick(BlockPos pos, T object, int delay, TickPriority priority, CallbackInfo ci) {
-		if (Tweaks.Global.DELAY_MULTIPLIER.get() != 0) {
-			if (Tweaks.Global.RANDOMIZE_TICK_PRIORITIES.get()) {
-				int index = world.getRandom().nextInt(TickPriority.values().length) + TickPriority.values()[0].getIndex();
-				priority = TickPriority.byIndex(index);
-			}
-			
-			addScheduledTick(new ScheduledTick<>(pos, object, world.getTime() + getDelay(delay), priority));
-		}
-		
-		ci.cancel();
-	}
 	
 	@Override
 	public boolean hasScheduledTickAtTime(BlockPos pos, Object object, int delay) {
@@ -139,16 +120,5 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 		} else {
 			return false;
 		}
-	}
-	
-	private int getDelay(int delay) {
-		if (Tweaks.Global.RANDOMIZE_DELAYS.get()) {
-			int min = 1;
-			int max = 127;
-			
-			delay = min + world.getRandom().nextInt(max);
-		}
-		
-		return Tweaks.Global.DELAY_MULTIPLIER.get() * delay;
 	}
 }

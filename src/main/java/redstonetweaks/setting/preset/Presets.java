@@ -144,13 +144,13 @@ public class Presets {
 
 	public static void cleanUp() {
 		ALL.values().removeIf((preset) -> {
-			if (!isActive(preset)) {
-				preset.remove();
-				
-				return true;
+			if (isActive(preset)) {
+				return false;
 			}
 			
-			return false;
+			preset.remove();
+			
+			return true;
 		});
 	}
 	
@@ -268,6 +268,7 @@ public class Presets {
 					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.FRONT).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.FRONT, RelativePos.BACK));
 			Tweaks.Comparator.DELAY.setPresetValue(DEFAULT, 2);
+			Tweaks.Comparator.MICRO_TICK_MODE.setPresetValue(DEFAULT, false);
 			Tweaks.Comparator.REDSTONE_BLOCKS_VALID_SIDE_INPUT.setPresetValue(DEFAULT, true);
 			Tweaks.Comparator.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			Tweaks.Comparator.TICK_PRIORITY_FACING_DIODE.setPresetValue(DEFAULT, TickPriority.HIGH);

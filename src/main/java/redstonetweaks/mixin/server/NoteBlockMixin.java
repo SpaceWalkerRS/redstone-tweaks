@@ -15,7 +15,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
-
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
@@ -35,14 +35,9 @@ public abstract class NoteBlockMixin extends AbstractBlock {
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/NoteBlock;playNote(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
-	private void onNeighborUpdateRedirectPlayNote(NoteBlock noteBlock, World world, BlockPos pos) {
+	private void onNeighborUpdateRedirectPlayNote(NoteBlock noteBlock, World world1, BlockPos pos1, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
 		if (!world.getBlockTickScheduler().isTicking(pos, noteBlock)) {
-			int delay = getDelay();
-			if (delay == 0) {
-				playNote(world, pos);
-			} else {
-				world.getBlockTickScheduler().schedule(pos, noteBlock, delay, getTickPriority());
-			}
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, getDelay(), getTickPriority());
 		}
 	}
 	

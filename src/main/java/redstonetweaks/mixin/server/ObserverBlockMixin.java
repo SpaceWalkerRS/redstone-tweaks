@@ -22,7 +22,6 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
@@ -36,21 +35,11 @@ import redstonetweaks.setting.Tweaks;
 public abstract class ObserverBlockMixin implements RTIBlock {
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
-	@Shadow protected abstract void scheduleTick(WorldAccess world, BlockPos pos);
 	@Shadow protected abstract void updateNeighbors(World world, BlockPos pos, BlockState state);
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos blockPos, T block, int delay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		TickSchedulerHelper.schedule(world, world.getBlockState(pos), tickScheduler, pos, block, Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
-	}
-	
-	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
-	private void onScheduledTickInjectAfterSetBlockState0(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
-		if (!((RTIWorld)world).immediateNeighborUpdates()) {
-			((RTIServerWorld)world).getIncompleteActionScheduler().scheduleBlockAction(pos, 0, (Block)(Object)this);
-			
-			ci.cancel();
-		}
+		TickSchedulerHelper.scheduleBlockTick(world, pos, world.getBlockState(pos), Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
 	}
 	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", ordinal = 1, shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
@@ -64,26 +53,24 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 	
 	@Inject(method = "getStateForNeighborUpdate", cancellable = true , at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/ObserverBlock;scheduleTick(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)V"))
 	private void onGetStateForNeighborUpdateInjectBeforeScheduleTick(BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom, CallbackInfoReturnable<BlockState> cir) {
-		if (!Tweaks.Observer.DISABLE.get() && !world.isClient()) {
-			if (Tweaks.Observer.DELAY_RISING_EDGE.get() == 0) {
-				scheduledTick(state, (ServerWorld)world, pos, world.getRandom());
-				state = world.getBlockState(pos);
-			} else {
-				scheduleTick(world, pos);
+		if (!Tweaks.Observer.DISABLE.get() && !world.isClient() && !world.getBlockTickScheduler().isScheduled(pos, state.getBlock())) {
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.Observer.DELAY_RISING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_RISING_EDGE.get());
+			
+			BlockState newBlockState = world.getBlockState(pos);
+			
+			if (newBlockState != state && newBlockState.isOf(state.getBlock())) {
+				state = newBlockState;
 			}
 		}
+		
 		cir.setReturnValue(state);
 		cir.cancel();
-	}
-	
-	@Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
-	private <T> void onScheduleTickRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay) {
-		tickScheduler.schedule(pos, block, Tweaks.Observer.DELAY_RISING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_RISING_EDGE.get());
 	}
 	
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
 		((RTIWorld)world).dispatchBlockUpdates(pos, state.get(Properties.FACING).getOpposite(), state.getBlock(), Tweaks.Observer.BLOCK_UPDATE_ORDER.get());
+		
 		ci.cancel();
 	}
 	
@@ -114,13 +101,9 @@ public abstract class ObserverBlockMixin implements RTIBlock {
 
 	@Override
 	public boolean continueAction(World world, BlockPos pos, int type) {
-		if (type == 0) {
-			updateNeighbors(world, pos, world.getBlockState(pos));
-		} else if (type == 1) {
-			TickSchedulerHelper.schedule(world, world.getBlockState(pos), world.getBlockTickScheduler(), pos, (Block)(Object)this, Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
-			
-			updateNeighbors(world, pos, world.getBlockState(pos));
-		}
+		TickSchedulerHelper.scheduleBlockTick(world, pos, world.getBlockState(pos), Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
+		
+		updateNeighbors(world, pos, world.getBlockState(pos));
 		
 		return false;
 	}

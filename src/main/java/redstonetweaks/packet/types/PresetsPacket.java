@@ -81,8 +81,10 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 			for (int index = 0; index < presetsCount; index++) {
 				Preset preset = presets[index];
 				
-				if (Presets.register(preset) && removed[index]) {
-					Presets.remove(preset);
+				if (Presets.register(preset)) {
+					if (removed[index]) {
+						Presets.remove(preset);
+					}
 				} else {
 					preset.remove();
 				}

@@ -15,7 +15,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
-
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
@@ -38,13 +38,12 @@ public abstract class HopperBlockMixin extends Block {
 	private boolean onUpdateEnabledRedirectSetBlockState(World world, BlockPos pos, BlockState state, int flags) {
 		// We invert the powered property because this state is the new state
 		boolean enabled = !state.get(Properties.ENABLED);
+		
 		int delay = getDelay(enabled);
-		if (delay == 0) {
-			world.setBlockState(pos, state, flags);
-		} else {
-			TickPriority priority = getTickPriority(enabled);
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
-		}
+		TickPriority priority = getTickPriority(enabled);
+		
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+		
 		return true;
 	}
 	
@@ -57,7 +56,9 @@ public abstract class HopperBlockMixin extends Block {
 		
 		if (enabled != shouldBeEnabled) {
 			BlockState newState = state.with(Properties.ENABLED, shouldBeEnabled);
+			
 			world.setBlockState(pos, newState, 6);
+			
 			if (shouldBeEnabled == isReceivingPower) {
 				updateEnabled(world, pos, newState);
 			}

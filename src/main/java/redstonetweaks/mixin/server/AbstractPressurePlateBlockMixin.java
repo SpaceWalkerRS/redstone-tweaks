@@ -23,6 +23,7 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import redstonetweaks.block.entity.PowerBlockEntity;
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIPressurePlate;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 
@@ -47,18 +48,16 @@ public abstract class AbstractPressurePlateBlockMixin extends Block {
 	@Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;updatePlateState(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)V"))
 	public void onEntityCollisionRedirectUpdatePlateState(AbstractPressurePlateBlock pressurePlate, World world, BlockPos pos, BlockState state, int i) {
 		int delay = ((RTIPressurePlate)this).delayRisingEdge(state);
-		if (delay == 0) {
-			updatePlateState(world, pos, state, i);
-		} else {
-			TickPriority priority = ((RTIPressurePlate)this).tickPriorityRisingEdge(state);
-			world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
-		}
+		TickPriority priority = ((RTIPressurePlate)this).tickPriorityRisingEdge(state);
+		
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
 	}
 	
 	@Inject(method = "updatePlateState", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onUpdatePlateStateInjectBeforeSetBlockState(World world, BlockPos pos, BlockState state, int rsOut, CallbackInfo ci, int newPower) {
 		if (hasBlockEntity()) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
 			if (blockEntity instanceof PowerBlockEntity) {
 				((PowerBlockEntity)blockEntity).setPower(newPower);
 			}
@@ -70,13 +69,14 @@ public abstract class AbstractPressurePlateBlockMixin extends Block {
 		int delay = ((RTIPressurePlate)this).delayFallingEdge(state);
 		TickPriority priority = ((RTIPressurePlate)this).tickPriorityFallingEdge(state);
 		
-		tickScheduler.schedule(pos, block, delay, priority);
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
 	}
 	
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, CallbackInfo ci) {
 		BlockState state = world.getBlockState(pos);
 		((RTIWorld)world).dispatchBlockUpdates(pos, null, state.getBlock(), ((RTIPressurePlate)this).updateOrder(state));
+		
 		ci.cancel();
 	}
 	

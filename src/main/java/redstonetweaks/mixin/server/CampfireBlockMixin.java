@@ -20,11 +20,11 @@ public class CampfireBlockMixin {
 	
 	@Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onGetStateForNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, Tweaks.Water.TICK_PRIORITY.get());
+		TickSchedulerHelper.scheduleFluidTick(world, pos, state.getFluidState(), delay, Tweaks.Water.TICK_PRIORITY.get());
 	}
 	
 	@Redirect(method = "tryFillWithFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onTryFillWithFluidRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T fluid, int delay, WorldAccess world, BlockPos pos, BlockState state, FluidState fluidState) {
-		TickSchedulerHelper.schedule(world, state, tickScheduler, pos, fluid, delay, Tweaks.Water.TICK_PRIORITY.get());
+		TickSchedulerHelper.scheduleFluidTick(world, pos, state.getFluidState(), delay, Tweaks.Water.TICK_PRIORITY.get());
 	}
 }

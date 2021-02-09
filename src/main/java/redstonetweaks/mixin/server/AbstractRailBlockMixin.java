@@ -20,6 +20,7 @@ public class AbstractRailBlockMixin {
 		if (state.isOf(Blocks.RAIL)) {
 			return WorldHelper.isPowered(world, pos, state, false, ((RTIRail)this).getQC(), ((RTIRail)this).randQC());
 		}
+		
 		return world.isReceivingRedstonePower(pos);
 	}
 }

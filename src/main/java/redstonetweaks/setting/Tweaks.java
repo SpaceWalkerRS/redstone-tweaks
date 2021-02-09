@@ -119,6 +119,7 @@ public class Tweaks {
 		public static final BooleanSetting ADDITION_MODE = new BooleanSetting(COMPARATOR, "additionMode", "When enabled, the comparator's subtract mode turns into \"addition mode\". The output will be the sum of the back input and the highest side input.");
 		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(COMPARATOR, "blockUpdateOrder", "The order in which the comparator updates its neighbors when its power output changes.");
 		public static final IntegerSetting DELAY = new IntegerSetting(COMPARATOR, "delay", "Delay in ticks before changing power output.", 0, Settings.Common.MAX_DELAY);
+		public static final BooleanSetting MICRO_TICK_MODE = new BooleanSetting(COMPARATOR, "microTickMode", "When enabled, comparators schedule block events instead of scheduled ticks.");
 		public static final BooleanSetting REDSTONE_BLOCKS_VALID_SIDE_INPUT = new BooleanSetting(COMPARATOR, "redstoneBlocksValidSideInput", "Count redstone blocks as valid side inputs.");
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(COMPARATOR, "tickPriority", Settings.Common.DESC_TICK_PRIORITY);
 		public static final TickPrioritySetting TICK_PRIORITY_FACING_DIODE = new TickPrioritySetting(COMPARATOR, "tickPriorityFacingDiode", Settings.Common.DESC_TICK_PRIORITY_FACING_DIODE);
@@ -755,6 +756,7 @@ public class Tweaks {
 		Settings.register(Comparator.ADDITION_MODE);
 		Settings.register(Comparator.BLOCK_UPDATE_ORDER);
 		Settings.register(Comparator.DELAY);
+		Settings.register(Comparator.MICRO_TICK_MODE);
 		Settings.register(Comparator.REDSTONE_BLOCKS_VALID_SIDE_INPUT);
 		Settings.register(Comparator.TICK_PRIORITY);
 		Settings.register(Comparator.TICK_PRIORITY_FACING_DIODE);

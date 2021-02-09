@@ -25,6 +25,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
@@ -49,14 +50,14 @@ public abstract class LeverBlockMixin extends WallMountedBlock {
 			cir.cancel();
 		} else {
 			boolean powered = state.get(Properties.POWERED);
+			
 			int delay = getDelay(powered);
-			if (delay > 0) {
-				TickPriority priority = getTickPriority(powered);
-				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, priority);
-				
-				cir.setReturnValue(ActionResult.SUCCESS);
-				cir.cancel();
-			}
+			TickPriority priority = getTickPriority(powered);
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+			
+			cir.setReturnValue(ActionResult.SUCCESS);
+			cir.cancel();
 		}
 	}
 	
@@ -73,14 +74,16 @@ public abstract class LeverBlockMixin extends WallMountedBlock {
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(BlockState state, World world, BlockPos pos, CallbackInfo ci) {
 		((RTIWorld)world).dispatchBlockUpdates(pos, getDirection(state).getOpposite(), state.getBlock(), Tweaks.Lever.BLOCK_UPDATE_ORDER.get());
+		
 		ci.cancel();
 	}
 	
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		BlockState blockState = method_21846(state, world, pos);
-        float pitch = blockState.get(Properties.POWERED) ? 0.6F : 0.5F;
-        world.playSound((PlayerEntity)null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, pitch);
+		float pitch = blockState.get(Properties.POWERED) ? 0.6F : 0.5F;
+		
+		world.playSound(null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, pitch);
 	}
 	
 	private int getDelay(boolean powered) {
