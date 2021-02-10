@@ -35,9 +35,8 @@ public abstract class HopperBlockMixin extends Block {
 	}
 	
 	@Redirect(method = "updateEnabled", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
-	private boolean onUpdateEnabledRedirectSetBlockState(World world, BlockPos pos, BlockState state, int flags) {
-		// We invert the powered property because this state is the new state
-		boolean enabled = !state.get(Properties.ENABLED);
+	private boolean onUpdateEnabledRedirectSetBlockState(World world1, BlockPos pos1, BlockState newState, int flags, World world, BlockPos pos, BlockState state) {
+		boolean enabled = state.get(Properties.ENABLED);
 		
 		int delay = getDelay(enabled);
 		TickPriority priority = getTickPriority(enabled);
@@ -57,7 +56,7 @@ public abstract class HopperBlockMixin extends Block {
 		if (enabled != shouldBeEnabled) {
 			BlockState newState = state.with(Properties.ENABLED, shouldBeEnabled);
 			
-			world.setBlockState(pos, newState, 6);
+			world.setBlockState(pos, newState, 4);
 			
 			if (shouldBeEnabled == isReceivingPower) {
 				updateEnabled(world, pos, newState);

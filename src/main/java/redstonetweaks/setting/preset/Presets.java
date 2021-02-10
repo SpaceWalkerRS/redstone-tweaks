@@ -38,7 +38,9 @@ public class Presets {
 			return false;
 		}
 		
-		ALL.putIfAbsent(id, preset);
+		if (ALL.putIfAbsent(id, preset) == null) {
+			RedstoneTweaks.LOGGER.info(String.format("Registered \'%s\' preset with id %d", preset.getName(), preset.getId()));
+		}
 		if (ACTIVE.putIfAbsent(preset.getName(), preset) == null) {
 			presetAdded(preset);
 		}
@@ -415,6 +417,7 @@ public class Presets {
 			Tweaks.Observer.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 2);
 			Tweaks.Observer.DELAY_FALLING_EDGE.setPresetValue(DEFAULT, 2);
 			Tweaks.Observer.DISABLE.setPresetValue(DEFAULT, false);
+			Tweaks.Observer.OBSERVE_BLOCK_UPDATES.setPresetValue(DEFAULT, false);
 			Tweaks.Observer.POWER_WEAK.setPresetValue(DEFAULT, 15);
 			Tweaks.Observer.POWER_STRONG.setPresetValue(DEFAULT, 15);
 			Tweaks.Observer.TICK_PRIORITY_RISING_EDGE.setPresetValue(DEFAULT, TickPriority.NORMAL);
@@ -864,6 +867,8 @@ public class Presets {
 			Tweaks.NoteBlock.DELAY.setPresetValue(HELL, 1);
 			Tweaks.NoteBlock.QC.setPresetValue(HELL, new Boolean[] {true, true, true, true, true, true});
 			Tweaks.NoteBlock.RANDOMIZE_QC.setPresetValue(HELL, true);
+			
+			Tweaks.Observer.OBSERVE_BLOCK_UPDATES.setPresetValue(HELL, true);
 			
 			Tweaks.PoweredRail.DELAY_FALLING_EDGE.setPresetValue(HELL, 1);
 			Tweaks.PoweredRail.POWER_LIMIT.setPresetValue(HELL, 7);

@@ -24,6 +24,8 @@ public class Settings {
 	public static void register(SettingsCategory category) {
 		if (CATEGORIES.putIfAbsent(category.getName(), category) != null) {
 			RedstoneTweaks.LOGGER.warn(String.format("SettingsCategory %s could not be registered, as a category with that name already exists.", category.getName()));
+		} else {
+			RedstoneTweaks.LOGGER.info(String.format("Initializing \'%s\' settings", category.getName()));
 		}
 	}
 	
@@ -66,6 +68,8 @@ public class Settings {
 	public static void init() {
 		Tweaks.init();
 		ServerConfig.init();
+		
+		RedstoneTweaks.LOGGER.info(String.format("Initialized %d Redstone Tweaks settings", ALL.size()));
 	}
 
 	public static void toDefault() {

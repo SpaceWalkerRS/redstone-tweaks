@@ -12,28 +12,36 @@ import redstonetweaks.util.RTMathHelper;
 
 public class TickSchedulerHelper {
 	
-	public static void scheduleBlockTick(WorldAccess world, BlockPos pos, BlockState state, int delay, TickPriority priority) {
+	public static boolean scheduleBlockTick(WorldAccess world, BlockPos pos, BlockState state, int delay, TickPriority priority) {
 		if (!world.isClient()) {
 			delay = prepareDelay(world, delay);
 			
 			if (delay == 0 && world instanceof ServerWorld) {
 				state.scheduledTick((ServerWorld)world, pos, world.getRandom());
+				
+				return true;
 			} else {
 				world.getBlockTickScheduler().schedule(pos, state.getBlock(), delay, preparePriority(world, priority));
 			}
 		}
+		
+		return false;
 	}
 	
-	public static void scheduleFluidTick(WorldAccess world, BlockPos pos, FluidState state, int delay, TickPriority priority) {
+	public static boolean scheduleFluidTick(WorldAccess world, BlockPos pos, FluidState state, int delay, TickPriority priority) {
 		if (!world.isClient()) {
 			delay = prepareDelay(world, delay);
 			
 			if (delay == 0 && world instanceof ServerWorld) {
 				state.onScheduledTick((ServerWorld)world, pos);
+				
+				return true;
 			} else {
 				world.getFluidTickScheduler().schedule(pos, state.getFluid(), delay, preparePriority(world, priority));
 			}
 		}
+		
+		return false;
 	}
 	
 	private static int prepareDelay(WorldAccess world, int delay) {

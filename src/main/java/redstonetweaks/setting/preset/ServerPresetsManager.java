@@ -10,7 +10,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-
+import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.packet.ServerPacketHandler;
@@ -82,6 +82,8 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	private void loadPresets() {
+		RedstoneTweaks.LOGGER.info("Loading presets");
+		
 		File directory = getPresetsFolder();
 		
 		for (File file : directory.listFiles()) {
@@ -126,6 +128,8 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	private void savePresets() {
+		RedstoneTweaks.LOGGER.info("Saving presets");
+		
 		cleanUpPresetFiles();
 		
 		for (Preset preset : Presets.getAllPresets()) {

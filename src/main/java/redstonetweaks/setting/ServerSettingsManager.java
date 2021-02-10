@@ -11,7 +11,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
-
+import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.packet.ServerPacketHandler;
@@ -151,6 +151,8 @@ public class ServerSettingsManager implements ISettingListener {
 	}
 	
 	private void loadSettings() {
+		RedstoneTweaks.LOGGER.info(String.format("Loading settings for \'%s\'", server.getSaveProperties().getLevelName()));
+		
 		File directory = getSettingsFolder();
 		
 		for (File file : directory.listFiles()) {
@@ -199,6 +201,8 @@ public class ServerSettingsManager implements ISettingListener {
 	}
 	
 	private void saveSettings() {
+		RedstoneTweaks.LOGGER.info(String.format("Saving settings for \'%s\'", server.getSaveProperties().getLevelName()));
+		
 		for (SettingsCategory category : Settings.getCategories()) {
 			saveSettings(category);
 		}

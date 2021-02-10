@@ -383,6 +383,7 @@ public class Tweaks {
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting(OBSERVER, "delayRisingEdge", Settings.Common.DESC_DELAY_RISING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(OBSERVER, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting DISABLE = new BooleanSetting(OBSERVER, "disable", "Disable observers.");
+		public static final BooleanSetting OBSERVE_BLOCK_UPDATES = new BooleanSetting(OBSERVER, "observeBlockUpdates", "When enabled, observers react to block updates instead of shape updates.");
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting(OBSERVER, "weakPower", Settings.Common.DESC_POWER_WEAK, 0, Settings.Common.MAX_POWER);
 		public static final IntegerSetting POWER_STRONG = new IntegerSetting(OBSERVER, "strongPower", Settings.Common.DESC_POWER_STRONG, 0, Settings.Common.MAX_POWER);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(OBSERVER, "tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE);
@@ -920,6 +921,7 @@ public class Tweaks {
 		Settings.register(Observer.DELAY_RISING_EDGE);
 		Settings.register(Observer.DELAY_FALLING_EDGE);
 		Settings.register(Observer.DISABLE);
+		Settings.register(Observer.OBSERVE_BLOCK_UPDATES);
 		Settings.register(Observer.POWER_WEAK);
 		Settings.register(Observer.POWER_STRONG);
 		Settings.register(Observer.TICK_PRIORITY_RISING_EDGE);

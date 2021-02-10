@@ -55,6 +55,7 @@ public class ServerNeighborUpdateScheduler implements INeighborUpdateScheduler {
 			currentScheduledUpdate = scheduledNeighborUpdates.pollFirst();
 			dispatchNeighborUpdate();
 		}
+		
 		clearCurrentUpdate();
 	}
 	
