@@ -13,16 +13,28 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import net.minecraft.util.math.BlockPos;
 
 import redstonetweaks.block.entity.BlockEntityTypes;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.packet.AbstractPacketHandler;
+import redstonetweaks.setting.preset.Presets;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
 	
 	@Shadow private MinecraftClient client;
+	
+	@Inject(method = "onGameJoin", at = @At(value = "HEAD"))
+	private void onOnGameJoinInjectAtHead(GameJoinS2CPacket packet, CallbackInfo ci) {
+		if (!client.isInSingleplayer()) {
+			Presets.init();
+		}
+		
+		((RTIMinecraftClient)client).getSettingsManager().onConnect();
+		((RTIMinecraftClient)client).getPresetsManager().onConnect();
+	}
 	
 	@Inject(method = "onCustomPayload", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/network/packet/s2c/play/CustomPayloadS2CPacket;getChannel()Lnet/minecraft/util/Identifier;"))
 	private void onOnCustomPayloadInjectAfterForceMainThread(CustomPayloadS2CPacket packet, CallbackInfo ci) {

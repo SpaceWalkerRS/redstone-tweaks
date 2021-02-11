@@ -80,7 +80,15 @@ public class ClientSettingsManager implements ISettingListener {
 		}
 	}
 	
+	public void onConnect() {
+		if (!client.isInSingleplayer()) {
+			Settings.toDefault();
+		}
+	}
+	
 	public void onDisconnect() {
-		Settings.toDefault();
+		if (!client.isInSingleplayer()) {
+			Settings.toDefault();
+		}
 	}
 }

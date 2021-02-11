@@ -25,6 +25,6 @@ public class ServerInfo {
 	}
 	
 	public static void updateFromPacket(ServerInfoPacket packet) {
-		modVersion = packet.modVersion;
+		modVersion = packet.serverModVersion;
 	}
 }

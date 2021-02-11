@@ -704,8 +704,6 @@ public class Presets {
 			
 			Tweaks.Global.SHOW_NEIGHBOR_UPDATES.setPresetValue(DEBUGGING, true);
 			Tweaks.Global.WORLD_TICK_OPTIONS.setPresetValue(DEBUGGING, new WorldTickOptions(WorldTickOptions.Mode.STEP_BY_STEP, WorldTickOptions.DimensionFilter.ACTIVE, 1));
-			
-			Tweaks.Barrier.IS_MOVABLE.setPresetValue(DEBUGGING, true);
 		}
 	}
 	

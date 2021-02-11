@@ -4,6 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.BlockState;
@@ -23,11 +24,23 @@ import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIWorld;
 
 @Mixin(PistonBlockEntityRenderer.class)
 public abstract class PistonBlockEntityRendererMixin {
 	
 	@Shadow protected abstract void method_3575(BlockPos pos, BlockState state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, World world, boolean cull, int overlay);
+	
+	@ModifyVariable(method = "render", argsOnly = true, ordinal = 0, at = @At(value = "HEAD"))
+	private float onRenderModifyTickDelta(float oldTickDelta, PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, int overlay) {
+		World world = pistonBlockEntity.getWorld();
+		
+		if (world != null && !((RTIWorld)world).normalWorldTicks()) {
+			return 0.1F;
+		}
+		
+		return oldTickDelta;
+	}
 	
 	@Inject(method = "render", cancellable = true, at = @At(value = "HEAD"))
 	private void onRenderInjectAtHead(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, int overlay, CallbackInfo ci) {
@@ -41,8 +54,14 @@ public abstract class PistonBlockEntityRendererMixin {
 		
 		BlockModelRenderer.enableBrightnessCache();
 		
+		float offsetX = pistonBlockEntity.getRenderOffsetX(tickDelta);
+		float offsetY = pistonBlockEntity.getRenderOffsetY(tickDelta);
+		float offsetZ = pistonBlockEntity.getRenderOffsetZ(tickDelta);
+		
+		float totalOffset = Math.abs(offsetX + offsetY + offsetZ);
+		
 		matrixStack.push();
-		matrixStack.translate(pistonBlockEntity.getRenderOffsetX(tickDelta), pistonBlockEntity.getRenderOffsetY(tickDelta), pistonBlockEntity.getRenderOffsetZ(tickDelta));
+		matrixStack.translate(offsetX, offsetY, offsetZ);
 		
 		Direction dir = pistonBlockEntity.getMovementDirection().getOpposite();
 		BlockPos toPos = pistonBlockEntity.getPos();
@@ -76,7 +95,7 @@ public abstract class PistonBlockEntityRendererMixin {
 			if (renderHead) {
 				PistonType pistonType = PistonHelper.isPistonHead(movedState) ? movedState.get(Properties.PISTON_TYPE) : (PistonHelper.isSticky(movedState) ? PistonType.STICKY : PistonType.DEFAULT);
 				Direction facing = movedState.get(Properties.FACING);
-				boolean shortArm = isExtending ? pistonBlockEntity.getProgress(tickDelta) <= 0.5F : pistonBlockEntity.getProgress(tickDelta) >= 0.5F;
+				boolean shortArm = isExtending ? totalOffset > 0.5F : totalOffset < 0.5F;
 				
 				BlockState pistonHead = Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, pistonType).with(Properties.FACING, facing).with(Properties.SHORT, shortArm);
 				
@@ -92,7 +111,7 @@ public abstract class PistonBlockEntityRendererMixin {
 			}
 		} else {
 			if (PistonHelper.isPistonHead(movedState) && ((RTIPistonBlockEntity)pistonBlockEntity).isMerging()) {
-				if (pistonBlockEntity.getProgress(tickDelta) >= 0.5F) {
+				if (totalOffset > 0.5F) {
 					movedState = movedState.with(Properties.SHORT, true);
 				}
 			}
@@ -110,7 +129,7 @@ public abstract class PistonBlockEntityRendererMixin {
 			BlockEntity mergingBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMergingBlockEntity();
 			
 			if (mergingState != null) {
-				if (PistonHelper.isPistonHead(mergingState) && pistonBlockEntity.getProgress(tickDelta) >= 0.5F) {
+				if (PistonHelper.isPistonHead(mergingState) && totalOffset > 0.5F) {
 					mergingState = mergingState.with(Properties.SHORT, true);
 				}
 				

@@ -26,7 +26,6 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.Tickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
@@ -67,16 +66,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Shadow public abstract void finish();
-	
-	@Inject(method = "getProgress", cancellable = true, at = @At(value = "HEAD"))
-	private void onGetProgressInjectAtReturn(float tickDelta, CallbackInfoReturnable<Float> cir) {
-		if (!((RTIWorld)world).normalWorldTicks()) {
-			int speed = PistonSettings.speed(sticky, extending);
-			
-			cir.setReturnValue(MathHelper.clamp(lastProgress + 0.2F / speed, 0, speed));
-			cir.cancel();
-		}
-	}
 	
 	@Redirect(method = "getAmountExtended", at = @At(value = "FIELD", target = "Lnet/minecraft/block/entity/PistonBlockEntity;extending:Z"))
 	private boolean onGetAmountExtendedRedirectExtending(PistonBlockEntity pistonBlockEntity, float tickDelta) {
@@ -142,6 +131,12 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Inject(method = "tick", at = @At(value = "HEAD"))
 	private void onTickInjectAtHead(CallbackInfo ci) {
+		try {
+			PistonBlockEntity.class.getDeclaredField("numberOfSteps").setFloat(null, PistonSettings.speed(sticky, extending));
+		} catch (Exception e) {
+			
+		}
+		
 		if (movedBlockEntity instanceof Tickable) {
 			((Tickable)movedBlockEntity).tick();
 		}

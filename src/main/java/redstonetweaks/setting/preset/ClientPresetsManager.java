@@ -17,10 +17,6 @@ public class ClientPresetsManager {
 		this.client = client;
 	}
 	
-	public void onDisconnect() {
-		Presets.reset();
-	}
-	
 	public void applyPreset(Preset preset) {
 		((RTIMinecraftClient)client).getPacketHandler().sendPacket(new ApplyPresetPacket(preset));
 	}
@@ -48,6 +44,18 @@ public class ClientPresetsManager {
 			Presets.remove(preset);
 		} else {
 			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new RemovePresetPacket(preset));
+		}
+	}
+	
+	public void onConnect() {
+		if (!client.isInSingleplayer()) {
+			Presets.reset();
+		}
+	}
+	
+	public void onDisconnect() {
+		if (!client.isInSingleplayer()) {
+			Presets.reset();
 		}
 	}
 }

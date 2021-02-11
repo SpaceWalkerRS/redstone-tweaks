@@ -4,27 +4,26 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 
-import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.RedstoneTweaksVersion;
 import redstonetweaks.server.ServerInfo;
 import redstonetweaks.util.PacketUtils;
 
 public class ServerInfoPacket extends RedstoneTweaksPacket {
 	
-	public RedstoneTweaksVersion modVersion;
+	public RedstoneTweaksVersion serverModVersion;
 	
 	public ServerInfoPacket() {
-		this.modVersion = ServerInfo.getModVersion();
+		this.serverModVersion = ServerInfo.getModVersion();
 	}
 	
 	@Override
 	public void encode(PacketByteBuf buffer) {
-		PacketUtils.writeRedstoneTweaksVersion(buffer, RedstoneTweaks.MOD_VERSION);
+		PacketUtils.writeRedstoneTweaksVersion(buffer, serverModVersion);
 	}
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		modVersion = PacketUtils.readRedstoneTweaksVersion(buffer);
+		serverModVersion = PacketUtils.readRedstoneTweaksVersion(buffer);
 	}
 	
 	@Override
