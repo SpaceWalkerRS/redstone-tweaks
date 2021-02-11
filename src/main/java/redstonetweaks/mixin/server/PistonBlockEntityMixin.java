@@ -60,6 +60,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	private boolean sticky;
 	private boolean isMerging;
 	private boolean sourceIsMoving;
+	private int speed;
 	
 	public PistonBlockEntityMixin(BlockEntityType<?> type) {
 		super(type);
@@ -131,12 +132,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Inject(method = "tick", at = @At(value = "HEAD"))
 	private void onTickInjectAtHead(CallbackInfo ci) {
-		try {
-			PistonBlockEntity.class.getDeclaredField("numberOfSteps").setFloat(null, PistonSettings.speed(sticky, extending));
-		} catch (Exception e) {
-			
-		}
-		
 		if (movedBlockEntity instanceof Tickable) {
 			((Tickable)movedBlockEntity).tick();
 		}
@@ -206,8 +201,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5F))
 	private float tickIncrementProgress(float oldIncrementValue) {
-		int speed = PistonSettings.speed(sticky, extending);
-		
 		return speed > 0 ? 1.0F / speed : 1.0F;
 	}
 	
@@ -278,10 +271,20 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Override
 	public void init() {
-		if (PistonSettings.speed(sticky, extending) == 0) {
+		speed = PistonSettings.speed(sticky, extending);
+		
+		if (speed == 0) {
 			// This ensures the block entity finishes the first time it is ticked
 			// Otherwise the behavior would be the same as if the speed was set to 1
 			this.progress = 1.0F;
+		} else {
+			try {
+				// G4mespeed compatibility
+				// Make sure pistons animate at the correct speed
+				PistonBlockEntity.class.getDeclaredField("numberOfSteps").setFloat(this, speed);
+			} catch (Exception e) {
+				
+			}
 		}
 	}
 	

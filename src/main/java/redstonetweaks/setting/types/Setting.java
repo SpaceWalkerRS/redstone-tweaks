@@ -166,8 +166,12 @@ public abstract class Setting<T> implements ISetting {
 		if (!valueEquals(value, newValue)) {
 			value = newValue;
 			
-			Settings.settingValueChanged(this);
+			valueChanged();
 		}
+	}
+	
+	protected void valueChanged() {
+		Settings.settingValueChanged(this);
 	}
 	
 	public T getDefault() {

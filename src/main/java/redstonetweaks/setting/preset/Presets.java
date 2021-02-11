@@ -763,13 +763,30 @@ public class Presets {
 			Tweaks.RedstoneTorch.SOFT_INVERSION.setPresetValue(HEAVEN, true);
 			
 			Tweaks.RedstoneWire.BLOCK_UPDATE_ORDER.setPresetValue(HEAVEN, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
-					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
-					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.WEST, RelativePos.EAST).
-					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.EAST, RelativePos.WEST).
-					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.NORTH, RelativePos.SOUTH).
-					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.SOUTH, RelativePos.NORTH).
-					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.DOWN, RelativePos.UP).
-					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.UP, RelativePos.DOWN));
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.WEST, RelativePos.WEST).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.WEST, RelativePos.DOWN).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.WEST, RelativePos.NORTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.WEST, RelativePos.UP).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.WEST, RelativePos.SOUTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.DOWN, RelativePos.DOWN).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.DOWN, RelativePos.NORTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.NORTH, RelativePos.NORTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.UP, RelativePos.NORTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.UP, RelativePos.UP).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.UP, RelativePos.SOUTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SOUTH, RelativePos.SOUTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.DOWN, RelativePos.SOUTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.EAST, RelativePos.DOWN).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.EAST, RelativePos.NORTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.EAST, RelativePos.UP).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.EAST, RelativePos.SOUTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.EAST, RelativePos.EAST).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.WEST).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.DOWN).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.NORTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.UP).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.SOUTH).
+					add(AbstractNeighborUpdate.Mode.SINGLE_UPDATE, RelativePos.SELF, RelativePos.EAST));
 			Tweaks.RedstoneWire.INVERT_FLOW_ON_GLASS.setPresetValue(HEAVEN, true);
 			Tweaks.RedstoneWire.SLABS_ALLOW_UP_CONNECTION.setPresetValue(HEAVEN, false);
 			

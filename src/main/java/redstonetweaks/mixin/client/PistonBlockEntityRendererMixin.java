@@ -36,7 +36,7 @@ public abstract class PistonBlockEntityRendererMixin {
 		World world = pistonBlockEntity.getWorld();
 		
 		if (world != null && !((RTIWorld)world).normalWorldTicks()) {
-			return 0.1F;
+			return 0.2F;
 		}
 		
 		return oldTickDelta;
