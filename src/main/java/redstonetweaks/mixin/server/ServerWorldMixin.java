@@ -2,6 +2,7 @@ package redstonetweaks.mixin.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Executor;
@@ -17,9 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -49,6 +48,7 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.timer.Timer;
+
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
@@ -62,7 +62,11 @@ import redstonetweaks.world.server.ServerWorldTickHandler;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World implements RTIWorld, RTIServerWorld  {
-
+	
+	// This is to prevent the game from freezing due to repeater clocks while microTickMode is enabled
+	// The value should be large enough that vanilla builds are unaffected
+	private static final int BLOCK_EVENT_LIMIT = 100000;
+	
 	@Shadow @Final private MinecraftServer server;
 	@Shadow @Final private boolean shouldTickTime;
 	@Shadow @Final private ServerWorldProperties worldProperties;
@@ -76,10 +80,13 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Shadow private int idleTimeout;
 	@Shadow boolean inEntityTick;
 	
-	private ServerNeighborUpdateScheduler serverNeighborUpdateScheduler;
+	private ServerNeighborUpdateScheduler neighborUpdateScheduler;
 	private ServerIncompleteActionScheduler incompleteActionScheduler;
-	private boolean isProcessingBlockEvents = false;
+	private boolean isProcessingBlockEvents;
+	private int processedBlockEvents;
 	private ArrayList<BlockEvent> blockEventList;
+	private boolean shouldTickEntities;
+	private Iterator<Entity> entitiesIt;
 	
 	protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryKey, DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l) {
 		super(properties, registryKey, dimensionType, supplier, bl, bl2, l);
@@ -99,7 +106,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> registryKey, DimensionType dimensionType, WorldGenerationProgressListener worldGenerationProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<Spawner> list, boolean bl2, CallbackInfo ci) {
-		serverNeighborUpdateScheduler = new ServerNeighborUpdateScheduler((ServerWorld)(Object)this);
+		neighborUpdateScheduler = new ServerNeighborUpdateScheduler((ServerWorld)(Object)this);
 		incompleteActionScheduler = new ServerIncompleteActionScheduler((ServerWorld)(Object)this);
 		blockEventList = new ArrayList<>();
 	}
@@ -132,29 +139,41 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 		if (set.add(event) && isProcessingBlockEvents && Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.add((BlockEvent)event);
 		}
+		
 		return true;
 	}
 	
 	@Inject(method = "processSyncedBlockEvents", at = @At(value = "HEAD"))
 	private void onProcessSyncedBlockEventsInjectAtHead(CallbackInfo ci) {
 		isProcessingBlockEvents = true;
+		processedBlockEvents = 0;
 		
 		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.ensureCapacity(syncedBlockEventQueue.size());
+			
 			for (BlockEvent event : syncedBlockEventQueue) {
 				blockEventList.add(event);
 			}
 		}
 	}
 	
+	@Redirect(method = "processSyncedBlockEvents", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;isEmpty()Z"))
+	private boolean onProcessSyncedBlockEventsRedirectIsEmpty(ObjectLinkedOpenHashSet<BlockEvent> set) {
+		return processedBlockEvents > BLOCK_EVENT_LIMIT || set.isEmpty();
+	}
+	
 	@Redirect(method = "processSyncedBlockEvents", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;removeFirst()Ljava/lang/Object;"))
 	private Object onProcessSyncedBlockEventsRedirectRemoveFirst(ObjectLinkedOpenHashSet<BlockEvent> set) {
 		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
-			int index = random.nextInt(set.size());
+			int randomIndex = random.nextInt(set.size());
 			int lastIndex = blockEventList.size() - 1;
-			Collections.swap(blockEventList, index, lastIndex);
+			
+			Collections.swap(blockEventList, randomIndex, lastIndex);
+			
 			BlockEvent event = blockEventList.remove(lastIndex);
+			
 			set.remove(event);
+			
 			return event;
 		} else {
 			return set.removeFirst();
@@ -177,6 +196,8 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 		if (((RTIWorld)this).immediateNeighborUpdates()) {
 			((RTIWorld)this).removeBlockEventHandler(event.getPos());
 		}
+		
+		processedBlockEvents++;
 	}
 	
 	@Override
@@ -216,7 +237,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	
 	@Override
 	public ServerNeighborUpdateScheduler getNeighborUpdateScheduler() {
-		return serverNeighborUpdateScheduler;
+		return neighborUpdateScheduler;
 	}
 	
 	@Override
@@ -232,7 +253,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	
 	@Override
 	public boolean immediateNeighborUpdates() {
-		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledNeighborUpdates();
+		boolean hasScheduledNeighborUpdates = getNeighborUpdateScheduler().hasScheduledUpdates();
 		return normalWorldTicks() || !(hasScheduledNeighborUpdates || Tweaks.Global.SHOW_NEIGHBOR_UPDATES.get());
 	}
 	
@@ -244,17 +265,22 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 				int clearWeatherTime = worldProperties.getClearWeatherTime();
 				int thunderTime = worldProperties.getThunderTime();
 				int rainTime = worldProperties.getRainTime();
+				
 				boolean isThundering = properties.isThundering();
 				boolean raining = properties.isRaining();
+				
 				if (clearWeatherTime > 0) {
-					--clearWeatherTime;
+					clearWeatherTime--;
+					
 					thunderTime = isThundering ? 0 : 1;
 					rainTime = raining ? 0 : 1;
+					
 					isThundering = false;
 					raining = false;
 				} else {
 					if (thunderTime > 0) {
-						--thunderTime;
+						thunderTime--;
+						
 						if (thunderTime == 0) {
 							isThundering = !isThundering;
 						}
@@ -263,9 +289,10 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 					} else {
 						thunderTime = random.nextInt(168000) + 12000;
 					}
-
+					
 					if (rainTime > 0) {
-						--rainTime;
+						rainTime--;
+						
 						if (rainTime == 0) {
 							raining = !raining;
 						}
@@ -275,66 +302,68 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 						rainTime = random.nextInt(168000) + 12000;
 					}
 				}
-
+				
+				worldProperties.setClearWeatherTime(clearWeatherTime);
 				worldProperties.setThunderTime(thunderTime);
 				worldProperties.setRainTime(rainTime);
-				worldProperties.setClearWeatherTime(clearWeatherTime);
+				
 				worldProperties.setThundering(isThundering);
 				worldProperties.setRaining(raining);
 			}
-
+			
 			thunderGradientPrev = thunderGradient;
 			if (properties.isThundering()) {
-				thunderGradient = (float)(thunderGradient + 0.01d);
+				thunderGradient = thunderGradient + 0.01F;
 			} else {
-				thunderGradient = (float)(thunderGradient - 0.01d);
+				thunderGradient = thunderGradient - 0.01F;
 			}
+			thunderGradient = MathHelper.clamp(thunderGradient, 0.0F, 1.0F);
 
-			thunderGradient = MathHelper.clamp(thunderGradient, 0.0f, 1.0f);
 			rainGradientPrev = rainGradient;
 			if (properties.isRaining()) {
 				rainGradient = (float)(rainGradient + 0.01d);
 			} else {
 				rainGradient = (float)(rainGradient - 0.01d);
 			}
-
 			rainGradient = MathHelper.clamp(rainGradient, 0.0f, 1.0f);
 		}
-
+		
 		if (rainGradientPrev != rainGradient) {
 			server.getPlayerManager().sendToDimension(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, rainGradient), getRegistryKey());
 		}
-
+		
 		if (thunderGradientPrev != thunderGradient) {
 			server.getPlayerManager().sendToDimension(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, thunderGradient), getRegistryKey());
 		}
-
+		
 		if (isRaining != isRaining()) {
 			if (isRaining) {
 				server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_STOPPED, 0.0f));
 			} else {
 				server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_STARTED, 0.0f));
 			}
-
+			
 			server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, rainGradient));
 			server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, thunderGradient));
 		}
-
+		
 		if (allPlayersSleeping && players.stream().noneMatch((serverPlayerEntity) -> {
 			return !serverPlayerEntity.isSpectator() && !serverPlayerEntity.isSleepingLongEnough();
 		})) {
 			allPlayersSleeping = false;
+			
 			if (getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)) {
 				long l = properties.getTimeOfDay() + 24000l;
-				setTimeOfDay(l - l % 24000l);
+				
+				setTimeOfDay(l - l % 24000L);
 			}
-
+			
 			this.wakeSleepingPlayers();
 			if (getGameRules().getBoolean(GameRules.DO_WEATHER_CYCLE)) {
 				resetWeather();
 			}
 		}
-
+		
 		calculateAmbientDarkness();
 	}
 	
@@ -361,8 +390,10 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Override
 	public void startProcessingBlockEvents() {
 		isProcessingBlockEvents = true;
+		
 		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.ensureCapacity(syncedBlockEventQueue.size());
+			
 			for (BlockEvent event : syncedBlockEventQueue) {
 				blockEventList.add(event);
 			}
@@ -372,8 +403,9 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Override
 	public boolean tryContinueProcessingBlockEvents() {
 		if (isProcessingBlockEvents) {
-			if (syncedBlockEventQueue.isEmpty()) {
+			if (processedBlockEvents > BLOCK_EVENT_LIMIT || syncedBlockEventQueue.isEmpty()) {
 				isProcessingBlockEvents = false;
+				
 				if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 					blockEventList.clear();
 				}
@@ -381,11 +413,15 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 				return false;
 			} else {
 				BlockEvent blockEvent;
+				
 				if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 					int index = random.nextInt(syncedBlockEventQueue.size());
 					int lastIndex = blockEventList.size() - 1;
+					
 					Collections.swap(blockEventList, index, lastIndex);
+					
 					blockEvent = blockEventList.remove(lastIndex);
+					
 					syncedBlockEventQueue.remove(blockEvent);
 				} else {
 					blockEvent = syncedBlockEventQueue.removeFirst();
@@ -397,86 +433,108 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 				
 				return true;
 			}
-		} else {
-			return false;
 		}
+		
+		return false;
 	}
 	
 	@Override
-	public void tickEntities(Profiler profiler) {
+	public void startTickingEntities(Profiler profiler) {
 		boolean chunksLoaded = !players.isEmpty() || !getForcedChunks().isEmpty();
 		if (chunksLoaded) {
 			resetIdleTimeout();
 		}
-
-		if (chunksLoaded || idleTimeout++ < 300) {
+		
+		shouldTickEntities = chunksLoaded || idleTimeout++ < 300;
+		
+		if (shouldTickEntities) {
 			if (enderDragonFight != null) {
 				enderDragonFight.tick();
 			}
 
 			inEntityTick = true;
-			@SuppressWarnings("rawtypes")
-			ObjectIterator objectIterator = entitiesById.int2ObjectEntrySet().iterator();
-
-			label164: while (true) {
+			
+			entitiesIt = entitiesById.values().iterator();
+		}
+	}
+	
+	@Override
+	public boolean tryContinueTickingEntities(Profiler profiler) {
+		if (inEntityTick && shouldTickEntities) {
+			boolean keepTicking = true;
+			
+			while (keepTicking) {
 				Entity entity;
 				while (true) {
-					if (!objectIterator.hasNext()) {
+					if (!entitiesIt.hasNext()) {
 						inEntityTick = false;
-
-						Entity entity3;
-						while ((entity3 = entitiesToLoad.poll()) != null) {
-							loadEntityUnchecked(entity3);
+						
+						for (Entity entityToLoad : entitiesToLoad) {
+							loadEntityUnchecked(entityToLoad);
 						}
 						
-						break label164;
+						return false;
 					}
-
-					@SuppressWarnings({ "unchecked", "rawtypes" })
-					Entry<Entity> entry = (Entry) objectIterator.next();
-					entity = entry.getValue();
-					Entity entity2 = entity.getVehicle();
+					
+					entity = entitiesIt.next();
+					Entity vehicle = entity.getVehicle();
+					
 					if (!server.shouldSpawnAnimals() && (entity instanceof AnimalEntity || entity instanceof WaterCreatureEntity)) {
 						entity.remove();
 					}
-
+					
 					if (!server.shouldSpawnNpcs() && entity instanceof Npc) {
 						entity.remove();
 					}
-
+					
 					profiler.push("checkDespawn");
+					
 					if (!entity.removed) {
 						entity.checkDespawn();
 					}
-
+					
 					profiler.pop();
-					if (entity2 == null) {
+					
+					if (vehicle == null) {
 						break;
 					}
-
-					if (entity2.removed || !entity2.hasPassenger(entity)) {
+					
+					if (vehicle.removed || !vehicle.hasPassenger(entity)) {
 						entity.stopRiding();
+						
 						break;
 					}
 				}
-
+				
 				profiler.push("tick");
+				
 				if (!entity.removed && !(entity instanceof EnderDragonPart)) {
-					tickEntity(((ServerWorld)(Object)this)::tickEntity, entity);
+					tickEntity((entityTotick) -> tickEntity(entityTotick), entity);
 				}
-
-				profiler.pop();
-				profiler.push("remove");
+				
+				profiler.swap("remove");
+				
 				if (entity.removed) {
 					removeEntityFromChunk(entity);
-					objectIterator.remove();
 					unloadEntity(entity);
+					
+					entitiesIt.remove();
 				}
-
+				
 				profiler.pop();
+				
+				if (incompleteActionScheduler.hasScheduledActions()) {
+					keepTicking = false;
+				}
+				
+				if (neighborUpdateScheduler.hasScheduledUpdates()) {
+					keepTicking = false;
+				}
 			}
+			
+			return true;
 		}
 		
-		profiler.pop();
+		return false;
 	}
 }

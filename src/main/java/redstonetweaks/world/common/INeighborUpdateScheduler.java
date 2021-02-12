@@ -2,6 +2,6 @@ package redstonetweaks.world.common;
 
 public interface INeighborUpdateScheduler {
 	
-	public boolean hasScheduledNeighborUpdates();
+	public boolean hasScheduledUpdates();
 	
 }

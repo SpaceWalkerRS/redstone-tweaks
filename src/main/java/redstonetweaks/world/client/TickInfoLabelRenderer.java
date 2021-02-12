@@ -113,4 +113,12 @@ public class TickInfoLabelRenderer extends DrawableHelper {
 		
 		updateText();
 	}
+	
+	public void onDisconnect() {
+		currentTime = 0L;
+		currentWorldName = "";
+		currentTask = Task.NONE;
+		
+		initText();
+	}
 }

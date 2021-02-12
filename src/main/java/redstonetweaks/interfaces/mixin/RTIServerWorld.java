@@ -26,6 +26,8 @@ public interface RTIServerWorld  {
 	
 	public boolean tryContinueProcessingBlockEvents();
 	
-	public void tickEntities(Profiler profiler);
+	public void startTickingEntities(Profiler profiler);
+	
+	public boolean tryContinueTickingEntities(Profiler profiler);
 	
 }

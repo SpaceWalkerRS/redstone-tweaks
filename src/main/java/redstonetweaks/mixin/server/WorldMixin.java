@@ -23,6 +23,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Tickable;
@@ -228,13 +229,23 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 			Profiler profiler = getProfiler();
 			
 			if (blockEntitiesIterator.hasNext()) {
-				BlockEntity blockEntity = blockEntitiesIterator.next();
+				boolean stopTicking = false;
 				
-				tickBlockEntity(blockEntity, profiler);
-				
-				if (!isClient()) {
-					syncClientBlockEntityTickingQueue(blockEntity);
-				}
+				do {
+					BlockEntity blockEntity = blockEntitiesIterator.next();
+					
+					tickBlockEntity(blockEntity, profiler);
+					
+					if (blockEntity instanceof PistonBlockEntity) {
+						stopTicking = true;
+					} else if (!isClient()) {
+						if (((RTIServerWorld)this).getNeighborUpdateScheduler().hasScheduledUpdates()) {
+							stopTicking = true;
+						} else if (((RTIServerWorld)this).getIncompleteActionScheduler().hasScheduledActions()) {
+							stopTicking = true;
+						}
+					}
+				} while (blockEntitiesIterator.hasNext() && !stopTicking);
 				
 				return true;
 			} else {
@@ -262,6 +273,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	public void tickBlockEntity(BlockEntity blockEntity, Profiler profiler) {
 		if (!blockEntity.isRemoved() && blockEntity.hasWorld()) {
 			BlockPos pos = blockEntity.getPos();
+			
 			if (getChunkManager().shouldTickBlock(pos) && getWorldBorder().contains(pos)) {
 				try {
 					profiler.push(() -> {
@@ -269,6 +281,10 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 					});
 					if (blockEntity.getType().supports(getBlockState(pos).getBlock())) {
 						((Tickable)blockEntity).tick();
+						
+						if (!isClient()) {
+							syncClientBlockEntityTickingQueue(blockEntity);
+						}
 					} else {
 						blockEntity.markInvalid();
 					}
@@ -278,6 +294,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 					CrashReport crashReport = CrashReport.create(t, "Ticking block entity");
 					CrashReportSection crashReportSection = crashReport.addElement("Block entity being ticked");
 					blockEntity.populateCrashReport(crashReportSection);
+					
 					throw new CrashException(crashReport);
 				}
 			}

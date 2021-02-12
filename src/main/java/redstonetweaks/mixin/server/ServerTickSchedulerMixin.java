@@ -11,6 +11,9 @@ import java.util.function.Predicate;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerChunkManager;
@@ -23,6 +26,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ScheduledTick;
 import net.minecraft.world.TickScheduler;
 
+import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
 
 @Mixin(ServerTickScheduler.class)
@@ -39,6 +43,11 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 	private boolean isTicking;
 	
 	@Shadow abstract void addScheduledTick(ScheduledTick<T> scheduledTick);
+	
+	@Inject(method = "tick", at = @At(value = "HEAD"))
+	private void onTickInjectAtHead(CallbackInfo ci) {
+		TickSchedulerHelper.tick();
+	}
 	
 	@Override
 	public boolean hasScheduledTickAtTime(BlockPos pos, Object object, int delay) {
@@ -59,30 +68,33 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 		if (counter != scheduledTickActions.size()) {
 			throw new IllegalStateException("TickNextTick list out of sync");
 		}
-
+		
 		if (counter > 65536) {
 			counter = 65536;
 		}
-
+		
+		TickSchedulerHelper.tick();
+		
 		ServerChunkManager serverChunkManager = world.getChunkManager();
 		Iterator<ScheduledTick<T>> iterator = scheduledTickActionsInOrder.iterator();
 		world.getProfiler().push("cleaning");
-
+		
 		ScheduledTick<T> scheduledTick;
 		while (counter > 0 && iterator.hasNext()) {
 			scheduledTick = iterator.next();
 			if (scheduledTick.time > world.getTime()) {
 				break;
 			}
-
+			
 			if (serverChunkManager.shouldTickBlock(scheduledTick.pos)) {
 				iterator.remove();
 				scheduledTickActions.remove(scheduledTick);
 				currentTickActions.add(scheduledTick);
+				
 				--counter;
 			}
 		}
-
+		
 		world.getProfiler().pop();
 		isTicking = true;
 	}

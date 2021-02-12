@@ -12,12 +12,17 @@ import redstonetweaks.util.RTMathHelper;
 
 public class TickSchedulerHelper {
 	
+	private static final int INSTANT_TICK_LIMIT = 512;
+	private static int instantTicks;
+	
 	public static boolean scheduleBlockTick(WorldAccess world, BlockPos pos, BlockState state, int delay, TickPriority priority) {
 		if (!world.isClient()) {
 			delay = prepareDelay(world, delay);
 			
-			if (delay == 0 && world instanceof ServerWorld) {
+			if (delay == 0 && instantTicks < INSTANT_TICK_LIMIT && world instanceof ServerWorld) {
 				state.scheduledTick((ServerWorld)world, pos, world.getRandom());
+				
+				instantTicks++;
 				
 				return true;
 			} else {
@@ -32,8 +37,10 @@ public class TickSchedulerHelper {
 		if (!world.isClient()) {
 			delay = prepareDelay(world, delay);
 			
-			if (delay == 0 && world instanceof ServerWorld) {
+			if (delay == 0 && instantTicks < INSTANT_TICK_LIMIT && world instanceof ServerWorld) {
 				state.onScheduledTick((ServerWorld)world, pos);
+				
+				instantTicks++;
 				
 				return true;
 			} else {
@@ -62,5 +69,9 @@ public class TickSchedulerHelper {
 		}
 		
 		return priority;
+	}
+	
+	public static void tick() {
+		instantTicks = 0;
 	}
 }

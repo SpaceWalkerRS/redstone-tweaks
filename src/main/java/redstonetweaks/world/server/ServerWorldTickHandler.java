@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameRules;
 
@@ -30,8 +31,11 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private long ticks;
 	private boolean shouldUpdateStatus;
 	
+	private boolean shouldStopServer;
+	
 	public ServerWorldTickHandler(MinecraftServer server) {
 		super();
+		
 		this.server = server;
 		this.ticks = Long.MAX_VALUE;
 		this.shouldUpdateStatus = true;
@@ -54,18 +58,33 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		syncPause();
 	}
 	
+	public void scheduleStop() {
+		shouldStopServer = true;
+	}
+	
+	public void cancelStop() {
+		shouldStopServer = false;
+	}
+	
 	public void tick(BooleanSupplier shouldKeepTicking) {
 		if (doWorldTicks()) {
 			boolean stepByStep = Tweaks.Global.WORLD_TICK_OPTIONS.get().getMode() == WorldTickOptions.Mode.STEP_BY_STEP;
+			boolean tickInProgress = tickInProgress();
 			
-			if (stepByStep || tickInProgress()) {
-				if (!stepByStep || server.getTicks() % Tweaks.Global.WORLD_TICK_OPTIONS.get().getInterval() == 0) {
-					tickStepByStep(shouldKeepTicking);
+			if (stepByStep || tickInProgress) {
+				if (!tickInProgress && shouldStopServer) {
+					server.stop(false);
+				} else {
+					if (!stepByStep || server.getTicks() % Tweaks.Global.WORLD_TICK_OPTIONS.get().getInterval() == 0) {
+						tickStepByStep(shouldKeepTicking);
+					}
+					
+					broadcastChunkData();
 				}
-				
-				broadcastChunkData();
-			} else {
+			} else if (!shouldStopServer) {
 				tickWorldsNormally(shouldKeepTicking);
+			} else {
+				server.stop(false);
 			}
 			
 			if (ticks == 0) {
@@ -169,16 +188,16 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	
 	private void tickWorld(BooleanSupplier shouldKeepTicking) {
 		ServerNeighborUpdateScheduler neighborUpdateScheduler = ((RTIServerWorld)currentWorld).getNeighborUpdateScheduler();
-		ServerIncompleteActionScheduler unfinishedEventScheduler = ((RTIServerWorld)currentWorld).getIncompleteActionScheduler();
+		ServerIncompleteActionScheduler incompleteActionScheduler = ((RTIServerWorld)currentWorld).getIncompleteActionScheduler();
 		
-		boolean hasNeighborUpdates = neighborUpdateScheduler.hasScheduledNeighborUpdates();
-		boolean hasScheduledEvents = unfinishedEventScheduler.hasScheduledActions();
+		boolean hasNeighborUpdates = neighborUpdateScheduler.hasScheduledUpdates();
+		boolean hasIncompleteActions = incompleteActionScheduler.hasScheduledActions();
 		
 		neighborUpdateScheduler.tick();
 		if (hasNeighborUpdates) {
-		} else if (hasScheduledEvents) {
-			unfinishedEventScheduler.tick();
-		} else if (doTasks) {
+		} else if (hasIncompleteActions) {
+			incompleteActionScheduler.tick();
+		} else {
 			if (shouldSwitchTask) {
 				nextTask();
 			}
@@ -295,6 +314,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 				
 				((RTIServerTickScheduler)currentWorld.getBlockTickScheduler()).startTicking();
 			}
+			
 			shouldSwitchTask = !((RTIServerTickScheduler)currentWorld.getBlockTickScheduler()).tryContinueTicking();
 		}
 		
@@ -310,6 +330,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 				
 				((RTIServerTickScheduler)currentWorld.getFluidTickScheduler()).startTicking();
 			}
+			
 			shouldSwitchTask = !((RTIServerTickScheduler)currentWorld.getFluidTickScheduler()).tryContinueTicking();
 		}
 		
@@ -332,6 +353,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			
 			((RTIServerWorld)currentWorld).startProcessingBlockEvents();
 		}
+		
 		shouldSwitchTask = !((RTIServerWorld)currentWorld).tryContinueProcessingBlockEvents();
 		
 		profiler.pop();
@@ -340,18 +362,29 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private void tickEntities() {
 		profiler.push("entities");
 		
-		((RTIServerWorld)currentWorld).tickEntities(profiler);
+		if (shouldSwitchTask) {
+			shouldSwitchTask = false;
+			
+			((RTIServerWorld)currentWorld).startTickingEntities(profiler);
+		}
+		
+		shouldSwitchTask = !((RTIServerWorld)currentWorld).tryContinueTickingEntities(profiler);
 		
 		profiler.pop();
 	}
 	
 	private void tickBlockEntities() {
+		profiler.push("entities");
+		
 		if (shouldSwitchTask) {
 			shouldSwitchTask = false;
 			
 			((RTIWorld)currentWorld).startTickingBlockEntities(true);
 		}
+		
 		shouldSwitchTask = !((RTIWorld)currentWorld).tryContinueTickingBlockEntities();
+		
+		profiler.pop();
 	}
 	
 	private void switchWorld() {
@@ -399,5 +432,13 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 				advance(1);
 			}
 		}
+	}
+	
+	public void onPlayerJoined(ServerPlayerEntity player) {
+		((RTIMinecraftServer)server).getPacketHandler().sendPacketToPlayer(new DoWorldTicksPacket(doWorldTicks()), player);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacketToPlayer(new TickStatusPacket(status), player);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacketToPlayer(new WorldSyncPacket(currentWorld), player);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacketToPlayer(new WorldTimeSyncPacket(getWorldTime()), player);
+		((RTIMinecraftServer)server).getPacketHandler().sendPacketToPlayer(new TaskSyncPacket(currentTask), player);
 	}
 }

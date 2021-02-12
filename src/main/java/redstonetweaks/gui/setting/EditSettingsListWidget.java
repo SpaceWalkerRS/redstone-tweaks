@@ -26,6 +26,7 @@ import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.gui.widget.RTTexturedButtonWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
@@ -376,7 +377,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof DirectionToBooleanSetting) {
 				DirectionToBooleanSetting dSetting = (DirectionToBooleanSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, () -> dSetting.get(), (setting) -> dSetting.set(dSetting.get()));
+					ArraySettingWindow<?, ?> window = new ArraySettingWindow<>(screen, dSetting, () -> dSetting.get(), (setting) -> Settings.settingValueChanged(dSetting));
 					
 					screen.openWindow(window);
 					
@@ -458,7 +459,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof UpdateOrderSetting) {
 				UpdateOrderSetting uSetting = (UpdateOrderSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, () -> uSetting.get(), (setting) -> uSetting.set(uSetting.get()));
+					UpdateOrderWindow window = new UpdateOrderWindow(screen, uSetting, () -> uSetting.get(), (setting) -> Settings.settingValueChanged(uSetting));
 					
 					screen.openWindow(window);
 					
@@ -470,7 +471,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			if (setting instanceof WorldTickOptionsSetting) {
 				WorldTickOptionsSetting wSetting = (WorldTickOptionsSetting)setting;
 				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
-					WorldTickOptionsWindow window = new WorldTickOptionsWindow(screen, wSetting, () -> wSetting.get(), (setting) -> wSetting.set(wSetting.get()));
+					WorldTickOptionsWindow window = new WorldTickOptionsWindow(screen, wSetting, () -> wSetting.get(), (setting) -> Settings.settingValueChanged(wSetting));
 					
 					screen.openWindow(window);
 					

@@ -11,7 +11,6 @@ public abstract class WorldTickHandler {
 	protected Profiler profiler;
 	protected Task currentTask;
 	protected boolean shouldSwitchTask;
-	protected boolean doTasks;
 	
 	protected boolean inWorldTick;
 	
@@ -19,7 +18,7 @@ public abstract class WorldTickHandler {
 		this.doWorldTicks = true;
 		this.status = Status.IDLE;
 		this.shouldSwitchTask = true;
-		this.doTasks = true;
+		this.currentTask = Task.NONE;
 	}
 
 	public boolean inWorldTick() {
@@ -36,6 +35,7 @@ public abstract class WorldTickHandler {
 	
 	public void setCurrentWorld(World world) {
 		currentWorld = world;
+		
 		if (currentWorld != null) {
 			profiler = currentWorld.getProfiler();
 		}
@@ -85,9 +85,11 @@ public abstract class WorldTickHandler {
 		
 		public Status next() {
 			int nextIndex = index + 1;
+			
 			if (nextIndex >= STATUSES.length) {
 				nextIndex = 0;
 			}
+			
 			return fromIndex(nextIndex);
 		}
 	}

@@ -39,7 +39,6 @@ public class WorldTickOptionsWindow extends RTWindow {
 		this.setting = setting;
 		this.worldTickOptionsSupplier = worldTickOptionsSupplier;
 		this.changeListener = (updateOrderSetting) -> {
-			worldTickOptionsChanged = true;
 			changeListener.accept(updateOrderSetting);
 		};
 		
@@ -56,7 +55,8 @@ public class WorldTickOptionsWindow extends RTWindow {
 		modeButton = new RTButtonWidget(x, y, 80, 20, () -> new TranslatableText(worldTickOptions.getMode().getName()), (button) -> {
 			worldTickOptions.cycleMode();
 			
-			changeListener.accept(setting);
+			worldTickOptionsChanged = true;
+			
 			button.updateMessage();
 		});
 		modeButton.setActive(canEdit);
@@ -65,7 +65,8 @@ public class WorldTickOptionsWindow extends RTWindow {
 		dimensionFilterButton = new RTButtonWidget(x, y + 22, 80, 20, () -> new TranslatableText(worldTickOptions.getDimensionFilter().getName()), (button) -> {
 			worldTickOptions.cycleDimensionFilter();
 			
-			changeListener.accept(setting);
+			worldTickOptionsChanged = true;
+			
 			button.updateMessage();
 		});
 		dimensionFilterButton.setActive(canEdit);
@@ -80,7 +81,7 @@ public class WorldTickOptionsWindow extends RTWindow {
 				if (newInterval != worldTickOptions.getInterval()) {
 					worldTickOptions.setInterval(newInterval);
 					
-					changeListener.accept(setting);
+					worldTickOptionsChanged = true;
 				}
 			} catch (Exception e) {
 				
@@ -94,6 +95,9 @@ public class WorldTickOptionsWindow extends RTWindow {
 	protected void tickContents() {
 		if (worldTickOptionsChanged) {
 			worldTickOptionsChanged = false;
+			
+			changeListener.accept(setting);
+			
 			refresh();
 		}
 		

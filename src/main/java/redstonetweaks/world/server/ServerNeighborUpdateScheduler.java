@@ -27,7 +27,7 @@ public class ServerNeighborUpdateScheduler implements INeighborUpdateScheduler {
 	}
 	
 	@Override
-	public boolean hasScheduledNeighborUpdates() {
+	public boolean hasScheduledUpdates() {
 		return !scheduledNeighborUpdates.isEmpty();
 	}
 	
@@ -51,7 +51,7 @@ public class ServerNeighborUpdateScheduler implements INeighborUpdateScheduler {
 	}
 	
 	public void clearUpdates() {
-		while (hasScheduledNeighborUpdates()) {
+		while (hasScheduledUpdates()) {
 			currentScheduledUpdate = scheduledNeighborUpdates.pollFirst();
 			dispatchNeighborUpdate();
 		}
@@ -73,7 +73,7 @@ public class ServerNeighborUpdateScheduler implements INeighborUpdateScheduler {
 	}
 	
 	public void schedule(NeighborUpdate neighborUpdate) {
-		boolean hadScheduledUpdates = hasScheduledNeighborUpdates();
+		boolean hadScheduledUpdates = hasScheduledUpdates();
 		
 		scheduledNeighborUpdates.add(new ScheduledNeighborUpdate(tickTime, neighborUpdate));
 		
@@ -88,7 +88,7 @@ public class ServerNeighborUpdateScheduler implements INeighborUpdateScheduler {
 	}
 	
 	private void syncClientNeighborUpdateScheduler() {
-		NeighborUpdateSchedulerPacket packet = new NeighborUpdateSchedulerPacket(hasScheduledNeighborUpdates());
+		NeighborUpdateSchedulerPacket packet = new NeighborUpdateSchedulerPacket(hasScheduledUpdates());
 		((RTIMinecraftServer)world.getServer()).getPacketHandler().sendPacketToDimension(packet, world.getRegistryKey());
 	}
 }

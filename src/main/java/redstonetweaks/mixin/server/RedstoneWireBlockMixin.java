@@ -34,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.block.piston.PistonSettings;
+import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.RedstoneWireHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIWorld;
@@ -186,7 +187,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	@Inject(method = "connectsTo(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;)Z", cancellable = true, at = @At(value = "HEAD"))
 	private static void onConnectsToInjectAtHead(BlockState state, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (state.getBlock() instanceof PistonBlock) {
-			cir.setReturnValue(PistonSettings.connectsToWire(state.isOf(Blocks.STICKY_PISTON)) && direction != null && state.get(Properties.FACING) != direction.getOpposite());
+			cir.setReturnValue(PistonSettings.connectsToWire(PistonHelper.isSticky(state)) && direction != null && state.get(Properties.FACING) != direction.getOpposite());
 			cir.cancel();
 		}
 	}

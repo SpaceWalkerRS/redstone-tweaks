@@ -256,6 +256,10 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		SAVED_SCROLL_AMOUNTS.put(savedScrollAmountKey, getScrollAmount());
 	}
 	
+	public static void clearSavedScrollAmounts() {
+		SAVED_SCROLL_AMOUNTS.clear();
+	}
+	
 	public void tick() {
 		for (E entry : children()) {
 			entry.tick();

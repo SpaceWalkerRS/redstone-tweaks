@@ -40,5 +40,4 @@ public abstract class IncompleteAction<T> implements IIncompleteAction {
 	public T getObject() {
 		return object;
 	}
-	
 }

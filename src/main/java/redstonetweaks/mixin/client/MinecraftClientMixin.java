@@ -4,17 +4,21 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
+
 import redstonetweaks.client.PermissionManager;
+import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.setting.EditSettingsListWidget;
 import redstonetweaks.hotkeys.HotkeysManager;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.listeners.Listeners;
 import redstonetweaks.packet.ClientPacketHandler;
 import redstonetweaks.server.ServerInfo;
@@ -23,6 +27,7 @@ import redstonetweaks.setting.preset.ClientPresetsManager;
 import redstonetweaks.world.client.ClientWorldTickHandler;
 import redstonetweaks.world.client.NeighborUpdateVisualizer;
 import redstonetweaks.world.client.TickInfoLabelRenderer;
+import redstonetweaks.world.server.ServerWorldTickHandler;
 
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin implements RTIMinecraftClient {
@@ -62,14 +67,32 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 		worldTickHandler.onDisconnect();
 		presetsManager.onDisconnect();
 		settingsManager.onDisconnect();
+		neighborUpdateVisualizer.onDisconnect();
+		tickInfoLabelRenderer.onDisconnect();
 		RTMenuScreen.clearLastSearchQueries();
 		RTMenuScreen.resetLastOpenedTabIndex();
+		RTListWidget.clearSavedScrollAmounts();
 		EditSettingsListWidget.resetLastModes();
 	}
 	
 	@Inject(method = "stop", at = @At(value = "HEAD"))
 	private void onStopInjectAtHead(CallbackInfo ci) {
 		hotkeysManager.saveHotkeys();
+	}
+	
+	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;isIntegratedServerRunning()Z"))
+	private boolean onRenderRedirectIsIntegratedServerRunning(MinecraftClient client) {
+		if (client.isIntegratedServerRunning()) {
+			ServerWorldTickHandler worldTickHandler = ((RTIMinecraftServer)client.getServer()).getWorldTickHandler();
+			
+			if (worldTickHandler != null) {
+				return !worldTickHandler.tickInProgress();
+			}
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 	@Override

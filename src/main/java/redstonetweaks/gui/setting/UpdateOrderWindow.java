@@ -41,7 +41,6 @@ public class UpdateOrderWindow extends RTWindow {
 		this.setting = setting;
 		this.updateOrderSupplier = updateOrderSupplier;
 		this.changeListener = (updateOrderSetting) -> {
-			updateOrderChanged = true;
 			changeListener.accept(updateOrderSetting);
 		};
 		
@@ -58,7 +57,8 @@ public class UpdateOrderWindow extends RTWindow {
 			boolean locationalOrder = updateOrder.getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL;
 			offsetButtons.setVisible(locationalOrder);
 			
-			changeListener.accept(setting);
+			updateOrderChanged = true;
+			
 			button.updateMessage();
 		});
 		notifierOrderButton.setActive(canEdit);
@@ -75,7 +75,7 @@ public class UpdateOrderWindow extends RTWindow {
 				if (updateOrder.getOffsetX() != newOffset) {
 					updateOrder.setOffsetX(newOffset);
 					
-					changeListener.accept(setting);
+					updateOrderChanged = true;
 				}
 			} catch (Exception e) {
 				
@@ -90,7 +90,7 @@ public class UpdateOrderWindow extends RTWindow {
 					if (updateOrder.getOffsetY() != newOffset) {
 						updateOrder.setOffsetY(newOffset);
 						
-						changeListener.accept(setting);
+						updateOrderChanged = true;
 					}
 				}
 			} catch (Exception e) {
@@ -105,7 +105,7 @@ public class UpdateOrderWindow extends RTWindow {
 				if (updateOrder.getOffsetZ() != newOffset) {
 					updateOrder.setOffsetZ(newOffset);
 					
-					changeListener.accept(setting);
+					updateOrderChanged = true;
 				}
 			} catch (Exception e) {
 				
@@ -123,7 +123,7 @@ public class UpdateOrderWindow extends RTWindow {
 			updateOrder.add(RelativePos.SELF, RelativePos.WEST);
 			button.visible = false;
 			
-			changeListener.accept(setting);
+			updateOrderChanged = true;
 		});
 		addUpdateButton.setVisible(false);
 		addUpdateButton.setActive(canEdit);
@@ -141,6 +141,9 @@ public class UpdateOrderWindow extends RTWindow {
 	protected void tickContents() {
 		if (updateOrderChanged) {
 			updateOrderChanged = false;
+			
+			changeListener.accept(setting);
+			
 			refresh();
 		}
 		

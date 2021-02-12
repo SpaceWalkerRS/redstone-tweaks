@@ -112,6 +112,7 @@
   	"client.ClientPlayNetworkHandlerMixin",
   	"client.ClientWorldMixin",
   	"client.DebugHudMixin",
+  	"client.GameMenuScreenMixin",
   	"client.InGameHudMixin",
 	"client.IntegratedServerMixin",
   	"client.KeyboardMixin",

@@ -465,4 +465,8 @@ public class NeighborUpdateVisualizer {
 		this.sourcePos = sourcePos;
 		this.updateType = updateType;
 	}
+	
+	public void onDisconnect() {
+		updateBoxPositions(null, null, null, UpdateType.NONE);
+	}
 }

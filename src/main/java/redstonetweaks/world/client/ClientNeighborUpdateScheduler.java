@@ -12,7 +12,7 @@ public class ClientNeighborUpdateScheduler implements INeighborUpdateScheduler {
 	}
 	
 	@Override
-	public boolean hasScheduledNeighborUpdates() {
+	public boolean hasScheduledUpdates() {
 		return hasScheduledNeighborUpdates;
 	}
 	

@@ -3,7 +3,6 @@ package redstonetweaks.mixin.client;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.mojang.authlib.GameProfileRepository;
@@ -28,10 +27,5 @@ public class IntegratedServerMixin {
 	private void onInitInjectAtReturn(Thread serverThread, MinecraftClient client, DynamicRegistryManager.Impl registryManager, LevelStorage.Session session, ResourcePackManager resourcePackManager, ServerResourceManager serverResourceManager, SaveProperties saveProperties, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, UserCache userCache, WorldGenerationProgressListenerFactory worldGenerationProgressListenerFactory, CallbackInfo ci) {
 		((RTIMinecraftServer)this).getSettingsManager().onStartUp();
 		((RTIMinecraftServer)this).getPresetsManager().onStartUp();
-	}
-	
-	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;isPaused()Z"))
-	private boolean onTickRedirectIsPaused(MinecraftClient client) {
-		return client.isPaused() && !((RTIMinecraftServer)this).getWorldTickHandler().tickInProgress();
 	}
 }

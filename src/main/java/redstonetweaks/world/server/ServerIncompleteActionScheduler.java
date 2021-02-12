@@ -33,7 +33,7 @@ public class ServerIncompleteActionScheduler implements IIncompleteActionSchedul
 	public void tick() {
 		ServerNeighborUpdateScheduler neighborUpdateScheduler = ((RTIServerWorld)world).getNeighborUpdateScheduler();
 		
-		while (!neighborUpdateScheduler.hasScheduledNeighborUpdates() && hasScheduledActions()) {
+		while (!neighborUpdateScheduler.hasScheduledUpdates() && hasScheduledActions()) {
 			IIncompleteAction action = incompleteActions.removeLast();
 			
 			if (action.tryContinue(world)) {

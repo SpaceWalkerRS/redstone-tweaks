@@ -27,5 +27,7 @@ public class PlayerManagerMixin {
 		
 		((RTIMinecraftServer)server).getSettingsManager().onPlayerJoined(player);
 		((RTIMinecraftServer)server).getPresetsManager().onPlayerJoined(player);
+		
+		((RTIMinecraftServer)server).getWorldTickHandler().onPlayerJoined(player);
 	}
 }
