@@ -59,6 +59,8 @@ public class RedstoneLampBlockMixin {
 			if (shouldBePowered != isReceivingPower) {
 				world.updateNeighbor(pos, state.getBlock(), pos);
 			}
+		} else if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get()) {
+			WorldHelper.createSpontaneousExplosion(world, pos);
 		}
 		
 		ci.cancel();

@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HopperBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -17,6 +19,7 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.interfaces.mixin.RTIHopperBlockEntity;
 import redstonetweaks.setting.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
@@ -54,14 +57,25 @@ public abstract class HopperBlockMixin extends Block {
 		boolean shouldBeEnabled = lazy ? !enabled : !isReceivingPower;
 		
 		if (enabled != shouldBeEnabled) {
-			BlockState newState = state.with(Properties.ENABLED, shouldBeEnabled);
-			
-			world.setBlockState(pos, newState, 4);
-			
-			if (shouldBeEnabled == isReceivingPower) {
-				updateEnabled(world, pos, newState);
+			if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get() && shouldBeEnabled && isHopperOnCooldown(world, pos)) {
+				WorldHelper.createSpontaneousExplosion(world, pos);
+			} else {
+				BlockState newState = state.with(Properties.ENABLED, shouldBeEnabled);
+				
+				world.setBlockState(pos, newState, 4);
+				
+				if (shouldBeEnabled == isReceivingPower) {
+					updateEnabled(world, pos, newState);
+				}
 			}
 		}
+	}
+	
+	private boolean isHopperOnCooldown(World world, BlockPos pos) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof HopperBlockEntity)
+			return ((RTIHopperBlockEntity)blockEntity).isHopperOnCooldown();
+		return false;
 	}
 	
 	private DirectionToBooleanSetting getQC() {

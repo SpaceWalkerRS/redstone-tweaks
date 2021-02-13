@@ -28,6 +28,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
 
@@ -83,7 +84,11 @@ public abstract class RedstoneTorchBlockMixin {
 	
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T object, int oldDelay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.RedstoneTorch.DELAY_BURNOUT.get(), Tweaks.RedstoneTorch.TICK_PRIORITY_BURNOUT.get());
+		if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get()) {
+			WorldHelper.createSpontaneousExplosion(world, pos);
+		} else {
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.RedstoneTorch.DELAY_BURNOUT.get(), Tweaks.RedstoneTorch.TICK_PRIORITY_BURNOUT.get());
+		}
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))

@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -25,8 +26,8 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
-
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIRedstoneDiode;
 import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
@@ -107,6 +108,19 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 			}
 		} else {
 			TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.Comparator.DELAY.get(), priority);
+		}
+	}
+	
+	@Inject(method = "scheduledTick", cancellable = true, at = @At("HEAD"))
+	private void onScheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
+		if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get()) {
+			boolean receivesPower = hasPower(world, pos, state);
+			boolean powered = state.get(POWERED);
+			
+			if (powered == receivesPower) {
+				WorldHelper.createSpontaneousExplosion(world, pos);
+				ci.cancel();
+			}
 		}
 	}
 	

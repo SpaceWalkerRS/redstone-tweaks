@@ -6,7 +6,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
+import net.minecraft.world.explosion.Explosion.DestructionType;
 import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.Tweaks;
@@ -48,5 +48,9 @@ public class WorldHelper {
 	
 	public static boolean stepByStepFilter(World world) {
 		return Tweaks.Global.WORLD_TICK_OPTIONS.get().getDimensionFilter() == WorldTickOptions.DimensionFilter.ACTIVE && world.getPlayers().isEmpty();
+	}
+
+	public static void createSpontaneousExplosion(World world, BlockPos pos) {
+		world.createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5.0f, false, DestructionType.DESTROY);
 	}
 }

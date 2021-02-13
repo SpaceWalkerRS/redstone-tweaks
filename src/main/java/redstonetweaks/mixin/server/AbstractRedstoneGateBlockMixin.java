@@ -31,6 +31,7 @@ import net.minecraft.world.WorldView;
 
 import redstonetweaks.helper.RedstoneWireHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIBlock;
 import redstonetweaks.interfaces.mixin.RTIRedstoneDiode;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
@@ -61,7 +62,9 @@ public abstract class AbstractRedstoneGateBlockMixin extends AbstractBlock imple
 			world.setBlockState(pos, newState, 2);
 			
 			if (shouldBePowered != isReceivingPower) {
-				if (((RTIWorld)world).immediateNeighborUpdates()) {
+				if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get()) {
+					WorldHelper.createSpontaneousExplosion(world, pos);
+				} else if (((RTIWorld)world).immediateNeighborUpdates()) {
 					scheduleTickOnScheduledTick(world, pos, newState, random);
 				} else {
 					((RTIServerWorld)world).getIncompleteActionScheduler().scheduleBlockAction(pos, 0, state.getBlock());

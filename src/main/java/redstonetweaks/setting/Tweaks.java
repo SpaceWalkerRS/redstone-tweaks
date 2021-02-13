@@ -35,6 +35,7 @@ public class Tweaks {
 		public static final BooleanSetting RANDOMIZE_TICK_PRIORITIES = new BooleanSetting(GLOBAL, "randomizeTickPriorities", "Randomize the tick priorities of all block and fluid ticks that are scheduled.");
 		public static final BooleanSetting SHOW_NEIGHBOR_UPDATES = new BooleanSetting(GLOBAL, "showNeighborUpdates", "When used while worlds tick in \"Step by step\" mode, neighbor updates become scheduled events. The world tick will be paused until all neighbor updates have been executed. Colored boxes are drawn at the location of each neighbor update. The white box is the notifier position, a yellow box is a block update, a blue box a shape update and a red box a comparator update.");
 		public static final WorldTickOptionsSetting WORLD_TICK_OPTIONS = new WorldTickOptionsSetting(GLOBAL, "worldTickOptions", "Options for debugging purposes. In \"Step by step\" mode the world tick will be broken down and each of its phases executed at the given interval of server ticks. Some phases, like those of scheduled ticks, block events and block entities, will break down even further and execute one their actions per interval. Information about the current tick, current world and current phase will be displayed in the top left of the screen. A dimension filter can also be selected to control which dimensions will be affected by the \"Step by step\" mode.");
+		public static final BooleanSetting SPONTANEOUS_EXPLOSIONS = new BooleanSetting(GLOBAL, "spontaneousExplosions", "Allow redstone components to spontaneously explode if they are looked at the wrong way (in case of abuse with short pulses).");
 	}
 	
 	public static class BugFixes {
@@ -709,6 +710,7 @@ public class Tweaks {
 		Settings.register(Global.RANDOMIZE_TICK_PRIORITIES);
 		Settings.register(Global.SHOW_NEIGHBOR_UPDATES);
 		Settings.register(Global.WORLD_TICK_OPTIONS);
+		Settings.register(Global.SPONTANEOUS_EXPLOSIONS);
 		
 		Settings.register(BugFixes.BUG_FIXES);
 		Settings.register(BugFixes.MC54711);

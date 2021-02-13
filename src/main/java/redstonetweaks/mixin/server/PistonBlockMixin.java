@@ -45,6 +45,7 @@ import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIBlock;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
@@ -171,7 +172,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		
 		return world.getBlockState(pos);
 	}
-	
+
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/PistonBlockEntity;isExtending()Z"))
 	private boolean onOnSyncedBlockEventRedirectIsExtending(PistonBlockEntity pistonBlockEntity) {
 		if (pistonBlockEntity.isExtending()) {
@@ -183,6 +184,15 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		}
 		
 		return false;
+	}
+	
+	@Inject(method = "onSyncedBlockEvent", cancellable = true, at = @At(value = "INVOKE", ordinal = 0, shift = Shift.AFTER, target = "Lnet/minecraft/block/entity/PistonBlockEntity;finish()V"))
+	private void onOnSyncedBlockEventInjectAfterFinish0(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
+		if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get()) {
+			WorldHelper.createSpontaneousExplosion(world, pos);
+			cir.setReturnValue(true);
+			cir.cancel();
+		}
 	}
 	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/block/entity/PistonBlockEntity;finish()V"))
