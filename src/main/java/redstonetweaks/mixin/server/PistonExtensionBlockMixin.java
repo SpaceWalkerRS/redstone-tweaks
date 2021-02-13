@@ -1,7 +1,10 @@
 package redstonetweaks.mixin.server;
 
+import java.util.Random;
+
 import org.spongepowered.asm.mixin.Mixin;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -9,6 +12,7 @@ import net.minecraft.block.PistonExtensionBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.piston.PistonHandler;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -17,11 +21,13 @@ import net.minecraft.world.World;
 import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
+import redstonetweaks.setting.Tweaks;
 
 @Mixin(PistonExtensionBlock.class)
-public class PistonExtensionBlockMixin extends Block {
+public abstract class PistonExtensionBlockMixin extends AbstractBlock {
 	
 	public PistonExtensionBlockMixin(Settings settings) {
 		super(settings);
@@ -46,6 +52,12 @@ public class PistonExtensionBlockMixin extends Block {
 					if (extend != shouldExtend) {
 						return false;
 					}
+				}
+				
+				if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get()) {
+					WorldHelper.createSpontaneousExplosion(world, pos);
+					
+					return true;
 				}
 				
 				((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
@@ -85,7 +97,7 @@ public class PistonExtensionBlockMixin extends Block {
 					if (extend) {
 						piston.onSyncedBlockEvent(world, pos, type, data);
 					} else {
-						if (!piston.onSyncedBlockEvent(world, pos, MotionType.RETRACT_FORWARDS, data)) {
+						if (!sticky || PistonSettings.doBlockDropping() || !piston.onSyncedBlockEvent(world, pos, MotionType.RETRACT_FORWARDS, data)) {
 							piston.onSyncedBlockEvent(world, pos, MotionType.RETRACT_A, data);
 						}
 					}
@@ -100,10 +112,17 @@ public class PistonExtensionBlockMixin extends Block {
 	
 	@Override
 	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-		if (world.isClient()) {
-			return;
+		if (!world.isClient()) {
+			tryMove(world, pos, state, false);
 		}
-		
+	}
+	
+	@Override
+	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+		tryMove(world, pos, state, true);
+	}
+	
+	private void tryMove(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		
 		if (blockEntity instanceof PistonBlockEntity) {
@@ -114,7 +133,7 @@ public class PistonExtensionBlockMixin extends Block {
 				boolean extending = pistonBlockEntity.isExtending();
 				
 				if (!(extending ? PistonSettings.ignoreUpdatesWhileExtending(sticky) : PistonSettings.ignoreUpdatesWhileRetracting(sticky))) {
-					PistonHelper.tryMove(world, pos, state, sticky, extending, false);
+					PistonHelper.tryMove(world, pos, state, sticky, extending, onScheduledTick);
 				}
 			}
 		}

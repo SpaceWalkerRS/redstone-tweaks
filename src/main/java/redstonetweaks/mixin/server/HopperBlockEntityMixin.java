@@ -12,6 +12,8 @@ import redstonetweaks.setting.Tweaks;
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin implements RTIHopperBlockEntity {
 	
+	@Shadow protected abstract boolean needsCooldown();
+	
 	@ModifyVariable(method = "setCooldown", argsOnly = true, at = @At(value = "HEAD"))
 	private int modifyTypeValue(int cooldown) {
 		if (cooldown == 7) {
@@ -20,11 +22,10 @@ public abstract class HopperBlockEntityMixin implements RTIHopperBlockEntity {
 		if (cooldown == 8) {
 			return Tweaks.Hopper.COOLDOWN_DEFAULT.get();
 		}
+		
 		return cooldown;
 	}
-
-	@Shadow protected abstract boolean needsCooldown();
-
+	
 	@Override
 	public boolean isHopperOnCooldown() {
 		return needsCooldown();

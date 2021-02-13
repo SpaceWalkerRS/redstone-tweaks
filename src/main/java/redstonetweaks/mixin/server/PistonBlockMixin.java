@@ -190,6 +190,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	private void onOnSyncedBlockEventInjectAfterFinish0(BlockState state, World world, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
 		if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get()) {
 			WorldHelper.createSpontaneousExplosion(world, pos);
+			
 			cir.setReturnValue(true);
 			cir.cancel();
 		}

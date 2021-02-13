@@ -22,9 +22,14 @@ public abstract class ComparatorBlockEntityMixin extends BlockEntity {
 	
 	@Inject(method = "setOutputSignal", at = @At(value = "RETURN"))
 	private void onSetOutputSignalInjectAtHead(int newPower, CallbackInfo ci) {
-		if (!world.isClient()) {
+		if (!world.isClient() && newPower > 15) {
 			world.getServer().getPlayerManager().sendToAround(null, getPos().getX(), getPos().getY(), getPos().getZ(), 64.0D, world.getRegistryKey(), toUpdatePacket());
 		}
+	}
+	
+	@Override
+	public CompoundTag toInitialChunkDataTag() {
+		return toTag(new CompoundTag());
 	}
 	
 	@Override

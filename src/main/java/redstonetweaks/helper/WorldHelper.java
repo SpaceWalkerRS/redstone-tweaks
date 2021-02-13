@@ -49,8 +49,8 @@ public class WorldHelper {
 	public static boolean stepByStepFilter(World world) {
 		return Tweaks.Global.WORLD_TICK_OPTIONS.get().getDimensionFilter() == WorldTickOptions.DimensionFilter.ACTIVE && world.getPlayers().isEmpty();
 	}
-
+	
 	public static void createSpontaneousExplosion(World world, BlockPos pos) {
-		world.createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5.0f, false, DestructionType.DESTROY);
+		world.createExplosion(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 5.0F, false, DestructionType.DESTROY);
 	}
 }

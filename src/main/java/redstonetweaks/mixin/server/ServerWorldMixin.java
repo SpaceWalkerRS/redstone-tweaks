@@ -469,7 +469,8 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 					if (!entitiesIt.hasNext()) {
 						inEntityTick = false;
 						
-						for (Entity entityToLoad : entitiesToLoad) {
+						Entity entityToLoad;
+						while ((entityToLoad = entitiesToLoad.poll()) != null) {
 							loadEntityUnchecked(entityToLoad);
 						}
 						

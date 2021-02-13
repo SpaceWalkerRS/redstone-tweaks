@@ -228,6 +228,7 @@ public class Presets {
 			Tweaks.Global.RANDOMIZE_DELAYS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.RANDOMIZE_TICK_PRIORITIES.setPresetValue(DEFAULT, false);
 			Tweaks.Global.SHOW_NEIGHBOR_UPDATES.setPresetValue(DEFAULT, false);
+			Tweaks.Global.SPONTANEOUS_EXPLOSIONS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.WORLD_TICK_OPTIONS.setPresetValue(DEFAULT, new WorldTickOptions());
 			
 			Tweaks.BugFixes.MC54711.setPresetValue(DEFAULT, false);
@@ -285,6 +286,11 @@ public class Presets {
 			Tweaks.CoralBlock.DELAY_MIN.setPresetValue(DEFAULT, 60);
 			Tweaks.CoralBlock.DELAY_MAX.setPresetValue(DEFAULT, 100);
 			Tweaks.CoralBlock.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
+			
+			Tweaks.DaylightDetector.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
+					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
+					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.DOWN, RelativePos.UP));
+			Tweaks.DaylightDetector.EMITS_STRONG_POWER.setPresetValue(DEFAULT, false);
 			
 			Tweaks.DetectorRail.DELAY.setPresetValue(DEFAULT, 20);
 			Tweaks.DetectorRail.POWER_WEAK.setPresetValue(DEFAULT, 15);
@@ -587,8 +593,17 @@ public class Presets {
 			Tweaks.SugarCane.DELAY.setPresetValue(DEFAULT, 1);
 			Tweaks.SugarCane.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
+			Tweaks.TargetBlock.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
+					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
+					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.WEST, RelativePos.EAST).
+					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.EAST, RelativePos.WEST).
+					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.NORTH, RelativePos.SOUTH).
+					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.SOUTH, RelativePos.NORTH).
+					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.DOWN, RelativePos.UP).
+					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.UP, RelativePos.DOWN));
 			Tweaks.TargetBlock.DELAY_DEFAULT.setPresetValue(DEFAULT, 8);
 			Tweaks.TargetBlock.DELAY_PERSISTENT_PROJECTILE.setPresetValue(DEFAULT, 20);
+			Tweaks.TargetBlock.EMITS_STRONG_POWER.setPresetValue(DEFAULT, false);
 			Tweaks.TargetBlock.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
 			Tweaks.TNT.DELAY.setPresetValue(DEFAULT, 0);

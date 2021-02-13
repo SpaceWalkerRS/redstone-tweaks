@@ -223,16 +223,18 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				if (blockEntity instanceof PowerBlockEntity) {
 					((PowerBlockEntity)blockEntity).setPower(powerReceived);
 				}
-				world.setBlockState(pos, state.with(Properties.POWER, Math.min(powerReceived, 15)), 2);
 				
-				updateNeighborsOnStateChange(world, pos, state);
+				BlockState newState = state.with(Properties.POWER, Math.min(powerReceived, 15));
+				world.setBlockState(pos, newState, 2);
+				
+				updateNeighborsOnPowerChange(world, pos, newState);
 			} else {
 				TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.RedstoneWire.TICK_PRIORITY.get());
 			}
 		}
 	}
 	
-	private void updateNeighborsOnStateChange(World world, BlockPos pos, BlockState state) {
+	private void updateNeighborsOnPowerChange(World world, BlockPos pos, BlockState state) {
 		((RTIWorld)world).dispatchBlockUpdates(pos, null, state.getBlock(), Tweaks.RedstoneWire.BLOCK_UPDATE_ORDER.get());
 	}
 	

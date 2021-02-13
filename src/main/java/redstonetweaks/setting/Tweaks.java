@@ -34,8 +34,8 @@ public class Tweaks {
 		public static final BooleanSetting RANDOMIZE_DELAYS = new BooleanSetting(GLOBAL, "randomizeDelays", "Randomize the delays of all block and fluid ticks that are scheduled.");
 		public static final BooleanSetting RANDOMIZE_TICK_PRIORITIES = new BooleanSetting(GLOBAL, "randomizeTickPriorities", "Randomize the tick priorities of all block and fluid ticks that are scheduled.");
 		public static final BooleanSetting SHOW_NEIGHBOR_UPDATES = new BooleanSetting(GLOBAL, "showNeighborUpdates", "When used while worlds tick in \"Step by step\" mode, neighbor updates become scheduled events. The world tick will be paused until all neighbor updates have been executed. Colored boxes are drawn at the location of each neighbor update. The white box is the notifier position, a yellow box is a block update, a blue box a shape update and a red box a comparator update.");
-		public static final WorldTickOptionsSetting WORLD_TICK_OPTIONS = new WorldTickOptionsSetting(GLOBAL, "worldTickOptions", "Options for debugging purposes. In \"Step by step\" mode the world tick will be broken down and each of its phases executed at the given interval of server ticks. Some phases, like those of scheduled ticks, block events and block entities, will break down even further and execute one their actions per interval. Information about the current tick, current world and current phase will be displayed in the top left of the screen. A dimension filter can also be selected to control which dimensions will be affected by the \"Step by step\" mode.");
 		public static final BooleanSetting SPONTANEOUS_EXPLOSIONS = new BooleanSetting(GLOBAL, "spontaneousExplosions", "Allow redstone components to spontaneously explode if they are looked at the wrong way (in case of abuse with short pulses).");
+		public static final WorldTickOptionsSetting WORLD_TICK_OPTIONS = new WorldTickOptionsSetting(GLOBAL, "worldTickOptions", "Options for debugging purposes. In \"Step by step\" mode the world tick will be broken down and each of its phases executed at the given interval of server ticks. Some phases, like those of scheduled ticks, block events and block entities, will break down even further and execute one their actions per interval. Information about the current tick, current world and current phase will be displayed in the top left of the screen. A dimension filter can also be selected to control which dimensions will be affected by the \"Step by step\" mode.");
 	}
 	
 	public static class BugFixes {
@@ -150,6 +150,14 @@ public class Tweaks {
 		public static final IntegerSetting DELAY_MIN = new IntegerSetting(CORAL_BLOCK, "delayMin", "Minimum delay in ticks.", 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_MAX = new IntegerSetting(CORAL_BLOCK, "delayMax", "Maximum delay in ticks.", 0, Settings.Common.MAX_DELAY);
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(CORAL_BLOCK, "tickPriority", Settings.Common.DESC_TICK_PRIORITY);
+	}
+	
+	public static class DaylightDetector {
+		
+		private static final SettingsPack DAYLIGHT_DETECTOR = new SettingsPack(TWEAKS, "Daylight Detector");
+		
+		public static final BooleanSetting EMITS_STRONG_POWER = new BooleanSetting(DAYLIGHT_DETECTOR, "emitsStrongPower", "When enabled, daylight detectors strongly power the block below them.");
+		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(DAYLIGHT_DETECTOR, "blockUpdateOrder", "If the emitsStrongPower setting is enabled, this is the order in which daylight detectors update neighboring blocks when their power level changes.");
 	}
 	
 	public static class DetectorRail {
@@ -602,8 +610,10 @@ public class Tweaks {
 		
 		private static final SettingsPack TARGET_BLOCK = new SettingsPack(TWEAKS, "Target Block");
 		
+		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(TARGET_BLOCK, "blockUpdateOrder", "When emitsStrongPower is enabled, this is the order in which neighboring blocks are updated when a target block powers on or off.");
 		public static final IntegerSetting DELAY_DEFAULT = new IntegerSetting(TARGET_BLOCK, "delayDefault", "The default delay in ticks before powering off.", 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_PERSISTENT_PROJECTILE = new IntegerSetting(TARGET_BLOCK, "delayPersistentProjectile", "The delay in ticks before powering off when hit by a persistent projectile, like an arrow or a trident.", 0, Settings.Common.MAX_DELAY);
+		public static final BooleanSetting EMITS_STRONG_POWER = new BooleanSetting(TARGET_BLOCK, "emitsStrongPower", "Allow target blocks to strongly power blocks around them.");
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(TARGET_BLOCK, "tickPriority", Settings.Common.DESC_TICK_PRIORITY);
 	}
 	
@@ -709,8 +719,8 @@ public class Tweaks {
 		Settings.register(Global.RANDOMIZE_DELAYS);
 		Settings.register(Global.RANDOMIZE_TICK_PRIORITIES);
 		Settings.register(Global.SHOW_NEIGHBOR_UPDATES);
-		Settings.register(Global.WORLD_TICK_OPTIONS);
 		Settings.register(Global.SPONTANEOUS_EXPLOSIONS);
+		Settings.register(Global.WORLD_TICK_OPTIONS);
 		
 		Settings.register(BugFixes.BUG_FIXES);
 		Settings.register(BugFixes.MC54711);
@@ -777,6 +787,10 @@ public class Tweaks {
 		Settings.register(CoralBlock.DELAY_MIN);
 		Settings.register(CoralBlock.DELAY_MAX);
 		Settings.register(CoralBlock.TICK_PRIORITY);
+		
+		Settings.register(DaylightDetector.DAYLIGHT_DETECTOR);
+		Settings.register(DaylightDetector.BLOCK_UPDATE_ORDER);
+		Settings.register(DaylightDetector.EMITS_STRONG_POWER);
 		
 		Settings.register(DetectorRail.DETECTOR_RAIL);
 		Settings.register(DetectorRail.DELAY);
@@ -1073,8 +1087,10 @@ public class Tweaks {
 		Settings.register(SugarCane.TICK_PRIORITY);
 		
 		Settings.register(TargetBlock.TARGET_BLOCK);
+		Settings.register(TargetBlock.BLOCK_UPDATE_ORDER);
 		Settings.register(TargetBlock.DELAY_DEFAULT);
 		Settings.register(TargetBlock.DELAY_PERSISTENT_PROJECTILE);
+		Settings.register(TargetBlock.EMITS_STRONG_POWER);
 		Settings.register(TargetBlock.TICK_PRIORITY);
 		
 		Settings.register(TNT.TNT);

@@ -34,6 +34,7 @@ public class BlockEntityTypes {
 		// In case they add more, just make the numbers sufficiently large
 		IDS.put(BlockEntityType.COMPARATOR, 101);
 		IDS.put(BlockEntityTypes.POWER_BLOCK, 102);
+		IDS.put(BlockEntityType.DAYLIGHT_DETECTOR, 103);
 		
 	}
 }

@@ -73,8 +73,11 @@ public abstract class HopperBlockMixin extends Block {
 	
 	private boolean isHopperOnCooldown(World world, BlockPos pos) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof HopperBlockEntity)
+		
+		if (blockEntity instanceof HopperBlockEntity) {
 			return ((RTIHopperBlockEntity)blockEntity).isHopperOnCooldown();
+		}
+		
 		return false;
 	}
 	

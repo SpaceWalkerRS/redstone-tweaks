@@ -15,12 +15,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.ComparatorBlockEntity;
+import net.minecraft.block.entity.DaylightDetectorBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.util.math.BlockPos;
-
 import redstonetweaks.block.entity.BlockEntityTypes;
 import redstonetweaks.block.entity.PowerBlockEntity;
+import redstonetweaks.interfaces.mixin.RTIDaylightDetectorBlockEntity;
 
 @Mixin(DebugHud.class)
 public class DebugHudMixin {
@@ -35,13 +36,19 @@ public class DebugHudMixin {
 			BlockEntity blockEntity = client.world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PowerBlockEntity) {
-				text.add(String.format("real power: ", ((PowerBlockEntity)blockEntity).getPower()));
+				text.add(String.format("real power: %d", ((PowerBlockEntity)blockEntity).getPower()));
 			}
 		} else if (BlockEntityType.COMPARATOR.supports(state.getBlock())) {
 			BlockEntity blockEntity = client.world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof ComparatorBlockEntity) {
-				text.add(String.format("power: ", ((ComparatorBlockEntity)blockEntity).getOutputSignal()));
+				text.add(String.format("power: %d", ((ComparatorBlockEntity)blockEntity).getOutputSignal()));
+			}
+		} else if (BlockEntityType.DAYLIGHT_DETECTOR.supports(state.getBlock())) {
+			BlockEntity blockEntity = client.world.getBlockEntity(pos);
+			
+			if (blockEntity instanceof DaylightDetectorBlockEntity) {
+				text.add(String.format("real power: %d", ((RTIDaylightDetectorBlockEntity)blockEntity).getPower()));
 			}
 		}
 	}

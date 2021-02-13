@@ -61,6 +61,9 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	private boolean isMerging;
 	private boolean sourceIsMoving;
 	private int speed;
+	// G4mespeed compatibility
+	// Make sure pistons animate at the correct speed
+	private float numberOfSteps;
 	
 	public PistonBlockEntityMixin(BlockEntityType<?> type) {
 		super(type);
@@ -208,6 +211,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	private void onFromTagInjectAtReturn(BlockState state, CompoundTag tag, CallbackInfo ci) {
 		sticky = tag.contains("sticky") ? tag.getBoolean("sticky") : false;
 		sourceIsMoving = tag.contains("sourceIsMoving") ? tag.getBoolean("sourceIsMoving") : false;
+		speed = tag.contains("speed") ? tag.getInt("speed") : 2;
+		numberOfSteps = speed == 0 ? 1.0F : speed;
 
 		if (tag.contains("movedBlockEntity")) {
 			Block movedBlock = pushedBlock.getBlock();
@@ -244,6 +249,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	private void onToTagInjectAtReturn(CompoundTag tag, CallbackInfoReturnable<?> cir) {
 		tag.putBoolean("sticky", sticky);
 		tag.putBoolean("sourceIsMoving", sourceIsMoving);
+		tag.putInt("speed", speed);
 		
 		if (movedBlockEntity != null) {
 			tag.put("movedBlockEntity", movedBlockEntity.toTag(new CompoundTag()));
@@ -274,17 +280,13 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		speed = PistonSettings.speed(sticky, extending);
 		
 		if (speed == 0) {
+			numberOfSteps = 1.0F;
+			
 			// This ensures the block entity finishes the first time it is ticked
 			// Otherwise the behavior would be the same as if the speed was set to 1
-			this.progress = 1.0F;
+			progress = 1.0F;
 		} else {
-			try {
-				// G4mespeed compatibility
-				// Make sure pistons animate at the correct speed
-				PistonBlockEntity.class.getDeclaredField("numberOfSteps").setFloat(this, speed);
-			} catch (Exception e) {
-				
-			}
+			numberOfSteps = speed;
 		}
 	}
 	

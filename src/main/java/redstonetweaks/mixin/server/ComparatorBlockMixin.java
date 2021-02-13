@@ -119,6 +119,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 			
 			if (powered == receivesPower) {
 				WorldHelper.createSpontaneousExplosion(world, pos);
+				
 				ci.cancel();
 			}
 		}

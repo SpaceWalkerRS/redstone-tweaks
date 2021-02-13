@@ -144,7 +144,17 @@ public class BlockEventHandler {
 			BlockEntity blockEntity = world.getBlockEntity(headPos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
-				((RTIPistonBlockEntity)blockEntity).finishSource();
+				((PistonBlockEntity)blockEntity).finish();
+				
+				if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get()) {
+					WorldHelper.createSpontaneousExplosion(world, pos);
+					
+					// We have to return true for the block event to be synced with the client
+					// but do not want to do the full retraction event.
+					progress = 100;
+					
+					return true;
+				}
 			} else {
 				tryContinueBlockEvent();
 			}
