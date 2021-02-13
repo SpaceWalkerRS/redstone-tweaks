@@ -259,7 +259,8 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	
 	@Override
 	public void processWeather() {
-		boolean isRaining = this.isRaining();
+		boolean isRaining = isRaining();
+		
 		if (getDimension().hasSkyLight()) {
 			if (getGameRules().getBoolean(GameRules.DO_WEATHER_CYCLE)) {
 				int clearWeatherTime = worldProperties.getClearWeatherTime();
@@ -358,7 +359,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 				setTimeOfDay(l - l % 24000L);
 			}
 			
-			this.wakeSleepingPlayers();
+			wakeSleepingPlayers();
 			if (getGameRules().getBoolean(GameRules.DO_WEATHER_CYCLE)) {
 				resetWeather();
 			}

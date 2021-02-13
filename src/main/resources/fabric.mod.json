@@ -38,6 +38,9 @@
   	  "links": {
   	    "modmenu.discord": "https://discord.gg/EJC9zkX"
   	  }
-  	}
+  	},
+  	"lithium:options": {
+  	  "mixin.world.tick_scheduler": false
+    }
   }
 }
