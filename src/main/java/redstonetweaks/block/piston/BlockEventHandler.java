@@ -291,7 +291,7 @@ public class BlockEventHandler {
 						isIterating = true;
 						index = droppedBlocks.size() - 1;
 						
-						droppedBlock = true;
+						droppedBlock = PistonSettings.doBlockDropping();
 					}
 				}
 				
