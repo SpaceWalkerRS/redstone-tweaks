@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.AbstractButtonBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.WallMountedBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -124,9 +125,13 @@ public abstract class AbstractButtonBlockMixin extends WallMountedBlock implemen
 	
 	@Override
 	public boolean continueAction(World world, BlockPos pos, int type) {
-		TickPriority priority = wooden ? Tweaks.WoodenButton.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.StoneButton.TICK_PRIORITY_FALLING_EDGE.get();
+		BlockState state = world.getBlockState(pos);
 		
-		TickSchedulerHelper.scheduleBlockTick(world, pos, world.getBlockState(pos), getPressTicks(), priority);
+		if (state.isOf((Block)(Object)this)) {
+			TickPriority priority = wooden ? Tweaks.WoodenButton.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.StoneButton.TICK_PRIORITY_FALLING_EDGE.get();
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, getPressTicks(), priority);
+		}
 		
 		return false;
 	}

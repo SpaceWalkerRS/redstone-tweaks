@@ -22,13 +22,16 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
+
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.interfaces.mixin.RTIBlock;
 import redstonetweaks.interfaces.mixin.RTIPressurePlate;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 
 @Mixin(AbstractPressurePlateBlock.class)
-public abstract class AbstractPressurePlateBlockMixin extends Block {
+public abstract class AbstractPressurePlateBlockMixin extends Block implements RTIBlock {
 	
 	public AbstractPressurePlateBlockMixin(Settings settings) {
 		super(settings);
@@ -66,10 +69,14 @@ public abstract class AbstractPressurePlateBlockMixin extends Block {
 	
 	@Redirect(method = "updatePlateState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void updatePlateStateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay, World world, BlockPos blockPos, BlockState state) {
-		int delay = ((RTIPressurePlate)this).delayFallingEdge(state);
-		TickPriority priority = ((RTIPressurePlate)this).tickPriorityFallingEdge(state);
-		
-		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+		if (((RTIWorld)world).immediateNeighborUpdates()) {
+			int delay = ((RTIPressurePlate)this).delayFallingEdge(state);
+			TickPriority priority = ((RTIPressurePlate)this).tickPriorityFallingEdge(state);
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+		} else if (!world.isClient()) {
+			((RTIServerWorld)world).getIncompleteActionScheduler().scheduleBlockAction(pos, 0, state.getBlock());
+		}
 	}
 	
 	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
@@ -92,5 +99,19 @@ public abstract class AbstractPressurePlateBlockMixin extends Block {
 		
 		cir.setReturnValue(power);
 		cir.cancel();
+	}
+	
+	@Override
+	public boolean continueAction(World world, BlockPos pos, int type) {
+		BlockState state = world.getBlockState(pos);
+		
+		if (state.isOf((Block)(Object)this)) {
+			int delay = ((RTIPressurePlate)this).delayFallingEdge(state);
+			TickPriority priority = ((RTIPressurePlate)this).tickPriorityFallingEdge(state);
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+		}
+		
+		return false;
 	}
 }

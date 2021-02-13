@@ -12,7 +12,7 @@ import net.minecraft.util.Formatting;
 public class TextFormatting {
 	
 	public static final String DEFAULT_LINE_BREAK_SEPARATOR = "\n";
-	public static final int DEFAULT_LINE_LENGTH = 55;
+	public static final int DEFAULT_LINE_LENGTH = 50;
 	public static final int DEFAULT_LINE_WIDTH = 250;
 	
 	public static String insertLineBreaks(String text) {
