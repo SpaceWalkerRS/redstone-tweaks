@@ -40,7 +40,8 @@
   	  }
   	},
   	"lithium:options": {
-  	  "mixin.world.tick_scheduler": false
+  	  "mixin.world.tick_scheduler": false,
+  	  "mixin.block.moving_block_shapes": false
     }
   }
 }
