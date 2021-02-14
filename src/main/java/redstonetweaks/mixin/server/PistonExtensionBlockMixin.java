@@ -24,7 +24,7 @@ import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(PistonExtensionBlock.class)
 public abstract class PistonExtensionBlockMixin extends AbstractBlock {

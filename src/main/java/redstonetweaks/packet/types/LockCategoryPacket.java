@@ -3,9 +3,8 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
-import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.util.PacketUtils;
 
 public class LockCategoryPacket extends RedstoneTweaksPacket {

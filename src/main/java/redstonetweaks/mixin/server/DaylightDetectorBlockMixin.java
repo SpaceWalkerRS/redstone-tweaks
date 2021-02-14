@@ -26,7 +26,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.interfaces.mixin.RTIDaylightDetectorBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIWorld;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(DaylightDetectorBlock.class)
 public abstract class DaylightDetectorBlockMixin extends AbstractBlock {

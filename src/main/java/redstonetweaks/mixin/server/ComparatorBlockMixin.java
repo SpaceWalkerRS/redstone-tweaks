@@ -31,7 +31,7 @@ import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIRedstoneDiode;
 import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(ComparatorBlock.class)
 public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock implements RTIRedstoneDiode {
@@ -74,7 +74,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	
 	@ModifyConstant(method = "getPower", constant = @Constant(intValue = 15))
 	private int onGetPowerModify15(int oldValue) {
-		return redstonetweaks.setting.Tweaks.Global.POWER_MAX.get();
+		return redstonetweaks.setting.settings.Tweaks.Global.POWER_MAX.get();
 	}
 	
 	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;isTicking(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;)Z"))

@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.network.PacketByteBuf;
-import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
+import redstonetweaks.setting.settings.Settings;
 
 public abstract class Setting<T> implements ISetting {
 	

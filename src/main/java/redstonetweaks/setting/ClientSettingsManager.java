@@ -14,6 +14,7 @@ import redstonetweaks.packet.types.ResetCategoryPacket;
 import redstonetweaks.packet.types.ResetPackPacket;
 import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.setting.preset.Preset;
+import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 
 public class ClientSettingsManager implements ISettingListener {

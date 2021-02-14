@@ -26,7 +26,7 @@ import net.minecraft.world.WorldAccess;
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIWorld;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(TargetBlock.class)
 public abstract class TargetBlockMixin extends AbstractBlock implements BlockEntityProvider {

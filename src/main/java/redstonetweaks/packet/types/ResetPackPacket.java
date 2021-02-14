@@ -5,8 +5,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
-import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsPack;
+import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.util.PacketUtils;
 
 public class ResetPackPacket extends RedstoneTweaksPacket {

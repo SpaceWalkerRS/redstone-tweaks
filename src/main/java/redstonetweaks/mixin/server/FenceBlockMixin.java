@@ -12,7 +12,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(FenceBlock.class)
 public class FenceBlockMixin {

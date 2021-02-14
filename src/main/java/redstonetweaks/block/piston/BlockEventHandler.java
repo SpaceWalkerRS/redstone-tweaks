@@ -28,7 +28,7 @@ import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
 import redstonetweaks.interfaces.mixin.RTIWorld;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 public class BlockEventHandler {
 	

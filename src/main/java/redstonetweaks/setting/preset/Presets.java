@@ -12,9 +12,9 @@ import net.minecraft.world.TickPriority;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.listeners.IPresetListener;
-import redstonetweaks.setting.ServerConfig;
-import redstonetweaks.setting.Settings;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.ServerConfig;
+import redstonetweaks.setting.settings.Settings;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.Directionality;
 import redstonetweaks.util.RelativePos;

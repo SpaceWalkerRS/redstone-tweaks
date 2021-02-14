@@ -1,5 +1,7 @@
-package redstonetweaks.setting;
+package redstonetweaks.setting.settings;
 
+import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.BugFixSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;

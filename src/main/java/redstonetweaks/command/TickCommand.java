@@ -11,7 +11,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
-import redstonetweaks.setting.ServerConfig;
+import redstonetweaks.setting.settings.ServerConfig;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 public class TickCommand {

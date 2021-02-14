@@ -30,7 +30,7 @@ import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIWorld;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(RedstoneTorchBlock.class)
 public abstract class RedstoneTorchBlockMixin {

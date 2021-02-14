@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Tweaks;;
+import redstonetweaks.setting.settings.Tweaks;;
 
 @Mixin(ScaffoldingBlock.class)
 public abstract class ScaffoldingBlockMixin {

@@ -1,8 +1,7 @@
 package redstonetweaks.block.piston;
 
 import net.minecraft.world.TickPriority;
-
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 public class PistonSettings {

@@ -6,8 +6,8 @@ import java.util.Set;
 import net.minecraft.client.MinecraftClient;
 import redstonetweaks.listeners.IPermissionListener;
 import redstonetweaks.server.ServerInfo;
-import redstonetweaks.setting.ServerConfig;
 import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.setting.settings.ServerConfig;
 
 public class PermissionManager {
 	

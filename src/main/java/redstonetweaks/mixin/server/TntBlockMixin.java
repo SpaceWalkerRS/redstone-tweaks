@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 @Mixin(TntBlock.class)

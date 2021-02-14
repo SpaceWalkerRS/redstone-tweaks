@@ -16,7 +16,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(SugarCaneBlock.class)
 public abstract class SugarCaneBlockMixin {

@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Tweaks;;
+import redstonetweaks.setting.settings.Tweaks;;
 
 @Mixin(TripwireBlock.class)
 public class TripwireBlockMixin {

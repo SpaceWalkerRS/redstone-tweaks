@@ -20,7 +20,7 @@ import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(LecternBlock.class)
 public abstract class LecternBlockMixin {

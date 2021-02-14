@@ -6,8 +6,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.WorldAccess;
-
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.util.RTMathHelper;
 
 public class TickSchedulerHelper {

@@ -31,7 +31,7 @@ import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 public class PistonHelper {
 	
@@ -316,7 +316,7 @@ public class PistonHelper {
 	}
 	
 	public static PistonBehavior getPistonBehavior(BlockState state) {
-		if (redstonetweaks.setting.Tweaks.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER)) {
+		if (redstonetweaks.setting.settings.Tweaks.Barrier.IS_MOVABLE.get() && state.isOf(Blocks.BARRIER)) {
 			return PistonBehavior.NORMAL;
 		}
 		if (isPiston(state) && (!state.get(Properties.EXTENDED) || PistonSettings.movableWhenExtended(isSticky(state)))) {

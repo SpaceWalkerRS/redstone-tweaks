@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import redstonetweaks.interfaces.mixin.RTIPressurePlate;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.world.common.UpdateOrder;
 
 @Mixin(PressurePlateBlock.class)

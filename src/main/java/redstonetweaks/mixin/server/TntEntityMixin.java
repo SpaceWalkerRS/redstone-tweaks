@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import net.minecraft.entity.TntEntity;
-import redstonetweaks.setting.Tweaks;;
+import redstonetweaks.setting.settings.Tweaks;;
 
 @Mixin(TntEntity.class)
 public class TntEntityMixin {

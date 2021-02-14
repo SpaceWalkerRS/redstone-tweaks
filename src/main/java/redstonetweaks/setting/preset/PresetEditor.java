@@ -4,8 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.minecraft.network.PacketByteBuf;
-
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.Setting;
 import redstonetweaks.util.PacketUtils;

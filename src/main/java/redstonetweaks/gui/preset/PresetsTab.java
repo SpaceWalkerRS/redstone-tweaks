@@ -19,11 +19,11 @@ import redstonetweaks.gui.WarningWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
-import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
 import redstonetweaks.setting.preset.Presets;
+import redstonetweaks.setting.settings.Settings;
 
 public class PresetsTab extends RTMenuTab {
 	

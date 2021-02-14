@@ -53,7 +53,7 @@ import redstonetweaks.helper.WorldHelper;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.world.common.WorldTickHandler;
 import redstonetweaks.world.common.WorldTickOptions;
 import redstonetweaks.world.server.ServerNeighborUpdateScheduler;

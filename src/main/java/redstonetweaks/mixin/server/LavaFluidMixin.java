@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import net.minecraft.fluid.LavaFluid;
 import net.minecraft.world.TickPriority;
 import redstonetweaks.interfaces.mixin.RTIFluid;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(LavaFluid.class)
 public class LavaFluidMixin implements RTIFluid {

@@ -21,12 +21,12 @@ import redstonetweaks.hotkeys.RTKeyBinding;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.listeners.ISettingListener;
-import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
 import redstonetweaks.setting.preset.Presets;
+import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 
 public class RTMenuScreen extends Screen implements ISettingListener, IPresetListener {

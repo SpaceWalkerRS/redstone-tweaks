@@ -1,4 +1,4 @@
-package redstonetweaks.setting;
+package redstonetweaks.setting.settings;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +10,8 @@ import java.util.Set;
 
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.listeners.ISettingListener;
+import redstonetweaks.setting.SettingsCategory;
+import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.types.ISetting;
 

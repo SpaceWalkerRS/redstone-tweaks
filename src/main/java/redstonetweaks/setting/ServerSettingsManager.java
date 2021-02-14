@@ -25,6 +25,7 @@ import redstonetweaks.packet.types.ResetPackPacket;
 import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.packet.types.SettingsPacket;
 import redstonetweaks.setting.preset.Preset;
+import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.PacketUtils;
 

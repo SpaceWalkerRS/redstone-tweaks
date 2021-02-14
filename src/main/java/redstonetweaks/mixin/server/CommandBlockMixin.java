@@ -19,7 +19,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(CommandBlock.class)
 public class CommandBlockMixin {

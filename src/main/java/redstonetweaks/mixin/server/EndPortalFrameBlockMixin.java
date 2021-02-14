@@ -5,8 +5,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import net.minecraft.block.EndPortalFrameBlock;
-
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(EndPortalFrameBlock.class)
 public class EndPortalFrameBlockMixin {

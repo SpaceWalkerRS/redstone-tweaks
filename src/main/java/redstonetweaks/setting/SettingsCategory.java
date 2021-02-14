@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import redstonetweaks.setting.settings.Settings;
+
 public class SettingsCategory {
 	
 	private final String name;

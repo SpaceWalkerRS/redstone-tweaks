@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import net.minecraft.fluid.WaterFluid;
 import net.minecraft.world.TickPriority;
 import redstonetweaks.interfaces.mixin.RTIFluid;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(WaterFluid.class)
 public class WaterFluidMixin implements RTIFluid {

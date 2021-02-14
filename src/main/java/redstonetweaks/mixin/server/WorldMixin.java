@@ -50,7 +50,7 @@ import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.packet.types.TickBlockEntityPacket;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.util.RelativePos;
 import redstonetweaks.world.common.AbstractNeighborUpdate;
 import redstonetweaks.world.common.BlockUpdate;

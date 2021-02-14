@@ -7,7 +7,7 @@ import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.packet.types.NeighborUpdateSchedulerPacket;
 import redstonetweaks.packet.types.NeighborUpdateVisualizerPacket;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.world.common.NeighborUpdate;
 import redstonetweaks.world.common.INeighborUpdateScheduler;
 

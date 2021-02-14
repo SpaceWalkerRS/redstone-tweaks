@@ -17,9 +17,9 @@ import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.listeners.IPermissionListener;
 import redstonetweaks.listeners.ISettingListener;
-import redstonetweaks.setting.Settings;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
+import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 
 public class SettingsTab extends RTMenuTab implements ISettingListener, IPermissionListener {

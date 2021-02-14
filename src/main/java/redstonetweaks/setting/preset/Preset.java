@@ -1,8 +1,7 @@
 package redstonetweaks.setting.preset;
 
 import net.minecraft.network.PacketByteBuf;
-
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.PacketUtils;
 

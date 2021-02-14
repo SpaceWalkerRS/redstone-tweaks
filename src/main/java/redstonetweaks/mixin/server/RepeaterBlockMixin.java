@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.interfaces.mixin.RTIRedstoneDiode;
 import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(RepeaterBlock.class)
 public abstract class RepeaterBlockMixin extends AbstractBlock implements RTIRedstoneDiode {

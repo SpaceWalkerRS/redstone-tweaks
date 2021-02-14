@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIRail;
 import redstonetweaks.interfaces.mixin.RTIRailPlacementHelper;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 
 @Mixin(RailBlock.class)

@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import net.minecraft.block.entity.HopperBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIHopperBlockEntity;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin implements RTIHopperBlockEntity {

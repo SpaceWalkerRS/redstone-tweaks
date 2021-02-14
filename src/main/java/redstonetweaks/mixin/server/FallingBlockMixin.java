@@ -20,7 +20,7 @@ import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(FallingBlock.class)
 public abstract class FallingBlockMixin {

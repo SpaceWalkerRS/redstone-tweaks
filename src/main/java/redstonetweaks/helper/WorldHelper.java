@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion.DestructionType;
 import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.interfaces.mixin.RTIWorld;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 import redstonetweaks.world.common.WorldTickOptions;
 

@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import net.fabricmc.api.ModInitializer;
 
 import redstonetweaks.block.entity.BlockEntityTypes;
-import redstonetweaks.setting.Settings;
+import redstonetweaks.setting.settings.Settings;
 
 public class RedstoneTweaks implements ModInitializer {
 	

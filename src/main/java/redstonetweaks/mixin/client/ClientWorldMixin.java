@@ -21,7 +21,7 @@ import net.minecraft.world.dimension.DimensionType;
 import redstonetweaks.interfaces.mixin.RTIClientWorld;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.interfaces.mixin.RTIWorld;
-import redstonetweaks.setting.Tweaks;
+import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.world.client.ClientNeighborUpdateScheduler;
 import redstonetweaks.world.client.ClientIncompleteActionScheduler;
 import redstonetweaks.world.client.ClientWorldTickHandler;
