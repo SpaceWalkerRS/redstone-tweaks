@@ -70,26 +70,6 @@ public class UpdateOrder {
 		return false;
 	}
 	
-	@Override
-	public String toString() {
-		String string = "";
-		
-		string += directionality + ";";
-		string += defaultMode + ";";
-		string += forceDefaultMode + ";";
-		
-		string += offsetX + ";";
-		string += offsetY + ";";
-		string += offsetZ + ";";
-		string += notifierOrder + ";";
-		
-		for (AbstractNeighborUpdate update : getNeighborUpdates()) {
-			string += update + ",";
-		}
-		
-		return string.substring(0, string.length() - 1);
-	}
-	
 	public void encode(PacketByteBuf buffer) {
 		buffer.writeByte(directionality.getIndex());
 		buffer.writeByte(defaultMode.getIndex());
@@ -118,31 +98,6 @@ public class UpdateOrder {
 		}
 	}
 	
-	public static UpdateOrder parseUpdateOrder(String string) {
-		String[] args = string.split(";");
-		int index = 0;
-		
-		Directionality directionality = Directionality.valueOf(args[index++]);
-		AbstractNeighborUpdate.Mode defaultMode = AbstractNeighborUpdate.Mode.valueOf(args[index++]);
-		boolean modeLocked = Boolean.parseBoolean(args[index++]);
-		
-		int offsetX = Integer.parseInt(args[index++]);
-		int offsetY = Integer.parseInt(args[index++]);
-		int offsetZ = Integer.parseInt(args[index++]);
-		NotifierOrder notifierOrder = NotifierOrder.valueOf(args[index++]);
-		
-		UpdateOrder order = new UpdateOrder(directionality, notifierOrder, defaultMode, modeLocked);
-		
-		order.setOffset(offsetX, offsetY, offsetZ);
-		
-		String[] updates = args[index++].split(",");
-		for (int i = 0; i < updates.length; i++) {
-			order.add(AbstractNeighborUpdate.parseRelativeNeighborUpdate(updates[i]));
-		}
-		
-		return order;
-	}
-
 	public UpdateOrder copy() {
 		UpdateOrder copy = new UpdateOrder(directionality, notifierOrder, defaultMode, forceDefaultMode);
 		

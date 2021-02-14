@@ -204,7 +204,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.5F))
 	private float tickIncrementProgress(float oldIncrementValue) {
-		return speed > 0 ? 1.0F / speed : 1.0F;
+		return 1.0F / numberOfSteps;
 	}
 	
 	@Inject(method = "fromTag", at = @At(value = "RETURN"))

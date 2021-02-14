@@ -10,6 +10,7 @@ import net.minecraft.util.registry.Registry;
 
 public class BlockEntityTypes {
 	
+	// These ids are used when sending block entity update packets
 	private static final Map<BlockEntityType<? extends BlockEntity>, Integer> IDS;
 	
 	public static BlockEntityType<PowerBlockEntity> POWER_BLOCK;
@@ -20,10 +21,6 @@ public class BlockEntityTypes {
 	
 	public static int getId(BlockEntityType<? extends BlockEntity> blockEntityType) {
 		return IDS.getOrDefault(blockEntityType, -1);
-	}
-	
-	public static boolean hasId(BlockEntityType<? extends BlockEntity> blockEntityType) {
-		return IDS.containsKey(blockEntityType);
 	}
 	
 	static {

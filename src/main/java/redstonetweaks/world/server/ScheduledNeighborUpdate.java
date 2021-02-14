@@ -24,6 +24,7 @@ public class ScheduledNeighborUpdate implements Comparable<ScheduledNeighborUpda
 	@Override
 	public int compareTo(ScheduledNeighborUpdate other) {
 		int t = Long.compare(other.time, time);
+		
 		return t == 0 ? Long.compare(id, other.id) : t;
 	}
 	

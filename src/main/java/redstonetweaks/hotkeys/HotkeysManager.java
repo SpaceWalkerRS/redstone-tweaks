@@ -61,7 +61,6 @@ public class HotkeysManager {
 	}
 	
 	private boolean keyPress(RTKeyBinding keyBinding) {
-		MinecraftClient client = MinecraftClient.getInstance();
 		if (keyBinding == hotkeys.toggleMenu) {
 			if (client.currentScreen == null) {
 				client.openScreen(new RTMenuScreen(client));
@@ -137,14 +136,12 @@ public class HotkeysManager {
 			if (!hotkeysFile.isFile()) {
 				hotkeysFile.createNewFile();
 			}
-		} catch (IOException e) {
 			
-		}
-		
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(hotkeysFile))) {
-			for (RTKeyBinding keyBinding : hotkeys.getKeyBindings()) {
-				bw.write(String.format("%s: %s", keyBinding.getName(), keyBinding.getKey().getTranslationKey()));
-				bw.newLine();
+			try (BufferedWriter bw = new BufferedWriter(new FileWriter(hotkeysFile))) {
+				for (RTKeyBinding keyBinding : hotkeys.getKeyBindings()) {
+					bw.write(String.format("%s: %s", keyBinding.getName(), keyBinding.getKey().getTranslationKey()));
+					bw.newLine();
+				}
 			}
 		} catch (IOException e) {
 			

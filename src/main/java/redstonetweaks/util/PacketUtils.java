@@ -54,11 +54,11 @@ public class PacketUtils {
 	}
 	
 	public static AbstractNeighborUpdate readAbstractNeighborUpdate(PacketByteBuf buffer) {
-		AbstractNeighborUpdate update = new AbstractNeighborUpdate();
+		AbstractNeighborUpdate.Mode mode = AbstractNeighborUpdate.Mode.fromIndex(buffer.readByte());
+		RelativePos notifierPos = RelativePos.fromIndex(buffer.readByte());
+		RelativePos updatePos = RelativePos.fromIndex(buffer.readByte());
 		
-		update.decode(buffer);
-		
-		return update;
+		return new AbstractNeighborUpdate(mode, notifierPos, updatePos);
 	}
 	
 	public static void writeWorldTickOptions(PacketByteBuf buffer, WorldTickOptions options) {

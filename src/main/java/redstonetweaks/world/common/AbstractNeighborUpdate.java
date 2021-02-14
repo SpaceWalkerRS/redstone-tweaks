@@ -18,11 +18,6 @@ public class AbstractNeighborUpdate {
 	
 	private BlockPos hashPos;
 	
-	// FOR PACKET DECODING ONLY
-	public AbstractNeighborUpdate() {
-		
-	}
-	
 	public AbstractNeighborUpdate(Mode mode, RelativePos notifierPos, RelativePos updatePos) {
 		this.mode = mode;
 		this.notifierPos = notifierPos;
@@ -44,32 +39,10 @@ public class AbstractNeighborUpdate {
 		return hashPos == null ? 0 : hashPos.hashCode();
 	}
 	
-	@Override
-	public String toString() {
-		return mode + ":" + notifierPos + ":" + updatePos;
-	}
-	
 	public void encode(PacketByteBuf buffer) {
 		buffer.writeByte(mode.getIndex());
 		buffer.writeByte(notifierPos.getIndex());
 		buffer.writeByte(updatePos.getIndex());
-	}
-	
-	public void decode(PacketByteBuf buffer) {
-		mode = Mode.fromIndex(buffer.readByte());
-		notifierPos = RelativePos.fromIndex(buffer.readByte());
-		updatePos = RelativePos.fromIndex(buffer.readByte());
-	}
-	
-	public static AbstractNeighborUpdate parseRelativeNeighborUpdate(String string) {
-		String[] args = string.split(":");
-		int index = 0;
-		
-		Mode mode = Mode.valueOf(args[index++]);
-		RelativePos notifierPos = RelativePos.valueOf(args[index++]);
-		RelativePos updatePos = RelativePos.valueOf(args[index++]);
-		
-		return new AbstractNeighborUpdate(mode, notifierPos, updatePos);
 	}
 	
 	public AbstractNeighborUpdate copy() {

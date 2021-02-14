@@ -14,8 +14,8 @@ public enum RelativePos {
 	SOUTH(4 , "south", Directionality.NONE      , (forward) -> Direction.SOUTH),
 	WEST (5 , "west" , Directionality.NONE      , (forward) -> Direction.WEST),
 	EAST (6 , "east" , Directionality.NONE      , (forward) -> Direction.EAST),
-	FRONT(7 , "front", Directionality.ALL      , (forward) -> forward),
-	BACK (8 , "back" , Directionality.ALL      , (forward) -> forward.getOpposite()),
+	FRONT(7 , "front", Directionality.ALL       , (forward) -> forward),
+	BACK (8 , "back" , Directionality.ALL       , (forward) -> forward.getOpposite()),
 	LEFT (9 , "left" , Directionality.HORIZONTAL, (forward) -> forward.rotateYCounterclockwise()),
 	RIGHT(10, "right", Directionality.HORIZONTAL, (forward) -> forward.rotateYClockwise());
 	
@@ -52,6 +52,7 @@ public enum RelativePos {
 		if (index >= POSITIONS.length) {
 			return POSITIONS[0];
 		}
+		
 		return POSITIONS[index];
 	}
 	
@@ -69,6 +70,7 @@ public enum RelativePos {
 	
 	public BlockPos toBlockPos(BlockPos pos, Direction forward) {
 		Direction dir = asDirection(forward);
+		
 		return dir == null ? pos : pos.offset(dir);
 	}
 	
@@ -76,16 +78,19 @@ public enum RelativePos {
 		if (this.directionality == directionality || this.directionality == Directionality.NONE) {
 			return true;
 		}
+		
 		return directionality != Directionality.NONE && this.directionality == Directionality.ALL;
 	}
 	
 	public RelativePos next(Directionality directionality) {
 		RelativePos nextPos = fromIndex(index + 1);
+		
 		return nextPos.isValid(directionality) ? nextPos : nextPos.next(directionality);
 	}
 	
 	public RelativePos previous(Directionality directionality) {
 		RelativePos nextPos = fromIndex(index - 1);
+		
 		return nextPos.isValid(directionality) ? nextPos : nextPos.previous(directionality);
 	}
 }
