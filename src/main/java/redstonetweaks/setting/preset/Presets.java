@@ -66,6 +66,10 @@ public class Presets {
 		return !ACTIVE.containsKey(name);
 	}
 	
+	public static Preset defaultPreset() {
+		return fromId(0);
+	}
+	
 	public static Preset fromId(int id) {
 		return ALL.get(id);
 	}

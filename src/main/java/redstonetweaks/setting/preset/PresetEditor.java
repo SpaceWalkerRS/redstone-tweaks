@@ -133,7 +133,7 @@ public class PresetEditor {
 		if (useCurrentValue) {
 			setting.copyValueToPreset(TEMP);
 		} else {
-			setting.copyPresetValue(Presets.fromId(0), TEMP);
+			setting.copyPresetValue(Presets.defaultPreset(), TEMP);
 		}
 	}
 	

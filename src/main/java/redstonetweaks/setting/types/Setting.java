@@ -175,7 +175,7 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	public T getDefault() {
-		T value = getPresetValue(Presets.fromId(0));
+		T value = getPresetValue(Presets.defaultPreset());
 		if (value == null) {
 			return getBackupValue();
 		}
