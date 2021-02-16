@@ -124,14 +124,15 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 		
 		// Usually the direction given is the opposite of the side from which the block is pulled along,
 		// but when tryMove is called inside calculatePush for a retraction event, it is not
-		Direction pulledFrom = (pos == posTo && !retracted) ? dir : dir.getOpposite();
+		boolean initialMove = pos.equals(posTo);
+		Direction pulledFrom = (initialMove && !retracted) ? dir : dir.getOpposite();
 		
 		if (alreadyMoved) {
-			if (loosePistonHeads.containsKey(pos)) {
-				// If the piston is now pulled along from two different sides no looseHead behavior can occur
+			// If the piston is pulled along from a side instead of its front or back, the head will not detach
+			if (loosePistonHeads.get(pos) == Boolean.TRUE && pulledFrom.getAxis() != motionDirection.getAxis()) {
 				loosePistonHeads.remove(pos);
 			}
-		} else if (pulledFrom == motionDirection && (!retracted || !pos.equals(posTo))) {
+		} else if (pulledFrom == motionDirection && (!retracted || !initialMove)) {
 			// Don't try to detach if the block is pushed by the piston directly
 			tryDetachPistonHead(pos, movedState);
 		}
@@ -190,7 +191,9 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			isAdjacentBlockStuck = isAdjacentBlockStuck(blockPos, blockState, behindPos, behindState, motionDirection.getOpposite());
 			
 			if (isAdjacentBlockStuck) {
-				tryDetachPistonHead(behindPos, behindState);
+				if (!movedBlocks.contains(behindPos)) {
+					tryDetachPistonHead(behindPos, behindState);
+				}
 				
 				if (Tweaks.Global.MERGE_SLABS.get() && SlabHelper.isSlab(behindState)) {
 					if (motionDirection.getAxis().isVertical() && !movedBlocks.contains(behindPos)) {

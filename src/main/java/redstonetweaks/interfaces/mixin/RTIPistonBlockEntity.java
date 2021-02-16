@@ -57,7 +57,7 @@ public interface RTIPistonBlockEntity {
 	
 	public void setMovedMovingBlockEntity(BlockEntity blockEntity);
 	
-	public BlockState getStateToMove();
+	public BlockState getStateForMovement();
 	
 	public PistonBlockEntity copy();
 	

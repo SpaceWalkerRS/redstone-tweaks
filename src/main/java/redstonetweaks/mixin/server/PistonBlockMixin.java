@@ -354,7 +354,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 				
 				// Check if the block that is moved by the moving block is movable itself
 				// By default piston heads are not movable but they do appear in the moving blocks of extending pistons
-				BlockState stateToMove = ((RTIPistonBlockEntity)pistonBlockEntity).getStateToMove();
+				BlockState stateToMove = ((RTIPistonBlockEntity)pistonBlockEntity).getStateForMovement();
 				
 				if (!stateToMove.isOf(Blocks.MOVING_PISTON) && PistonBlock.isMovable(stateToMove, world, pos, direction, canBreak, pistonDir)) {
 					// Prevent a piston from pushing its own extending piston head

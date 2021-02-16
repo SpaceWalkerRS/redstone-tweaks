@@ -110,8 +110,11 @@ public abstract class PistonBlockEntityRendererMixin {
 				method_3575(toPos, movedState.with(Properties.EXTENDED, true), matrixStack, vertexConsumerProvider, world, false, overlay);
 			}
 		} else {
-			if (PistonHelper.isPistonHead(movedState) && ((RTIPistonBlockEntity)pistonBlockEntity).isMerging()) {
-				if (totalOffset > 0.5F) {
+			BlockState mergingState = ((RTIPistonBlockEntity)pistonBlockEntity).getMergingState();
+			BlockEntity mergingBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMergingBlockEntity();
+			
+			if (PistonHelper.isPistonHead(movedState) && mergingState != null) {
+				if (totalOffset < 0.5F) {
 					movedState = movedState.with(Properties.SHORT, true);
 				}
 			}
@@ -124,9 +127,6 @@ public abstract class PistonBlockEntityRendererMixin {
 			
 			matrixStack.pop();
 			matrixStack.push();
-			
-			BlockState mergingState = ((RTIPistonBlockEntity)pistonBlockEntity).getMergingState();
-			BlockEntity mergingBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMergingBlockEntity();
 			
 			if (mergingState != null) {
 				if (PistonHelper.isPistonHead(mergingState) && totalOffset > 0.5F) {

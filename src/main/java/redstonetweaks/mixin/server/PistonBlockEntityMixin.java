@@ -212,7 +212,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		sticky = tag.contains("sticky") ? tag.getBoolean("sticky") : false;
 		sourceIsMoving = tag.contains("sourceIsMoving") ? tag.getBoolean("sourceIsMoving") : false;
 		speed = tag.contains("speed") ? tag.getInt("speed") : 2;
-		numberOfSteps = speed == 0 ? 1.0F : speed;
+		numberOfSteps = (speed == 0) ? 1.0F : speed;
 
 		if (tag.contains("movedBlockEntity")) {
 			Block movedBlock = pushedBlock.getBlock();
@@ -468,15 +468,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
-	public BlockState getStateToMove() {
-		if (source && PistonHelper.isPiston(pushedBlock)) {
-			// Both extending and retracting piston bases should be treated as extended
-			return pushedBlock.with(Properties.EXTENDED, true);
-		}
-		
+	public BlockState getStateForMovement() {
 		if (mergingState == null) {
 			if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity instanceof PistonBlockEntity) {
-				return ((RTIPistonBlockEntity)movedBlockEntity).getStateToMove();
+				return ((RTIPistonBlockEntity)movedBlockEntity).getStateForMovement();
 			}
 			
 			return pushedBlock;
@@ -549,12 +544,24 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			}
 		} else if (PistonHelper.isPiston(pushedBlock)) {
 			Direction facing = pushedBlock.get(Properties.FACING);
-			boolean headMoving = facing == motionDir;
+			boolean headMoving = (facing == motionDir);
 			
+			BlockState state;
 			if (returnMovingPart == headMoving) {
-				setMovedState(PistonHelper.getPistonHead(PistonHelper.isSticky(pushedBlock), facing).with(Properties.SHORT, headMoving));
+				state = PistonHelper.getPistonHead(PistonHelper.isSticky(pushedBlock), facing).with(Properties.SHORT, headMoving);
 			} else {
-				setMovedState(pushedBlock.with(Properties.EXTENDED, true));
+				state = pushedBlock.with(Properties.EXTENDED, true);
+			}
+			
+			if (source) {
+				if (parentPistonBlockEntity == null) {
+					return new MovedBlock(state, null);
+				} else {
+					((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedState(state);
+					((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedBlockEntity(null);
+				}
+			} else {
+				setMovedState(state);
 			}
 		} else if (pushedBlock.isOf(Blocks.MOVING_PISTON) && movedBlockEntity instanceof PistonBlockEntity) {
 			return ((RTIPistonBlockEntity)movedBlockEntity).detachPistonHead(motionDir, returnMovingPart);

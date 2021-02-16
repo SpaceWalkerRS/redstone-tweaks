@@ -363,7 +363,7 @@ public class PistonHelper {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if (blockEntity instanceof PistonBlockEntity) {
-				state = ((RTIPistonBlockEntity)blockEntity).getStateToMove();
+				state = ((RTIPistonBlockEntity)blockEntity).getStateForMovement();
 			}
 		}
 		
@@ -457,14 +457,8 @@ public class PistonHelper {
 	}
 	
 	public static MovedBlock attachPistonHead(World world, BlockPos pos, BlockState movedState, BlockEntity blockEntity, Direction motionDir) {
-		BlockPos toPos = pos.offset(motionDir);
-		BlockState toState = world.getBlockState(toPos);
-		
-		if (isPiston(movedState, motionDir) && isPistonHead(toState, motionDir)) {
-			movedState = getPiston(isStickyHead(toState), motionDir, true);
-		} else
-		if (isPistonHead(movedState, motionDir.getOpposite()) && isPiston(toState, motionDir.getOpposite())) {
-			world.setBlockState(toPos, getPiston(isStickyHead(movedState), motionDir.getOpposite(), true), 16);
+		if (movedState.isOf(Blocks.MOVING_PISTON) && blockEntity != null && blockEntity instanceof PistonBlockEntity) {
+			return new MovedBlock(((PistonBlockEntity)blockEntity).getPushedBlock(), null);
 		}
 		
 		return new MovedBlock(movedState, blockEntity);
