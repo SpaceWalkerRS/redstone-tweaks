@@ -3,13 +3,14 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.world.common.NeighborUpdate;
 import redstonetweaks.world.common.UpdateType;
 import redstonetweaks.world.server.ScheduledNeighborUpdate;
 
-public class NeighborUpdateVisualizerPacket extends RedstoneTweaksPacket {
+public class NeighborUpdateVisualizerPacket extends AbstractRedstoneTweaksPacket {
 
 	public UpdateType updateType = UpdateType.NONE;
 	public BlockPos pos;
@@ -50,7 +51,7 @@ public class NeighborUpdateVisualizerPacket extends RedstoneTweaksPacket {
 	}
 
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		
 	}
 

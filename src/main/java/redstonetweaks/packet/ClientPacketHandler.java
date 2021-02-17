@@ -3,7 +3,7 @@ package redstonetweaks.packet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import redstonetweaks.packet.types.RedstoneTweaksPacket;
+import redstonetweaks.packet.types.AbstractRedstoneTweaksPacket;
 
 public class ClientPacketHandler extends AbstractPacketHandler {
 	
@@ -17,14 +17,19 @@ public class ClientPacketHandler extends AbstractPacketHandler {
 	public CustomPayloadC2SPacket toCustomPayloadPacket(PacketByteBuf buffer) {
 		return new CustomPayloadC2SPacket(PACKET_IDENTIFIER, buffer);
 	}
-
+	
 	@Override
-	public void sendPacket(RedstoneTweaksPacket packet) {
+	public void sendPacket(AbstractRedstoneTweaksPacket packet) {
 		client.getNetworkHandler().sendPacket(encodePacket(packet));
 	}
-
-	@Override
-	protected void execute(RedstoneTweaksPacket packet) {
-		packet.execute(client);
+	
+	public void onPacketReceived(PacketByteBuf buffer) {
+		if (canReadPacket(buffer)) {
+			try {
+				decodePacket(buffer).execute(client);
+			} catch (Exception e) {
+				
+			}
+		}
 	}
 }

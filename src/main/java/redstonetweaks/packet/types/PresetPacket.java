@@ -3,13 +3,13 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;
 import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.util.PacketUtils;
 
-public class PresetPacket extends RedstoneTweaksPacket {
+public class PresetPacket extends AbstractRedstoneTweaksPacket {
 	
 	private PresetEditor editor;
 	
@@ -44,7 +44,7 @@ public class PresetPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		editor.trySaveChanges();
 	}
 	

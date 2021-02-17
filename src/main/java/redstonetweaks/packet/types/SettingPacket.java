@@ -3,11 +3,12 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.PacketUtils;
 
-public class SettingPacket extends RedstoneTweaksPacket {
+public class SettingPacket extends AbstractRedstoneTweaksPacket {
 	
 	public ISetting setting;
 	
@@ -34,7 +35,7 @@ public class SettingPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		
 	}
 	

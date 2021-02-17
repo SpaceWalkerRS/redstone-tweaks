@@ -3,11 +3,11 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 
-public class RemovePresetPacket extends RedstoneTweaksPacket {
+public class RemovePresetPacket extends AbstractRedstoneTweaksPacket {
 	
 	private Preset preset;
 	
@@ -30,7 +30,7 @@ public class RemovePresetPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		if (preset != null) {
 			Presets.remove(preset);
 		}

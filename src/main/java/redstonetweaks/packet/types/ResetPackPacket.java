@@ -3,13 +3,13 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.util.PacketUtils;
 
-public class ResetPackPacket extends RedstoneTweaksPacket {
+public class ResetPackPacket extends AbstractRedstoneTweaksPacket {
 	
 	private SettingsPack pack;
 	
@@ -32,7 +32,7 @@ public class ResetPackPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		if (pack != null) {
 			((RTIMinecraftServer)server).getSettingsManager().resetPack(pack);
 		}

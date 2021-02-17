@@ -3,9 +3,10 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.gui.RTMenuScreen;
 
-public class OpenMenuPacket extends RedstoneTweaksPacket {
+public class OpenMenuPacket extends AbstractRedstoneTweaksPacket {
 	
 	public OpenMenuPacket() {
 		
@@ -22,7 +23,7 @@ public class OpenMenuPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		
 	}
 	

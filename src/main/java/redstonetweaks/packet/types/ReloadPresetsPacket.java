@@ -3,10 +3,10 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 
-public class ReloadPresetsPacket extends RedstoneTweaksPacket {
+public class ReloadPresetsPacket extends AbstractRedstoneTweaksPacket {
 	
 	public ReloadPresetsPacket() {
 		
@@ -23,7 +23,7 @@ public class ReloadPresetsPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		((RTIMinecraftServer)server).getPresetsManager().reloadPresets();
 	}
 	

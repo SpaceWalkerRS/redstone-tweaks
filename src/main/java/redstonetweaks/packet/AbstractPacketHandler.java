@@ -20,7 +20,7 @@ import redstonetweaks.packet.types.NeighborUpdateVisualizerPacket;
 import redstonetweaks.packet.types.OpenMenuPacket;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
-import redstonetweaks.packet.types.RedstoneTweaksPacket;
+import redstonetweaks.packet.types.AbstractRedstoneTweaksPacket;
 import redstonetweaks.packet.types.ReloadPresetsPacket;
 import redstonetweaks.packet.types.RemovePresetPacket;
 import redstonetweaks.packet.types.ResetSettingPacket;
@@ -42,7 +42,7 @@ public abstract class AbstractPacketHandler {
 	public static final Identifier PACKET_IDENTIFIER = new Identifier("redstonetweaks");
 	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.createRelease(1, 0, 5);
 	
-	protected Packet<?> encodePacket(RedstoneTweaksPacket packet) {
+	protected Packet<?> encodePacket(AbstractRedstoneTweaksPacket packet) {
 		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 		
 		PacketUtils.writeRedstoneTweaksVersion(buffer, PACKET_PROTOCOL);
@@ -60,30 +60,22 @@ public abstract class AbstractPacketHandler {
 	
 	protected abstract Packet<?> toCustomPayloadPacket(PacketByteBuf buffer);
 	
-	protected RedstoneTweaksPacket decodePacket(PacketByteBuf buffer) throws InstantiationException, IllegalAccessException {
+	protected AbstractRedstoneTweaksPacket decodePacket(PacketByteBuf buffer) throws InstantiationException, IllegalAccessException {
 		PacketType type = PacketType.fromIndex(buffer.readByte());
-		RedstoneTweaksPacket packet = type.getClazz().newInstance();
+		AbstractRedstoneTweaksPacket packet = type.getClazz().newInstance();
 		
 		packet.decode(buffer);
 		
 		return packet;
 	}
 	
-	public abstract void sendPacket(RedstoneTweaksPacket redstoneTweaksPacket);
+	public abstract void sendPacket(AbstractRedstoneTweaksPacket redstoneTweaksPacket);
 	
-	public void onPacketReceived(PacketByteBuf buffer) {
+	protected boolean canReadPacket(PacketByteBuf buffer) {
 		RedstoneTweaksVersion packetProtocol = PacketUtils.readRedstoneTweaksVersion(buffer);
 		
-		if (PACKET_PROTOCOL.equals(packetProtocol)) {
-			try {
-				execute(decodePacket(buffer));
-			} catch (Exception e) {
-				
-			}
-		}
+		return PACKET_PROTOCOL.equals(packetProtocol);
 	}
-	
-	protected abstract void execute(RedstoneTweaksPacket packet);
 	
 	private enum PacketType {
 		
@@ -115,7 +107,7 @@ public abstract class AbstractPacketHandler {
 		OPEN_MENU(25, OpenMenuPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
-		private static final Map<Class<? extends RedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;
+		private static final Map<Class<? extends AbstractRedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;
 		
 		static {
 			PACKET_TYPES = new PacketType[values().length];
@@ -128,9 +120,9 @@ public abstract class AbstractPacketHandler {
 		}
 		
 		private final int index;
-		private final Class<? extends RedstoneTweaksPacket> clazz;
+		private final Class<? extends AbstractRedstoneTweaksPacket> clazz;
 		
-		PacketType(int index, Class<? extends RedstoneTweaksPacket> clazz) {
+		PacketType(int index, Class<? extends AbstractRedstoneTweaksPacket> clazz) {
 			this.index = index;
 			this.clazz = clazz;
 		}
@@ -142,7 +134,7 @@ public abstract class AbstractPacketHandler {
 			return INVALID;
 		}
 		
-		public static PacketType fromPacket(RedstoneTweaksPacket packet) {
+		public static PacketType fromPacket(AbstractRedstoneTweaksPacket packet) {
 			return PACKET_TO_TYPE.getOrDefault(packet.getClass(), INVALID);
 		}
 		
@@ -150,7 +142,7 @@ public abstract class AbstractPacketHandler {
 			return index;
 		}
 		
-		public Class<? extends RedstoneTweaksPacket> getClazz() {
+		public Class<? extends AbstractRedstoneTweaksPacket> getClazz() {
 			return clazz;
 		}
 	}

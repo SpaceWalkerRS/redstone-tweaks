@@ -3,10 +3,11 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.world.common.WorldTickHandler.Status;
 
-public class TickStatusPacket extends RedstoneTweaksPacket {
+public class TickStatusPacket extends AbstractRedstoneTweaksPacket {
 	
 	public Status status;
 	
@@ -30,7 +31,7 @@ public class TickStatusPacket extends RedstoneTweaksPacket {
 	}
 
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		
 	}
 

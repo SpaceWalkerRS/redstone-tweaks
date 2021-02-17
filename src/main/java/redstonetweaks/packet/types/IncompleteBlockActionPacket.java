@@ -4,12 +4,13 @@ import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import redstonetweaks.interfaces.mixin.RTIClientWorld;
 import redstonetweaks.world.common.IncompleteBlockAction;
 
-public class IncompleteBlockActionPacket extends RedstoneTweaksPacket {
+public class IncompleteBlockActionPacket extends AbstractRedstoneTweaksPacket {
 	
 	public BlockPos pos;
 	public int type;
@@ -40,7 +41,7 @@ public class IncompleteBlockActionPacket extends RedstoneTweaksPacket {
 	}
 
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		
 	}
 

@@ -6,7 +6,7 @@ import net.minecraft.server.world.ServerWorld;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.packet.ServerPacketHandler;
-import redstonetweaks.packet.types.RedstoneTweaksPacket;
+import redstonetweaks.packet.types.AbstractRedstoneTweaksPacket;
 import redstonetweaks.world.common.IIncompleteAction;
 import redstonetweaks.world.common.IIncompleteActionScheduler;
 
@@ -43,7 +43,7 @@ public class ServerIncompleteActionScheduler implements IIncompleteActionSchedul
 	}
 	
 	private void syncClientIncompleteActionScheduler(IIncompleteAction action) {
-		RedstoneTweaksPacket packet = action.toPacket();
+		AbstractRedstoneTweaksPacket packet = action.toPacket();
 		ServerPacketHandler packetHandler = ((RTIMinecraftServer)world.getServer()).getPacketHandler();
 		
 		if (action.getViewDistance() < 0) {

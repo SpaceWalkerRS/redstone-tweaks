@@ -5,11 +5,12 @@ import java.util.Collection;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.PacketUtils;
 
-public class SettingsPacket extends RedstoneTweaksPacket {
+public class SettingsPacket extends AbstractRedstoneTweaksPacket {
 	
 	public int count;
 	public ISetting[] settings;
@@ -52,7 +53,7 @@ public class SettingsPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 
 	}
 

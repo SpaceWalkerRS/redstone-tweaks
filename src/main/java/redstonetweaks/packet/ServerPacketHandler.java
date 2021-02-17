@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
-import redstonetweaks.packet.types.RedstoneTweaksPacket;
+import redstonetweaks.packet.types.AbstractRedstoneTweaksPacket;
 
 public class ServerPacketHandler extends AbstractPacketHandler {
 	
@@ -25,25 +25,29 @@ public class ServerPacketHandler extends AbstractPacketHandler {
 	}
 	
 	@Override
-	public void sendPacket(RedstoneTweaksPacket packet) {
+	public void sendPacket(AbstractRedstoneTweaksPacket packet) {
 		server.getPlayerManager().sendToAll(encodePacket(packet));
-		
 	}
 	
-	@Override
-	protected void execute(RedstoneTweaksPacket packet) {
-		packet.execute(server);
+	public void onPacketReceived(PacketByteBuf buffer, ServerPlayerEntity player) {
+		if (canReadPacket(buffer)) {
+			try {
+				decodePacket(buffer).execute(server, player);
+			} catch (Exception e) {
+				
+			}
+		}
 	}
 	
-	public void sendPacketToDimension(RedstoneTweaksPacket packet, RegistryKey<World> dimension) {
+	public void sendPacketToDimension(AbstractRedstoneTweaksPacket packet, RegistryKey<World> dimension) {
 		server.getPlayerManager().sendToDimension(encodePacket(packet), dimension);
 	}
 	
-	public void sendPacketToAround(RedstoneTweaksPacket packet, RegistryKey<World> dimension, BlockPos pos, double distance) {
+	public void sendPacketToAround(AbstractRedstoneTweaksPacket packet, RegistryKey<World> dimension, BlockPos pos, double distance) {
 		server.getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), distance, dimension, encodePacket(packet));
 	}
 
-	public void sendPacketToPlayer(RedstoneTweaksPacket packet, ServerPlayerEntity player) {
+	public void sendPacketToPlayer(AbstractRedstoneTweaksPacket packet, ServerPlayerEntity player) {
 		player.networkHandler.sendPacket(encodePacket(packet));
 	}
 }

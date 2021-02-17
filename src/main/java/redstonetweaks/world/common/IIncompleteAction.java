@@ -2,7 +2,7 @@ package redstonetweaks.world.common;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import redstonetweaks.packet.types.RedstoneTweaksPacket;
+import redstonetweaks.packet.types.AbstractRedstoneTweaksPacket;
 
 public interface IIncompleteAction {
 	
@@ -14,6 +14,6 @@ public interface IIncompleteAction {
 		
 	public boolean tryContinue(World world);
 	
-	public RedstoneTweaksPacket toPacket();
+	public AbstractRedstoneTweaksPacket toPacket();
 	
 }

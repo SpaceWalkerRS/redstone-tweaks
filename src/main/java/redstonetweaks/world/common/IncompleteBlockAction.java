@@ -5,7 +5,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import redstonetweaks.interfaces.mixin.RTIBlock;
 import redstonetweaks.packet.types.IncompleteBlockActionPacket;
-import redstonetweaks.packet.types.RedstoneTweaksPacket;
+import redstonetweaks.packet.types.AbstractRedstoneTweaksPacket;
 
 public class IncompleteBlockAction extends IncompleteAction<Block> {
 	
@@ -23,7 +23,7 @@ public class IncompleteBlockAction extends IncompleteAction<Block> {
 	}
 	
 	@Override
-	public RedstoneTweaksPacket toPacket() {
+	public AbstractRedstoneTweaksPacket toPacket() {
 		return new IncompleteBlockActionPacket(this);
 	}
 }

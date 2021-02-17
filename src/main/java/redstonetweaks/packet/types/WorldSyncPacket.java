@@ -3,11 +3,12 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.util.PacketUtils;
 
-public class WorldSyncPacket extends RedstoneTweaksPacket {
+public class WorldSyncPacket extends AbstractRedstoneTweaksPacket {
 	
 	public String worldName;
 	
@@ -30,7 +31,7 @@ public class WorldSyncPacket extends RedstoneTweaksPacket {
 	}
 
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		
 	}
 

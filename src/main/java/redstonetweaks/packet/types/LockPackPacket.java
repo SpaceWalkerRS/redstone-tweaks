@@ -3,11 +3,12 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.util.PacketUtils;
 
-public class LockPackPacket extends RedstoneTweaksPacket {
+public class LockPackPacket extends AbstractRedstoneTweaksPacket {
 	
 	public SettingsPack pack;
 	public boolean locked;
@@ -38,7 +39,7 @@ public class LockPackPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		if (pack != null) {
 			pack.setLocked(locked);
 		}

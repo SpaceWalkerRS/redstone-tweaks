@@ -3,12 +3,12 @@ package redstonetweaks.packet.types;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 
-public class ApplyPresetPacket extends RedstoneTweaksPacket {
+public class ApplyPresetPacket extends AbstractRedstoneTweaksPacket {
 	
 	private Preset preset;
 	
@@ -31,7 +31,7 @@ public class ApplyPresetPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		if (preset != null) {
 			((RTIMinecraftServer)server).getSettingsManager().applyPreset(preset);
 		}

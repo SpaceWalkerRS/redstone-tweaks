@@ -5,12 +5,12 @@ import java.util.Collection;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-
+import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.util.PacketUtils;
 
-public class PresetsPacket extends RedstoneTweaksPacket {
+public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 	
 	private int presetsCount;
 	private Preset[] presets;
@@ -69,7 +69,7 @@ public class PresetsPacket extends RedstoneTweaksPacket {
 	}
 	
 	@Override
-	public void execute(MinecraftServer server) {
+	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		
 	}
 	
