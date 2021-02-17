@@ -4,14 +4,15 @@ import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TargetBlock;
@@ -21,15 +22,18 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.interfaces.mixin.RTIBlock;
+import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(TargetBlock.class)
-public abstract class TargetBlockMixin extends AbstractBlock implements BlockEntityProvider {
+public abstract class TargetBlockMixin extends AbstractBlock implements BlockEntityProvider, RTIBlock {
 	
 	public TargetBlockMixin(Settings settings) {
 		super(settings);
@@ -63,7 +67,11 @@ public abstract class TargetBlockMixin extends AbstractBlock implements BlockEnt
 		
 		updateNeighborsOnPowerChange(world, pos, state);
 		
-		TickSchedulerHelper.scheduleBlockTick(world, pos, newState, delay, Tweaks.TargetBlock.TICK_PRIORITY.get());
+		if (((RTIWorld)world).immediateNeighborUpdates()) {
+			TickSchedulerHelper.scheduleBlockTick(world, pos, newState, delay, Tweaks.TargetBlock.TICK_PRIORITY.get());
+		} else if (world instanceof ServerWorld) {
+			((RTIServerWorld)world).getIncompleteActionScheduler().scheduleBlockAction(pos, delay, newState.getBlock());
+		}
 		
 		ci.cancel();
 	}
@@ -103,6 +111,17 @@ public abstract class TargetBlockMixin extends AbstractBlock implements BlockEnt
 	@Override
 	public BlockEntity createBlockEntity(BlockView world) {
 		return new PowerBlockEntity();
+	}
+	
+	@Override
+	public boolean continueAction(World world, BlockPos pos, int type) {
+		BlockState state = world.getBlockState(pos);
+		
+		if (state.isOf((Block)(Object)this)) {
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, type, Tweaks.TargetBlock.TICK_PRIORITY.get());
+		}
+		
+		return false;
 	}
 	
 	private static void updateNeighborsOnPowerChange(WorldAccess world, BlockPos pos, BlockState state) {

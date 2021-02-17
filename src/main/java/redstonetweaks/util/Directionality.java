@@ -28,7 +28,7 @@ public enum Directionality {
 	}
 	
 	public static Directionality fromIndex(int index) {
-		if (index >= 0 && index < DIRECTIONALITIES.length) {
+		if (index > 0 && index < DIRECTIONALITIES.length) {
 			return DIRECTIONALITIES[index];
 		}
 		
