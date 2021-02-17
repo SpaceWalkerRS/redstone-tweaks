@@ -125,7 +125,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	}
 	
 	public boolean canLockSettings() {
-		return PermissionManager.canManageSettings();
+		return PermissionManager.canManageSettings(client.player);
 	}
 	
 	public void onSettingChanged(ISetting setting) {
@@ -231,7 +231,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		}
 		
 		private void updateButtonsActive() {
-			boolean canManageSettings = PermissionManager.canManageSettings();
+			boolean canManageSettings = PermissionManager.canManageSettings(client.player);
 			
 			lockButton.setActive(canManageSettings && !category.opOnly());
 			resetButton.setActive(canManageSettings && !category.opOnly() && !pack.isDefault());
@@ -381,7 +381,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!PermissionManager.canChangeSettings(category) || category.isLocked() || setting.isLocked()) {
+					if (!PermissionManager.canChangeSettings(client.player, category) || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -463,7 +463,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!PermissionManager.canChangeSettings(category) || category.isLocked() || setting.isLocked()) {
+					if (!PermissionManager.canChangeSettings(client.player, category) || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -475,7 +475,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 					
 					screen.openWindow(window);
 					
-					if (!PermissionManager.canChangeSettings(category) || category.isLocked() || setting.isLocked()) {
+					if (!PermissionManager.canChangeSettings(client.player, category) || category.isLocked() || setting.isLocked()) {
 						window.disableButtons();
 					}
 				})).alwaysActive());
@@ -483,8 +483,8 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		}
 		
 		private void updateButtonsActive() {
-			boolean canChangeSettings = PermissionManager.canChangeSettings(category);
-			boolean canManageSettings = PermissionManager.canManageSettings();
+			boolean canChangeSettings = PermissionManager.canChangeSettings(client.player, category);
+			boolean canManageSettings = PermissionManager.canManageSettings(client.player);
 			boolean locked = setting.isLocked() || setting.getPack().isLocked() || category.isLocked();
 			
 			buttonPanel.setActive(canChangeSettings && (!locked || canManageSettings));

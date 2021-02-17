@@ -5,7 +5,6 @@ import net.minecraft.client.MinecraftClient;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.listeners.ISettingListener;
-import redstonetweaks.packet.types.ApplyPresetPacket;
 import redstonetweaks.packet.types.LockCategoryPacket;
 import redstonetweaks.packet.types.LockPackPacket;
 import redstonetweaks.packet.types.LockSettingPacket;
@@ -13,7 +12,6 @@ import redstonetweaks.packet.types.ResetSettingPacket;
 import redstonetweaks.packet.types.ResetCategoryPacket;
 import redstonetweaks.packet.types.ResetPackPacket;
 import redstonetweaks.packet.types.SettingPacket;
-import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 
@@ -70,14 +68,6 @@ public class ClientSettingsManager implements ISettingListener {
 			((RTIMinecraftServer)client.getServer()).getSettingsManager().resetSetting(setting);
 		} else {
 			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new ResetSettingPacket(setting));
-		}
-	}
-	
-	public void applyPreset(Preset preset) {
-		if (client.isInSingleplayer()) {
-			((RTIMinecraftServer)client.getServer()).getSettingsManager().applyPreset(preset);
-		} else {
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new ApplyPresetPacket(preset));
 		}
 	}
 	

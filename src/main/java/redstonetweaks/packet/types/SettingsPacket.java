@@ -45,6 +45,7 @@ public class SettingsPacket extends AbstractRedstoneTweaksPacket {
 		
 		for (int i = 0; i < count; i++) {
 			ISetting setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
+			
 			if (setting != null) {
 				setting.setEnabled(true);
 				setting.decode(buffer);

@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
@@ -32,7 +33,7 @@ public class ApplyPresetPacket extends AbstractRedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftServer server, ServerPlayerEntity player) {
-		if (preset != null) {
+		if (preset != null && PermissionManager.canEditPresets(player)) {
 			((RTIMinecraftServer)server).getSettingsManager().applyPreset(preset);
 		}
 	}

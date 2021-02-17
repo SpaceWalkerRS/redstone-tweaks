@@ -69,14 +69,14 @@ public class HotkeysManager {
 			}
 		} else
 		if (keyBinding == hotkeys.pauseWorldTicking) {
-			if (client.currentScreen == null && PermissionManager.canUseTickCommand()) {
+			if (client.currentScreen == null && PermissionManager.canUseTickCommand(client.player)) {
 				((RTIMinecraftClient)client).getPacketHandler().sendPacket(new TickPausePacket(true));
 				
 				return true;
 			}
 		} else
 		if (keyBinding == hotkeys.advanceWorldTicking) {
-			if (client.currentScreen == null && PermissionManager.canUseTickCommand()) {
+			if (client.currentScreen == null && PermissionManager.canUseTickCommand(client.player)) {
 				((RTIMinecraftClient)client).getPacketHandler().sendPacket(new TickPausePacket(false));
 				
 				return true;

@@ -138,7 +138,7 @@ public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWid
 		
 		@Override
 		public void updateButtonsActive() {
-			unremoveButton.setActive(PermissionManager.canEditPresets());
+			unremoveButton.setActive(PermissionManager.canEditPresets(client.player));
 		}
 	}
 	

@@ -142,7 +142,7 @@ public class SettingsTab extends RTMenuTab implements ISettingListener, IPermiss
 	}
 	
 	public void updateButtonsActive() {
-		boolean canManageSettings = PermissionManager.canManageSettings();
+		boolean canManageSettings = PermissionManager.canManageSettings(screen.client.player);
 		
 		lockButton.setActive(canManageSettings && !category.opOnly());
 		resetButton.setActive(canManageSettings && !category.opOnly() && !category.isDefault());

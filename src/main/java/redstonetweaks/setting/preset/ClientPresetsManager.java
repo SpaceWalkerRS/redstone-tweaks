@@ -18,7 +18,11 @@ public class ClientPresetsManager {
 	}
 	
 	public void applyPreset(Preset preset) {
-		((RTIMinecraftClient)client).getPacketHandler().sendPacket(new ApplyPresetPacket(preset));
+		if (client.isInSingleplayer()) {
+			((RTIMinecraftServer)client.getServer()).getSettingsManager().applyPreset(preset);
+		} else {
+			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new ApplyPresetPacket(preset));
+		}
 	}
 	
 	public void savePreset(PresetEditor editor) {

@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.PacketUtils;
@@ -29,6 +30,7 @@ public class SettingPacket extends AbstractRedstoneTweaksPacket {
 	@Override
 	public void decode(PacketByteBuf buffer) {
 		setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
+		
 		if (setting != null) {
 			setting.decode(buffer);
 		}

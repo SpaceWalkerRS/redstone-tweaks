@@ -297,7 +297,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditSettings = PermissionManager.canChangeSettings();
+			boolean canEditSettings = PermissionManager.canChangeSettings(client.player);
 			
 			addRemoveButton.setActive(canEditSettings);
 		}
@@ -479,7 +479,7 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditSettings = PermissionManager.canChangeSettings();
+			boolean canEditSettings = PermissionManager.canChangeSettings(client.player);
 			boolean editable = parent.getPresetEditor().isEditable();
 			
 			buttonPanel.setActive(canEditSettings && editable);

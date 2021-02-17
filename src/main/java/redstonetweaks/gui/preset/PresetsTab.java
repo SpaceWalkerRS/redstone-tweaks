@@ -353,7 +353,7 @@ public class PresetsTab extends RTMenuTab {
 	}
 	
 	public void updateButtonsActive() {
-		boolean canEditPresets = PermissionManager.canEditPresets();
+		boolean canEditPresets = PermissionManager.canEditPresets(screen.client.player);
 		boolean editable = isEditingPreset() ? getPresetEditor().isEditable() : false;
 		
 		reloadPresetsButton.setActive(canEditPresets);

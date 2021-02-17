@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.settings.Settings;
@@ -33,7 +34,7 @@ public class ResetPackPacket extends AbstractRedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftServer server, ServerPlayerEntity player) {
-		if (pack != null) {
+		if (pack != null && PermissionManager.canManageSettings(player)) {
 			((RTIMinecraftServer)server).getSettingsManager().resetPack(pack);
 		}
 	}

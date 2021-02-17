@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.util.PacketUtils;
@@ -40,7 +41,7 @@ public class LockCategoryPacket extends AbstractRedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftServer server, ServerPlayerEntity player) {
-		if (category != null) {
+		if (category != null && PermissionManager.canManageSettings(player)) {
 			category.setLocked(locked);
 		}
 	}

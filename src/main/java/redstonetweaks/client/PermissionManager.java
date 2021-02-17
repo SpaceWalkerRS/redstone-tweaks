@@ -3,7 +3,8 @@ package redstonetweaks.client;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
+
 import redstonetweaks.listeners.IPermissionListener;
 import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.SettingsCategory;
@@ -12,12 +13,6 @@ import redstonetweaks.setting.settings.ServerConfig;
 public class PermissionManager {
 	
 	private static final Set<IPermissionListener> LISTENERS = new HashSet<>();
-	
-	private static MinecraftClient client;
-	
-	public static void init(MinecraftClient client) {
-		PermissionManager.client = client;
-	}
 	
 	public static void addListener(IPermissionListener listener) {
 		LISTENERS.add(listener);
@@ -35,31 +30,31 @@ public class PermissionManager {
 		LISTENERS.forEach((listener) -> listener.permissionsChanged());
 	}
 	
-	public static boolean isOp() {
-		return client.player.hasPermissionLevel(2);
+	public static boolean isOp(PlayerEntity player) {
+		return player.hasPermissionLevel(2);
 	}
 	
-	public static boolean canChangeSettings(SettingsCategory category) {
-		return category.opOnly() ? canManageSettings() : canChangeSettings();
+	public static boolean canChangeSettings(PlayerEntity player, SettingsCategory category) {
+		return category.opOnly() ? canManageSettings(player) : canChangeSettings(player);
 	}
 	
-	public static boolean canChangeSettings() {
-		return ServerInfo.getModVersion().isValid() && (isOp() || ServerConfig.Permissions.EDIT_SETTINGS.get());
+	public static boolean canChangeSettings(PlayerEntity player) {
+		return ServerInfo.getModVersion().isValid() && (isOp(player) || ServerConfig.Permissions.EDIT_SETTINGS.get());
 	}
 	
-	public static boolean canManageSettings() {
-		return ServerInfo.getModVersion().isValid() && isOp();
+	public static boolean canManageSettings(PlayerEntity player) {
+		return ServerInfo.getModVersion().isValid() && isOp(player);
 	}
 	
-	public static boolean canEditPresets() {
-		return ServerInfo.getModVersion().isValid() && (isOp() || ServerConfig.Permissions.EDIT_PRESETS.get());
+	public static boolean canEditPresets(PlayerEntity player) {
+		return ServerInfo.getModVersion().isValid() && (isOp(player) || ServerConfig.Permissions.EDIT_PRESETS.get());
 	}
 	
-	public static boolean canManagePresets() {
-		return ServerInfo.getModVersion().isValid() && isOp();
+	public static boolean canManagePresets(PlayerEntity player) {
+		return ServerInfo.getModVersion().isValid() && isOp(player);
 	}
 	
-	public static boolean canUseTickCommand() {
-		return ServerInfo.getModVersion().isValid() && (isOp() || ServerConfig.Permissions.TICK_COMMAND.get());
+	public static boolean canUseTickCommand(PlayerEntity player) {
+		return ServerInfo.getModVersion().isValid() && (isOp(player) || ServerConfig.Permissions.TICK_COMMAND.get());
 	}
 }

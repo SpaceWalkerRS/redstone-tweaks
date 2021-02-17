@@ -105,7 +105,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditPresets = PermissionManager.canEditPresets();
+			boolean canEditPresets = PermissionManager.canEditPresets(client.player);
 			
 			addButton.setActive(canEditPresets);
 			oopsButton.setActive(canEditPresets);
@@ -144,7 +144,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			});
 			this.children.add(this.duplicateButton);
 			
-			this.editButton = new RTButtonWidget(0, 0, 34, 20, () -> new TranslatableText(PermissionManager.canEditPresets() && this.preset.isEditable() ? "Edit" : "View"), (button) -> {
+			this.editButton = new RTButtonWidget(0, 0, 34, 20, () -> new TranslatableText(PermissionManager.canEditPresets(client.player) && this.preset.isEditable() ? "Edit" : "View"), (button) -> {
 				parent.editPreset(this.preset);
 			});
 			this.children.add(this.editButton);
@@ -236,7 +236,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditPresets = PermissionManager.canEditPresets();
+			boolean canEditPresets = PermissionManager.canEditPresets(client.player);
 			
 			applyButton.setActive(canEditPresets);
 			duplicateButton.setActive(canEditPresets);

@@ -109,7 +109,7 @@ public class PresetWindow extends RTWindow {
 	}
 	
 	public void updateButtonsActive() {
-		boolean canEditPresets = PermissionManager.canEditPresets();
+		boolean canEditPresets = PermissionManager.canEditPresets(screen.client.player);
 		boolean editable = parent.getPresetEditor().isEditable();
 		
 		nameField.setActive(canEditPresets && editable);
