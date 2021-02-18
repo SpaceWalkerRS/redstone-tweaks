@@ -47,6 +47,7 @@ public class SettingsPacket extends AbstractRedstoneTweaksPacket {
 	public void decode(PacketByteBuf buffer) {
 		count = buffer.readInt();
 		
+		settings = new ISetting[count];
 		for (int i = 0; i < count; i++) {
 			settings[i] = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
 		}
@@ -59,11 +60,15 @@ public class SettingsPacket extends AbstractRedstoneTweaksPacket {
 		if (PermissionManager.canChangeSettings(player)) {
 			decodeSettings();
 		}
+		
+		data.release();
 	}
 
 	@Override
 	public void execute(MinecraftClient client) {
 		decodeSettings();
+		
+		data.release();
 	}
 	
 	private void decodeSettings() {
