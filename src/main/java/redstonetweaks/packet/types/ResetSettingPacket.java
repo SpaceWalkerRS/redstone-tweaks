@@ -36,7 +36,7 @@ public class ResetSettingPacket extends AbstractRedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftServer server, ServerPlayerEntity player) {
-		if (PermissionManager.canManageSettings(player)) {
+		if (PermissionManager.canChangeSettings(player)) {
 			((RTIMinecraftServer)server).getSettingsManager().resetSetting(setting);
 		}
 	}

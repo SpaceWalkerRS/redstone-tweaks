@@ -578,6 +578,10 @@ public class PistonHelper {
 				sideState = PistonHelper.getStateForMovement(world, sidePos);
 			}
 			
+			if (sourcePos != null && sidePos.equals(sourcePos)) {
+				return false;
+			}
+			
 			if (!Block.sideCoversSmallSquare(world, sidePos, dir.getOpposite())) {
 				if (extend || !sidePos.equals(headPos) || motionDir == null || axis != motionDir.getAxis()) {
 					return false;
