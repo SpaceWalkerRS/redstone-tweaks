@@ -16,11 +16,6 @@ public class ClientIncompleteActionScheduler implements IIncompleteActionSchedul
 	}
 	
 	@Override
-	public boolean hasScheduledActions() {
-		return hasScheduledActions;
-	}
-	
-	@Override
 	public void scheduleAction(IIncompleteAction action) {
 		action.tryContinue(world);
 	}

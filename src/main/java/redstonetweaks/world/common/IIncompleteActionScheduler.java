@@ -5,8 +5,6 @@ import net.minecraft.util.math.BlockPos;
 
 public interface IIncompleteActionScheduler {
 	
-	public boolean hasScheduledActions();
-	
 	default void scheduleBlockAction(BlockPos pos, int type, Block block) {
 		scheduleBlockAction(pos, type, -1, block);
 	}

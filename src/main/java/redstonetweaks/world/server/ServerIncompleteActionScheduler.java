@@ -21,13 +21,12 @@ public class ServerIncompleteActionScheduler implements IIncompleteActionSchedul
 	}
 	
 	@Override
-	public boolean hasScheduledActions() {
-		return !incompleteActions.isEmpty();
-	}
-	
-	@Override
 	public void scheduleAction(IIncompleteAction action) {
 		incompleteActions.add(action);
+	}
+	
+	public boolean hasScheduledActions() {
+		return !incompleteActions.isEmpty();
 	}
 	
 	public void tick() {
