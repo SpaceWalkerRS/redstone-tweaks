@@ -48,7 +48,7 @@ public class PowerBlockEntity extends BlockEntity {
 	public void setPower(int newPower) {
 		power = newPower;
 		
-		if (!world.isClient() && power > 15) {
+		if (!world.isClient()) {
 			world.getServer().getPlayerManager().sendToAround(null, getPos().getX(), getPos().getY(), getPos().getZ(), 64.0D, world.getRegistryKey(), toUpdatePacket());
 		}
 	}
@@ -58,7 +58,7 @@ public class PowerBlockEntity extends BlockEntity {
 	// of 0. In the case where the block entity power is 0 but the power level in the block state is not,
 	// we set the block entity power level to the block state power level
 	public void ensureCorrectPower(BlockState state) {
-		if ((!powerCorrected || getPower() == 0) && getType().supports(state.getBlock())) {
+		if (!powerCorrected && getType().supports(state.getBlock())) {
 			setPower(state.get(Properties.POWER));
 			powerCorrected = true;
 		}
