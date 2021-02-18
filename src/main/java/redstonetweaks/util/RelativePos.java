@@ -7,17 +7,17 @@ import net.minecraft.util.math.Direction;
 
 public enum RelativePos {
 	
-	SELF (0 , "self" , Directionality.NONE      , (forward) -> null),
-	DOWN (1 , "down" , Directionality.NONE      , (forward) -> Direction.DOWN),
-	UP   (2 , "up"   , Directionality.NONE      , (forward) -> Direction.UP),
-	NORTH(3 , "north", Directionality.NONE      , (forward) -> Direction.NORTH),
-	SOUTH(4 , "south", Directionality.NONE      , (forward) -> Direction.SOUTH),
-	WEST (5 , "west" , Directionality.NONE      , (forward) -> Direction.WEST),
-	EAST (6 , "east" , Directionality.NONE      , (forward) -> Direction.EAST),
-	FRONT(7 , "front", Directionality.ALL       , (forward) -> forward),
-	BACK (8 , "back" , Directionality.ALL       , (forward) -> forward.getOpposite()),
-	LEFT (9 , "left" , Directionality.HORIZONTAL, (forward) -> forward.rotateYCounterclockwise()),
-	RIGHT(10, "right", Directionality.HORIZONTAL, (forward) -> forward.rotateYClockwise());
+	SELF (0 , "self" , Directionality.NONE      , forward -> null),
+	DOWN (1 , "down" , Directionality.NONE      , forward -> Direction.DOWN),
+	UP   (2 , "up"   , Directionality.NONE      , forward -> Direction.UP),
+	NORTH(3 , "north", Directionality.NONE      , forward -> Direction.NORTH),
+	SOUTH(4 , "south", Directionality.NONE      , forward -> Direction.SOUTH),
+	WEST (5 , "west" , Directionality.NONE      , forward -> Direction.WEST),
+	EAST (6 , "east" , Directionality.NONE      , forward -> Direction.EAST),
+	FRONT(7 , "front", Directionality.ALL       , forward -> forward),
+	BACK (8 , "back" , Directionality.ALL       , forward -> forward.getOpposite()),
+	LEFT (9 , "left" , Directionality.HORIZONTAL, forward -> forward.rotateYCounterclockwise()),
+	RIGHT(10, "right", Directionality.HORIZONTAL, forward -> forward.rotateYClockwise());
 	
 	private static final RelativePos[] POSITIONS;
 	

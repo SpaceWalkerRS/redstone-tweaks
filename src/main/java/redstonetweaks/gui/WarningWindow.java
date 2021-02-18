@@ -40,8 +40,7 @@ public class WarningWindow extends RTWindow {
 	@Override
 	protected void renderContents(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		for (int index = 0; index < warning.size(); index++) {
-			Text line = warning.get(index);
-			drawCenteredText(matrices, screen.getTextRenderer(), line, getX() + getWidth() / 2, getY() + 36 + index * 14, TEXT_COLOR);
+			drawCenteredText(matrices, screen.getTextRenderer(), warning.get(index), getX() + getWidth() / 2, getY() + 36 + index * 14, TEXT_COLOR);
 		}
 	}
 	

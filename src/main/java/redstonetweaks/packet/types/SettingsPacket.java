@@ -6,14 +6,16 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import redstonetweaks.client.PermissionManager;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.PacketUtils;
 
 public class SettingsPacket extends AbstractRedstoneTweaksPacket {
 	
-	public int count;
-	public ISetting[] settings;
+	private int count;
+	private ISetting[] settings;
+	private PacketByteBuf data;
 	
 	public SettingsPacket() {
 		
@@ -35,6 +37,8 @@ public class SettingsPacket extends AbstractRedstoneTweaksPacket {
 		
 		for (ISetting setting : settings) {
 			buffer.writeString(setting.getId());
+		}
+		for (ISetting setting : settings) {
 			setting.encode(buffer);
 		}
 	}
@@ -44,22 +48,30 @@ public class SettingsPacket extends AbstractRedstoneTweaksPacket {
 		count = buffer.readInt();
 		
 		for (int i = 0; i < count; i++) {
-			ISetting setting = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
-			
-			if (setting != null) {
-				setting.setEnabled(true);
-				setting.decode(buffer);
-			}
+			settings[i] = Settings.getSettingFromId(buffer.readString(PacketUtils.MAX_STRING_LENGTH));
 		}
+		
+		data = new PacketByteBuf(buffer.readBytes(buffer.readableBytes()));
 	}
 	
 	@Override
 	public void execute(MinecraftServer server, ServerPlayerEntity player) {
-
+		if (PermissionManager.canChangeSettings(player)) {
+			decodeSettings();
+		}
 	}
 
 	@Override
 	public void execute(MinecraftClient client) {
-		
+		decodeSettings();
+	}
+	
+	private void decodeSettings() {
+		for (ISetting setting : settings) {
+			if (setting != null) {
+				setting.setEnabled(true);
+				setting.decode(data);
+			}
+		}
 	}
 }

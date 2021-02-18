@@ -408,7 +408,7 @@ public class NeighborUpdateVisualizer {
 	}
 	
 	private float getRed() {
-		switch (this.updateType) {
+		switch (updateType) {
 		case BLOCK_UPDATE:
 			return BLOCK_UPDATE_RED;
 		case COMPARATOR_UPDATE:
@@ -421,7 +421,7 @@ public class NeighborUpdateVisualizer {
 	}
 	
 	private float getGreen() {
-		switch (this.updateType) {
+		switch (updateType) {
 		case BLOCK_UPDATE:
 			return BLOCK_UPDATE_GREEN;
 		case COMPARATOR_UPDATE:
@@ -434,7 +434,7 @@ public class NeighborUpdateVisualizer {
 	}
 	
 	private float getBlue() {
-		switch (this.updateType) {
+		switch (updateType) {
 		case BLOCK_UPDATE:
 			return BLOCK_UPDATE_BLUE;
 		case COMPARATOR_UPDATE:
@@ -447,7 +447,7 @@ public class NeighborUpdateVisualizer {
 	}
 	
 	private float getAlpha() {
-		switch (this.updateType) {
+		switch (updateType) {
 		case BLOCK_UPDATE:
 			return BLOCK_UPDATE_ALPHA;
 		case COMPARATOR_UPDATE:
