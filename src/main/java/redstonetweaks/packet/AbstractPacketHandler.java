@@ -40,7 +40,7 @@ import redstonetweaks.util.PacketUtils;
 public abstract class AbstractPacketHandler {
 	
 	public static final Identifier PACKET_IDENTIFIER = new Identifier("redstonetweaks");
-	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.createRelease(1, 0, 6);
+	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.createRelease(1, 0, 7);
 	
 	protected Packet<?> encodePacket(AbstractRedstoneTweaksPacket packet) {
 		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
