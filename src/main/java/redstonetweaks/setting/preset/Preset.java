@@ -19,11 +19,11 @@ public class Preset {
 	private Mode mode;
 	
 	public Preset(boolean editable, String name, String description, Mode mode) {
-		this(idCounter++, null, editable, name, description, mode);
+		this(nextId(), null, editable, name, description, mode);
 	}
 	
 	public Preset(String savedName, String name, String description, Mode mode) {
-		this(idCounter++, savedName, true, name, description, mode);
+		this(nextId(), savedName, true, name, description, mode);
 	}
 	
 	public Preset(int id, String savedName, boolean editable, String name, String description, Mode mode) {
@@ -38,6 +38,14 @@ public class Preset {
 	
 	public static void resetIdCounter() {
 		idCounter = 0;
+	}
+	
+	public static int nextId() {
+		while (Presets.fromId(idCounter) != null) {
+			idCounter++;
+		}
+		
+		return idCounter;
 	}
 	
 	@Override

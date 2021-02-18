@@ -11,7 +11,7 @@ import redstonetweaks.util.PacketUtils;
 
 public class PresetEditor {
 	
-	private final Preset TEMP = new Preset(true, "TEMP", "A preset used to temporarily store values while a preset is being edited.", Preset.Mode.SET);
+	private final Preset TEMP = new Preset(-Preset.nextId(), null, true, "TEMP", "A preset used to temporarily store values while a preset is being edited.", Preset.Mode.SET);
 	
 	private final Preset preset;
 	

@@ -90,8 +90,9 @@ public class Presets {
 		return ACTIVE.containsValue(preset);
 	}
 	
+	// Only used on the client for creating new presets
 	public static Preset create(String name, String description, Preset.Mode mode) {
-		return new Preset(true, name, description, mode);
+		return new Preset(-Preset.nextId(), null, true, name, description, mode);
 	}
 	
 	public static Preset fromIdOrCreate(int id, String name, String description, Preset.Mode mode) {

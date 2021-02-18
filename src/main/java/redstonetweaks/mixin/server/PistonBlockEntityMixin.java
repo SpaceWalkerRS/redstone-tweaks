@@ -598,7 +598,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (Tweaks.Observer.DELAY_RISING_EDGE.get() == 0 && pushedBlock.isOf(Blocks.OBSERVER) && !pushedBlock.get(Properties.POWERED)) {
 			// This fixes observers not having the proper delay when their rising edge delay is set to 0
 			world.setBlockState(pos, pushedBlock.cycle(Properties.FACING), 16);
-			System.out.println("just placed observer, now in the world: " + world.getBlockState(pos));
 		}
 		if (mergingState != null) {
 			if (SlabHelper.isSlab(pushedBlock)) {

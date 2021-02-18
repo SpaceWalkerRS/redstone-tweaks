@@ -34,7 +34,7 @@ public class PresetPacket extends AbstractRedstoneTweaksPacket {
 	
 	@Override
 	public void decode(PacketByteBuf buffer) {
-		int id = buffer.readInt();
+		int id = getId(buffer.readInt());
 		String name = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 		String description = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 		Preset.Mode mode = Preset.Mode.fromIndex(buffer.readByte());
@@ -56,5 +56,9 @@ public class PresetPacket extends AbstractRedstoneTweaksPacket {
 		if (!client.isInSingleplayer()) {
 			editor.trySaveChanges();
 		}
+	}
+	
+	private int getId(int id) {
+		return id >= 0 ? id : Preset.nextId();
 	}
 }
