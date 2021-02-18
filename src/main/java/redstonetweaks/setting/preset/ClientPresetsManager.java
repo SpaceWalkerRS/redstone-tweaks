@@ -26,13 +26,9 @@ public class ClientPresetsManager {
 	}
 	
 	public void savePreset(PresetEditor editor) {
-		if (client.isInSingleplayer()) {
-			editor.trySaveChanges();
-		} else {
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new PresetPacket(editor));
-			
-			editor.discardChanges();
-		}
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(new PresetPacket(editor));
+		
+		editor.discardChanges();
 	}
 	
 	public void reloadPresets() {
