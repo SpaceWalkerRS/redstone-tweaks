@@ -4,7 +4,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+
 import redstonetweaks.client.PermissionManager;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.PacketUtils;
@@ -49,7 +51,7 @@ public class LockSettingPacket extends AbstractRedstoneTweaksPacket {
 	@Override
 	public void execute(MinecraftClient client) {
 		if (!client.isInSingleplayer() && setting != null) {
-			setting.setLocked(locked);
+			((RTIMinecraftClient)client).getSettingsManager().setSettingLocked(setting, locked);
 		}
 	}
 }

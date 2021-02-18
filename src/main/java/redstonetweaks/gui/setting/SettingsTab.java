@@ -62,7 +62,7 @@ public class SettingsTab extends RTMenuTab implements ISettingListener, IPermiss
 		int y = screen.getHeaderHeight();
 		
 		resetButton = new RTButtonWidget(screen.getWidth() - 50, y, 40, 20, () -> new TranslatableText("RESET"), (button) -> {
-			screen.openWindow(new ConfirmWindow(screen, "Are you sure you want to reset all settings in this category?", 300, () -> ((RTIMinecraftClient)screen.client).getSettingsManager().resetCategory(category), () -> {}));
+			screen.openWindow(new ConfirmWindow(screen, "Are you sure you want to reset all settings in this category?", 300, () -> ((RTIMinecraftClient)screen.client).getSettingsManager().resetCategory(category, false), () -> {}));
 		});
 		addContent(resetButton);
 		

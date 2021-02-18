@@ -189,7 +189,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.children.add(lockButton);
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (button) -> {
-				((RTIMinecraftClient)client).getSettingsManager().resetPack(this.pack);
+				((RTIMinecraftClient)client).getSettingsManager().resetPack(this.pack, false);
 			});
 			this.children.add(resetButton);
 		}
@@ -295,7 +295,7 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.children.add(lockButton);
 			
 			this.resetButton = new RTButtonWidget(0, 0, 40, 20, () -> new TranslatableText("RESET"), (resetButton) -> {
-				((RTIMinecraftClient)client).getSettingsManager().resetSetting(setting);
+				((RTIMinecraftClient)client).getSettingsManager().resetSetting(setting, false);
 			});
 			this.children.add(resetButton);
 			

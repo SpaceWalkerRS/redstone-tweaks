@@ -4,7 +4,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+
 import redstonetweaks.client.PermissionManager;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.settings.Settings;
@@ -42,7 +44,7 @@ public class ResetCategoryPacket extends AbstractRedstoneTweaksPacket {
 	@Override
 	public void execute(MinecraftClient client) {
 		if (!client.isInSingleplayer() && category != null) {
-			category.resetAll();
+			((RTIMinecraftClient)client).getSettingsManager().resetCategory(category, true);
 		}
 	}
 }

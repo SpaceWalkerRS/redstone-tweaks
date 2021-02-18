@@ -5,6 +5,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import redstonetweaks.client.PermissionManager;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.PacketUtils;
@@ -43,8 +44,8 @@ public class SettingPacket extends AbstractRedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (setting != null) {
-			setting.decode(data);
+		if (!client.isInSingleplayer() && setting != null) {
+			((RTIMinecraftClient)client).getSettingsManager().decodeSetting(setting, data);
 		}
 	}
 }
