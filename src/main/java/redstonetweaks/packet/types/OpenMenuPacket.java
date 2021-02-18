@@ -4,7 +4,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import redstonetweaks.gui.RTMenuScreen;
+
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 
 public class OpenMenuPacket extends AbstractRedstoneTweaksPacket {
 	
@@ -29,8 +30,6 @@ public class OpenMenuPacket extends AbstractRedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftClient client) {
-		if (client.currentScreen == null) {
-			client.openScreen(new RTMenuScreen(client));
-		}
+		((RTIMinecraftClient)client).openRedstoneTweaksMenu();
 	}
 }

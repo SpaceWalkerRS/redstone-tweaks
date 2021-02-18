@@ -32,6 +32,7 @@ import redstonetweaks.world.server.ServerWorldTickHandler;
 public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	
 	@Shadow public ClientWorld world;
+	@Shadow public Screen currentScreen;
 	@Shadow private static int currentFps;
 	
 	private ClientPacketHandler packetHandler;
@@ -41,6 +42,8 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	private ClientWorldTickHandler worldTickHandler;
 	private NeighborUpdateVisualizer neighborUpdateVisualizer;
 	private TickInfoLabelRenderer tickInfoLabelRenderer;
+	
+	@Shadow public abstract void openScreen(Screen screen);
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(RunArgs args, CallbackInfo ci) {
@@ -131,5 +134,12 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	@Override
 	public int getCurrentFps() {
 		return currentFps;
+	}
+	
+	@Override
+	public void openRedstoneTweaksMenu() {
+		if (currentScreen == null) {
+			openScreen(new RTMenuScreen((MinecraftClient)(Object)this));
+		}
 	}
 }

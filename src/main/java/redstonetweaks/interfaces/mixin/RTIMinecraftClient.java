@@ -26,4 +26,6 @@ public interface RTIMinecraftClient {
 	
 	public int getCurrentFps();
 	
+	public void openRedstoneTweaksMenu();
+	
 }
