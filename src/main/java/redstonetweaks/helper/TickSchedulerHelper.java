@@ -11,7 +11,7 @@ import redstonetweaks.util.RTMathHelper;
 
 public class TickSchedulerHelper {
 	
-	private static final int INSTANT_TICK_LIMIT = 512;
+	private static final int INSTANT_TICK_LIMIT = 100000;
 	private static int instantTicks;
 	
 	public static boolean scheduleBlockTick(WorldAccess world, BlockPos pos, BlockState state, int delay, TickPriority priority) {
