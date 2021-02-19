@@ -55,7 +55,7 @@ public class ClientSettingsManager implements ISettingListener {
 	}
 	
 	public void resetCategory(SettingsCategory category, boolean fromPacket) {
-		if (client.isInSingleplayer() || fromPacket) {
+		if (fromPacket) {
 			deaf = true;
 			
 			if (fromPacket) {
@@ -71,7 +71,7 @@ public class ClientSettingsManager implements ISettingListener {
 	}
 	
 	public void resetPack(SettingsPack pack, boolean fromPacket) {
-		if (client.isInSingleplayer() || fromPacket) {
+		if (fromPacket) {
 			deaf = true;
 			
 			if (fromPacket) {
