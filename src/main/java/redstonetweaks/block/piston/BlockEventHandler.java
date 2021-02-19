@@ -568,7 +568,9 @@ public class BlockEventHandler {
 				world.updateNeighborsAlways(headPos, Blocks.PISTON_HEAD);
 			}
 			
-			return false;
+			moveProgress++;
+			
+			break;
 		default:
 			return false;
 		}

@@ -391,6 +391,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Override
 	public void startProcessingBlockEvents() {
 		isProcessingBlockEvents = true;
+		processedBlockEvents = 0;
 		
 		if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {
 			blockEventList.ensureCapacity(syncedBlockEventQueue.size());

@@ -114,6 +114,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		if (!isClient()) {
 			dispatchBlockUpdatesAround(pos, pos, null, block);
 		}
+		
 		ci.cancel();
 	}
 	
@@ -122,6 +123,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		if (!isClient()) {
 			dispatchBlockUpdate(false, new BlockUpdate(pos, notifierPos, notifierPos, sourceBlock));
 		}
+		
 		ci.cancel();
 	}
 	
@@ -130,6 +132,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		if (!isClient()) {
 			dispatchComparatorUpdatesAround(pos, pos, null, block);
 		}
+		
 		ci.cancel();
 	}
 	
