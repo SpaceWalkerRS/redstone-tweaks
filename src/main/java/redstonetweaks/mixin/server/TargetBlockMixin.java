@@ -63,7 +63,7 @@ public abstract class TargetBlockMixin extends AbstractBlock implements BlockEnt
 		}
 		
 		BlockState newState = state.with(Properties.POWER, Math.min(power, 15));
-		world.setBlockState(pos, newState, 3);
+		world.setBlockState(pos, newState, 2);
 		
 		updateNeighborsOnPowerChange(world, pos, state);
 		
@@ -127,8 +127,6 @@ public abstract class TargetBlockMixin extends AbstractBlock implements BlockEnt
 	private static void updateNeighborsOnPowerChange(WorldAccess world, BlockPos pos, BlockState state) {
 		if (Tweaks.TargetBlock.EMITS_STRONG_POWER.get()) {
 			((RTIWorld)world).dispatchBlockUpdates(pos, null, state.getBlock(), Tweaks.TargetBlock.BLOCK_UPDATE_ORDER.get());
-		} else {
-			world.updateNeighbors(pos, state.getBlock());
 		}
 	}
 }

@@ -599,7 +599,6 @@ public class Presets {
 			Tweaks.SugarCane.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
 			Tweaks.TargetBlock.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL).
-					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.SELF, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.WEST, RelativePos.EAST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.EAST, RelativePos.WEST).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.NORTH, RelativePos.SOUTH).
