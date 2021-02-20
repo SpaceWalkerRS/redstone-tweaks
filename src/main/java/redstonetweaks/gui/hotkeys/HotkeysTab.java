@@ -109,7 +109,7 @@ public class HotkeysTab extends RTMenuTab {
 		hotkeys.updateKeyBinding(keyBinding, newKey);
 	}
 	
-	public void onHotkeyChanged(RTKeyBinding keyBinding) {
-		hotkeysList.onHotkeyChanged(keyBinding);
+	public void onHotkeyChanged() {
+		hotkeysList.onHotkeyChanged();
 	}
 }

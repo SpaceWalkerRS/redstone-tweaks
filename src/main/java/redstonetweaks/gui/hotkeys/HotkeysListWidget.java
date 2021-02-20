@@ -45,11 +45,9 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 
 	}
 	
-	public void onHotkeyChanged(RTKeyBinding keyBinding) {
+	public void onHotkeyChanged() {
 		for (Entry entry : children()) {
-			if (entry.keyBinding == keyBinding || keyBinding == null) {
-				entry.onHotkeyChanged();
-			}
+			entry.onHotkeyChanged();
 		}
 	}
 	
@@ -70,7 +68,7 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 				if (parent.focusedKeyBinding == keyBinding) {
 					return new TranslatableText("> " + keyBinding.getKey().getLocalizedText().asString() + " <").formatted(Formatting.YELLOW);
 				} else {
-					return keyBinding.getKey().getLocalizedText();
+					return keyBinding.getKey().getLocalizedText().copy().formatted(hotkeys.isValid(keyBinding) ? Formatting.WHITE : Formatting.RED);
 				}
 			}, (button) -> {
 				parent.focusedKeyBinding = keyBinding;

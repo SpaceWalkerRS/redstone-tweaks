@@ -94,11 +94,11 @@ public class HotkeysManager {
 		return false;
 	}
 	
-	public void onKeyBindingChanged(RTKeyBinding keyBinding) {
+	public void onKeyBindingChanged() {
 		Screen screen = client.currentScreen;
 		
 		if (screen instanceof RTMenuScreen) {
-			((RTMenuScreen)screen).onHotkeyChanged(keyBinding);
+			((RTMenuScreen)screen).onHotkeyChanged();
 		}
 	}
 	

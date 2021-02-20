@@ -12,7 +12,7 @@ public class RedstoneTweaks implements ModInitializer {
 	
 	public static final Logger LOGGER = LogManager.getLogger("Redstone Tweaks");
 	
-	public static final RedstoneTweaksVersion MOD_VERSION = RedstoneTweaksVersion.createRelease(0, 9, 3);
+	public static final RedstoneTweaksVersion MOD_VERSION = RedstoneTweaksVersion.createRelease(0, 9, 4);
 	
 	@Override
 	public void onInitialize() {

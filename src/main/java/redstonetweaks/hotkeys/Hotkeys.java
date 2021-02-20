@@ -2,8 +2,10 @@ package redstonetweaks.hotkeys;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -14,7 +16,7 @@ public class Hotkeys {
 	
 	private final HotkeysManager manager;
 	
-	private final List<RTKeyBinding> keys;
+	private final List<RTKeyBinding> keyBindings;
 	private final Map<Key, RTKeyBinding> keyToBinding;
 	private final Map<String, RTKeyBinding> nameToBinding;
 	
@@ -25,7 +27,7 @@ public class Hotkeys {
 	public Hotkeys(HotkeysManager manager) {
 		this.manager = manager;
 		
-		this.keys = new ArrayList<>();
+		this.keyBindings = new ArrayList<>();
 		this.keyToBinding = new HashMap<>();
 		this.nameToBinding = new HashMap<>();
 		
@@ -35,7 +37,7 @@ public class Hotkeys {
 	}
 	
 	private RTKeyBinding register(RTKeyBinding keyBinding) {
-		keys.add(keyBinding);
+		keyBindings.add(keyBinding);
 		keyToBinding.put(keyBinding.getKey(), keyBinding);
 		nameToBinding.put(keyBinding.getName(), keyBinding);
 		
@@ -43,7 +45,7 @@ public class Hotkeys {
 	}
 	
 	public List<RTKeyBinding> getKeyBindings() {
-		return keys;
+		return keyBindings;
 	}
 	
 	public RTKeyBinding getKeyBinding(Key key) {
@@ -56,26 +58,49 @@ public class Hotkeys {
 	
 	public void updateKeyBinding(RTKeyBinding keyBinding, Key newKey) {
 		setKeyBinding(keyBinding, newKey);
-		manager.onKeyBindingChanged(keyBinding);
+		
+		manager.onKeyBindingChanged();
 	}
 	
 	public void setKeyBinding(RTKeyBinding keyBinding, Key newKey) {
-		keyToBinding.remove(keyBinding.getKey());
-		
 		keyBinding.setKey(newKey);
 		
-		keyToBinding.put(newKey, keyBinding);
+		validate();
 	}
 	
 	public void resetKeyBindings() {
 		keyToBinding.clear();
 		
-		for (RTKeyBinding keyBinding : keys) {
-			keyBinding.setKey(keyBinding.getDefaultKey());
-			
-			keyToBinding.put(keyBinding.getKey(), keyBinding);
+		for (RTKeyBinding keyBinding : keyBindings) {
+			setKeyBinding(keyBinding, keyBinding.getDefaultKey());
 		}
 		
-		manager.onKeyBindingChanged(null);
+		manager.onKeyBindingChanged();
+	}
+	
+	public void validate() {
+		keyToBinding.clear();
+		
+		Set<Key> duplicates = new HashSet<>();
+		
+		for (RTKeyBinding keyBinding : keyBindings) {
+			Key key = keyBinding.getKey();
+			
+			if (duplicates.contains(key)) {
+				continue;
+			}
+			if (keyToBinding.containsKey(key)) {
+				keyToBinding.remove(key);
+				duplicates.add(key);
+				
+				continue;
+			}
+			
+			keyToBinding.put(key, keyBinding);
+		}
+	}
+	
+	public boolean isValid(RTKeyBinding keyBinding) {
+		return keyToBinding.get(keyBinding.getKey()) == keyBinding;
 	}
 }

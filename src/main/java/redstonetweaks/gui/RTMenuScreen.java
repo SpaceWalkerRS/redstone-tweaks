@@ -11,13 +11,13 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+
 import redstonetweaks.gui.hotkeys.HotkeysTab;
 import redstonetweaks.gui.info.InfoTab;
 import redstonetweaks.gui.preset.PresetsTab;
 import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.hotkeys.RTKeyBinding;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.listeners.ISettingListener;
@@ -292,10 +292,10 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		}
 	}
 	
-	public void onHotkeyChanged(RTKeyBinding keyBinding) {
+	public void onHotkeyChanged() {
 		RTMenuTab selectedTab = getSelectedTab();
 		if (selectedTab instanceof HotkeysTab) {
-			((HotkeysTab)selectedTab).onHotkeyChanged(keyBinding);
+			((HotkeysTab)selectedTab).onHotkeyChanged();
 		}
 	}
 	
