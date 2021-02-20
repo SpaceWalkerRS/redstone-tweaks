@@ -276,21 +276,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
-	public void init() {
-		speed = PistonSettings.speed(sticky, extending);
-		
-		if (speed == 0) {
-			numberOfSteps = 1.0F;
-			
-			// This ensures the block entity finishes the first time it is ticked
-			// Otherwise the behavior would be the same as if the speed was set to 1
-			progress = 1.0F;
-		} else {
-			numberOfSteps = speed;
-		}
-	}
-	
-	@Override
 	public void setLocation(World world, BlockPos pos) {
 		this.world = world;
 		this.pos = pos.toImmutable();
@@ -312,6 +297,21 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		}
 		if (mergingBlockEntity != null) {
 			mergingBlockEntity.setPos(this.pos);
+		}
+	}
+	
+	@Override
+	public void init() {
+		speed = PistonSettings.speed(sticky, extending);
+		
+		if (speed == 0) {
+			numberOfSteps = 1.0F;
+			
+			// This ensures the block entity finishes the first time it is ticked
+			// Otherwise the behavior would be the same as if the speed was set to 1
+			progress = 1.0F;
+		} else {
+			numberOfSteps = speed;
 		}
 	}
 	
