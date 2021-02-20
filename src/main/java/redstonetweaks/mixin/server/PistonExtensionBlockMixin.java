@@ -50,6 +50,7 @@ public abstract class PistonExtensionBlockMixin extends AbstractBlock {
 					boolean shouldExtend = lazy ? extend : PistonHelper.isReceivingPower(world, pos, state, facing, true);
 					
 					if (extend != shouldExtend) {
+						System.out.println("rip");
 						return false;
 					}
 				}

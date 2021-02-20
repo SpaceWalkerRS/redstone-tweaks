@@ -62,6 +62,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				return aboveState.isSideSolidFullSquare(world, up, Direction.DOWN);
 			}
 		}
+		
 		return aboveState.isSolidBlock(world, pos);
 	}
 	
@@ -75,6 +76,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				canConnectUp = !aboveState.isSideSolidFullSquare(world, up, direction);
 			}
 		}
+		
 		return method_27841(world, pos, direction, canConnectUp);
 	}
 	
@@ -85,7 +87,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Redirect(method = "prepare", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RedstoneWireBlock;replace(Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;II)V"))
 	private void onPrepareRedirectReplace(BlockState oldState, BlockState newState, WorldAccess world, BlockPos pos, int flags, int depth) {
-		
+		// replaced by the inject below
 	}
 	
 	@Inject(method = "prepare", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
@@ -104,6 +106,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				return state.isSideSolidFullSquare(world, up, Direction.DOWN) || state.isSideSolidFullSquare(world, up, direction);
 			}
 		}
+		
 		return state.isSolidBlock(world, pos);
 	}
 	
@@ -223,6 +226,10 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				if (blockEntity instanceof PowerBlockEntity) {
 					((PowerBlockEntity)blockEntity).setPower(powerReceived);
 				}
+				
+				// This ensures neighboring blocks are updated when the new state is placed
+				BlockState tempState = state.with(Properties.POWER, (powerReceived == 0) ? 1 : 0);
+				world.setBlockState(pos, tempState, 16);
 				
 				BlockState newState = state.with(Properties.POWER, Math.min(powerReceived, 15));
 				world.setBlockState(pos, newState, 2);

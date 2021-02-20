@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.AbstractRedstoneGateBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ComparatorBlock;
@@ -80,7 +81,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;isTicking(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;)Z"))
 	private <T> boolean onUpdatePoweredRedirectIsTicking(TickScheduler<T> scheduler, BlockPos pos, T block, World world, BlockPos blockPos, BlockState state) {
 		if (Tweaks.Comparator.MICRO_TICK_MODE.get()) {
-			return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(pos);
+			return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(pos, (Block)block);
 		}
 		
 		return scheduler.isTicking(pos, block);

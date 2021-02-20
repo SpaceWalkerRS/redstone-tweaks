@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -56,7 +57,7 @@ public abstract class AbstractPressurePlateBlockMixin extends Block implements R
 		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
 	}
 	
-	@Inject(method = "updatePlateState", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@Inject(method = "updatePlateState", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onUpdatePlateStateInjectBeforeSetBlockState(World world, BlockPos pos, BlockState state, int rsOut, CallbackInfo ci, int newPower) {
 		if (hasBlockEntity()) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
@@ -65,6 +66,16 @@ public abstract class AbstractPressurePlateBlockMixin extends Block implements R
 				((PowerBlockEntity)blockEntity).setPower(newPower);
 			}
 		}
+	}
+	
+	@ModifyArg(method = "updatePlateState", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private int onUpdatePlateStateModifySetBlockStateFlags(int oldFlags) {
+		return oldFlags & 16;
+	}
+	
+	@Inject(method = "updatePlateState", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	private void onUpdatePlateStateInjectAfterSetBlockState(World world, BlockPos pos, BlockState state, int rsOut, CallbackInfo ci, int newPower, boolean bl, boolean bl2, BlockState newState) {
+		newState.updateNeighbors(world, pos, 2);
 	}
 	
 	@Redirect(method = "updatePlateState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))

@@ -5,10 +5,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.AbstractPressurePlateBlock;
 import net.minecraft.block.Block;
@@ -23,6 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
+
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPressurePlate;
 import redstonetweaks.setting.settings.Tweaks;
@@ -52,10 +52,9 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 		return (Block)(Object)this == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? Tweaks.LightWeightedPressurePlate.DELAY_FALLING_EDGE.get() : Tweaks.HeavyWeightedPressurePlate.DELAY_FALLING_EDGE.get();
 	}
 	
-	@Inject(method = "setRedstoneOutput", cancellable = true, at = @At(value = "HEAD"))
-	private void onSetRedstoneOutputInjectAtHead(BlockState state, int newPower, CallbackInfoReturnable<BlockState> cir) {
-		cir.setReturnValue(state.with(Properties.POWER, Math.min(newPower, 15)));
-		cir.cancel();
+	@ModifyVariable(method = "setRedstoneOutput", argsOnly = true, ordinal = 0, at = @At(value = "HEAD"))
+	private int onSetRedstoneOutputModifyPower(int realPower) {
+		return Math.min(15, realPower);
 	}
 	
 	// We need to override this method because when the blocks are initialized

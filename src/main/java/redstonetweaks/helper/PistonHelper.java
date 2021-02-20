@@ -388,7 +388,7 @@ public class PistonHelper {
 	// Notify clients of any pistons that are about to be "double retracted"
 	public static boolean prepareDoubleRetraction(World world, BlockPos pos, BlockState state) {
 		if (!world.isClient() && isPiston(state) && !state.get(Properties.EXTENDED)) {
-			if (doDoubleRetraction(isSticky(state)) && ((RTIServerWorld)world).hasBlockEvent(pos, MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
+			if (doDoubleRetraction(isSticky(state)) && ((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock(), MotionType.RETRACT_A, MotionType.RETRACT_B, MotionType.RETRACT_FORWARDS)) {
 				BlockUpdateS2CPacket packet = new BlockUpdateS2CPacket(world, pos);
 				((ServerWorld)world).getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 64.0D, world.getRegistryKey(), packet);
 				
@@ -621,7 +621,7 @@ public class PistonHelper {
 			} else {
 				if (onScheduledTick) {
 					world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
-				} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
+				} else if (!((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
 					TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, PistonSettings.tickPriorityRisingEdge(sticky));
 				}
 			}
@@ -643,9 +643,8 @@ public class PistonHelper {
 					
 					world.setBlockState(pos, state, 16);
 				}
-				
 				world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
-			} else if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
+			} else if (!((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
 				TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, PistonSettings.tickPriorityFallingEdge(sticky));
 			}
 		}

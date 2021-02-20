@@ -1,5 +1,6 @@
 package redstonetweaks.interfaces.mixin;
 
+import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.profiler.Profiler;
 
@@ -10,7 +11,7 @@ public interface RTIServerWorld  {
 	
 	public void tickTimeAccess();
 	
-	public boolean hasBlockEvent(BlockPos pos, int... types);
+	public boolean hasBlockEvent(BlockPos pos, Block block, int... types);
 	
 	public ServerNeighborUpdateScheduler getNeighborUpdateScheduler();
 	

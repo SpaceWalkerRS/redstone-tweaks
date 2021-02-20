@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.AbstractRedstoneGateBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
@@ -87,7 +88,7 @@ public abstract class AbstractRedstoneGateBlockMixin extends AbstractBlock imple
 	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;isTicking(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;)Z"))
 	private <T> boolean onUpdatePoweredRedirectIsTicking(TickScheduler<T> scheduler, BlockPos pos, T block, World world, BlockPos blockPos, BlockState state) {
 		if (Tweaks.Repeater.MICRO_TICK_MODE.get()) {
-			return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(pos);
+			return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(pos, (Block)block);
 		}
 		
 		return scheduler.isTicking(pos, block);
@@ -182,7 +183,7 @@ public abstract class AbstractRedstoneGateBlockMixin extends AbstractBlock imple
 		int delay = powered ? Tweaks.Repeater.DELAY_FALLING_EDGE.get() : Tweaks.Repeater.DELAY_RISING_EDGE.get();
 		
 		if (Tweaks.Repeater.MICRO_TICK_MODE.get()) {
-			if (!((RTIServerWorld)world).hasBlockEvent(pos)) {
+			if (!((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
 				world.addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
 			}
 		} else {

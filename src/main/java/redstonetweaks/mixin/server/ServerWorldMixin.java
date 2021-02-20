@@ -217,9 +217,9 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	}
 	
 	@Override
-	public boolean hasBlockEvent(BlockPos pos, int... types) {
+	public boolean hasBlockEvent(BlockPos pos, Block block, int... types) {
 		for (BlockEvent event : syncedBlockEventQueue) {
-			if (event.getPos().equals(pos)) {
+			if (event.getPos().equals(pos) && event.getBlock() == block) {
 				if (types.length == 0) {
 					return true;
 				}

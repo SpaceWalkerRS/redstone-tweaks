@@ -63,9 +63,9 @@ public abstract class TargetBlockMixin extends AbstractBlock implements BlockEnt
 		}
 		
 		BlockState newState = state.with(Properties.POWER, Math.min(power, 15));
-		world.setBlockState(pos, newState, 2);
 		
-		updateNeighborsOnPowerChange(world, pos, state);
+		world.setBlockState(pos, newState, 18);
+		updateNeighborsOnPowerChange(world, pos, newState);
 		
 		if (((RTIWorld)world).immediateNeighborUpdates()) {
 			TickSchedulerHelper.scheduleBlockTick(world, pos, newState, delay, Tweaks.TargetBlock.TICK_PRIORITY.get());
@@ -76,18 +76,20 @@ public abstract class TargetBlockMixin extends AbstractBlock implements BlockEnt
 		ci.cancel();
 	}
 	
-	@Inject(method = "scheduledTick", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onScheduledTickInjectBeforeSetBlockState(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		
 		if (blockEntity instanceof PowerBlockEntity) {
 			((PowerBlockEntity)blockEntity).setPower(0);
 		}
-	}
-	
-	@Inject(method = "scheduledTick", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
-	private void onScheduledTickInjectAfterSetBlockState(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
-		updateNeighborsOnPowerChange(world, pos, state);
+		
+		BlockState newState = state.with(Properties.POWER, 0);
+		
+		world.setBlockState(pos, newState, 18);
+		updateNeighborsOnPowerChange(world, pos, state.with(Properties.POWER, 0));
+		
+		ci.cancel();
 	}
 	
 	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "HEAD"))
@@ -125,6 +127,9 @@ public abstract class TargetBlockMixin extends AbstractBlock implements BlockEnt
 	}
 	
 	private static void updateNeighborsOnPowerChange(WorldAccess world, BlockPos pos, BlockState state) {
+		world.updateNeighbors(pos, state.getBlock());
+		state.updateNeighbors(world, pos, 2);
+		
 		if (Tweaks.TargetBlock.EMITS_STRONG_POWER.get()) {
 			((RTIWorld)world).dispatchBlockUpdates(pos, null, state.getBlock(), Tweaks.TargetBlock.BLOCK_UPDATE_ORDER.get());
 		}

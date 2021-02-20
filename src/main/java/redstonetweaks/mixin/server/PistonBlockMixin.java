@@ -68,7 +68,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	
 	@Inject(method = "tryMove", cancellable = true, at = @At(value = "HEAD"))
 	private void onTryMoveInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
-		if (!world.getBlockTickScheduler().isTicking(pos, this) && !(Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient() && ((RTIServerWorld)world).hasBlockEvent(pos))) {
+		if (!world.getBlockTickScheduler().isTicking(pos, this) && !(Tweaks.Global.DOUBLE_RETRACTION.get() && !world.isClient() && ((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock()))) {
 			PistonHelper.tryMove(world, pos, state, sticky, PistonHelper.isExtended(world, pos, state, false) || PistonHelper.isExtending(world, pos, state), false);
 		}
 		
