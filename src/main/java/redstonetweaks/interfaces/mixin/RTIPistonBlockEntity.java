@@ -7,6 +7,7 @@ import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockView;
 
 import redstonetweaks.block.piston.MovedBlock;
@@ -22,6 +23,10 @@ public interface RTIPistonBlockEntity {
 	public boolean isSticky();
 	
 	public void setSticky(boolean newValue);
+	
+	public double correctStepAmount(double stepAmount, Direction.Axis axis);
+	
+	public Vec3d getTotalAmountExtended(Vec3d offset);
 	
 	public boolean sourceIsMoving();
 	

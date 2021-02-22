@@ -14,6 +14,9 @@ public class RedstoneTweaks implements ModInitializer {
 	
 	public static final RedstoneTweaksVersion MOD_VERSION = RedstoneTweaksVersion.createRelease(0, 9, 4);
 	
+	public static boolean client;
+	public static boolean server;
+	
 	@Override
 	public void onInitialize() {
 		BlockEntityTypes.register();

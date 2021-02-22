@@ -41,6 +41,7 @@
 	"server.DragonEggBlockMixin",
 	"server.EnderChestBlockMixin",
 	"server.EndPortalFrameBlockMixin",
+	"server.EntityMixin",
 	"server.FallingBlockMixin",
 	"server.FarmlandBlockMixin",
 	"server.FenceBlockMixin",
