@@ -92,16 +92,6 @@ public class ArraySettingListWidget<K, E> extends RTListWidget<ArraySettingListW
 		}
 		
 		@Override
-		protected void unfocusTextFields() {
-			buttonPanel.unfocusTextFields(null);
-		}
-		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return buttonPanel.focusedIsTextField();
-		}
-		
-		@Override
 		public void init(int titleWidth) {
 			buttonPanel.setX(getX() + getWidth() - 110);
 		}

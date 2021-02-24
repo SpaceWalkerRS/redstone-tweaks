@@ -114,7 +114,7 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 		setIsEditable(active);
 		
 		if (!active) {
-			unFocus();
+			unfocus();
 		}
 	}
 	
@@ -123,18 +123,23 @@ public class RTTextFieldWidget extends TextFieldWidget implements IAbstractButto
 		super.setVisible(visible);
 	}
 	
+	@Override
+	public void unfocus() {
+		setFocused(false);
+		
+		deaf = true;
+		updateText();
+		deaf = false;
+	}
+	
+	@Override
+	public void focus() {
+		setFocused(true);
+	}
+	
 	public void setIsEditable(boolean isEditable) {
 		this.isEditable = isEditable;
 		super.setEditable(isEditable);
-	}
-	
-	public void unFocus() {
-		if (isFocused()) {
-			setFocused(false);
-			deaf = true;
-			updateText();
-			deaf = false;
-		}
 	}
 	
 	private void updateText() {

@@ -3,7 +3,6 @@ package redstonetweaks.gui;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -67,22 +66,13 @@ public class ConfirmWindow extends RTWindow {
 			Text line = message.get(index);
 			drawCenteredText(matrices, screen.getTextRenderer(), line, getX() + getWidth() / 2, getY() + 36 + index * 14, TEXT_COLOR);
 		}
+		
 		confirmButton.render(matrices, mouseX, mouseY, delta);
 		denyButton.render(matrices, mouseX, mouseY, delta);
 	}
 	
 	@Override
 	protected void onRefresh() {
-		
-	}
-	
-	@Override
-	protected boolean hasFocusedTextField() {
-		return false;
-	}
-	
-	@Override
-	public void unfocusTextFields(Element except) {
 		
 	}
 	

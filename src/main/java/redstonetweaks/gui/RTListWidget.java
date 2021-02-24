@@ -1,6 +1,7 @@
 package redstonetweaks.gui;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,7 +18,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 
-import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.util.RTMathHelper;
 
 public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends ElementListWidget<E> implements RTElement {
@@ -56,13 +56,52 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		return getX() + getWidth() - SCROLLBAR_WIDTH - 2;
 	}
 	
+	public void setFocused(E e) {
+		E focused = getFocused();
+		
+		if (focused != null) {
+			focused.unfocus();
+		}
+		
+		super.setFocused(e);
+		
+		if (e != null) {
+			e.focus();
+		}
+	}
+	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		boolean clicked = mouseClick(mouseX, mouseY, button);
+		updateScrollingState(mouseX, mouseY, button);
 		
-		unfocusTextFields(clicked ? getFocused() : null);
+		if (isMouseOver(mouseX, mouseY)) {
+			E entry = getEntryAtPos(mouseX, mouseY);
+			
+			if (entry == null) {
+				setFocused(null);
+				
+				if (button == 0) {
+					clickedHeader((int)(mouseX - (getX() + getWidth() / 2 - getRowWidth() / 2)), (int)(mouseY - getY()) + roundedScrollAmount() - 4);
+					
+					return true;
+				}
+			} else {
+				if (entry.mouseClicked(mouseX, mouseY, button)) {
+					setFocused(entry);
+					setDragging(true);
+					
+					return true;
+				}
+				
+				setFocused(null);
+			}
+			
+			return scrolling;
+		}
 		
-		return clicked;
+		setFocused(null);
+		
+		return false;
 	}
 	
 	@Override
@@ -116,6 +155,11 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		hoverAllowed = allowHover;
 	}
 	
+	@Override
+	public void unfocus() {
+		setFocused(null);
+	}
+	
 	public void init() {
 		clearEntries();
 		entryTitleWidth = 0;
@@ -131,40 +175,6 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 	private void initEntries() {
 		for (Entry<E> e : children()) {
 			e.init(getEntryTitleWidth());
-		}
-	}
-	
-	public boolean focusedIsTextField() {
-		E focused = getFocused();
-		
-		if (focused == null) {
-			return false;
-		} else {
-			return focused.focusedIsTextField();
-		}
-	}
-	
-	private boolean mouseClick(double mouseX, double mouseY, int button) {
-		updateScrollingState(mouseX, mouseY, button);
-		if (!isMouseOver(mouseX, mouseY)) {
-			return false;
-		} else {
-			E entry = getEntryAtPos(mouseX, mouseY);
-			
-			if (entry != null) {
-				if (entry.mouseClicked(mouseX, mouseY, button)) {
-					setFocused(entry);
-					setDragging(true);
-					
-					return true;
-				}
-			} else if (button == 0) {
-				clickedHeader((int)(mouseX - (getX() + getWidth() / 2 - getRowWidth() / 2)), (int)(mouseY - getY()) + roundedScrollAmount() - 4);
-				
-				return true;
-			}
-
-			return scrolling;
 		}
 	}
 	
@@ -266,14 +276,6 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		}
 	}
 	
-	public void unfocusTextFields(Entry<E> except) {
-		for (Entry<E> entry : children()) {
-			if (entry != except) {
-				entry.unfocusTextFields();
-			}
-		}
-	}
-	
 	public void filter(String query) {
 		clearEntries();
 		
@@ -306,6 +308,50 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 			return getChildren();
 		}
 		
+		@Override
+		public void setFocused(Element e) {
+			Element focused = getFocused();
+			
+			if (e == focused) {
+				return;
+			}
+			
+			if (focused != null && focused instanceof RTElement) {
+				((RTElement)focused).unfocus();
+			}
+			
+			super.setFocused(e);
+			
+			if (e != null && e instanceof RTElement) {
+				((RTElement)e).focus();
+			}
+		}
+		
+		@Override
+		public boolean mouseClicked(double mouseX, double mouseY, int button) {
+			boolean clicked = false;
+			
+			Iterator<? extends Element> it = children().iterator();
+			while (it.hasNext()) {
+				Element el = it.next();
+				
+				if (el.mouseClicked(mouseX, mouseY, button)) {
+					setFocused(el);
+					clicked = true;
+				}
+			}
+			
+			if (!clicked) {
+				setFocused(null);
+			}
+			
+			if (button == 0) {
+				setDragging(true);
+			}
+			
+			return clicked;
+		}
+		
 		public abstract List<? extends RTElement> getChildren();
 		
 		public void init(int titleWidth) {
@@ -318,17 +364,13 @@ public abstract class RTListWidget<E extends RTListWidget.Entry<E>> extends Elem
 		
 		public abstract void tick();
 		
-		protected void unfocusTextFields() {
+		public void unfocus() {
+			setFocused(null);
+		}
+		
+		public void focus() {
 			
 		}
 		
-		public boolean focusedIsTextField() {
-			if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
-				return true;
-			}
-			return hasFocusedTextField();
-		}
-		
-		protected abstract boolean hasFocusedTextField();
 	}
 }

@@ -30,11 +30,11 @@ public class WorldHelper {
 		world.setBlockState(pos, state, flags);
 	}
 	
-	public static boolean isPowered(World world, BlockPos pos, BlockState state, boolean forceCheckQC, DirectionToBooleanSetting qc, boolean randQC) {
-		return world.isReceivingRedstonePower(pos) || isQCPowered(world, pos, state, forceCheckQC, qc, randQC);
+	public static boolean isPowered(World world, BlockPos pos, boolean forceCheckQC, DirectionToBooleanSetting qc, boolean randQC) {
+		return world.isReceivingRedstonePower(pos) || isQCPowered(world, pos, forceCheckQC, qc, randQC);
 	}
 	
-	public static boolean isQCPowered(World world, BlockPos pos, BlockState state, boolean forceCheck, DirectionToBooleanSetting qc, boolean randQC) {
+	public static boolean isQCPowered(World world, BlockPos pos, boolean forceCheck, DirectionToBooleanSetting qc, boolean randQC) {
 		for (Direction dir : Direction.values()) {
 			if (qc.get(dir) && (forceCheck || !randQC || world.getRandom().nextBoolean())) {
 				if (world.isReceivingRedstonePower(pos.offset(dir))) {

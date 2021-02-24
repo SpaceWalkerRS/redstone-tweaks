@@ -3,7 +3,6 @@ package redstonetweaks.gui.setting;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -169,16 +168,6 @@ public class UpdateOrderWindow extends RTWindow {
 		}
 		
 		drawBackgroundTextureBelow(matrices, list.getY() + list.getHeight() + 5, mouseX, mouseY, delta);
-	}
-
-	@Override
-	public void unfocusTextFields(Element except) {
-		
-	}
-	
-	@Override
-	protected boolean hasFocusedTextField() {
-		return offsetButtons.focusedIsTextField();
 	}
 	
 	@Override

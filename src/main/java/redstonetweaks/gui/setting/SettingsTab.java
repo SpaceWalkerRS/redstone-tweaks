@@ -3,10 +3,10 @@ package redstonetweaks.gui.setting;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
+
 import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.ConfirmWindow;
 import redstonetweaks.gui.RTMenuScreen;
@@ -40,6 +40,17 @@ public class SettingsTab extends RTMenuTab implements ISettingListener, IPermiss
 		super(screen, new TranslatableText(category.getName()));
 		
 		this.category = category;
+	}
+	
+	@Override
+	public boolean charTyped(char chr, int keyCode) {
+		if (getFocused() == null || !getFocused().charTyped(chr, keyCode)) {
+			setFocused(searchBox);
+			
+			return searchBox.charTyped(chr, keyCode);
+		}
+		
+		return true;
 	}
 	
 	@Override
@@ -118,18 +129,6 @@ public class SettingsTab extends RTMenuTab implements ISettingListener, IPermiss
 		PermissionManager.removeListener(this);
 		
 		settingsList.saveScrollAmount();
-	}
-	
-	@Override
-	public void unfocusTextFields(Element except) {
-		if (searchBox != except) {
-			searchBox.unFocus();
-		}
-	}
-	
-	@Override
-	protected boolean hasFocusedTextField() {
-		return getFocused() == searchBox || settingsList.focusedIsTextField();
 	}
 	
 	public void onSettingChanged(ISetting setting) {

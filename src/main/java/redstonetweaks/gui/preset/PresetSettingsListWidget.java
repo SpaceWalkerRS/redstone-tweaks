@@ -21,7 +21,6 @@ import redstonetweaks.gui.setting.WorldTickOptionsWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
-import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
@@ -182,11 +181,6 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		public void tick() {
 			
 		}
-		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
 	}
 	
 	public class SeparatorEntry extends Entry {
@@ -209,11 +203,6 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		public void tick() {
 			
 		}
-		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
 	}
 	
 	public class AddSettingEntry extends Entry {
@@ -223,8 +212,6 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		private final List<Text> tooltip;
 		private final List<RTElement> children;
 		private final RTButtonWidget addRemoveButton;
-		
-		private double hoverAnimation;
 		
 		public AddSettingEntry(ISetting setting) {
 			this.setting = setting;
@@ -242,19 +229,13 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 				button.updateMessage();
 			});
 			this.children.add(this.addRemoveButton);
-			
-			this.hoverAnimation = 0.0D;
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			double speed = 60.0D / ((RTIMinecraftClient)client).getCurrentFps();
 			if (hovered) {
-				hoverAnimation = 1.0D - (1.0D - hoverAnimation) / Math.pow(1.2D, speed);
-			} else {
-				hoverAnimation = hoverAnimation / Math.pow(2, speed);
+				fillGradient(matrices, 2, y - 1, getScrollbarPositionX() - 1, y + itemHeight - 1, -2146365166, -2146365166);
 			}
-			fillGradient(matrices, 2, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
@@ -283,11 +264,6 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 			
 		}
 		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
-		
 		private boolean titleHovered(int mouseX, int mouseY) {
 			int width = client.textRenderer.getWidth(title);
 			int height = client.textRenderer.fontHeight;
@@ -312,8 +288,6 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		private final ButtonPanel buttonPanel;
 		private final RTButtonWidget removeButton;
 		
-		private double hoverAnimation;
-		
 		public EditSettingEntry(ISetting setting) {
 			this.setting = setting;
 			this.title = new TranslatableText(setting.getName());
@@ -330,19 +304,13 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 				settingsChanged = true;
 			});
 			this.children.add(removeButton);
-			
-			this.hoverAnimation = 0.0D;
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			double speed = 60.0D / ((RTIMinecraftClient)client).getCurrentFps();
 			if (hovered) {
-				hoverAnimation = 1.0D - (1.0D - hoverAnimation) / Math.pow(1.2D, speed);
-			} else {
-				hoverAnimation = hoverAnimation / Math.pow(2, speed);
+				fillGradient(matrices, 0, y - 1, getScrollbarPositionX() - 1, y + itemHeight - 1, -2146365166, -2146365166);
 			}
-			fillGradient(matrices, 0, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
@@ -376,13 +344,8 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 		}
 		
 		@Override
-		protected void unfocusTextFields() {
-			buttonPanel.unfocusTextFields(null);
-		}
-		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return buttonPanel.focusedIsTextField();
+		public void unfocus() {
+			buttonPanel.unfocus();
 		}
 		
 		private void populateButtonPanel() {

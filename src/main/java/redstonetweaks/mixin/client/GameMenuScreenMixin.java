@@ -10,6 +10,9 @@ import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import redstonetweaks.gui.RTMenuScreen;
+import redstonetweaks.gui.widget.RTButtonWidget;
 
 @Mixin(GameMenuScreen.class)
 public class GameMenuScreenMixin extends Screen {
@@ -25,6 +28,10 @@ public class GameMenuScreenMixin extends Screen {
 		if (client.isInSingleplayer()) {
 			toTitleScreenButton = button;
 		}
+		
+		addButton(new RTButtonWidget(width / 2 - 240, height / 4 + 80, 130, 20, () -> new TranslatableText("Redstone Tweaks Menu"), (menuButton) -> {
+			client.openScreen(new RTMenuScreen(client));
+		}));
 	}
 	
 	@Inject(method = "tick", at = @At(value = "RETURN"))

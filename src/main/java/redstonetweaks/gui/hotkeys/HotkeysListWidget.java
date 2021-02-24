@@ -115,10 +115,5 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 			editButton.updateMessage();
 			resetButton.setActive(!keyBinding.isDefault());
 		}
-		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
 	}
 }

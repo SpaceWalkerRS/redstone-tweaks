@@ -7,7 +7,6 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
-import redstonetweaks.gui.widget.RTTextFieldWidget;
 
 public class ButtonPanel extends RTAbstractParentElement implements RTElement {
 	
@@ -15,8 +14,6 @@ public class ButtonPanel extends RTAbstractParentElement implements RTElement {
 	
 	private final List<IAbstractButtonWidget> buttons;
 	private final int spacing;
-	
-	private Element focused;
     
     private int x;
     private int y;
@@ -44,24 +41,16 @@ public class ButtonPanel extends RTAbstractParentElement implements RTElement {
 	}
 	
 	@Override
-	public Element getFocused() {
-		return focused;
-	}
-	
-	@Override
-	public void setFocused(Element focused) {
-		this.focused = focused;
-	}
-	
-	@Override
 	public void allowHover(boolean allowHover) {
 		buttons.forEach((button) -> button.allowHover(allowHover));
 	}
 	
+	@Override
 	public int getX() {
 		return x;
 	}
 	
+	@Override
 	public int getY() {
 		return y;
 	}
@@ -125,9 +114,5 @@ public class ButtonPanel extends RTAbstractParentElement implements RTElement {
 	
 	public void setVisible(boolean visible) {
 		buttons.forEach((button) -> button.setVisible(visible));
-	}
-	
-	public boolean focusedIsTextField() {
-		return getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive();
 	}
 }

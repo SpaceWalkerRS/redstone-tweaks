@@ -48,11 +48,6 @@ public class RemovedPresetsWindow extends RTWindow {
 	protected void onRefresh() {
 		list.saveScrollAmount();
 	}
-
-	@Override
-	protected boolean hasFocusedTextField() {
-		return list.focusedIsTextField();
-	}
 	
 	public void updateButtonsActive() {
 		list.updateButtonsActive();

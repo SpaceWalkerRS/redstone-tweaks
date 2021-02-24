@@ -34,7 +34,7 @@ public abstract class HopperBlockMixin extends Block {
 	
 	@Redirect(method = "updateEnabled", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onUpdateEnabledRedirectGetReceivedPower(World world1, BlockPos blockPos, World world, BlockPos pos, BlockState state) {
-		return WorldHelper.isPowered(world, pos, state, false, getQC(), randQC());
+		return WorldHelper.isPowered(world, pos, false, getQC(), randQC());
 	}
 	
 	@Redirect(method = "updateEnabled", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
@@ -53,7 +53,7 @@ public abstract class HopperBlockMixin extends Block {
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		boolean enabled = state.get(Properties.ENABLED);
 		boolean lazy = isLazy(enabled);
-		boolean isReceivingPower = WorldHelper.isPowered(world, pos, state, true, getQC(), randQC());
+		boolean isReceivingPower = WorldHelper.isPowered(world, pos, true, getQC(), randQC());
 		boolean shouldBeEnabled = lazy ? !enabled : !isReceivingPower;
 		
 		if (enabled != shouldBeEnabled) {

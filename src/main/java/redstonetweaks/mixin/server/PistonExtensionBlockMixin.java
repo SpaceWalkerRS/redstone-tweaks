@@ -3,6 +3,8 @@ package redstonetweaks.mixin.server;
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -33,6 +35,36 @@ public abstract class PistonExtensionBlockMixin extends AbstractBlock {
 		super(settings);
 	}
 	
+	@Redirect(method = "onStateReplaced", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/PistonBlockEntity;finish()V"))
+	private void onOnStateReplacedRedirectFinish(PistonBlockEntity pistonBlockEntity, BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+		pistonBlockEntity.finish();
+		
+		if (newState.isAir()) {
+			// This makes sure block entities with inventories drop their contents
+			// when the moving block is destroyed, for example by an explosion
+			
+			BlockState movedState = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedMovingState();
+			BlockEntity movedBlockEntity = ((RTIPistonBlockEntity)pistonBlockEntity).getMovedMovingBlockEntity();
+			
+			if (movedBlockEntity != null && !(movedBlockEntity instanceof PistonBlockEntity) && movedBlockEntity.getType().supports(movedState.getBlock())) {
+				WorldHelper.setBlockWithEntity(world, pos, movedState, movedBlockEntity, 18);
+				world.breakBlock(pos, true);
+			}
+		}
+	}
+	
+	@Redirect(method = "getDroppedStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/PistonBlockEntity;getPushedBlock()Lnet/minecraft/block/BlockState;"))
+	private BlockState onGetDroppedStacksRedirectGetPushedBlock(PistonBlockEntity pistonBlockEntity) {
+		BlockState movedState = pistonBlockEntity.getPushedBlock();
+		
+		return movedState.isOf(Blocks.MOVING_PISTON) ? Blocks.AIR.getDefaultState() : movedState;
+	}
+	
+	@Override
+	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+		tryMove(world, pos, state, false);
+	}
+	
 	@Override
 	public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
@@ -47,10 +79,9 @@ public abstract class PistonExtensionBlockMixin extends AbstractBlock {
 				
 				if (!world.isClient()) {
 					boolean lazy = extend ? PistonSettings.lazyRisingEdge(sticky) : PistonSettings.lazyFallingEdge(sticky);
-					boolean shouldExtend = lazy ? extend : PistonHelper.isReceivingPower(world, pos, state, facing, true);
+					boolean shouldExtend = lazy ? extend : PistonHelper.isReceivingPower(world, pos, sticky, facing, true);
 					
 					if (extend != shouldExtend) {
-						System.out.println("rip");
 						return false;
 					}
 				}

@@ -59,11 +59,6 @@ public class ArraySettingWindow<K, E> extends RTWindow {
 		list.saveScrollAmount();
 	}
 	
-	@Override
-	protected boolean hasFocusedTextField() {
-		return list.focusedIsTextField();
-	}
-	
 	public void disableButtons() {
 		canEdit = false;
 		refresh();

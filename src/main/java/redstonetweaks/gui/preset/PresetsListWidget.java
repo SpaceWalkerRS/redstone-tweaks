@@ -90,11 +90,6 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		}
 		
 		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
-		
-		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			addButton.setY(y);
 			addButton.render(matrices, mouseX, mouseY, tickDelta);
@@ -126,8 +121,6 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		private boolean trimmedDescription;
 		private String description;
 		
-		private double hoverAnimation;
-		
 		public PresetEntry(Preset preset) {
 			this.preset = preset;
 			this.title = new TranslatableText(preset.getName()).formatted(Formatting.UNDERLINE, this.preset.isEditable() ? Formatting.UNDERLINE : Formatting.BOLD);
@@ -153,8 +146,6 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 				((RTIMinecraftClient)screen.client).getPresetsManager().removePreset(this.preset);
 			});
 			this.children.add(deleteButton);
-			
-			this.hoverAnimation = 0.0F;
 		}
 		
 		@Override
@@ -184,19 +175,10 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		}
 		
 		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
-		
-		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			double speed = 60.0D / ((RTIMinecraftClient)client).getCurrentFps();
 			if (hovered) {
-				hoverAnimation = 1.0D - (1.0D - hoverAnimation) / Math.pow(1.2D, speed);
-			} else {
-				hoverAnimation = hoverAnimation / Math.pow(2, speed);
+				fillGradient(matrices, 2, y - 1, getScrollbarPositionX() - 1, y + entryHeight - 1, -2146365166, -2146365166);
 			}
-			fillGradient(matrices, 2, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + entryHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			client.textRenderer.draw(matrices, description, x + getEntryTitleWidth() + 10, y + itemHeight / 2 - 5, TEXT_COLOR);
@@ -248,5 +230,6 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	public abstract class Entry extends RTListWidget.Entry<PresetsListWidget.Entry> {
 		
 		public abstract void updateButtonsActive();
+		
 	}
 }

@@ -1,6 +1,5 @@
 package redstonetweaks.gui.info;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -41,15 +40,5 @@ public class InfoTab extends RTMenuTab {
 	@Override
 	public void onTabClosed() {
 		list.saveScrollAmount();
-	}
-	
-	@Override
-	protected boolean hasFocusedTextField() {
-		return list.focusedIsTextField();
-	}
-	
-	@Override
-	public void unfocusTextFields(Element except) {
-		
 	}
 }

@@ -105,7 +105,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	private boolean onOnSyncedBlockEventRedirectShouldExtend(PistonBlock piston, World world1, BlockPos pos1, Direction facing, BlockState state, World world, BlockPos pos, int type, int data) {
 		boolean extending = type == MotionType.EXTEND || type == MotionType.EXTEND_BACKWARDS;
 		boolean lazy = extending ? PistonSettings.lazyRisingEdge(sticky) : PistonSettings.lazyFallingEdge(sticky);
-		return lazy ? extending : PistonHelper.isReceivingPower(world, pos, state, facing, true);
+		return lazy ? extending : PistonHelper.isReceivingPower(world, pos, sticky, facing, true);
 	}
 	
 	@ModifyConstant(method = "onSyncedBlockEvent", constant = @Constant(intValue = MotionType.RETRACT_A, ordinal = 0))
@@ -172,15 +172,19 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		
 		return world.getBlockState(pos);
 	}
-
+	
 	@Redirect(method = "onSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/PistonBlockEntity;isExtending()Z"))
-	private boolean onOnSyncedBlockEventRedirectIsExtending(PistonBlockEntity pistonBlockEntity) {
+	private boolean onOnSyncedBlockEventRedirectIsExtending(PistonBlockEntity pistonBlockEntity, BlockState state, World world, BlockPos pos, int type, int data) {
 		if (pistonBlockEntity.isExtending()) {
 			if (PistonSettings.doBlockDropping()) {
 				return true;
 			}
 			
-			((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
+			if (PistonSettings.superBlockDropping()) {
+				dropPushedBlocks(world, pos, state);
+			} else {
+				((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
+			}
 		}
 		
 		return false;
@@ -200,17 +204,7 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 	private void onOnSyncedBlockEventRedirectFinish1(PistonBlockEntity pistonBlockEntity, BlockState state, World world, BlockPos pos, int type, int data) {
 		if (PistonSettings.fastBlockDropping()) {
 			if (PistonSettings.superBlockDropping()) {
-				PistonHandler pistonHandler = PistonHelper.createPistonHandler(world, pos, state.get(Properties.FACING), true, sticky);
-				
-				List<BlockPos> droppedBlocks = ((RTIPistonHandler)pistonHandler).getMovingStructure();
-				
-				for (int index = droppedBlocks.size() - 1; index >= 0; index--) {
-					BlockEntity blockEntity = world.getBlockEntity(droppedBlocks.get(index));
-					
-					if (blockEntity instanceof PistonBlockEntity) {
-						((RTIPistonBlockEntity)blockEntity).finishSource();
-					}
-				}
+				dropPushedBlocks(world, pos, state);
 			} else {
 				((RTIPistonBlockEntity)pistonBlockEntity).finishSource();
 			}
@@ -583,5 +577,19 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		}
 		
 		return true;
+	}
+	
+	private void dropPushedBlocks(World world, BlockPos pos, BlockState state) {
+		PistonHandler pistonHandler = PistonHelper.createPistonHandler(world, pos, state.get(Properties.FACING), true, sticky);
+		
+		List<BlockPos> droppedBlocks = ((RTIPistonHandler)pistonHandler).getMovingStructure();
+		
+		for (int index = droppedBlocks.size() - 1; index >= 0; index--) {
+			BlockEntity blockEntity = world.getBlockEntity(droppedBlocks.get(index));
+			
+			if (blockEntity instanceof PistonBlockEntity) {
+				((RTIPistonBlockEntity)blockEntity).finishSource();
+			}
+		}
 	}
 }

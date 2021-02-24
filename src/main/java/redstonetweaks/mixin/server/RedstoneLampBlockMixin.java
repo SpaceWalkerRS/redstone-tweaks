@@ -27,12 +27,12 @@ public class RedstoneLampBlockMixin {
 	
 	@Redirect(method = "getPlacementState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onGetPlacementStateRedirectGetReceivedPower(World world, BlockPos pos, ItemPlacementContext ctx) {
-		return WorldHelper.isPowered(world, pos, world.getBlockState(pos), false, Tweaks.RedstoneLamp.QC, Tweaks.RedstoneLamp.RANDOMIZE_QC.get());
+		return WorldHelper.isPowered(world, pos, false, Tweaks.RedstoneLamp.QC, Tweaks.RedstoneLamp.RANDOMIZE_QC.get());
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onNeighborUpdateRedirectGetReceivedPower(World world1, BlockPos blockPos, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-		return WorldHelper.isPowered(world, pos, state, false, Tweaks.RedstoneLamp.QC, Tweaks.RedstoneLamp.RANDOMIZE_QC.get());
+		return WorldHelper.isPowered(world, pos, false, Tweaks.RedstoneLamp.QC, Tweaks.RedstoneLamp.RANDOMIZE_QC.get());
 	}
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
@@ -50,7 +50,7 @@ public class RedstoneLampBlockMixin {
 	@Inject(method = "scheduledTick", at = @At(value = "HEAD"), cancellable = true)
 	private void onScheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		boolean powered = state.get(Properties.LIT);
-		boolean isReceivingPower = WorldHelper.isPowered(world, pos, state, true, Tweaks.RedstoneLamp.QC, Tweaks.RedstoneLamp.RANDOMIZE_QC.get());
+		boolean isReceivingPower = WorldHelper.isPowered(world, pos, true, Tweaks.RedstoneLamp.QC, Tweaks.RedstoneLamp.RANDOMIZE_QC.get());
 		boolean shouldBePowered = isLazy(powered) ? !powered : isReceivingPower;
 
 		if (powered != shouldBePowered) {

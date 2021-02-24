@@ -225,11 +225,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			
 		}
 		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
-		
 		private void updateButtonsActive() {
 			boolean canManageSettings = PermissionManager.canManageSettings(client.player);
 			
@@ -262,11 +257,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		public void tick() {
 			
 		}
-		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
 	}
 	
 	public class SettingEntry extends Entry {
@@ -278,8 +268,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		private final ButtonPanel buttonPanel;
 		private final RTLockButtonWidget lockButton;
 		private final RTButtonWidget resetButton;
-		
-		private double hoverAnimation;
 		
 		public SettingEntry(ISetting setting) {
 			this.setting = setting;
@@ -302,19 +290,13 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 			this.buttonPanel = new ButtonPanel();
 			this.populateButtonPanels();
 			this.children.add(buttonPanel);
-			
-			this.hoverAnimation = 0.0D;
 		}
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int itemHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			double speed = 60.0D / ((RTIMinecraftClient)client).getCurrentFps();
 			if (hovered) {
-				hoverAnimation = 1.0D - (1.0D - hoverAnimation) / Math.pow(1.2D, speed);
-			} else {
-				hoverAnimation = hoverAnimation / Math.pow(2, speed);
+				fillGradient(matrices, 2, y - 1, getScrollbarPositionX() - 1, y + itemHeight - 1, -2146365166, -2146365166);
 			}
-			fillGradient(matrices, 2, y - 1, (int)(hoverAnimation * (getScrollbarPositionX() - 1)), y + itemHeight - 1, -2146365166, -2146365166);
 			
 			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
@@ -351,16 +333,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		@Override
 		public void tick() {
 			buttonPanel.tick();
-		}
-		
-		@Override
-		protected void unfocusTextFields() {
-			buttonPanel.unfocusTextFields(null);
-		}
-		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return buttonPanel.focusedIsTextField();
 		}
 		
 		private List<Text> createTooltip() {

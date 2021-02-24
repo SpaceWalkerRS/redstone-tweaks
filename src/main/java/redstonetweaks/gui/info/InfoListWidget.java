@@ -122,11 +122,6 @@ public class InfoListWidget extends RTListWidget<InfoListWidget.Entry> {
 		}
 		
 		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
-		
-		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			screen.getTextRenderer().draw(matrices, text, x, y + 5, TEXT_COLOR);
 			
@@ -149,11 +144,6 @@ public class InfoListWidget extends RTListWidget<InfoListWidget.Entry> {
 		@Override
 		public void tick() {
 			
-		}
-		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
 		}
 		
 		@Override
@@ -181,11 +171,6 @@ public class InfoListWidget extends RTListWidget<InfoListWidget.Entry> {
 		}
 		
 		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
-		
-		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			screen.getTextRenderer().draw(matrices, name, x, y + 5, TEXT_COLOR);
 		}
@@ -209,11 +194,6 @@ public class InfoListWidget extends RTListWidget<InfoListWidget.Entry> {
 		@Override
 		public void tick() {
 			
-		}
-		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
 		}
 		
 		@Override

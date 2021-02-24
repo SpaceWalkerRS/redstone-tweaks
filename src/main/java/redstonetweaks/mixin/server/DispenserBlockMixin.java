@@ -30,7 +30,7 @@ public abstract class DispenserBlockMixin {
 	
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean neighborUpdateRedirectIsReceivingRedstonePower1(World world1, BlockPos posUp, BlockState state, World world, BlockPos pos) {
-		return WorldHelper.isQCPowered(world, pos, state, false, getQC(state), randQC(state));
+		return WorldHelper.isQCPowered(world, pos, false, getQC(state), randQC(state));
 	}
 
 	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
@@ -63,7 +63,7 @@ public abstract class DispenserBlockMixin {
 
 	@Inject(method = "scheduledTick", at = @At(value = "HEAD"), cancellable = true)
 	private void onScheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
-		if (!isLazy(state) && !WorldHelper.isPowered(world, pos, state, true, getQC(state), randQC(state))) {
+		if (!isLazy(state) && !WorldHelper.isPowered(world, pos, true, getQC(state), randQC(state))) {
 			ci.cancel();
 		}
 	}

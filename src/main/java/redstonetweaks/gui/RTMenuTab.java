@@ -7,8 +7,6 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-import redstonetweaks.gui.widget.RTTextFieldWidget;
-
 public abstract class RTMenuTab extends RTAbstractParentElement {
 	
 	protected static final int TEXT_COLOR = 16777215;
@@ -38,6 +36,11 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 		return mouseY >= screen.getHeaderHeight();
 	}
 	
+	@Override
+	protected boolean consumeClick() {
+		return true;
+	}
+	
 	public Text getTitle() {
 		return title;
 	}
@@ -59,11 +62,11 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	}
 	
 	private void addWindow(RTWindow window) {
-		getWindows().add(window);
+		windows.add(window);
 	}
 	
 	private void removeWindow(RTWindow window) {
-		getWindows().remove(window);
+		windows.remove(window);
 	}
 	
 	public void init() {
@@ -73,7 +76,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 		initContents();
 		allowHover(!hasWindowOpen());
 	}
-
+	
 	protected abstract void initContents();
 	
 	public void refresh() {
@@ -111,7 +114,7 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	protected abstract void renderContents(MatrixStack matrices, int mouseX, int mouseY, float delta);
 
 	private void renderWindows(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		getWindows().forEach((window) -> window.render(matrices, mouseX, mouseY, delta));
+		windows.forEach((window) -> window.render(matrices, mouseX, mouseY, delta));
 	}
 	
 	public void openWindow(RTWindow window) {
@@ -150,23 +153,5 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	}
 	
 	public abstract void onTabClosed();
-	
-	public boolean focusedIsTextField() {
-		if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
-			return true;
-		}
-		if (!hasWindowOpen()) {
-			return hasFocusedTextField();
-		} else {
-			for (RTWindow window : windows) {
-				if (window.hasFocusedTextField()) {
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-	
-	protected abstract boolean hasFocusedTextField();
 	
 }

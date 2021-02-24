@@ -19,7 +19,7 @@ public class AbstractRailBlockMixin {
 	@Redirect(method = "updateBlockState(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Z)Lnet/minecraft/block/BlockState;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isReceivingRedstonePower(Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onUpdateBlockStateRedirectIsReceivingRedstonePower(World world1, BlockPos blockPos, World world, BlockPos pos, BlockState state, boolean forceUpdate) {
 		if (state.isOf(Blocks.RAIL)) {
-			return WorldHelper.isPowered(world, pos, state, false, ((RTIRail)this).getQC(), ((RTIRail)this).randQC());
+			return WorldHelper.isPowered(world, pos, false, ((RTIRail)this).getQC(), ((RTIRail)this).randQC());
 		}
 		
 		return world.isReceivingRedstonePower(pos);

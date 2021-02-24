@@ -279,15 +279,15 @@ public class PistonHelper {
 		return isPistonHead(pistonHead, sticky, facing) || isExtendingPistonHead(world, headPos, pistonHead, sticky, facing);
 	}
 	
-	public static boolean isReceivingPower(World world, BlockPos pos, BlockState state, Direction facing) {
-		return isReceivingPower(world, pos, state, facing, false);
+	public static boolean isReceivingPower(World world, BlockPos pos, BlockState state) {
+		return isReceivingPower(world, pos, isSticky(state), state.get(Properties.FACING), false);
 	}
 	
-	public static boolean isReceivingPower(World world, BlockPos pos, BlockState state, Direction facing, boolean onBlockEvent) {
-		boolean sticky = isSticky(state);
+	public static boolean isReceivingPower(World world, BlockPos pos, boolean sticky, Direction facing, boolean onBlockEvent) {
+		boolean ignorePowerFromFront = PistonSettings.ignorePowerFromFront(sticky);
 		
 		for (Direction direction : Direction.values()) {
-			if (PistonSettings.ignorePowerFromFront(sticky) && direction == facing) {
+			if (ignorePowerFromFront && direction == facing) {
 				continue;
 			}
 			
@@ -296,11 +296,15 @@ public class PistonHelper {
 			}
 		}
 		
-		return WorldHelper.isQCPowered(world, pos, state, onBlockEvent, PistonSettings.getQC(sticky), PistonSettings.randQC(sticky));
+		return WorldHelper.isQCPowered(world, pos, onBlockEvent, PistonSettings.getQC(sticky), PistonSettings.randQC(sticky));
 	}
 	
 	public static boolean canMoveBlockEntityOf(Block block) {
 		return block.hasBlockEntity() && !IMMOVABLE_BLOCKS.contains(block);
+	}
+	
+	public static boolean launchesEntities(Block block) {
+		return block == Blocks.SLIME_BLOCK;
 	}
 	
 	public static float getSoundPitch(World world, boolean extending, boolean sticky) {
@@ -607,12 +611,17 @@ public class PistonHelper {
 			delay = PistonSettings.delayRisingEdge(sticky);
 			lazy = PistonSettings.lazyRisingEdge(sticky);
 		}
-		boolean powered = PistonHelper.isReceivingPower(world, pos, state, facing);
+		boolean powered = PistonHelper.isReceivingPower(world, pos, sticky, facing, false);
 		
 		boolean shouldExtend = (onScheduledTick && lazy) ? !extended : powered;
 		
 		if (shouldExtend && !extended) {
-			int type = createPistonHandler(world, pos, facing, true, sticky).calculatePush() ? MotionType.EXTEND : ((PistonSettings.canMoveSelf(sticky) && createPistonHandler(world, pos, facing.getOpposite(), true, sticky).calculatePush()) ? MotionType.EXTEND_BACKWARDS : MotionType.NONE);
+			int type;
+			if (isPiston(state)) {
+				type = createPistonHandler(world, pos, facing, true, sticky).calculatePush() ? MotionType.EXTEND : ((PistonSettings.canMoveSelf(sticky) && createPistonHandler(world, pos, facing.getOpposite(), true, sticky).calculatePush()) ? MotionType.EXTEND_BACKWARDS : MotionType.NONE);
+			} else {
+				type = MotionType.EXTEND;
+			}
 			
 			if (type == MotionType.NONE) {
 				if (powered && PistonSettings.updateSelf(sticky)) {
@@ -621,7 +630,7 @@ public class PistonHelper {
 			} else {
 				if (onScheduledTick) {
 					world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
-				} else if (!((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
+				} else if (delay == 0 || Tweaks.Global.DELAY_MULTIPLIER.get() == 0 || !((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
 					TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, PistonSettings.tickPriorityRisingEdge(sticky));
 				}
 			}
@@ -643,8 +652,9 @@ public class PistonHelper {
 					
 					world.setBlockState(pos, state, 16);
 				}
+				
 				world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
-			} else if (!((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
+			} else if (delay == 0 || Tweaks.Global.DELAY_MULTIPLIER.get() == 0 || !((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
 				TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, PistonSettings.tickPriorityFallingEdge(sticky));
 			}
 		}

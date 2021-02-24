@@ -307,7 +307,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		
 		if (world instanceof World) {
 			if (((World) world).isClient() ? RedstoneTweaks.client : RedstoneTweaks.server) {
-				System.out.println(collisionShape + " - " + pos + " - " + movedState);
+				//System.out.println(collisionShape + " - " + pos + " - " + movedState);
 			}
 		}
 		
@@ -742,6 +742,14 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		return getTotalAmountExtended(Vec3d.ZERO);
 	}
 	
+	private double getTotalStepAmount(Direction.Axis axis) {
+		return correctStepAmount(0.0D, axis);
+	}
+	
+	private boolean shouldLaunchEntities() {
+		return PistonHelper.launchesEntities(getMovedMovingState().getBlock());
+	}
+	
 	// The axial velocity of an entity launched by a slime block
 	private double getLaunchVelocity(double velocity, double stepAmount) {
 		return (stepAmount > 0.0D) ? 1.0D : -1.0D;
@@ -784,15 +792,15 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			Vec3d offset = Vec3d.of(pos).add(getTotalAmountExtended());
 			Box boundingBox = voxelShape.getBoundingBox().offset(offset);
 			
-			double stepX = correctStepAmount(0.0D, Direction.Axis.X);
-			double stepY = correctStepAmount(0.0D, Direction.Axis.Y);
-			double stepZ = correctStepAmount(0.0D, Direction.Axis.Z);
+			double stepX = getTotalStepAmount(Direction.Axis.X);
+			double stepY = getTotalStepAmount(Direction.Axis.Y);
+			double stepZ = getTotalStepAmount(Direction.Axis.Z);
 			
 			List<Entity> entities = world.getOtherEntities(null, boundingBox.stretch(stepX, stepY, stepZ));
 			
 			if (!entities.isEmpty()) {
 				List<Box> boundingBoxes = voxelShape.getBoundingBoxes();
-				boolean launchEntities = getMovedMovingState().isOf(Blocks.SLIME_BLOCK);
+				boolean launchEntities = shouldLaunchEntities();
 				
 				boolean moveX = (stepX != 0.0D);
 				boolean moveY = (stepY != 0.0D);
@@ -820,6 +828,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 					for (Box box : boundingBoxes) {
 						Box[] boxes = BoxUtils.getExpansionBoxes(box.offset(offset), stepX, stepY, stepZ);
 						Box entityBox = entity.getBoundingBox();
+						
 						if (moveX && entityBox.intersects(boxes[0])) {
 							moveAmountX = updateMoveAmount(moveAmountX, stepX, Direction.Axis.X, entityBox, boxes[0]);
 						}

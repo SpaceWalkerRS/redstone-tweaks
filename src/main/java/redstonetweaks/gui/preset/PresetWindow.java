@@ -1,6 +1,5 @@
 package redstonetweaks.gui.preset;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
@@ -91,21 +90,6 @@ public class PresetWindow extends RTWindow {
 	@Override
 	protected void onRefresh() {
 		
-	}
-	
-	@Override
-	protected boolean hasFocusedTextField() {
-		return getFocused() == nameField || getFocused() == descriptionField;
-	}
-	
-	@Override
-	public void unfocusTextFields(Element except) {
-		if (nameField != except) {
-			nameField.unFocus();
-		}
-		if (descriptionField != except) {
-			descriptionField.unFocus();
-		}
 	}
 	
 	public void updateButtonsActive() {

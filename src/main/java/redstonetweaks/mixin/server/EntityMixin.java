@@ -54,7 +54,7 @@ public abstract class EntityMixin implements RTIEntity {
 	private MovementType onMoveRedirectMovementTypePiston(MovementType type, Vec3d movement) {
 		// The movement is adjusted for pistons before the call to move
 		if (type == MovementType.PISTON) {
-			System.out.println("movement: " + movement);
+			//System.out.println("movement: " + movement);
 		}
 		
 		return type == MovementType.PISTON ? null : MovementType.PISTON;
@@ -62,15 +62,15 @@ public abstract class EntityMixin implements RTIEntity {
 	
 	@Inject(method = "adjustMovementForCollisions(Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;onGround:Z"))
 	private void e(Vec3d movement, CallbackInfoReturnable<Vec3d> cir, Box box, ShapeContext context, Stream<VoxelShape> stream, Stream<VoxelShape> stream2, ReusableStream<VoxelShape> rstream) {
-		System.out.println(box + " - " + context);
-		System.out.println("stream 2");
-		rstream.stream().forEach(v -> System.out.println("e " + v));
+		//System.out.println(box + " - " + context);
+		//System.out.println("stream");
+		//rstream.stream().forEach(v -> System.out.println("e " + v));
 	}
 	
 	@Inject(method = "adjustMovementForCollisions(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Lnet/minecraft/util/collection/ReusableStream;)Lnet/minecraft/util/math/Vec3d;", at = @At(value = "RETURN", ordinal = 0))
 	private static void e(Vec3d movement, Box entityBoundingBox, ReusableStream<VoxelShape> collisions, CallbackInfoReturnable<Vec3d> cir) {
-		System.out.println(movement + " - " + entityBoundingBox);
-		collisions.stream().forEach(v -> System.out.println("e " + v));
+		//System.out.println(movement + " - " + entityBoundingBox);
+		//collisions.stream().forEach(v -> System.out.println("e " + v));
 	}
 	
 	@Override
@@ -83,10 +83,10 @@ public abstract class EntityMixin implements RTIEntity {
 			} else {
 				RedstoneTweaks.server = true;
 			}
-			System.out.println("===============================================");
-			System.out.println("before position: " + pos);
+			//System.out.println("===============================================");
+			//System.out.println("before position: " + pos);
 			move(MovementType.PISTON, adjustMovementByPiston(movement, blockMovement));
-			System.out.println("after position: " + pos);
+			//System.out.println("after position: " + pos);
 			if (world.isClient()) {
 				RedstoneTweaks.client = false;
 			} else {
@@ -130,7 +130,7 @@ public abstract class EntityMixin implements RTIEntity {
 		
 		double combinedMovement = MathHelper.clamp(movement + currentMovement, -maxMovement, maxMovement);
 		double newMovement = combinedMovement - currentMovement;
-		System.out.println(movement + " - " + currentMovement + " - " + maxMovement + " - " + combinedMovement + " - " + newMovement);
+		//System.out.println(movement + " - " + currentMovement + " - " + maxMovement + " - " + combinedMovement + " - " + newMovement);
 		pistonMovementDelta[axis] = combinedMovement;
 		
 		return Math.abs(newMovement) <= 9.999999747378752E-6D ? 0.0D : newMovement;

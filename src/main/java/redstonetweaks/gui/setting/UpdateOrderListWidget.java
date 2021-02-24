@@ -161,11 +161,6 @@ public class UpdateOrderListWidget extends RTListWidget<UpdateOrderListWidget.En
 			buttonPanel2.render(matrices, mouseX, mouseY, tickDelta);
 		}
 		
-		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
-		
 		private void disableButtons() {
 			modeButton.setActive(false);
 			buttonPanel1.setActive(false);

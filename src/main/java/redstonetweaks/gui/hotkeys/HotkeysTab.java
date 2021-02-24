@@ -1,6 +1,5 @@
 package redstonetweaks.gui.hotkeys;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.InputUtil.Key;
 import net.minecraft.client.util.math.MatrixStack;
@@ -35,6 +34,7 @@ public class HotkeysTab extends RTMenuTab {
 		if (focusedKeyBinding == null) {
 			return super.mouseClicked(mouseX, mouseY, button);
 		}
+		
 		updateFocusedKeyBinding(InputUtil.Type.MOUSE.createFromCode(button));
 		
 		return true;
@@ -56,11 +56,6 @@ public class HotkeysTab extends RTMenuTab {
 		}
 		
 		return true;
-	}
-	
-	@Override
-	public void unfocusTextFields(Element except) {
-		
 	}
 	
 	@Override
@@ -95,11 +90,7 @@ public class HotkeysTab extends RTMenuTab {
 	@Override
 	public void onTabClosed() {
 		hotkeysList.saveScrollAmount();
-	}
-	
-	@Override
-	protected boolean hasFocusedTextField() {
-		return false;
+		((RTIMinecraftClient)screen.client).getHotkeysManager().trySaveHotkeys();
 	}
 	
 	private void updateFocusedKeyBinding(Key newKey) {

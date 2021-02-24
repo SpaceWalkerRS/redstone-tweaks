@@ -103,11 +103,6 @@ public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWid
 		}
 		
 		@Override
-		protected boolean hasFocusedTextField() {
-			return false;
-		}
-		
-		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 			client.textRenderer.drawWithShadow(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			client.textRenderer.drawWithShadow(matrices, description, x + getEntryTitleWidth() + 10, y + itemHeight / 2 - 5, TEXT_COLOR);
@@ -145,5 +140,6 @@ public class RemovedPresetsListWidget extends RTListWidget<RemovedPresetsListWid
 	public abstract class Entry extends RTListWidget.Entry<RemovedPresetsListWidget.Entry> {
 		
 		public abstract void updateButtonsActive();
+		
 	}
 }

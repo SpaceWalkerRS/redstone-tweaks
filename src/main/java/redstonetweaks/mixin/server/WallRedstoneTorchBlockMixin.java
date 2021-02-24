@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.PistonBlock;
 import net.minecraft.block.WallRedstoneTorchBlock;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -32,8 +31,8 @@ public class WallRedstoneTorchBlockMixin {
 		if (Tweaks.RedstoneTorch.SOFT_INVERSION.get()) {
 			BlockState blockState = world.getBlockState(blockPos);
 			
-			if (blockState.getBlock() instanceof PistonBlock) {
-				if (PistonHelper.isReceivingPower(world, blockPos, blockState, blockState.get(Properties.FACING))) {
+			if (PistonHelper.isPiston(blockState)) {
+				if (PistonHelper.isReceivingPower(world, blockPos, blockState)) {
 					cir.setReturnValue(true);
 					cir.cancel();
 				}

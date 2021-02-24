@@ -18,7 +18,6 @@ import redstonetweaks.gui.preset.PresetsTab;
 import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.setting.SettingsCategory;
@@ -65,15 +64,32 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	}
 	
 	@Override
+	public void setFocused(Element e) {
+		Element focused = getFocused();
+		
+		if (e == focused) {
+			return;
+		}
+		
+		if (focused != null && focused instanceof RTElement) {
+			((RTElement)focused).unfocus();
+		}
+		
+		super.setFocused(e);
+		
+		if (e != null && e instanceof RTElement) {
+			((RTElement)e).focus();
+		}
+	}
+	
+	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		RTMenuTab selectedTab = getSelectedTab();
 		if (selectedTab.mouseClicked(mouseX, mouseY, button)) {
 			setFocused(selectedTab);
 		} else {
 			for (IAbstractButtonWidget tabButton : tabButtons) {
-				if (tabButton.mouseClicked(mouseX, mouseY, button)) {
-					setFocused(tabButton);
-				}
+				tabButton.mouseClicked(mouseX, mouseY, button);
 			}
 		}
 		
@@ -89,10 +105,12 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		if (getSelectedTab().keyPressed(keyCode, scanCode, modifiers)) {
 			return true;
 		}
-		if (keyCode == 256 || (((RTIMinecraftClient)client).getHotkeysManager().getHotkeys().toggleMenu.matchesKey(keyCode, scanCode) && !focusedIsTextField())) {
+		if (keyCode == 256) {
 			onClose();
+			
 			return true;
 		}
+		
 		return false;
 	}
 	
@@ -131,6 +149,7 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		tabButtons.clear();
 		
 		headerHeight = TITLE_MARGIN + TITLE_HEIGHT + 30;
+		
 		createTabs();
 		createTabButtons();
 		
@@ -222,6 +241,8 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		
 		tabButtons.get(index).setActive(false);
 		getSelectedTab().init();
+		
+		setFocused(getSelectedTab());
 	}
 	
 	public void openWindow(RTWindow window) {
@@ -234,10 +255,6 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	
 	public boolean hasWindowOpen() {
 		return getSelectedTab().hasWindowOpen();
-	}
-	
-	public boolean focusedIsTextField() {
-		return getSelectedTab().focusedIsTextField();
 	}
 	
 	@Override

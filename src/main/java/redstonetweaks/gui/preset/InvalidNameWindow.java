@@ -1,6 +1,5 @@
 package redstonetweaks.gui.preset;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -32,16 +31,6 @@ public class InvalidNameWindow extends RTWindow {
 	
 	@Override
 	protected void onRefresh() {
-		
-	}
-	
-	@Override
-	protected boolean hasFocusedTextField() {
-		return false;
-	}
-	
-	@Override
-	public void unfocusTextFields(Element except) {
 		
 	}
 }

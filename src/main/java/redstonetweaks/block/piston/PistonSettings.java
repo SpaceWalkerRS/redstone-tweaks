@@ -27,11 +27,11 @@ public class PistonSettings {
 	}
 	
 	public static boolean fastBlockDropping() {
-		return doBlockDropping() && Tweaks.StickyPiston.FAST_BLOCK_DROPPING.get();
+		return Tweaks.StickyPiston.FAST_BLOCK_DROPPING.get();
 	}
 	
 	public static boolean superBlockDropping() {
-		return fastBlockDropping() && Tweaks.StickyPiston.SUPER_BLOCK_DROPPING.get();
+		return Tweaks.StickyPiston.SUPER_BLOCK_DROPPING.get();
 	}
 	
 	public static boolean headUpdatesOnExtension(boolean sticky) {

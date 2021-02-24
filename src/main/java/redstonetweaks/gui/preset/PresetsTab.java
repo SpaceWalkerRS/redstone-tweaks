@@ -3,7 +3,6 @@ package redstonetweaks.gui.preset;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -58,6 +57,17 @@ public class PresetsTab extends RTMenuTab {
 		
 		this.presetsBrowserContent = new ArrayList<>();
 		this.presetEditorContent = new ArrayList<>();
+	}
+	
+	@Override
+	public boolean charTyped(char chr, int keyCode) {
+		if (getFocused() == null || !getFocused().charTyped(chr, keyCode)) {
+			setFocused(searchBox);
+			
+			return searchBox.charTyped(chr, keyCode);
+		}
+		
+		return true;
 	}
 	
 	@Override
@@ -255,18 +265,6 @@ public class PresetsTab extends RTMenuTab {
 		
 		if (isEditingPreset()) {
 			getPresetEditor().discardChanges();
-		}
-	}
-	
-	@Override
-	protected boolean hasFocusedTextField() {
-		return getFocused() == searchBox || presetsList.focusedIsTextField();
-	}
-	
-	@Override
-	public void unfocusTextFields(Element except) {
-		if (searchBox != except) {
-			searchBox.unFocus();
 		}
 	}
 	

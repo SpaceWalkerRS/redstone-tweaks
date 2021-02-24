@@ -27,6 +27,8 @@ public class HotkeysManager {
 	private final MinecraftClient client;
 	private final Hotkeys hotkeys;
 	
+	private boolean unsavedChanges;
+	
 	public HotkeysManager(MinecraftClient client) {
 		this.client = client;
 		this.hotkeys = new Hotkeys(this);
@@ -61,13 +63,6 @@ public class HotkeysManager {
 	}
 	
 	private boolean keyPress(RTKeyBinding keyBinding) {
-		if (keyBinding == hotkeys.toggleMenu) {
-			if (client.currentScreen == null) {
-				client.openScreen(new RTMenuScreen(client));
-				
-				return true;
-			}
-		} else
 		if (keyBinding == hotkeys.pauseWorldTicking) {
 			if (client.currentScreen == null && PermissionManager.canUseTickCommand(client.player)) {
 				((RTIMinecraftClient)client).getPacketHandler().sendPacket(new TickPausePacket(true));
@@ -91,14 +86,32 @@ public class HotkeysManager {
 	}
 	
 	private boolean keyRelease(RTKeyBinding keyBinding) {
+		if (keyBinding == hotkeys.toggleMenu) {
+			if (client.currentScreen == null) {
+				client.openScreen(new RTMenuScreen(client));
+				
+				return true;
+			}
+		}
+		
 		return false;
 	}
 	
 	public void onKeyBindingChanged() {
+		unsavedChanges = true;
+		
 		Screen screen = client.currentScreen;
 		
 		if (screen instanceof RTMenuScreen) {
 			((RTMenuScreen)screen).onHotkeyChanged();
+		}
+	}
+	
+	public void trySaveHotkeys() {
+		if (unsavedChanges) {
+			saveHotkeys();
+			
+			unsavedChanges = false;
 		}
 	}
 	

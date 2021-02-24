@@ -87,7 +87,7 @@ public class BlockEventHandler {
 	public boolean startBlockEvent() {
 		if (!world.isClient()) {
 			boolean lazy = extend ? PistonSettings.lazyRisingEdge(sticky) : PistonSettings.lazyFallingEdge(sticky);
-			boolean shouldExtend =  lazy ? extend : PistonHelper.isReceivingPower(world, pos, state, facing, true);
+			boolean shouldExtend =  lazy ? extend : PistonHelper.isReceivingPower(world, pos, sticky, facing, true);
 			
 			if (shouldExtend && !extend) {
 				int flags = PistonHelper.doDoubleRetraction(sticky) ? 18 : 2;

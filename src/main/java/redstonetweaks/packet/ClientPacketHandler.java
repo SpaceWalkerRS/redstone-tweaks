@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import redstonetweaks.packet.types.AbstractRedstoneTweaksPacket;
+import redstonetweaks.server.ServerInfo;
 
 public class ClientPacketHandler extends AbstractPacketHandler {
 	
@@ -20,7 +21,9 @@ public class ClientPacketHandler extends AbstractPacketHandler {
 	
 	@Override
 	public void sendPacket(AbstractRedstoneTweaksPacket packet) {
-		client.getNetworkHandler().sendPacket(encodePacket(packet));
+		if (ServerInfo.getModVersion().isValid()) {
+			client.getNetworkHandler().sendPacket(encodePacket(packet));
+		}
 	}
 	
 	public void onPacketReceived(PacketByteBuf buffer) {

@@ -16,4 +16,13 @@ public interface RTElement extends Element {
 	
 	public void allowHover(boolean allowHover);
 	
+	default void unfocus() {
+		if (this instanceof RTAbstractParentElement) {
+			((RTAbstractParentElement)this).setFocused(null);
+		}
+	}
+	
+	default void focus() {
+		
+	}
 }

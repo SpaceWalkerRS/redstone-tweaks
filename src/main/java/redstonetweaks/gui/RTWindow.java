@@ -12,7 +12,6 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 import redstonetweaks.gui.widget.RTButtonWidget;
-import redstonetweaks.gui.widget.RTTextFieldWidget;
 
 public abstract class RTWindow extends RTAbstractParentElement implements RTElement {
 	
@@ -52,12 +51,17 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	public List<? extends Element> children() {
 		return contents;
 	}
-
+	
 	@Override
 	public boolean isMouseOver(double mouseX, double mouseY) {
 		return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
 	}
-
+	
+	@Override
+	protected boolean consumeClick() {
+		return true;
+	}
+	
 	@Override
 	public int getX() {
 		return x;
@@ -188,14 +192,5 @@ public abstract class RTWindow extends RTAbstractParentElement implements RTElem
 	}
 	
 	protected abstract void onRefresh();
-	
-	public boolean focusedIsTextField() {
-		if (getFocused() instanceof RTTextFieldWidget && ((RTTextFieldWidget)getFocused()).isActive()) {
-			return true;
-		}
-		return hasFocusedTextField();
-	}
-	
-	protected abstract boolean hasFocusedTextField();
 	
 }

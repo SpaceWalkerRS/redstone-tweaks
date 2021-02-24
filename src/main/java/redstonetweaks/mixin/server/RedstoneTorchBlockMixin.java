@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.PistonBlock;
 import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.server.world.ServerTickScheduler;
 import net.minecraft.server.world.ServerWorld;
@@ -61,8 +60,8 @@ public abstract class RedstoneTorchBlockMixin {
 		if (Tweaks.RedstoneTorch.SOFT_INVERSION.get()) {
 			BlockState blockState = world.getBlockState(blockPos);
 			
-			if (blockState.getBlock() instanceof PistonBlock) {
-				if (PistonHelper.isReceivingPower(world, blockPos, blockState, blockState.get(Properties.FACING))) {
+			if (PistonHelper.isPiston(blockState)) {
+				if (PistonHelper.isReceivingPower(world, blockPos, blockState)) {
 					cir.setReturnValue(true);
 					cir.cancel();
 				}
