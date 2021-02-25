@@ -96,7 +96,11 @@ public class PistonHelper {
 	}
 	
 	public static BlockState getPistonHead(boolean sticky, Direction facing) {
-		return Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT).with(Properties.FACING, facing);
+		return getPistonHead(sticky, facing, false);
+	}
+	
+	public static BlockState getPistonHead(boolean sticky, Direction facing, boolean shortArm) {
+		return Blocks.PISTON_HEAD.getDefaultState().with(Properties.PISTON_TYPE, sticky ? PistonType.STICKY : PistonType.DEFAULT).with(Properties.FACING, facing).with(Properties.SHORT, shortArm);
 	}
 	
 	public static boolean isPistonHead(BlockState state, boolean sticky, Direction facing) {

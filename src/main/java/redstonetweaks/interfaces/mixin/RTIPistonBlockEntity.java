@@ -1,6 +1,5 @@
 package redstonetweaks.interfaces.mixin;
 
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SideShapeType;
 import net.minecraft.block.entity.BlockEntity;
@@ -9,6 +8,7 @@ import net.minecraft.block.enums.SlabType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 
 import redstonetweaks.block.piston.MovedBlock;
@@ -25,9 +25,11 @@ public interface RTIPistonBlockEntity {
 	
 	public void setSticky(boolean newValue);
 	
-	public double correctStepAmount(double stepAmount, Direction.Axis axis);
+	public Vec3d getTotalAmountExtended(Vec3d amountExtended, boolean ignore);
 	
-	public Vec3d getTotalAmountExtended(Vec3d offset);
+	public Vec3d getTotalStepAmount(Vec3d stepAmount, boolean ignore);
+	
+	public VoxelShape getTotalCollisionShape(VoxelShape collisionShape, BlockView world, BlockPos pos);
 	
 	public boolean sourceIsMoving();
 	

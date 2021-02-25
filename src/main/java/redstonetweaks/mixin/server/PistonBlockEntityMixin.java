@@ -84,6 +84,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Shadow protected abstract BlockState getHeadBlockState();
 	@Shadow public abstract void finish();
 	@Shadow public abstract Direction getMovementDirection();
+	@Shadow protected native boolean method_23671(Box box, Entity entity);
 	
 	@Redirect(method = "getAmountExtended", at = @At(value = "FIELD", target = "Lnet/minecraft/block/entity/PistonBlockEntity;extending:Z"))
 	private boolean onGetAmountExtendedRedirectExtending(PistonBlockEntity pistonBlockEntity, float tickDelta) {
@@ -223,16 +224,12 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Redirect(method = "tick", at = @At(value = "INVOKE",  target = "Lnet/minecraft/block/entity/PistonBlockEntity;pushEntities(F)V"))
 	private void onTickRedirectPushEntities(PistonBlockEntity pistonBlockEntity, float nextProgress) {
-		if (!hasChildPistonBlockEntity) {
-			moveEntities();
-		}
+		moveEntities();
 	}
 	
 	@Redirect(method = "tick", at = @At(value = "INVOKE",  target = "Lnet/minecraft/block/entity/PistonBlockEntity;method_23674(F)V"))
 	private void onTickRedirectMethod_23674(PistonBlockEntity pistonBlockEntity, float nextProgress) {
-		if (!hasChildPistonBlockEntity) {
-			
-		}
+		// Replaced by the redirect above
 	}
 	
 	@Inject(method = "fromTag", at = @At(value = "RETURN"))
@@ -247,7 +244,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			Block movedBlock = pushedBlock.getBlock();
 			
 			if (movedBlock.hasBlockEntity()) {
-				movedBlockEntity = movedBlock == Blocks.MOVING_PISTON ? new PistonBlockEntity() : ((BlockEntityProvider)movedBlock).createBlockEntity(world);
+				movedBlockEntity = (movedBlock == Blocks.MOVING_PISTON) ? new PistonBlockEntity() : ((BlockEntityProvider)movedBlock).createBlockEntity(world);
 				
 				if (movedBlockEntity != null) {
 					movedBlockEntity.fromTag(pushedBlock, tag.getCompound("movedBlockEntity"));
@@ -263,7 +260,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			Block mergingBlock = mergingState.getBlock();
 			
 			if (mergingBlock.hasBlockEntity()) {
-				mergingBlockEntity = mergingBlock == Blocks.MOVING_PISTON ? new PistonBlockEntity() : ((BlockEntityProvider)mergingBlock).createBlockEntity(world);
+				mergingBlockEntity = (mergingBlock == Blocks.MOVING_PISTON) ? new PistonBlockEntity() : ((BlockEntityProvider)mergingBlock).createBlockEntity(world);
 				
 				if (mergingBlockEntity != null) {
 					mergingBlockEntity.fromTag(mergingState, tag.getCompound("mergingBlockEntity"));
@@ -293,25 +290,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Inject(method = "getCollisionShape", cancellable = true, at = @At(value = "HEAD"))
 	private void onGetCollisionShapeInjectAtHead(BlockView world, BlockPos pos, CallbackInfoReturnable<VoxelShape> cir) {
-		VoxelShape collisionShape;
-		
-		BlockState movedState = getMovedMovingState();
-		
-		if (movedState.isOf(Blocks.MOVING_PISTON)) {
-			collisionShape = VoxelShapes.empty();
-		} else {
-			Vec3d amountExtended = getTotalAmountExtended();
-			
-			collisionShape = movedState.getCollisionShape(world, pos).offset(amountExtended.x, amountExtended.y, amountExtended.z);
-		}
-		
-		if (world instanceof World) {
-			if (((World) world).isClient() ? RedstoneTweaks.client : RedstoneTweaks.server) {
-				//System.out.println(collisionShape + " - " + pos + " - " + movedState);
-			}
-		}
-		
-		cir.setReturnValue(collisionShape);
+		cir.setReturnValue(getTotalCollisionShape(VoxelShapes.empty(), world, pos));
 		cir.cancel();
 	}
 	
@@ -391,31 +370,48 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	}
 	
 	@Override
-	public double correctStepAmount(double stepAmount, Direction.Axis axis) {
-		Direction motionDir = getMovementDirection();
+	public Vec3d getTotalAmountExtended(Vec3d amountExtended, boolean ignore) {
+		if (!ignore) {
+			double s = getAmountExtended(progress);
+			
+			amountExtended = amountExtended.add(s * facing.getOffsetX(), s * facing.getOffsetY(), s * facing.getOffsetZ());
+		}
 		
-		if (axis == motionDir.getAxis()) {
-			stepAmount += amountPerStep * motionDir.getDirection().offset();
+		if (parentPistonBlockEntity == null) {
+			return amountExtended;
+		}
+		
+		return ((RTIPistonBlockEntity)parentPistonBlockEntity).getTotalAmountExtended(amountExtended, isMerging);
+	}
+	
+	@Override
+	public Vec3d getTotalStepAmount(Vec3d stepAmount, boolean ignore) {
+		if (!ignore) {
+			double s = amountPerStep;
+			
+			stepAmount = stepAmount.add(s * facing.getOffsetX(), s * facing.getOffsetY(), s * facing.getOffsetZ());
 		}
 		
 		if (parentPistonBlockEntity == null) {
 			return stepAmount;
 		}
 		
-		return ((RTIPistonBlockEntity)parentPistonBlockEntity).correctStepAmount(stepAmount, axis);
+		return ((RTIPistonBlockEntity)parentPistonBlockEntity).getTotalStepAmount(stepAmount, isMerging);
 	}
 	
 	@Override
-	public Vec3d getTotalAmountExtended(Vec3d totalAmount) {
-		double s = getAmountExtended(progress);
+	public VoxelShape getTotalCollisionShape(VoxelShape collisionShape, BlockView world, BlockPos pos) {
+		VoxelShape mainShape = getMainCollisionShape(world, pos);
+		VoxelShape additionalShape = getAdditionalCollisionShape(world, pos);
 		
-		totalAmount = totalAmount.add(s * facing.getOffsetX(), s * facing.getOffsetY(), s * facing.getOffsetZ());
-		
-		if (parentPistonBlockEntity == null) {
-			return totalAmount;
+		if (!mainShape.isEmpty()) {
+			collisionShape = VoxelShapes.union(collisionShape, mainShape);
+		}
+		if (!additionalShape.isEmpty()) {
+			collisionShape = VoxelShapes.union(collisionShape, additionalShape);
 		}
 		
-		return ((RTIPistonBlockEntity)parentPistonBlockEntity).getTotalAmountExtended(totalAmount);
+		return collisionShape;
 	}
 	
 	@Override
@@ -738,12 +734,56 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		setMergingBlockEntity(null);
 	}
 	
-	private Vec3d getTotalAmountExtended() {
-		return getTotalAmountExtended(Vec3d.ZERO);
+	private BlockState getStateForMainShape() {
+		if (source && !sourceIsMoving && !extending) {
+			boolean sticky = PistonHelper.isSticky(pushedBlock);
+			Direction facing = pushedBlock.get(Properties.FACING);
+			boolean shortArm = (progress >= 0.5F);
+			
+			return PistonHelper.getPistonHead(sticky, facing, shortArm);
+		}
+		
+		return pushedBlock;
 	}
 	
-	private double getTotalStepAmount(Direction.Axis axis) {
-		return correctStepAmount(0.0D, axis);
+	private BlockState getStateForAdditionalShape() {
+		if (source) {
+			if (!extending) {
+				if (sourceIsMoving) {
+					boolean sticky = PistonHelper.isSticky(pushedBlock);
+					Direction facing = pushedBlock.get(Properties.FACING);
+					boolean shortArm = (progress >= 0.5F);
+					
+					return PistonHelper.getPistonHead(sticky, facing, shortArm);
+				}
+				
+				return pushedBlock;
+			}
+		} else if (mergingState != null) {
+			return mergingState;
+		}
+		
+		return Blocks.AIR.getDefaultState();
+	}
+	
+	private Vec3d getAmountExtended() {
+		double s = getAmountExtended(progress);
+		
+		return new Vec3d(s * facing.getOffsetX(), s * facing.getOffsetY(), s * facing.getOffsetZ());
+	}
+	
+	private Vec3d getTotalAmountExtended() {
+		return getTotalAmountExtended(Vec3d.ZERO, isMerging);
+	}
+	
+	private Vec3d getStepAmount() {
+		double s = amountPerStep;
+		
+		return new Vec3d(s * facing.getOffsetX(), s * facing.getOffsetY(), s * facing.getOffsetZ());
+	}
+	
+	private Vec3d getTotalStepAmount() {
+		return getTotalStepAmount(Vec3d.ZERO, isMerging);
 	}
 	
 	private boolean shouldLaunchEntities() {
@@ -785,74 +825,144 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		return (stepAmount > 0.0D) ? (Math.min(moveAmount, stepAmount) + offset) : (Math.max(moveAmount, stepAmount) + offset);
 	}
 	
+	// Check if the entity should be pulled along by moved honey
+	private boolean shouldPullEntity(Box box, Entity entity) {
+		return method_23671(box, entity);
+	}
+	
 	private void moveEntities() {
-		VoxelShape voxelShape = getHeadBlockState().getCollisionShape(world, pos);
+		BlockState mainState = getStateForMainShape();
+		BlockState additionalState = getStateForAdditionalShape();
 		
-		if (!voxelShape.isEmpty()) {
-			Vec3d offset = Vec3d.of(pos).add(getTotalAmountExtended());
-			Box boundingBox = voxelShape.getBoundingBox().offset(offset);
+		Vec3d totalAmountExtended = getTotalAmountExtended();
+		Vec3d totalStepAmount = getTotalStepAmount();
+		
+		if (!mainState.isOf(Blocks.MOVING_PISTON)) {
+			VoxelShape mainShape = mainState.getCollisionShape(world, pos);
 			
-			double stepX = getTotalStepAmount(Direction.Axis.X);
-			double stepY = getTotalStepAmount(Direction.Axis.Y);
-			double stepZ = getTotalStepAmount(Direction.Axis.Z);
+			if (!mainShape.isEmpty()) {
+				moveEntities(mainShape, totalAmountExtended, totalStepAmount);
+			}
 			
-			List<Entity> entities = world.getOtherEntities(null, boundingBox.stretch(stepX, stepY, stepZ));
+			if (mainState.isOf(Blocks.HONEY_BLOCK)) {
+				pullEntities(mainShape, totalAmountExtended, totalStepAmount);
+			}
+		}
+		if (!additionalState.isOf(Blocks.MOVING_PISTON)) {
+			VoxelShape additionalShape = additionalState.getCollisionShape(world, pos);
 			
-			if (!entities.isEmpty()) {
-				List<Box> boundingBoxes = voxelShape.getBoundingBoxes();
-				boolean launchEntities = shouldLaunchEntities();
+			if (!additionalShape.isEmpty()) {
+				Vec3d amountExtended = totalAmountExtended.subtract(getAmountExtended());
+				Vec3d stepAmount = totalStepAmount.subtract(getStepAmount());
 				
-				boolean moveX = (stepX != 0.0D);
-				boolean moveY = (stepY != 0.0D);
-				boolean moveZ = (stepZ != 0.0D);
+				moveEntities(additionalShape, amountExtended, stepAmount);
+			}
+		}
+	}
+	
+	private void moveEntities(VoxelShape shape, Vec3d amountExtended, Vec3d stepAmount) {
+		Vec3d offset = Vec3d.of(pos).add(amountExtended);
+		Box boundingBox = shape.getBoundingBox().offset(offset);
+		
+		double stepX = stepAmount.x;
+		double stepY = stepAmount.y;
+		double stepZ = stepAmount.z;
+		
+		List<Entity> entities = world.getOtherEntities(null, boundingBox.stretch(stepX, stepY, stepZ));
+		
+		if (!entities.isEmpty()) {
+			List<Box> boundingBoxes = shape.getBoundingBoxes();
+			boolean launchEntities = shouldLaunchEntities();
+			
+			boolean moveX = (stepX != 0.0D);
+			boolean moveY = (stepY != 0.0D);
+			boolean moveZ = (stepZ != 0.0D);
+			
+			for (Entity entity : entities) {
+				if (entity.getPistonBehavior() == PistonBehavior.IGNORE) {
+					continue;
+				}
 				
-				for (Entity entity : entities) {
-					if (entity.getPistonBehavior() == PistonBehavior.IGNORE) {
-						continue;
+				if (launchEntities && !(entity instanceof ServerPlayerEntity)) {
+					Vec3d velocity = entity.getVelocity();
+					
+					double velocityX = moveX ? getLaunchVelocity(velocity.x, stepX) : velocity.x;
+					double velocityY = moveY ? getLaunchVelocity(velocity.y, stepY) : velocity.y;
+					double velocityZ = moveZ ? getLaunchVelocity(velocity.z, stepZ) : velocity.z;
+					
+					entity.setVelocity(velocityX, velocityY, velocityZ);
+				}
+				
+				double moveAmountX = 0.0D;
+				double moveAmountY = 0.0D;
+				double moveAmountZ = 0.0D;
+				
+				for (Box box : boundingBoxes) {
+					Box[] boxes = BoxUtils.getExpansionBoxes(box.offset(offset), stepX, stepY, stepZ);
+					Box entityBox = entity.getBoundingBox();
+					
+					if (moveX && entityBox.intersects(boxes[0])) {
+						moveAmountX = updateMoveAmount(moveAmountX, stepX, Direction.Axis.X, entityBox, boxes[0]);
 					}
-					
-					if (launchEntities && !(entity instanceof ServerPlayerEntity)) {
-						Vec3d velocity = entity.getVelocity();
-						
-						double velocityX = moveX ? getLaunchVelocity(velocity.x, stepX) : velocity.x;
-						double velocityY = moveY ? getLaunchVelocity(velocity.y, stepY) : velocity.y;
-						double velocityZ = moveZ ? getLaunchVelocity(velocity.z, stepZ) : velocity.z;
-						
-						entity.setVelocity(velocityX, velocityY, velocityZ);
+					if (moveY && entityBox.intersects(boxes[1])) {
+						moveAmountY = updateMoveAmount(moveAmountY, stepY, Direction.Axis.Y, entityBox, boxes[1]);
 					}
-					
-					double moveAmountX = 0.0D;
-					double moveAmountY = 0.0D;
-					double moveAmountZ = 0.0D;
-					
-					for (Box box : boundingBoxes) {
-						Box[] boxes = BoxUtils.getExpansionBoxes(box.offset(offset), stepX, stepY, stepZ);
-						Box entityBox = entity.getBoundingBox();
-						
-						if (moveX && entityBox.intersects(boxes[0])) {
-							moveAmountX = updateMoveAmount(moveAmountX, stepX, Direction.Axis.X, entityBox, boxes[0]);
-						}
-						if (moveY && entityBox.intersects(boxes[1])) {
-							moveAmountY = updateMoveAmount(moveAmountY, stepY, Direction.Axis.Y, entityBox, boxes[1]);
-						}
-						if (moveZ && entityBox.intersects(boxes[2])) {
-							moveAmountZ = updateMoveAmount(moveAmountZ, stepZ, Direction.Axis.Z, entityBox, boxes[2]);
-						}
+					if (moveZ && entityBox.intersects(boxes[2])) {
+						moveAmountZ = updateMoveAmount(moveAmountZ, stepZ, Direction.Axis.Z, entityBox, boxes[2]);
 					}
-					
-					moveAmountX = clampMoveAmount(moveAmountX, stepX);
-					moveAmountY = clampMoveAmount(moveAmountY, stepY);
-					moveAmountZ = clampMoveAmount(moveAmountZ, stepZ);
-					
-					if (moveAmountX != 0.0D || moveAmountY != 0.0D || moveAmountZ != 0.0D) {
-						moveEntity(entity, moveAmountX, moveAmountY, moveAmountZ, stepX, stepY, stepZ);
-					}
+				}
+				
+				moveAmountX = clampMoveAmount(moveAmountX, stepX);
+				moveAmountY = clampMoveAmount(moveAmountY, stepY);
+				moveAmountZ = clampMoveAmount(moveAmountZ, stepZ);
+				
+				if (moveAmountX != 0.0D || moveAmountY != 0.0D || moveAmountZ != 0.0D) {
+					((RTIEntity)entity).moveByPiston(new Vec3d(moveAmountX, moveAmountY, moveAmountZ), stepAmount);
 				}
 			}
 		}
 	}
 	
-	private void moveEntity(Entity entity, double amountX, double amountY, double amountZ, double stepAmountX, double stepAmountY, double stepAmountZ) {
-		((RTIEntity)entity).moveByPiston(new Vec3d(amountX, amountY, amountZ), new Vec3d(stepAmountX, stepAmountY, stepAmountZ));
+	private void pullEntities(VoxelShape shape, Vec3d amountExtended, Vec3d stepAmount) {
+		if (stepAmount.x != 0.0D || stepAmount.z != 0.0D) {
+			Vec3d offset = Vec3d.of(pos).add(amountExtended);
+			double y = shape.getMax(Direction.Axis.Y);
+			
+			Box boundingBox = new Box(0.0D, y, 0.0D, 1.0D, 1.5000000999999998D, 1.0D).offset(offset);
+			
+			List<Entity> entities = world.getOtherEntities(null, boundingBox, (entity) -> {
+				return shouldPullEntity(boundingBox, entity);
+			});
+			
+			for (Entity entity : entities) {
+				((RTIEntity)entity).moveByPiston(stepAmount, stepAmount);
+			}
+		}
+	}
+	
+	private VoxelShape getMainCollisionShape(BlockView world, BlockPos pos) {
+		BlockState mainState = getStateForMainShape();
+		
+		Vec3d amountExtended = getAmountExtended();
+		
+		if (!mainState.isOf(Blocks.MOVING_PISTON)) {
+			return mainState.getCollisionShape(world, pos).offset(amountExtended.x, amountExtended.y, amountExtended.z);
+		} else if (hasChildPistonBlockEntity) {
+			return ((PistonBlockEntity)movedBlockEntity).getCollisionShape(world, pos).offset(amountExtended.x, amountExtended.y, amountExtended.z);
+		}
+		
+		return VoxelShapes.empty();
+	}
+	
+	private VoxelShape getAdditionalCollisionShape(BlockView world, BlockPos pos) {
+		BlockState additionalState = getStateForAdditionalShape();
+		
+		if (!additionalState.isOf(Blocks.MOVING_PISTON)) {
+			return additionalState.getCollisionShape(world, pos);
+		} else if (mergingBlockEntity != null && mergingBlockEntity instanceof PistonBlockEntity) {
+			return ((PistonBlockEntity)movedBlockEntity).getCollisionShape(world, pos);
+		}
+		
+		return VoxelShapes.empty();
 	}
 }
