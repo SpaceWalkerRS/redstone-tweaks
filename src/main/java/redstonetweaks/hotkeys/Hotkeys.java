@@ -31,7 +31,7 @@ public class Hotkeys {
 		this.keyToBinding = new HashMap<>();
 		this.nameToBinding = new HashMap<>();
 		
-		this.toggleMenu = register(new RTKeyBinding("Open Menu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_R).alwaysBound());
+		this.toggleMenu = register(new RTKeyBinding("Open Menu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_R));
 		this.pauseWorldTicking = register(new RTKeyBinding("Pause World Ticking", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_P));
 		this.advanceWorldTicking = register(new RTKeyBinding("Advance World Ticking", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_O));
 	}
