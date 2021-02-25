@@ -388,8 +388,9 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	public Vec3d getTotalStepAmount(Vec3d stepAmount, boolean ignore) {
 		if (!ignore) {
 			double s = amountPerStep;
+			Direction dir = getMovementDirection();
 			
-			stepAmount = stepAmount.add(s * facing.getOffsetX(), s * facing.getOffsetY(), s * facing.getOffsetZ());
+			stepAmount = stepAmount.add(s * dir.getOffsetX(), s * dir.getOffsetY(), s * dir.getOffsetZ());
 		}
 		
 		if (parentPistonBlockEntity == null) {
@@ -780,8 +781,9 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	private Vec3d getStepAmount() {
 		double s = amountPerStep;
+		Direction dir = getMovementDirection();
 		
-		return new Vec3d(s * facing.getOffsetX(), s * facing.getOffsetY(), s * facing.getOffsetZ());
+		return new Vec3d(s * dir.getOffsetX(), s * dir.getOffsetY(), s * dir.getOffsetZ());
 	}
 	
 	private Vec3d getTotalStepAmount() {
