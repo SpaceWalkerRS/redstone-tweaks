@@ -41,6 +41,10 @@ public class PresetPacket extends AbstractRedstoneTweaksPacket {
 		
 		editor = Presets.editPreset(Presets.fromIdOrCreate(id, name, description, mode));
 		
+		editor.setName(name);
+		editor.setDescription(description);
+		editor.setMode(mode);
+		
 		editor.decode(buffer);
 	}
 	

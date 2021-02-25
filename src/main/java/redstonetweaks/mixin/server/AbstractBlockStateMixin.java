@@ -41,6 +41,7 @@ public abstract class AbstractBlockStateMixin {
 	@Inject(method = "updateNeighbors(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;II)V", cancellable = true, at = @At(value = "HEAD"))
 	private void onUpdateNeighborsInjectAtHead(WorldAccess world, BlockPos pos, int flags, int maxUpdateDepth, CallbackInfo ci) {
 		((RTIWorld)world).dispatchShapeUpdatesAround(pos, pos, world.getBlockState(pos), flags, maxUpdateDepth);
+		
 		ci.cancel();
 	}
 }

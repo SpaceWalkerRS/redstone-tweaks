@@ -375,9 +375,9 @@ public class PresetsTab extends RTMenuTab {
 	private void savePreset() {
 		PresetEditor editor = getPresetEditor();
 		
-		((RTIMinecraftClient)screen.client).getPresetsManager().savePreset(editor);
-		
 		browsePresets();
+		
+		((RTIMinecraftClient)screen.client).getPresetsManager().savePreset(editor);
 	}
 	
 	public void onPresetChanged(Preset preset) {

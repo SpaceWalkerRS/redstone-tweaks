@@ -27,8 +27,6 @@ public class ClientPresetsManager {
 	
 	public void savePreset(PresetEditor editor) {
 		((RTIMinecraftClient)client).getPacketHandler().sendPacket(new PresetPacket(editor));
-		
-		editor.discardChanges();
 	}
 	
 	public void reloadPresets() {
