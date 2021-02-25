@@ -84,7 +84,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	@Shadow protected abstract BlockState getHeadBlockState();
 	@Shadow public abstract void finish();
 	@Shadow public abstract Direction getMovementDirection();
-	@Shadow protected native boolean method_23671(Box box, Entity entity);
+	@Shadow protected native static boolean method_23671(Box box, Entity entity);
 	
 	@Redirect(method = "getAmountExtended", at = @At(value = "FIELD", target = "Lnet/minecraft/block/entity/PistonBlockEntity;extending:Z"))
 	private boolean onGetAmountExtendedRedirectExtending(PistonBlockEntity pistonBlockEntity, float tickDelta) {
