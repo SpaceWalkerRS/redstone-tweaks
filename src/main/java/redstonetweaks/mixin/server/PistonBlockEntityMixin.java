@@ -841,11 +841,11 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			VoxelShape mainShape = mainState.getCollisionShape(world, pos);
 			
 			if (!mainShape.isEmpty()) {
+				if (mainState.isOf(Blocks.HONEY_BLOCK)) {
+					pullEntities(mainShape, totalAmountExtended, totalStepAmount);
+				}
+				
 				moveEntities(mainShape, totalAmountExtended, totalStepAmount);
-			}
-			
-			if (mainState.isOf(Blocks.HONEY_BLOCK)) {
-				pullEntities(mainShape, totalAmountExtended, totalStepAmount);
 			}
 		}
 		if (!additionalState.isOf(Blocks.MOVING_PISTON)) {
