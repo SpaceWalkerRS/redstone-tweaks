@@ -64,7 +64,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 				addEntry(new EnvEntry(ViewMode.DELETED));
 				
 				for (Preset preset : Presets.getAllPresets()) {
-					if (!Presets.isActive(preset)) {
+					if (!Presets.isActive(preset) && !preset.isDeletedForever()) {
 						addEntry(new DeletedPresetEntry(preset));
 						
 						updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
@@ -109,7 +109,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 				addEntry(new EnvEntry(ViewMode.DELETED));
 				
 				for (Preset preset : Presets.getAllPresets()) {
-					if (preset.getName().toLowerCase().contains(query) && !Presets.isActive(preset)) {
+					if (preset.getName().toLowerCase().contains(query) && !Presets.isActive(preset) && !preset.isDeletedForever()) {
 						addEntry(new DeletedPresetEntry(preset));
 						
 						updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));

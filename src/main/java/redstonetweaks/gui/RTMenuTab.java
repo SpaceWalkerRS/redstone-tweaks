@@ -7,6 +7,8 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
+import redstonetweaks.gui.widget.RTTextFieldWidget;
+
 public abstract class RTMenuTab extends RTAbstractParentElement {
 	
 	protected static final int TEXT_COLOR = 16777215;
@@ -150,6 +152,12 @@ public abstract class RTMenuTab extends RTAbstractParentElement {
 	
 	private void allowHover(boolean allowHover) {
 		getContents().forEach((element) -> element.allowHover(allowHover));
+	}
+	
+	public boolean canClose() {
+		Element focused = getFocused();
+		
+		return focused == null || !(focused instanceof RTTextFieldWidget);
 	}
 	
 	public abstract void onTabClosed();

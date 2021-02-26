@@ -56,14 +56,14 @@ public class Presets {
 	}
 	
 	public static void deleteForever(Preset preset) {
-		if (ALL.remove(preset.getId(), preset)) {
-			ACTIVE_LOCAL.values().remove(preset);
-			ACTIVE_GLOBAL.values().remove(preset);
-			
-			preset.delete();
-			
-			presetDeletedForever(preset);
-		}
+		preset.markDeletedForever();
+		
+		ACTIVE_LOCAL.values().remove(preset);
+		ACTIVE_GLOBAL.values().remove(preset);
+		
+		Settings.removePreset(preset);
+		
+		presetDeletedForever(preset);
 	}
 	
 	public static boolean isNameValid(String name) {
@@ -157,28 +157,27 @@ public class Presets {
 		RedstoneTweaks.LOGGER.info(String.format("Initialized %d built-in presets", getAllPresets().size()));
 	}
 	
-	public static void softReset() {
-		ALL.values().removeIf((preset) -> {
-			if (preset.isEditable() && isActive(preset)) {
-				ACTIVE_LOCAL.values().remove(preset);
-				ACTIVE_GLOBAL.values().remove(preset);
-				
-				preset.delete();
-				
-				return true;
-			}
-			
-			return false;
-		});
-	}
-	
 	public static void reset() {
 		delete();
 		init();
 	}
 	
+	// Delete all active presets in preparation for reloading them
+	// Use on server only
+	public static void softReset() {
+		RedstoneTweaks.LOGGER.info("Deleting all player-made active presets");
+		
+		for (Preset preset : ALL.values()) {
+			if (preset.isEditable() && isActive(preset)) {
+				deleteForever(preset);
+			}
+		}
+	}
+	
+	// Completely clear all presets
+	// Use on client only
 	public static void delete() {
-		RedstoneTweaks.LOGGER.info("Deleting all presets");
+		RedstoneTweaks.LOGGER.info("Permanently deleting all presets");
 		
 		Settings.clearPresets();
 		

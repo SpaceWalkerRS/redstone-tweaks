@@ -18,6 +18,7 @@ import redstonetweaks.gui.preset.PresetsTab;
 import redstonetweaks.gui.setting.SettingsTab;
 import redstonetweaks.gui.widget.IAbstractButtonWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
+import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.listeners.ISettingListener;
 import redstonetweaks.setting.SettingsCategory;
@@ -102,12 +103,12 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (getSelectedTab().keyPressed(keyCode, scanCode, modifiers)) {
-			return true;
-		}
-		if (keyCode == 256) {
+		if (getSelectedTab().canClose() && (keyCode == 256 && ((RTIMinecraftClient)client).getHotkeysManager().getHotkeys().toggleMenu.matchesKey(keyCode, scanCode))) {
 			onClose();
 			
+			return true;
+		}
+		if (getSelectedTab().keyPressed(keyCode, scanCode, modifiers)) {
 			return true;
 		}
 		
@@ -154,6 +155,13 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		createTabButtons();
 		
 		openTab(lastOpenedTabIndex);
+		
+		client.keyboard.setRepeatEvents(true);
+	}
+	
+	@Override
+	public void removed() {
+		client.keyboard.setRepeatEvents(false);
 	}
 	
 	@Override

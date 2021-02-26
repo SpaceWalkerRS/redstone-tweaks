@@ -53,7 +53,7 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	}
 	
 	@Inject(method = "save", at = @At(value = "RETURN"))
-	private void onSave(boolean suppressLogs, boolean flushChunkUpdates, boolean shouldSave, CallbackInfoReturnable<Boolean> cir) {
+	private void onSave(boolean suppressLogs, boolean flushChunkUpdates, boolean saveAll, CallbackInfoReturnable<Boolean> cir) {
 		settingsManager.onSaveWorld();
 		presetsManager.onSaveWorld();
 	}

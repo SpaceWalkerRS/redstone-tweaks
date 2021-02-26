@@ -8,6 +8,7 @@ import redstonetweaks.client.PermissionManager;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
+import redstonetweaks.setting.settings.Settings;
 
 public class ApplyPresetPacket extends AbstractRedstoneTweaksPacket {
 	
@@ -41,7 +42,7 @@ public class ApplyPresetPacket extends AbstractRedstoneTweaksPacket {
 	@Override
 	public void execute(MinecraftClient client) {
 		if (!client.isInSingleplayer() && preset != null) {
-			preset.apply();
+			Settings.applyPreset(preset);
 		}
 	}
 }

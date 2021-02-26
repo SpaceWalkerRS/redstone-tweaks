@@ -88,6 +88,11 @@ public class HotkeysTab extends RTMenuTab {
 	}
 	
 	@Override
+	public boolean canClose() {
+		return focusedKeyBinding == null && super.canClose();
+	}
+	
+	@Override
 	public void onTabClosed() {
 		hotkeysList.saveScrollAmount();
 		((RTIMinecraftClient)screen.client).getHotkeysManager().trySaveHotkeys();

@@ -45,6 +45,8 @@ public class ServerPresetsManager implements IPresetListener {
 	
 	@Override
 	public void presetDeleted(Preset preset) {
+		deletePresetFile(preset, true);
+		
 		if (!deaf && server.isRemote()) {
 			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new DeletePresetPacket(preset));
 		}
@@ -147,7 +149,7 @@ public class ServerPresetsManager implements IPresetListener {
 		preset.decode(buffer);
 		
 		if (!Presets.register(preset)) {
-			preset.delete();
+			Presets.deleteForever(preset);
 		}
 	}
 	
@@ -193,7 +195,7 @@ public class ServerPresetsManager implements IPresetListener {
 		writePreset(preset, buffer);
 		
 		if (buffer.hasArray()) {
-			File file = getPresetFile(preset);
+			File file = getPresetFile(preset, false);
 			
 			try {
 				if (!file.isFile()) {
@@ -223,44 +225,27 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	private void cleanUpPresetFiles(boolean local) {
-		File presetsFolder = getPresetsFolder(local);
-		
-		for (File file : presetsFolder.listFiles()) {
-			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION) && shouldDeleteFile(file, local)) {
-				file.delete();
+		for (Preset preset : Presets.getAllPresets()) {
+			if (preset.isLocal() == local) {
+				boolean nameChanged = preset.nameChanged();
+				
+				if (!Presets.isActive(preset) || (nameChanged && Presets.isNameAvailable(preset.getSavedName(), local))) {
+					deletePresetFile(preset, nameChanged);
+				}
 			}
 		}
 	}
 	
-	private boolean shouldDeleteFile(File file, boolean local) {
-		try (FileInputStream stream = new FileInputStream(file)) {
-			byte[] data = IOUtils.toByteArray(stream);
-			PacketByteBuf buffer = new PacketByteBuf(Unpooled.wrappedBuffer(data));
-			
-			String savedName = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
-			
-			boolean shouldDelete = false;
-			
-			for (Preset preset : Presets.getAllPresets()) {
-				if (preset.isEditable() && (preset.isLocal() == local)) {
-					if (Presets.isActive(preset)) {
-						if (preset.getName().equals(savedName)) {
-							return false;
-						}
-					} else {
-						if (preset.getSavedName().equals(savedName)) {
-							shouldDelete = true;
-						}
-					}
-				}
-			}
-			
-			return shouldDelete;
-		} catch (Exception e) {
-			
-		}
+	private void deletePresetFile(Preset preset, boolean useSavedName) {
+		String fileName = useSavedName ? preset.getSavedName() : preset.getName();
 		
-		return false;
+		if (fileName != null) {
+			File file = getPresetFile(preset, useSavedName);
+			
+			if (file.exists()) {
+				file.delete();
+			}
+		}
 	}
 	
 	private File getCacheDir(boolean local) {
@@ -283,7 +268,9 @@ public class ServerPresetsManager implements IPresetListener {
 		return directory;
 	}
 	
-	private File getPresetFile(Preset preset) {
-		return new File(getPresetsFolder(preset.isLocal()), String.format("%s.%s", preset.getName(), FILE_EXTENSION));
+	private File getPresetFile(Preset preset, boolean useSavedName) {
+		String fileName = useSavedName ? preset.getSavedName() : preset.getName();
+		
+		return new File(getPresetsFolder(preset.isLocal()), String.format("%s.%s", fileName, FILE_EXTENSION));
 	}
 }

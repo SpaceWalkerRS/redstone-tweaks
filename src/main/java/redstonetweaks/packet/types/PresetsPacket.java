@@ -92,7 +92,7 @@ public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 						Presets.delete(preset);
 					}
 				} else {
-					preset.delete();
+					Presets.deleteForever(preset);
 				}
 			}
 		}

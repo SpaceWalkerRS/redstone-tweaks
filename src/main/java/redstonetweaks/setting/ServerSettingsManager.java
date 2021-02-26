@@ -107,7 +107,7 @@ public class ServerSettingsManager implements ISettingListener {
 	public void applyPreset(Preset preset) {
 		deaf = true;
 		
-		preset.apply();
+		Settings.applyPreset(preset);
 		if (server.isRemote()) {
 			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new ApplyPresetPacket(preset));
 		}

@@ -36,7 +36,7 @@ public class PresetWindow extends RTWindow {
 		int x = getX() + 80;
 		int y = getY() + 30;
 		
-		nameField = new RTTextFieldWidget(screen.getTextRenderer(), 16, x, y, 100, 20, (textField) -> {}, (text) -> {
+		nameField = new RTTextFieldWidget(screen.getTextRenderer(), 32, x, y, 100, 20, (textField) -> {}, (text) -> {
 			parent.getPresetEditor().setName(text);
 			
 			Preset existingPreset = Presets.fromName(text, parent.getPresetEditor().isLocal());
