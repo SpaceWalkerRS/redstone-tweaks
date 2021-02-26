@@ -380,7 +380,7 @@ public class PresetsTab extends RTMenuTab {
 		
 		propertiesButton.setActive(edit);
 		saveButton.setActive(edit && canEditPresets && editable);
-		cancelButton.setActive(editable);
+		cancelButton.setActive(edit);
 		toggleListButton.setActive(edit && canEditPresets && editable);
 	}
 	
