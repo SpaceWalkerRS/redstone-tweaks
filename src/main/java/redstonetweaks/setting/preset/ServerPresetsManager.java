@@ -155,7 +155,7 @@ public class ServerPresetsManager implements IPresetListener {
 		saveGlobalPresets();
 		saveLocalPresets();
 		
-		Presets.reset();
+		Presets.softReset();
 		
 		loadGlobalPresets();
 		loadLocalPresets();

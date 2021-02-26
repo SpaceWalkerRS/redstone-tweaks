@@ -60,7 +60,7 @@ public class Presets {
 			ACTIVE_LOCAL.values().remove(preset);
 			ACTIVE_GLOBAL.values().remove(preset);
 			
-			preset.remove();
+			preset.delete();
 			
 			presetDeletedForever(preset);
 		}
@@ -157,6 +157,18 @@ public class Presets {
 		RedstoneTweaks.LOGGER.info(String.format("Initialized %d built-in presets", getAllPresets().size()));
 	}
 	
+	public static void softReset() {
+		ALL.values().removeIf((preset) -> {
+			if (preset.isEditable() && isActive(preset)) {
+				preset.delete();
+				
+				return true;
+			}
+			
+			return false;
+		});
+	}
+	
 	public static void reset() {
 		delete();
 		init();
@@ -164,6 +176,8 @@ public class Presets {
 	
 	public static void delete() {
 		RedstoneTweaks.LOGGER.info("Deleting all presets");
+		
+		Settings.clearPresets();
 		
 		ALL.clear();
 		ACTIVE_GLOBAL.clear();

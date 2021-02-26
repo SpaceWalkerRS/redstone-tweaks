@@ -268,7 +268,7 @@ public class PresetEditor {
 			setting.removePreset(preset);
 		}
 		
-		TEMP.remove();
+		TEMP.delete();
 		
 		saved = true;
 		
@@ -276,7 +276,7 @@ public class PresetEditor {
 	}
 	
 	public void discardChanges() {
-		TEMP.remove();
+		TEMP.delete();
 		
 		saved = true;
 	}

@@ -114,7 +114,7 @@ public class Preset {
 		Settings.applyPreset(this);
 	}
 	
-	public void remove() {
+	public void delete() {
 		Settings.removePreset(this);
 	}
 	

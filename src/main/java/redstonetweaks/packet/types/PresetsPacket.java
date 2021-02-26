@@ -14,7 +14,7 @@ public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 	
 	private int presetsCount;
 	private Preset[] presets;
-	private boolean[] removed;
+	private boolean[] deleted;
 	private PacketByteBuf data;
 	
 	public PresetsPacket() {
@@ -55,7 +55,7 @@ public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 		presetsCount = buffer.readInt();
 		
 		presets = new Preset[presetsCount];
-		removed = new boolean[presetsCount];
+		deleted = new boolean[presetsCount];
 		
 		for (int index = 0; index < presetsCount; index++) {
 			int id = buffer.readInt();
@@ -66,7 +66,7 @@ public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 			boolean editable = buffer.readBoolean();
 			
 			presets[index] = new Preset(id, name, editable, name, description, mode, local);
-			removed[index] = buffer.readBoolean();
+			deleted[index] = buffer.readBoolean();
 		}
 		
 		data = new PacketByteBuf(buffer.readBytes(buffer.readableBytes()));
@@ -88,11 +88,11 @@ public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 				preset.decode(data);
 				
 				if (Presets.register(preset)) {
-					if (removed[index]) {
+					if (deleted[index]) {
 						Presets.delete(preset);
 					}
 				} else {
-					preset.remove();
+					preset.delete();
 				}
 			}
 		}

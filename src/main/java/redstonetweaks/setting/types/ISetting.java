@@ -43,7 +43,7 @@ public interface ISetting {
 	
 	public void removePreset(Preset preset);
 	
-	public void removePresets();
+	public void clearPresets();
 	
 	public void copyPresetValue(Preset from, Preset to);
 	

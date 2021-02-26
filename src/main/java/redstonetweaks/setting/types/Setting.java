@@ -139,7 +139,7 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	@Override
-	public void removePresets() {
+	public void clearPresets() {
 		presetValues.clear();
 	}
 	
