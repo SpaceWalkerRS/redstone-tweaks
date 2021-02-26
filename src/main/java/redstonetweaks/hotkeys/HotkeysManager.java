@@ -77,6 +77,13 @@ public class HotkeysManager {
 				return true;
 			}
 		}
+		if (keyBinding == hotkeys.toggleMenu) {
+			if (client.currentScreen == null) {
+				client.openScreen(new RTMenuScreen(client));
+				
+				return true;
+			}
+		}
 		
 		return false;
 	}
@@ -86,14 +93,6 @@ public class HotkeysManager {
 	}
 	
 	private boolean keyRelease(RTKeyBinding keyBinding) {
-		if (keyBinding == hotkeys.toggleMenu) {
-			if (client.currentScreen == null) {
-				client.openScreen(new RTMenuScreen(client));
-				
-				return true;
-			}
-		}
-		
 		return false;
 	}
 	

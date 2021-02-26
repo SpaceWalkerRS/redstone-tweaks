@@ -43,6 +43,8 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	private int selectedTabIndex;
 	private int headerHeight;
 	
+	private boolean initialized;
+	
 	public RTMenuScreen(MinecraftClient client) {
 		super(new TranslatableText("Redstone Tweaks Menu"));
 
@@ -166,6 +168,10 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	
 	@Override
 	public void tick() {
+		if (!initialized) {
+			initialized = true;
+		}
+		
 		getSelectedTab().tick();
 	}
 	
@@ -174,6 +180,11 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		getSelectedTab().onTabClosed();
 		
 		super.resize(client, width, height);
+	}
+	
+	@Override
+	public Element getFocused() {
+		return initialized ? super.getFocused() : null;
 	}
 	
 	public int getWidth() {
