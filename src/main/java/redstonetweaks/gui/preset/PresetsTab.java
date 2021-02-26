@@ -40,7 +40,6 @@ public class PresetsTab extends RTMenuTab {
 	private RTButtonWidget clearSearchBoxButton;
 	
 	private RTButtonWidget newPresetButton;
-	private RTButtonWidget binButton;
 	private RTButtonWidget reloadPresetsButton;
 	
 	private RTButtonWidget saveButton;
@@ -135,12 +134,7 @@ public class PresetsTab extends RTMenuTab {
 		});
 		addBrowserContent(reloadPresetsButton);
 		
-		binButton = new RTButtonWidget(reloadPresetsButton.getX() - 47, reloadPresetsButton.getY(), 45, 20, () -> new TranslatableText("Bin"), (button) -> {
-			screen.openWindow(new RemovedPresetsWindow(this));
-		});
-		addBrowserContent(binButton);
-		
-		newPresetButton = new RTButtonWidget(binButton.getX() - 82, binButton.getY(), 80, 20, () -> new TranslatableText("New Preset"), (button) -> {
+		newPresetButton = new RTButtonWidget(reloadPresetsButton.getX() - 82, reloadPresetsButton.getY(), 80, 20, () -> new TranslatableText("New Preset"), (button) -> {
 			newPreset(Screen.hasShiftDown());
 		});
 		addBrowserContent(newPresetButton);
@@ -276,7 +270,6 @@ public class PresetsTab extends RTMenuTab {
 			viewModeButton.render(matrices, mouseX, mouseY, delta);
 			
 			newPresetButton.render(matrices, mouseX, mouseY, delta);
-			binButton.render(matrices, mouseX, mouseY, delta);
 			reloadPresetsButton.render(matrices, mouseX, mouseY, delta);
 			
 			presetsList.render(matrices, mouseX, mouseY, delta);
@@ -383,7 +376,6 @@ public class PresetsTab extends RTMenuTab {
 		boolean editable = isEditingPreset() ? getPresetEditor().isEditable() : false;
 		
 		newPresetButton.setActive(!edit && canEditPresets);
-		binButton.setActive(!edit);
 		reloadPresetsButton.setActive(!edit && canEditPresets);
 		
 		propertiesButton.setActive(edit);
@@ -435,12 +427,6 @@ public class PresetsTab extends RTMenuTab {
 			}
 		} else {
 			presetsList.updateButtonsActive();
-			
-			for (RTWindow window : getWindows()) {
-				if (window instanceof RemovedPresetsWindow) {
-					((RemovedPresetsWindow)window).updateButtonsActive();
-				}
-			}
 		}
 	}
 }

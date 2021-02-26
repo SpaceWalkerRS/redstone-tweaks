@@ -8,15 +8,15 @@ import redstonetweaks.client.PermissionManager;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 
-public class RemovePresetPacket extends AbstractRedstoneTweaksPacket {
+public class DeletePresetForeverPacket extends AbstractRedstoneTweaksPacket {
 	
 	private Preset preset;
 	
-	public RemovePresetPacket() {
+	public DeletePresetForeverPacket() {
 		
 	}
 	
-	public RemovePresetPacket(Preset preset) {
+	public DeletePresetForeverPacket(Preset preset) {
 		this.preset = preset;
 	}
 	
@@ -33,14 +33,14 @@ public class RemovePresetPacket extends AbstractRedstoneTweaksPacket {
 	@Override
 	public void execute(MinecraftServer server, ServerPlayerEntity player) {
 		if (preset != null && PermissionManager.canEditPresets(player)) {
-			Presets.remove(preset);
+			Presets.deleteForever(preset);
 		}
 	}
 	
 	@Override
 	public void execute(MinecraftClient client) {
 		if (!client.isInSingleplayer() && preset != null) {
-			Presets.remove(preset);
+			Presets.deleteForever(preset);
 		}
 	}
 }

@@ -39,10 +39,10 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	protected void initList() {
 		if (ServerInfo.getModVersion().isValid()) {
 			if (viewMode == ViewMode.ALL || viewMode == ViewMode.GLOBAL) {
-				addEntry(new EnvEntry(false));
+				addEntry(new EnvEntry(ViewMode.GLOBAL));
 				
 				for (Preset preset : Presets.getActiveGlobalPresets()) {
-					addEntry(new PresetEntry(preset));
+					addEntry(new ActivePresetEntry(preset));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
 				}
@@ -50,12 +50,25 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 				addEntry(new SeparatorEntry());
 			}
 			if (viewMode == ViewMode.ALL || viewMode == ViewMode.LOCAL) {
-				addEntry(new EnvEntry(true));
+				addEntry(new EnvEntry(ViewMode.LOCAL));
 				
 				for (Preset preset : Presets.getActiveLocalPresets()) {
-					addEntry(new PresetEntry(preset));
+					addEntry(new ActivePresetEntry(preset));
 					
 					updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+				}
+				
+				addEntry(new SeparatorEntry());
+			}
+			if (viewMode == ViewMode.DELETED) {
+				addEntry(new EnvEntry(ViewMode.DELETED));
+				
+				for (Preset preset : Presets.getAllPresets()) {
+					if (!Presets.isActive(preset)) {
+						addEntry(new DeletedPresetEntry(preset));
+						
+						updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+					}
 				}
 				
 				addEntry(new SeparatorEntry());
@@ -67,11 +80,11 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	protected void filterEntries(String query) {
 		if (ServerInfo.getModVersion().isValid()) {
 			if (viewMode == ViewMode.ALL || viewMode == ViewMode.GLOBAL) {
-				addEntry(new EnvEntry(false));
+				addEntry(new EnvEntry(ViewMode.GLOBAL));
 				
 				for (Preset preset : Presets.getActiveGlobalPresets()) {
 					if (preset.getName().toLowerCase().contains(query)) {
-						addEntry(new PresetEntry(preset));
+						addEntry(new ActivePresetEntry(preset));
 						
 						updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
 					}
@@ -80,11 +93,24 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 				addEntry(new SeparatorEntry());
 			}
 			if (viewMode == ViewMode.ALL || viewMode == ViewMode.LOCAL) {
-				addEntry(new EnvEntry(true));
+				addEntry(new EnvEntry(ViewMode.LOCAL));
 				
 				for (Preset preset : Presets.getActiveLocalPresets()) {
 					if (preset.getName().toLowerCase().contains(query)) {
-						addEntry(new PresetEntry(preset));
+						addEntry(new ActivePresetEntry(preset));
+						
+						updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+					}
+				}
+				
+				addEntry(new SeparatorEntry());
+			}
+			if (viewMode == ViewMode.DELETED) {
+				addEntry(new EnvEntry(ViewMode.DELETED));
+				
+				for (Preset preset : Presets.getAllPresets()) {
+					if (preset.getName().toLowerCase().contains(query) && !Presets.isActive(preset)) {
+						addEntry(new DeletedPresetEntry(preset));
 						
 						updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
 					}
@@ -150,13 +176,35 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		private static final String GLOBAL_TOOLTIP_TEXT = "Global presets are stored in the game's run directory and are therefor available in every world.";
 		private static final String LOCAL_TOOLTIP_TEXT = "Local presets are stored in this world's save folder and are therefor only available in this world.";
+		private static final String DELETED_TOOLTIP_TEXT = "Deleted presets can be restored, but once you click \'Delete Forever\', that preset is gone for good!";
 		
 		private final Text text;
 		private final List<Text> tooltip;
 		
-		public EnvEntry(boolean local) {
-			this.text = new TranslatableText(String.format("%s Presets", local ? "Local" : "Global")).formatted(Formatting.BOLD, Formatting.UNDERLINE);
-			this.tooltip = createTooltip(local);
+		public EnvEntry(ViewMode viewMode) {
+			String title;
+			String description;
+			switch (viewMode) {
+			case GLOBAL:
+				title = "Global Presets";
+				description = GLOBAL_TOOLTIP_TEXT;
+				break;
+			case LOCAL:
+				title = "Local Presets";
+				description = LOCAL_TOOLTIP_TEXT;
+				break;
+			case DELETED:
+				title = "Deleted Presets";
+				description = DELETED_TOOLTIP_TEXT;
+				break;
+			default:
+				title = "Alien Presets";
+				description = "I think something went wrong... These aren't supposed to exist?";
+				break;
+			}
+			
+			this.text = new TranslatableText(title).formatted(Formatting.BOLD, Formatting.UNDERLINE);
+			this.tooltip = createTooltip(description);
 		}
 		
 		@Override
@@ -183,9 +231,9 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			}
 		}
 		
-		private List<Text> createTooltip(boolean local) {
+		private List<Text> createTooltip(String text) {
 			List<Text> tooltip = new ArrayList<>();
-			for (String line : TextFormatting.getAsLines(local ? LOCAL_TOOLTIP_TEXT : GLOBAL_TOOLTIP_TEXT)) {
+			for (String line : TextFormatting.getAsLines(text)) {
 				tooltip.add(new TranslatableText(line));
 			}
 			
@@ -196,13 +244,11 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			int width = client.textRenderer.getWidth(text);
 			int height = client.textRenderer.fontHeight;
 			
-			int centerX = getWidth() / 2;
-			
-			return mouseX >= centerX - width / 2 && mouseX  <= centerX + width / 2 && mouseY % itemHeight >= 0 && mouseY % itemHeight <= height;
+			return mouseX >= getX() && mouseX <= getX() + width + 5 && mouseY % itemHeight >= 0 && mouseY % itemHeight <= height;
 		}
 	}
 	
-	public class PresetEntry extends Entry {
+	public class ActivePresetEntry extends Entry {
 		
 		private final Preset preset;
 		private final Text title;
@@ -216,7 +262,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		private boolean trimmedDescription;
 		private String description;
 		
-		public PresetEntry(Preset preset) {
+		public ActivePresetEntry(Preset preset) {
 			this.preset = preset;
 			this.title = new TranslatableText(preset.getName()).formatted(this.preset.isEditable() ? Formatting.RESET : Formatting.BOLD);
 			this.tooltip = createTooltip();
@@ -238,7 +284,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.children.add(this.editButton);
 			
 			this.deleteButton = new RTButtonWidget(0, 0, 45, 20, () -> new TranslatableText("Delete"), (button) -> {
-				((RTIMinecraftClient)screen.client).getPresetsManager().removePreset(this.preset);
+				((RTIMinecraftClient)screen.client).getPresetsManager().deletePreset(this.preset);
 			});
 			this.children.add(deleteButton);
 		}
@@ -323,6 +369,105 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		}
 	}
 	
+	public class DeletedPresetEntry extends Entry {
+		
+		private final Preset preset;
+		private final Text title;
+		private final List<Text> tooltip;
+		private final List<RTElement> children;
+		private final RTButtonWidget restoreButton;
+		private final RTButtonWidget deleteForeverButton;
+		
+		private boolean trimmedDescription;
+		private String description;
+		
+		public DeletedPresetEntry(Preset preset) {
+			this.preset = preset;
+			this.title = new TranslatableText(preset.getName()).formatted(this.preset.isEditable() ? Formatting.RESET : Formatting.BOLD);
+			this.tooltip = createTooltip();
+			this.children = new ArrayList<>();
+			
+			this.restoreButton = new RTButtonWidget(0, 0, 55, 20, () -> new TranslatableText("Restore"), (button) -> {
+				parent.editPreset(this.preset);
+			});
+			this.children.add(this.restoreButton);
+			
+			this.deleteForeverButton = new RTButtonWidget(0, 0, 90, 20, () -> new TranslatableText("Delete Forever"), (button) -> {
+				((RTIMinecraftClient)screen.client).getPresetsManager().deletePresetForever(this.preset);
+			});
+			this.children.add(deleteForeverButton);
+		}
+		
+		@Override
+		public List<? extends RTElement> getChildren() {
+			return children;
+		}
+		
+		@Override
+		public void init(int titleWidth) {
+			deleteForeverButton.setX(getX() + getWidth() - deleteForeverButton.getWidth() - 10);
+			restoreButton.setX(deleteForeverButton.getX() - restoreButton.getWidth() - 2);
+			
+			int width = restoreButton.getX() - getX() - titleWidth - 25;
+			description = TextFormatting.prettyTrimToWidth(preset.getDescription(), width, client.textRenderer);
+			if (!description.equals(preset.getDescription())) {
+				trimmedDescription = true;
+			}
+			
+			updateButtonsActive();
+		}
+		
+		@Override
+		public void tick() {
+			
+		}
+		
+		@Override
+		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			if (hovered) {
+				fillGradient(matrices, 2, y - 1, getScrollbarPositionX() - 1, y + entryHeight - 1, -2146365166, -2146365166);
+			}
+			
+			client.textRenderer.draw(matrices, title, x, y + itemHeight / 2 - 5, TEXT_COLOR);
+			client.textRenderer.draw(matrices, description, x + getEntryTitleWidth() + 10, y + itemHeight / 2 - 5, TEXT_COLOR);
+			
+			restoreButton.setY(y);
+			restoreButton.render(matrices, mouseX, mouseY, tickDelta);
+			
+			deleteForeverButton.setY(y);
+			deleteForeverButton.render(matrices, mouseX, mouseY, tickDelta);
+			
+			if (trimmedDescription && hovered && descriptionHovered(mouseX, mouseY)) {
+				currentTooltip = tooltip;
+			}
+		}
+		
+		private List<Text> createTooltip() {
+			List<Text> tooltip = new ArrayList<>();
+			for (String line : TextFormatting.getAsLines(preset.getDescription())) {
+				tooltip.add(new TranslatableText(line));
+			}
+			
+			return tooltip;
+		}
+		
+		private boolean descriptionHovered(int mouseX, int mouseY) {
+			int x1 = getX() + getEntryTitleWidth() + 10;
+			int x2 = restoreButton.getX() - 10;
+			int height = client.textRenderer.fontHeight;
+			
+			return mouseX >= x1 && mouseX <= x2 && mouseY % itemHeight >= 0 && mouseY % itemHeight <= height;
+		}
+		
+		@Override
+		public void updateButtonsActive() {
+			boolean canEditPresets = PermissionManager.canEditPresets(client.player);
+			
+			restoreButton.setActive(canEditPresets);
+			deleteForeverButton.setActive(canEditPresets);
+		}
+	}
+	
 	public abstract class Entry extends RTListWidget.Entry<PresetsListWidget.Entry> {
 		
 		public abstract void updateButtonsActive();
@@ -333,7 +478,8 @@ public enum ViewMode {
 		
 		ALL(0),
 		GLOBAL(1),
-		LOCAL(2);
+		LOCAL(2),
+		DELETED(3);
 		
 		private static final ViewMode[] MODES;
 		

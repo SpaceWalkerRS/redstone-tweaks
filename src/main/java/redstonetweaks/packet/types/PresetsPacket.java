@@ -89,7 +89,7 @@ public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 				
 				if (Presets.register(preset)) {
 					if (removed[index]) {
-						Presets.remove(preset);
+						Presets.delete(preset);
 					}
 				} else {
 					preset.remove();

@@ -283,12 +283,17 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	}
 	
 	@Override
-	public void presetRemoved(Preset preset) {
+	public void presetAdded(Preset preset) {
 		onPresetChanged(preset);
 	}
 	
 	@Override
-	public void presetAdded(Preset preset) {
+	public void presetDeleted(Preset preset) {
+		onPresetChanged(preset);
+	}
+	
+	@Override
+	public void presetDeletedForever(Preset preset) {
 		onPresetChanged(preset);
 	}
 	

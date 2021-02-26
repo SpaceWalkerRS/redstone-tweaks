@@ -9,7 +9,10 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
 import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.packet.types.AbstractRedstoneTweaksPacket;
 import redstonetweaks.packet.types.ApplyPresetPacket;
+import redstonetweaks.packet.types.DeletePresetForeverPacket;
+import redstonetweaks.packet.types.DeletePresetPacket;
 import redstonetweaks.packet.types.DoWorldTicksPacket;
 import redstonetweaks.packet.types.IncompleteBlockActionPacket;
 import redstonetweaks.packet.types.LockCategoryPacket;
@@ -20,12 +23,10 @@ import redstonetweaks.packet.types.NeighborUpdateVisualizerPacket;
 import redstonetweaks.packet.types.OpenMenuPacket;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
-import redstonetweaks.packet.types.AbstractRedstoneTweaksPacket;
 import redstonetweaks.packet.types.ReloadPresetsPacket;
-import redstonetweaks.packet.types.RemovePresetPacket;
-import redstonetweaks.packet.types.ResetSettingPacket;
 import redstonetweaks.packet.types.ResetCategoryPacket;
 import redstonetweaks.packet.types.ResetPackPacket;
+import redstonetweaks.packet.types.ResetSettingPacket;
 import redstonetweaks.packet.types.ServerInfoPacket;
 import redstonetweaks.packet.types.SettingPacket;
 import redstonetweaks.packet.types.SettingsPacket;
@@ -104,12 +105,13 @@ public abstract class AbstractPacketHandler {
 		PRESET(17, PresetPacket.class),
 		PRESETS(18, PresetsPacket.class),
 		RELOAD_PRESETS(19, ReloadPresetsPacket.class),
-		REMOVE_PRESET(20, RemovePresetPacket.class),
-		APPLY_PRESET(21, ApplyPresetPacket.class),
-		LOCK_SETTING(22, LockSettingPacket.class),
-		LOCK_PACK(23, LockPackPacket.class),
-		LOCK_CATEGORY(24, LockCategoryPacket.class),
-		OPEN_MENU(25, OpenMenuPacket.class);
+		DELETE_PRESET(20, DeletePresetPacket.class),
+		DELETE_PRESET_FOREVER(21, DeletePresetForeverPacket.class),
+		APPLY_PRESET(22, ApplyPresetPacket.class),
+		LOCK_SETTING(23, LockSettingPacket.class),
+		LOCK_PACK(24, LockPackPacket.class),
+		LOCK_CATEGORY(25, LockCategoryPacket.class),
+		OPEN_MENU(26, OpenMenuPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends AbstractRedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;

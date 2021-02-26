@@ -49,14 +49,25 @@ public class Presets {
 		return true;
 	}
 	
-	public static void remove(Preset preset) {
+	public static void delete(Preset preset) {
 		if (preset.isLocal() ? (ACTIVE_LOCAL.remove(preset.getName(), preset)) : (ACTIVE_GLOBAL.remove(preset.getName(), preset))) {
-			presetRemoved(preset);
+			presetDeleted(preset);
 		}
 	}
 	
-	private static void removeAll() {
-		ALL.values().forEach((preset) -> remove(preset));
+	public static void deleteForever(Preset preset) {
+		if (ALL.remove(preset.getId(), preset)) {
+			ACTIVE_LOCAL.values().remove(preset);
+			ACTIVE_GLOBAL.values().remove(preset);
+			
+			preset.remove();
+			
+			presetDeletedForever(preset);
+		}
+	}
+	
+	private static void deleteAll() {
+		ALL.values().forEach((preset) -> delete(preset));
 	}
 
 	public static boolean isNameValid(String name) {
@@ -158,7 +169,7 @@ public class Presets {
 	public static void delete() {
 		RedstoneTweaks.LOGGER.info("Deleting all presets");
 		
-		removeAll();
+		deleteAll();
 		cleanUp();
 	}
 	
@@ -204,12 +215,16 @@ public class Presets {
 		}
 	}
 	
-	public static void presetRemoved(Preset preset) {
-		LISTENERS.forEach((listener) -> listener.presetRemoved(preset));
-	}
-	
 	public static void presetAdded(Preset preset) {
 		LISTENERS.forEach((listener) -> listener.presetAdded(preset));
+	}
+	
+	public static void presetDeleted(Preset preset) {
+		LISTENERS.forEach((listener) -> listener.presetDeleted(preset));
+	}
+	
+	public static void presetDeletedForever(Preset preset) {
+		LISTENERS.forEach((listener) -> listener.presetDeletedForever(preset));
 	}
 	
 	private static class Default {

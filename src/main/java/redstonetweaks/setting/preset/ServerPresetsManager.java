@@ -11,13 +11,15 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
+
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.packet.ServerPacketHandler;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
-import redstonetweaks.packet.types.RemovePresetPacket;
+import redstonetweaks.packet.types.DeletePresetForeverPacket;
+import redstonetweaks.packet.types.DeletePresetPacket;
 import redstonetweaks.util.PacketUtils;
 
 public class ServerPresetsManager implements IPresetListener {
@@ -42,9 +44,16 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	@Override
-	public void presetRemoved(Preset preset) {
+	public void presetDeleted(Preset preset) {
 		if (!deaf && server.isRemote()) {
-			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new RemovePresetPacket(preset));
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new DeletePresetPacket(preset));
+		}
+	}
+	
+	@Override
+	public void presetDeletedForever(Preset preset) {
+		if (!deaf && server.isRemote()) {
+			((RTIMinecraftServer)server).getPacketHandler().sendPacket(new DeletePresetForeverPacket(preset));
 		}
 	}
 	
@@ -137,7 +146,7 @@ public class ServerPresetsManager implements IPresetListener {
 		preset.decode(buffer);
 		
 		if (!Presets.register(preset)) {
-			Presets.remove(preset);
+			Presets.delete(preset);
 		}
 	}
 	

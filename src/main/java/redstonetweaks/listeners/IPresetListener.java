@@ -9,6 +9,8 @@ public interface IPresetListener {
 	
 	public void presetAdded(Preset preset);
 	
-	public void presetRemoved(Preset preset);
+	public void presetDeleted(Preset preset);
+	
+	public void presetDeletedForever(Preset preset);
 	
 }
