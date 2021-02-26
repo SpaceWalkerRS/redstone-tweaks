@@ -1,13 +1,14 @@
 package redstonetweaks.gui.preset;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
+
 import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
@@ -21,34 +22,72 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	
 	private final PresetsTab parent;
 	
+	private ViewMode viewMode;
+	
 	public PresetsListWidget(PresetsTab parent, int x, int y, int width, int height) {
 		super(parent.screen, x, y, width, height, 22, "Presets List");
 		
 		this.parent = parent;
+		
+		this.viewMode = ViewMode.ALL;
 	}
 	
 	@Override
 	protected void initList() {
-		for (Preset preset : Presets.getActivePresets()) {
-			addEntry(new PresetEntry(preset));
+		if (viewMode == ViewMode.ALL || viewMode == ViewMode.GLOBAL) {
+			addEntry(new EnvEntry(false));
 			
-			updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
-		}
-		
-		addEntry(new AddPresetEntry());
-	}
-	
-	@Override
-	protected void filterEntries(String query) {
-		for (Preset preset : Presets.getActivePresets()) {
-			if (preset.getName().toLowerCase().contains(query)) {
+			for (Preset preset : Presets.getActiveGlobalPresets()) {
 				addEntry(new PresetEntry(preset));
 				
 				updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
 			}
+			
+			addEntry(new SeparatorEntry());
 		}
 		
-		addEntry(new AddPresetEntry());
+		if (viewMode == ViewMode.ALL || viewMode == ViewMode.LOCAL) {
+			addEntry(new EnvEntry(true));
+			
+			for (Preset preset : Presets.getActiveLocalPresets()) {
+				addEntry(new PresetEntry(preset));
+				
+				updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+			}
+			
+			addEntry(new SeparatorEntry());
+		}
+	}
+	
+	@Override
+	protected void filterEntries(String query) {
+		if (viewMode == ViewMode.ALL || viewMode == ViewMode.GLOBAL) {
+			addEntry(new EnvEntry(false));
+			
+			for (Preset preset : Presets.getActiveGlobalPresets()) {
+				if (preset.getName().toLowerCase().contains(query)) {
+					addEntry(new PresetEntry(preset));
+					
+					updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+				}
+			}
+			
+			addEntry(new SeparatorEntry());
+		}
+		
+		if (viewMode == ViewMode.ALL || viewMode == ViewMode.LOCAL) {
+			addEntry(new EnvEntry(true));
+			
+			for (Preset preset : Presets.getActiveLocalPresets()) {
+				if (preset.getName().toLowerCase().contains(query)) {
+					addEntry(new PresetEntry(preset));
+					
+					updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+				}
+			}
+			
+			addEntry(new SeparatorEntry());
+		}
 	}
 	
 	public void updateButtonsActive() {
@@ -57,31 +96,32 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		}
 	}
 	
-	public class AddPresetEntry extends Entry {
+	public ViewMode getViewMode() {
+		return viewMode;
+	}
+	
+	public void updateViewMode(boolean next) {
+		setViewMode(next ? viewMode.next() : viewMode.previous());
+	}
+	
+	public void setViewMode(ViewMode viewMode) {
+		this.viewMode = viewMode;
+	}
+	
+	public class SeparatorEntry extends Entry {
 		
-		private final List<RTElement> children;
-		private final RTButtonWidget addButton;
-		private final RTButtonWidget oopsButton;
+		public SeparatorEntry() {
+			
+		}
 		
-		public AddPresetEntry() {
-			this.children = new ArrayList<>();
+		@Override
+		public void updateButtonsActive() {
 			
-			this.addButton = new RTButtonWidget((getX() + getWidth() - 80) / 2, 0, 80, 20, () -> new TranslatableText("New Preset"), (button) -> {
-				parent.newPreset(Screen.hasShiftDown());
-			});
-			this.children.add(this.addButton);
-			
-			this.oopsButton = new RTButtonWidget(getX() + getWidth() - 55, 0, 45, 20, () -> new TranslatableText("oops"), (button) -> {
-				screen.openWindow(new RemovedPresetsWindow(parent));
-			});
-			this.children.add(this.oopsButton);
-			
-			updateButtonsActive();
 		}
 		
 		@Override
 		public List<? extends RTElement> getChildren() {
-			return children;
+			return Collections.emptyList();
 		}
 		
 		@Override
@@ -91,19 +131,63 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			addButton.setY(y);
-			addButton.render(matrices, mouseX, mouseY, tickDelta);
 			
-			oopsButton.setY(y);
-			oopsButton.render(matrices, mouseX, mouseY, tickDelta);
+		}
+	}
+	
+	public class EnvEntry extends Entry {
+		
+		private static final String GLOBAL_TOOLTIP_TEXT = "Global presets are stored in the game's run directory and are therefor available in every world.";
+		private static final String LOCAL_TOOLTIP_TEXT = "Local presets are stored in this world's save folder and are therefor only available in this world.";
+		
+		private final Text text;
+		private final List<Text> tooltip;
+		
+		public EnvEntry(boolean local) {
+			this.text = new TranslatableText(String.format("%s Presets", local ? "Local" : "Global")).formatted(Formatting.BOLD, Formatting.UNDERLINE);
+			this.tooltip = createTooltip(local);
 		}
 		
 		@Override
 		public void updateButtonsActive() {
-			boolean canEditPresets = PermissionManager.canEditPresets(client.player);
 			
-			addButton.setActive(canEditPresets);
-			oopsButton.setActive(canEditPresets);
+		}
+		
+		@Override
+		public List<? extends RTElement> getChildren() {
+			return Collections.emptyList();
+		}
+		
+		@Override
+		public void tick() {
+			
+		}
+		
+		@Override
+		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			drawCenteredText(matrices, client.textRenderer, text, getWidth() / 2, y + itemHeight / 2 - 5, TEXT_COLOR);
+			
+			if (hovered && titleHovered(mouseX, mouseY)) {
+				currentTooltip = tooltip;
+			}
+		}
+		
+		private List<Text> createTooltip(boolean local) {
+			List<Text> tooltip = new ArrayList<>();
+			for (String line : TextFormatting.getAsLines(local ? LOCAL_TOOLTIP_TEXT : GLOBAL_TOOLTIP_TEXT)) {
+				tooltip.add(new TranslatableText(line));
+			}
+			
+			return tooltip;
+		} 
+		
+		private boolean titleHovered(int mouseX, int mouseY) {
+			int width = client.textRenderer.getWidth(text);
+			int height = client.textRenderer.fontHeight;
+			
+			int centerX = getWidth() / 2;
+			
+			return mouseX >= centerX - width / 2 && mouseX  <= centerX + width / 2 && mouseY % itemHeight >= 0 && mouseY % itemHeight <= height;
 		}
 	}
 	
@@ -205,6 +289,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			for (String line : TextFormatting.getAsLines(preset.getDescription())) {
 				tooltip.add(new TranslatableText(line));
 			}
+			
 			return tooltip;
 		}
 		
@@ -231,5 +316,47 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		public abstract void updateButtonsActive();
 		
+	}
+	
+public enum ViewMode {
+		
+		ALL(0),
+		GLOBAL(1),
+		LOCAL(2);
+		
+		private static final ViewMode[] MODES;
+		
+		static {
+			MODES = new ViewMode[values().length];
+			
+			for (ViewMode mode : values()) {
+				MODES[mode.index] = mode;
+			}
+		}
+		
+		private final int index;
+		
+		private ViewMode(int index) {
+			this.index = index;
+		}
+		
+		public static ViewMode fromIndex(int index) {
+			if (index < 0) {
+				return MODES[MODES.length - 1];
+			}
+			if (index >= MODES.length) {
+				return MODES[0];
+			}
+			
+			return MODES[index];
+		}
+		
+		public ViewMode next() {
+			return fromIndex(index + 1);
+		}
+		
+		public ViewMode previous() {
+			return fromIndex(index - 1);
+		}
 	}
 }

@@ -17,16 +17,19 @@ public class Preset {
 	private String name;
 	private String description;
 	private Mode mode;
+	private boolean local;
 	
-	public Preset(boolean editable, String name, String description, Mode mode) {
-		this(nextId(), null, editable, name, description, mode);
+	// Only use for initializing built-in presets
+	public Preset(String name, String description, Mode mode) {
+		this(nextId(), null, false, name, description, mode, false);
 	}
 	
-	public Preset(String savedName, String name, String description, Mode mode) {
-		this(nextId(), savedName, true, name, description, mode);
+	// Only use when loading presets from file
+	public Preset(String savedName, String name, String description, Mode mode, boolean local) {
+		this(nextId(), savedName, true, name, description, mode, local);
 	}
 	
-	public Preset(int id, String savedName, boolean editable, String name, String description, Mode mode) {
+	public Preset(int id, String savedName, boolean editable, String name, String description, Mode mode, boolean local) {
 		this.id = id;
 		this.savedName = savedName;
 		this.editable = editable;
@@ -34,6 +37,7 @@ public class Preset {
 		this.name = name;
 		this.description = description;
 		this.mode = mode;
+		this.local = local;
 	}
 	
 	public static void resetIdCounter() {
@@ -96,6 +100,14 @@ public class Preset {
 	
 	public void setMode(Mode newMode) {
 		mode = newMode;
+	}
+	
+	public boolean isLocal() {
+		return local;
+	}
+	
+	public void setIsLocal(boolean local) {
+		this.local = local;
 	}
 	
 	public void apply() {

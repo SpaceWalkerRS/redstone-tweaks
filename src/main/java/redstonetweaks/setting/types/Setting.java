@@ -139,6 +139,11 @@ public abstract class Setting<T> implements ISetting {
 	}
 	
 	@Override
+	public void removePresets() {
+		presetValues.clear();
+	}
+	
+	@Override
 	public void copyPresetValue(Preset from, Preset to) {
 		T value = getPresetValue(from);
 		if (value != null) {

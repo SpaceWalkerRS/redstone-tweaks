@@ -28,6 +28,7 @@ public class PresetPacket extends AbstractRedstoneTweaksPacket {
 		buffer.writeString(editor.getName());
 		buffer.writeString(editor.getDescription());
 		buffer.writeByte(editor.getMode().getIndex());
+		buffer.writeBoolean(editor.isLocal());
 		
 		editor.encode(buffer);
 	}
@@ -38,12 +39,14 @@ public class PresetPacket extends AbstractRedstoneTweaksPacket {
 		String name = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 		String description = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 		Preset.Mode mode = Preset.Mode.fromIndex(buffer.readByte());
+		boolean local = buffer.readBoolean();
 		
-		editor = Presets.editPreset(Presets.fromIdOrCreate(id, name, description, mode));
+		editor = Presets.editPreset(Presets.fromIdOrCreate(id, name, description, mode, local));
 		
 		editor.setName(name);
 		editor.setDescription(description);
 		editor.setMode(mode);
+		editor.setIsLocal(local);
 		
 		editor.decode(buffer);
 	}

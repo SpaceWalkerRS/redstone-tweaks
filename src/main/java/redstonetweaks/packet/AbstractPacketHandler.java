@@ -40,7 +40,7 @@ import redstonetweaks.util.PacketUtils;
 public abstract class AbstractPacketHandler {
 	
 	public static final Identifier PACKET_IDENTIFIER = new Identifier("redstonetweaks");
-	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.createRelease(1, 0, 7);
+	public static final RedstoneTweaksVersion PACKET_PROTOCOL = RedstoneTweaksVersion.createRelease(1, 0, 8);
 	
 	protected Packet<?> encodePacket(AbstractRedstoneTweaksPacket packet) {
 		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
@@ -61,7 +61,12 @@ public abstract class AbstractPacketHandler {
 	protected abstract Packet<?> toCustomPayloadPacket(PacketByteBuf buffer);
 	
 	protected AbstractRedstoneTweaksPacket decodePacket(PacketByteBuf buffer) throws InstantiationException, IllegalAccessException {
-		PacketType type = PacketType.fromIndex(buffer.readByte());
+		byte index = buffer.readByte();
+		
+		PacketType type = PacketType.fromIndex(index);
+		if (type == PacketType.INVALID) {
+			throw new IllegalStateException("Unable to decode packet type: " + index);
+		}
 		AbstractRedstoneTweaksPacket packet = type.getClazz().newInstance();
 		
 		packet.decode(buffer);
@@ -131,6 +136,7 @@ public abstract class AbstractPacketHandler {
 			if (index > 0 && index < PACKET_TYPES.length) {
 				return PACKET_TYPES[index];
 			}
+			
 			return INVALID;
 		}
 		

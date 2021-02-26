@@ -41,6 +41,7 @@ public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 			buffer.writeString(preset.getDescription());
 			buffer.writeByte(preset.getMode().getIndex());
 			buffer.writeBoolean(preset.isEditable());
+			buffer.writeBoolean(preset.isLocal());
 			buffer.writeBoolean(!Presets.isActive(preset));
 		}
 		
@@ -61,10 +62,11 @@ public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 			String name = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 			String description = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 			Preset.Mode mode = Preset.Mode.fromIndex(buffer.readByte());
+			boolean local = buffer.readBoolean();
 			boolean editable = buffer.readBoolean();
 			
+			presets[index] = new Preset(id, name, editable, name, description, mode, local);
 			removed[index] = buffer.readBoolean();
-			presets[index] = new Preset(id, name, editable, name, description, mode);
 		}
 		
 		data = new PacketByteBuf(buffer.readBytes(buffer.readableBytes()));
@@ -78,7 +80,7 @@ public class PresetsPacket extends AbstractRedstoneTweaksPacket {
 	@Override
 	public void execute(MinecraftClient client) {
 		if (!client.isInSingleplayer()) {
-			Presets.reset();
+			Presets.delete();
 			
 			for (int index = 0; index < presetsCount; index++) {
 				Preset preset = presets[index];

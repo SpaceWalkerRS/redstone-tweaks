@@ -15,13 +15,14 @@ import redstonetweaks.setting.preset.Presets;
 public class PresetWindow extends RTWindow {
 	
 	private static final int WIDTH = 400;
-	private static final int HEIGHT = 105;
+	private static final int HEIGHT = 125;
 	
 	private final PresetsTab parent;
 	
 	private RTTextFieldWidget nameField;
 	private boolean nameAlreadyExists;
 	private RTTextFieldWidget descriptionField;
+	private RTButtonWidget envButton;
 	private RTButtonWidget modeButton;
 	
 	public PresetWindow(PresetsTab parent) {
@@ -38,7 +39,7 @@ public class PresetWindow extends RTWindow {
 		nameField = new RTTextFieldWidget(screen.getTextRenderer(), 16, x, y, 100, 20, (textField) -> {}, (text) -> {
 			parent.getPresetEditor().setName(text);
 			
-			Preset existingPreset = Presets.fromName(text);
+			Preset existingPreset = Presets.fromName(text, parent.getPresetEditor().isLocal());
 			nameAlreadyExists = existingPreset != null && existingPreset != parent.getPresetEditor().getPreset();
 		});
 		nameField.setText(parent.getPresetEditor().getName());
@@ -50,7 +51,14 @@ public class PresetWindow extends RTWindow {
 		descriptionField.setText(parent.getPresetEditor().getDescription());
 		addContent(descriptionField);
 		
-		modeButton = new RTButtonWidget(x, y + 44, 100, 20, () -> new TranslatableText(parent.getPresetEditor().getMode().toString()), (button) -> {
+		envButton = new RTButtonWidget(x, y + 44, 100, 20, () -> new TranslatableText(parent.getPresetEditor().isLocal() ? "Local" : "Global"), (button) -> {
+			parent.getPresetEditor().toggleIsLocal();
+			
+			button.updateMessage();
+		});
+		addContent(envButton);
+		
+		modeButton = new RTButtonWidget(x, y + 66, 100, 20, () -> new TranslatableText(parent.getPresetEditor().getMode().toString()), (button) -> {
 			if (Screen.hasShiftDown()) {
 				parent.getPresetEditor().nextMode();
 			} else {
@@ -76,7 +84,8 @@ public class PresetWindow extends RTWindow {
 		int y = getY() + 36;
 		screen.client.textRenderer.drawWithShadow(matrices, "Name", x, y, TEXT_COLOR);
 		screen.client.textRenderer.drawWithShadow(matrices, "Description", x, y + 22, TEXT_COLOR);
-		screen.client.textRenderer.drawWithShadow(matrices, "Mode", x, y + 44, TEXT_COLOR);
+		screen.client.textRenderer.drawWithShadow(matrices, "Environment", x, y + 44, TEXT_COLOR);
+		screen.client.textRenderer.drawWithShadow(matrices, "Mode", x, y + 66, TEXT_COLOR);
 		
 		if (nameAlreadyExists) {
 			screen.client.textRenderer.drawWithShadow(matrices, new TranslatableText("That name already exists!").formatted(Formatting.RED), nameField.getX() + nameField.getWidth() + 5, y, TEXT_COLOR);
@@ -84,6 +93,7 @@ public class PresetWindow extends RTWindow {
 		
 		nameField.render(matrices, mouseX, mouseY, delta);
 		descriptionField.render(matrices, mouseX, mouseY, delta);
+		envButton.render(matrices, mouseX, mouseY, delta);
 		modeButton.render(matrices, mouseX, mouseY, delta);
 	}
 	
@@ -98,6 +108,7 @@ public class PresetWindow extends RTWindow {
 		
 		nameField.setActive(canEditPresets && editable);
 		descriptionField.setActive(canEditPresets && editable);
+		envButton.setActive(canEditPresets && editable);
 		modeButton.setActive(canEditPresets && editable);
 	}
 }

@@ -108,6 +108,10 @@ public class Settings {
 		ALL.values().forEach((setting) -> setting.removePreset(preset));
 	}
 	
+	public static void removePresets() {
+		ALL.values().forEach((setting) -> setting.removePresets());
+	}
+	
 	public static void addListener(ISettingListener listener) {
 		LISTENERS.add(listener);
 	}

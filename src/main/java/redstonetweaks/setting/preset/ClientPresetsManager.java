@@ -46,9 +46,7 @@ public class ClientPresetsManager {
 	}
 	
 	public void onConnect() {
-		if (!client.isInSingleplayer()) {
-			Presets.reset();
-		}
+		
 	}
 	
 	public void onDisconnect() {

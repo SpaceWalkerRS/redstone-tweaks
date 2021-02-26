@@ -19,7 +19,6 @@ import net.minecraft.util.math.BlockPos;
 import redstonetweaks.block.entity.BlockEntityTypes;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.packet.AbstractPacketHandler;
-import redstonetweaks.setting.preset.Presets;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
@@ -28,10 +27,6 @@ public class ClientPlayNetworkHandlerMixin {
 	
 	@Inject(method = "onGameJoin", at = @At(value = "HEAD"))
 	private void onOnGameJoinInjectAtHead(GameJoinS2CPacket packet, CallbackInfo ci) {
-		if (!client.isInSingleplayer()) {
-			Presets.init();
-		}
-		
 		((RTIMinecraftClient)client).getSettingsManager().onConnect();
 		((RTIMinecraftClient)client).getPresetsManager().onConnect();
 	}

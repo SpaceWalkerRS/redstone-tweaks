@@ -39,6 +39,8 @@ public class PresetsTab extends RTMenuTab {
 	private RTTextFieldWidget searchBox;
 	private RTButtonWidget clearSearchBoxButton;
 	
+	private RTButtonWidget newPresetButton;
+	private RTButtonWidget binButton;
 	private RTButtonWidget reloadPresetsButton;
 	
 	private RTButtonWidget saveButton;
@@ -110,11 +112,38 @@ public class PresetsTab extends RTMenuTab {
 		addBrowserContent(searchBox);
 		addEditorContent(searchBox);
 		
+		viewModeButton = new RTButtonWidget(0, 0, 80, 20, () -> new TranslatableText(String.format("View: %s", isEditingPreset() ? settingsList.getViewMode() : presetsList.getViewMode())), (button) -> {
+			boolean edit = isEditingPreset();
+			boolean shift = Screen.hasShiftDown();
+			
+			if (edit) {
+				settingsList.updateViewMode(!shift);
+				settingsList.filter(searchBox.getText());
+			} else {
+				presetsList.updateViewMode(!shift);
+				presetsList.filter(searchBox.getText());
+			}
+			
+			button.updateMessage();
+		});
+		addBrowserContent(viewModeButton);
+		addEditorContent(viewModeButton);
+		
 		
 		reloadPresetsButton = new RTButtonWidget(screen.getWidth() - 110, screen.getHeaderHeight(), 100, 20, () -> new TranslatableText("Reload Presets"), (button) -> {
 			((RTIMinecraftClient)screen.client).getPresetsManager().reloadPresets();
 		});
 		addBrowserContent(reloadPresetsButton);
+		
+		binButton = new RTButtonWidget(reloadPresetsButton.getX() - 47, reloadPresetsButton.getY(), 45, 20, () -> new TranslatableText("Bin"), (button) -> {
+			screen.openWindow(new RemovedPresetsWindow(this));
+		});
+		addBrowserContent(binButton);
+		
+		newPresetButton = new RTButtonWidget(binButton.getX() - 82, binButton.getY(), 80, 20, () -> new TranslatableText("New Preset"), (button) -> {
+			newPreset(Screen.hasShiftDown());
+		});
+		addBrowserContent(newPresetButton);
 		
 		
 		cancelButton = new RTButtonWidget(screen.getWidth() - 60, screen.getHeaderHeight(), 50, 20, () -> new TranslatableText("Cancel"), (button) -> {
@@ -193,14 +222,6 @@ public class PresetsTab extends RTMenuTab {
 		});
 		addEditorContent(toggleListButton);
 		
-		viewModeButton = new RTButtonWidget(toggleListButton.getX() - 82, toggleListButton.getY(), 80, 20, () -> new TranslatableText(String.format("View: %s", settingsList.getViewMode())), (button) -> {
-			settingsList.updateViewMode(!Screen.hasShiftDown());
-			settingsList.filter(searchBox.getText());
-			
-			button.updateMessage();
-		});
-		addEditorContent(viewModeButton);
-		
 		
 		if (isEditingPreset()) {
 			initEditorContent();
@@ -252,7 +273,10 @@ public class PresetsTab extends RTMenuTab {
 		} else {
 			searchBox.render(matrices, mouseX, mouseY, delta);
 			clearSearchBoxButton.render(matrices, mouseX, mouseY, delta);
+			viewModeButton.render(matrices, mouseX, mouseY, delta);
 			
+			newPresetButton.render(matrices, mouseX, mouseY, delta);
+			binButton.render(matrices, mouseX, mouseY, delta);
 			reloadPresetsButton.render(matrices, mouseX, mouseY, delta);
 			
 			presetsList.render(matrices, mouseX, mouseY, delta);
@@ -305,14 +329,8 @@ public class PresetsTab extends RTMenuTab {
 	}
 	
 	private void initBrowserContent() {
-		int y = screen.getHeaderHeight();
+		viewModeChanged();
 		
-		clearSearchBoxButton.setX(reloadPresetsButton.getX() - clearSearchBoxButton.getWidth() - 5);
-		clearSearchBoxButton.setY(y);
-		
-		searchBox.setX(5);
-		searchBox.setY(y);
-		searchBox.setWidth(clearSearchBoxButton.getX() - searchBox.getX() - 2);
 		searchBox.setText("");
 		
 		presetsList.init();
@@ -337,27 +355,41 @@ public class PresetsTab extends RTMenuTab {
 	}
 	
 	private void viewModeChanged() {
-		int x = settingsList.addSettingsMode() ? viewModeButton.getX() : toggleListButton.getX();
-		int y = categoryButtons[categoryButtons.length - 1].getY() + 25;
+		boolean edit = isEditingPreset();
 		
-		clearSearchBoxButton.setX(x - clearSearchBoxButton.getWidth() - 5);
+		int x = (edit ? toggleListButton.getX() : newPresetButton.getX()) - viewModeButton.getWidth() - 5;
+		int y = edit ? toggleListButton.getY() : reloadPresetsButton.getY();
+		
+		viewModeButton.setX(x);
+		viewModeButton.setY(y);
+		
+		if (edit && !settingsList.addSettingsMode()) {
+			x = toggleListButton.getX();
+		}
+		
+		clearSearchBoxButton.setX(x - clearSearchBoxButton.getWidth() - 2);
 		clearSearchBoxButton.setY(y);
 		
 		searchBox.setX(5);
 		searchBox.setY(y);
 		searchBox.setWidth(clearSearchBoxButton.getX() - searchBox.getX() - 2);
 		
-		viewModeButton.setActive(settingsList.addSettingsMode());
+		viewModeButton.setActive(!edit || settingsList.addSettingsMode());
 	}
 	
 	public void updateButtonsActive() {
+		boolean edit = isEditingPreset();
 		boolean canEditPresets = PermissionManager.canEditPresets(screen.client.player);
 		boolean editable = isEditingPreset() ? getPresetEditor().isEditable() : false;
 		
-		reloadPresetsButton.setActive(canEditPresets);
+		newPresetButton.setActive(!edit && canEditPresets);
+		binButton.setActive(!edit);
+		reloadPresetsButton.setActive(!edit && canEditPresets);
 		
-		saveButton.setActive(canEditPresets && editable);
-		toggleListButton.setActive(canEditPresets && editable);
+		propertiesButton.setActive(edit);
+		saveButton.setActive(edit && canEditPresets && editable);
+		cancelButton.setActive(editable);
+		toggleListButton.setActive(edit && canEditPresets && editable);
 	}
 	
 	public SettingsCategory getSelectedCategory() {

@@ -10,6 +10,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.WorldSavePath;
 import redstonetweaks.RedstoneTweaks;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
 import redstonetweaks.listeners.IPresetListener;
@@ -53,15 +54,23 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	public void onStartUp() {
-		loadPresets();
-		
 		Presets.addListener(this);
+		
+		loadGlobalPresets();
 	}
 	
 	public void onShutdown() {
 		Presets.removeListener(this);
 		
-		savePresets();
+		saveGlobalPresets();
+	}
+	
+	public void onLoadWorld() {
+		loadLocalPresets();
+	}
+	
+	public void onSaveWorld() {
+		saveLocalPresets();
 	}
 	
 	public void onPlayerJoined(ServerPlayerEntity player) {
@@ -81,77 +90,108 @@ public class ServerPresetsManager implements IPresetListener {
 		}
 	}
 	
-	private void loadPresets() {
-		RedstoneTweaks.LOGGER.info("Loading presets");
+	private void loadGlobalPresets() {
+		RedstoneTweaks.LOGGER.info("Loading global presets");
 		
-		File directory = getPresetsFolder();
+		loadPresets(false);
+	}
+	
+	private void loadLocalPresets() {
+		RedstoneTweaks.LOGGER.info(String.format("Loading presets for \'%s\'", server.getSaveProperties().getLevelName()));
+		
+		loadPresets(true);
+	}
+	
+	private void loadPresets(boolean local) {
+		File directory = getPresetsFolder(local);
+		
+		deaf = true;
 		
 		for (File file : directory.listFiles()) {
 			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION)) {
-				loadPreset(file);
+				loadPreset(file, local);
 			}
 		}
+		
+		deaf = false;
 	}
 	
-	private void loadPreset(File file) {
+	private void loadPreset(File file, boolean local) {
 		try (FileInputStream stream = new FileInputStream(file)) {
 			byte[] data = IOUtils.toByteArray(stream);
 			PacketByteBuf buffer = new PacketByteBuf(Unpooled.wrappedBuffer(data));
 			
-			readPreset(buffer);
+			readPreset(buffer, local);
 		} catch (Exception e) {
 			
 		}
 	}
 	
-	private void readPreset(PacketByteBuf buffer) {
+	private void readPreset(PacketByteBuf buffer, boolean local) {
 		String name = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 		String description = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
 		Preset.Mode mode = Preset.Mode.fromIndex(buffer.readByte());
 		
-		Preset preset = new Preset(name, name, description, mode);
+		Preset preset = new Preset(name, name, description, mode, local);
 		
-		if (Presets.register(preset)) {
-			preset.decode(buffer);
+		preset.decode(buffer);
+		
+		if (!Presets.register(preset)) {
+			Presets.remove(preset);
 		}
 	}
 	
 	public void reloadPresets() {
-		savePresets();
+		saveGlobalPresets();
+		saveLocalPresets();
 		
 		Presets.reset();
-		Presets.init();
 		
-		loadPresets();
+		loadGlobalPresets();
+		loadLocalPresets();
 		
 		sendPresetsToPlayer(null);
 	}
 	
-	private void savePresets() {
-		RedstoneTweaks.LOGGER.info("Saving presets");
+	private void saveGlobalPresets() {
+		RedstoneTweaks.LOGGER.info("Saving global presets");
 		
-		cleanUpPresetFiles();
+		savePresets(false);
+	}
+	
+	private void saveLocalPresets() {
+		RedstoneTweaks.LOGGER.info(String.format("Saving presets for \'%s\'", server.getSaveProperties().getLevelName()));
+		
+		savePresets(true);
+	}
+	
+	private void savePresets(boolean local) {
+		deaf = true;
+		
+		cleanUpPresetFiles(local);
 		
 		for (Preset preset : Presets.getAllPresets()) {
-			if (preset.isEditable()) {
+			if (preset.isEditable() && (preset.isLocal() == local)) {
 				savePreset(preset);
 			}
 		}
+		
+		deaf = false;
 	}
 	
-	private void cleanUpPresetFiles() {
-		File presetsFolder = getPresetsFolder();
+	private void cleanUpPresetFiles(boolean local) {
+		File presetsFolder = getPresetsFolder(local);
 		
 		for (File file : presetsFolder.listFiles()) {
-			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION) && shouldDeleteFile(file)) {
+			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION) && shouldDeleteFile(file, local)) {
 				file.delete();
 			}
 		}
 		
-		Presets.cleanUp();
+		Presets.cleanUp(local);
 	}
 	
-	private boolean shouldDeleteFile(File file) {
+	private boolean shouldDeleteFile(File file, boolean local) {
 		try (FileInputStream stream = new FileInputStream(file)) {
 			byte[] data = IOUtils.toByteArray(stream);
 			PacketByteBuf buffer = new PacketByteBuf(Unpooled.wrappedBuffer(data));
@@ -160,7 +200,7 @@ public class ServerPresetsManager implements IPresetListener {
 			
 			for (Preset preset : Presets.getAllPresets()) {
 				try {
-					if (preset.isEditable() && !Presets.isActive(preset) && preset.getSavedName().equals(savedName)) {
+					if (preset.isEditable() && (preset.isLocal() == local) && !Presets.isActive(preset) && preset.getSavedName().equals(savedName)) {
 						return true;
 					}
 				} catch (Exception e) {
@@ -204,8 +244,8 @@ public class ServerPresetsManager implements IPresetListener {
 		preset.encode(buffer);
 	}
 	
-	private File getCacheDir() {
-		File directory = new File(server.getRunDirectory(), CACHE_DIRECTORY);
+	private File getCacheDir(boolean local) {
+		File directory = new File(local ? server.getSavePath(WorldSavePath.ROOT).toFile() : server.getRunDirectory(), CACHE_DIRECTORY);
 
 		if (!directory.exists()) {
 			directory.mkdirs();
@@ -214,8 +254,8 @@ public class ServerPresetsManager implements IPresetListener {
 		return directory;
 	}
 	
-	private File getPresetsFolder() {
-		File directory = new File(getCacheDir(), PRESETS_PATH);
+	private File getPresetsFolder(boolean local) {
+		File directory = new File(getCacheDir(local), PRESETS_PATH);
 
 		if (!directory.exists()) {
 			directory.mkdirs();
@@ -225,6 +265,6 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	private File getPresetFile(Preset preset) {
-		return new File(getPresetsFolder(), String.format("%s.%s", preset.getName(), FILE_EXTENSION));
+		return new File(getPresetsFolder(preset.isLocal()), String.format("%s.%s", preset.getName(), FILE_EXTENSION));
 	}
 }

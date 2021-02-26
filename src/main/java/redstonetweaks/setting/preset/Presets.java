@@ -25,7 +25,8 @@ import redstonetweaks.world.common.WorldTickOptions;
 public class Presets {
 	
 	private static final Map<Integer, Preset> ALL = new HashMap<>();
-	private static final Map<String, Preset> ACTIVE = new LinkedHashMap<>();
+	private static final Map<String, Preset> ACTIVE_GLOBAL = new LinkedHashMap<>();
+	private static final Map<String, Preset> ACTIVE_LOCAL = new LinkedHashMap<>();
 	
 	private static final Set<IPresetListener> LISTENERS = new HashSet<>();
 	
@@ -41,7 +42,7 @@ public class Presets {
 		if (ALL.putIfAbsent(id, preset) == null) {
 			RedstoneTweaks.LOGGER.info(String.format("Registered \'%s\' preset with id %d", preset.getName(), preset.getId()));
 		}
-		if (ACTIVE.putIfAbsent(preset.getName(), preset) == null) {
+		if (preset.isLocal() ? (ACTIVE_LOCAL.putIfAbsent(preset.getName(), preset) == null) : (ACTIVE_GLOBAL.putIfAbsent(preset.getName(), preset) == null)) {
 			presetAdded(preset);
 		}
 		
@@ -49,7 +50,7 @@ public class Presets {
 	}
 	
 	public static void remove(Preset preset) {
-		if (ACTIVE.remove(preset.getName(), preset)) {
+		if (preset.isLocal() ? (ACTIVE_LOCAL.remove(preset.getName(), preset)) : (ACTIVE_GLOBAL.remove(preset.getName(), preset))) {
 			presetRemoved(preset);
 		}
 	}
@@ -62,8 +63,8 @@ public class Presets {
 		return name != null && !name.isEmpty();
 	}
 	
-	public static boolean isNameAvailable(String name) {
-		return !ACTIVE.containsKey(name);
+	public static boolean isNameAvailable(String name, boolean local) {
+		return local ? !ACTIVE_LOCAL.containsKey(name) : !ACTIVE_GLOBAL.containsKey(name);
 	}
 	
 	public static Preset defaultPreset() {
@@ -74,35 +75,39 @@ public class Presets {
 		return ALL.get(id);
 	}
 	
-	public static Preset fromName(String name) {
-		return ACTIVE.get(name);
+	public static Preset fromName(String name, boolean local) {
+		return local ? ACTIVE_LOCAL.get(name) : ACTIVE_GLOBAL.get(name);
 	}
 	
 	public static Collection<Preset> getAllPresets() {
 		return Collections.unmodifiableCollection(ALL.values());
 	}
 	
-	public static Collection<Preset> getActivePresets() {
-		return Collections.unmodifiableCollection(ACTIVE.values());
+	public static Collection<Preset> getActiveGlobalPresets() {
+		return Collections.unmodifiableCollection(ACTIVE_GLOBAL.values());
+	}
+	
+	public static Collection<Preset> getActiveLocalPresets() {
+		return Collections.unmodifiableCollection(ACTIVE_LOCAL.values());
 	}
 	
 	public static boolean isActive(Preset preset) {
-		return ACTIVE.containsValue(preset);
+		return preset.isLocal() ? ACTIVE_LOCAL.containsValue(preset) : ACTIVE_GLOBAL.containsValue(preset);
 	}
 	
 	// Only used on the client for creating new presets
-	public static Preset create(String name, String description, Preset.Mode mode) {
-		return new Preset(-Preset.nextId(), null, true, name, description, mode);
+	public static Preset create(String name, String description, Preset.Mode mode, boolean local) {
+		return new Preset(-Preset.nextId(), null, true, name, description, mode, local);
 	}
 	
-	public static Preset fromIdOrCreate(int id, String name, String description, Preset.Mode mode) {
+	public static Preset fromIdOrCreate(int id, String name, String description, Preset.Mode mode, boolean local) {
 		Preset preset = fromId(id);
 		
-		return preset == null ? new Preset(id, null, true, name, description, mode) : preset;
+		return preset == null ? new Preset(id, null, true, name, description, mode, local) : preset;
 	}
 	
 	public static PresetEditor newPreset(boolean fromSettings) {
-		PresetEditor editor = editPreset(create("", "", Preset.Mode.SET));
+		PresetEditor editor = editPreset(create("", "", Preset.Mode.SET, false));
 		
 		if (fromSettings) {
 			for (ISetting setting : Settings.getSettings()) {
@@ -116,7 +121,7 @@ public class Presets {
 	}
 	
 	public static PresetEditor duplicatePreset(Preset preset) {
-		PresetEditor editor = editPreset(create(String.format("%s - copy", preset.getName()), preset.getDescription(), preset.getMode()));
+		PresetEditor editor = editPreset(create(String.format("%s - copy", preset.getName()), preset.getDescription(), preset.getMode(), preset.isLocal()));
 		
 		for (ISetting setting : Settings.getSettings()) {
 			if (setting.hasPreset(preset)) {
@@ -132,7 +137,6 @@ public class Presets {
 		return new PresetEditor(preset);
 	}
 	
-	// Use on the server only
 	public static void init() {
 		Preset.resetIdCounter();
 		
@@ -142,16 +146,30 @@ public class Presets {
 		Heaven.init();
 		Hell.init();
 		PistonMadness.init();
+		
+		RedstoneTweaks.LOGGER.info(String.format("Initialized %d built-in presets", getAllPresets().size()));
 	}
 	
 	public static void reset() {
+		delete();
+		init();
+	}
+	
+	public static void delete() {
+		RedstoneTweaks.LOGGER.info("Deleting all presets");
+		
 		removeAll();
 		cleanUp();
 	}
-
+	
 	public static void cleanUp() {
+		cleanUp(false);
+		cleanUp(true);
+	}
+	
+	public static void cleanUp(boolean local) {
 		ALL.values().removeIf((preset) -> {
-			if (isActive(preset)) {
+			if ((preset.isLocal() != local) || isActive(preset)) {
 				return false;
 			}
 			
@@ -176,7 +194,8 @@ public class Presets {
 	public static void presetChanged(PresetEditor editor) {
 		Preset preset = editor.getPreset();
 		
-		ACTIVE.values().remove(preset);
+		ACTIVE_GLOBAL.values().remove(preset);
+		ACTIVE_LOCAL.values().remove(preset);
 		register(preset);
 		
 		if (isActive(preset)) {
@@ -195,7 +214,7 @@ public class Presets {
 	private static class Default {
 		
 		private static void init() {
-			Preset DEFAULT = new Preset(false, "Default", "The default values of all settings.", Preset.Mode.SET);
+			Preset DEFAULT = new Preset("Default", "The default values of all settings.", Preset.Mode.SET);
 			
 			Presets.register(DEFAULT);
 			
@@ -673,7 +692,7 @@ public class Presets {
 	private static class Bedrock {
 		
 		private static void init() {
-			Preset BEDROCK = new Preset(false, "Bedrock", "Features or behaviors that are present in the Bedrock Edition of Minecraft.", Preset.Mode.SET);
+			Preset BEDROCK = new Preset("Bedrock", "Features or behaviors that are present in the Bedrock Edition of Minecraft.", Preset.Mode.SET);
 			
 			Presets.register(BEDROCK);
 			
@@ -717,7 +736,7 @@ public class Presets {
 	private static class Debugging {
 		
 		private static void init() {
-			Preset DEBUGGING = new Preset(false, "Debugging", "Debugging tools.", Preset.Mode.SET);
+			Preset DEBUGGING = new Preset("Debugging", "Debugging tools.", Preset.Mode.SET);
 			
 			Presets.register(DEBUGGING);
 			
@@ -729,7 +748,7 @@ public class Presets {
 	private static class Heaven {
 		
 		private static void init() {
-			Preset HEAVEN = new Preset(false, "Heaven", "Bug fixes, quality of life changes and cool new features to make your redstoning experience a bliss.", Preset.Mode.SET);
+			Preset HEAVEN = new Preset("Heaven", "Bug fixes, quality of life changes and cool new features to make your redstoning experience a bliss.", Preset.Mode.SET);
 			
 			Presets.register(HEAVEN);
 			
@@ -829,7 +848,7 @@ public class Presets {
 	private static class Hell {
 		
 		private static void init() {
-			Preset HELL = new Preset(false, "Hell", "The worst redstoning experience imaginable. Apply at your own risk.", Preset.Mode.SET);
+			Preset HELL = new Preset("Hell", "The worst redstoning experience imaginable. Apply at your own risk.", Preset.Mode.SET);
 			
 			Presets.register(HELL);
 			
@@ -947,7 +966,7 @@ public class Presets {
 	private static class PistonMadness {
 		
 		private static void init() {
-			Preset PISTON_MADNESS = new Preset(false, "Piston Madness", "Pistons as you've never seen them before! Sometimes in a good way, sometimes in a weird way...", Preset.Mode.SET);
+			Preset PISTON_MADNESS = new Preset("Piston Madness", "Pistons as you've never seen them before! Sometimes in a good way, sometimes in a weird way...", Preset.Mode.SET);
 			
 			Presets.register(PISTON_MADNESS);
 			

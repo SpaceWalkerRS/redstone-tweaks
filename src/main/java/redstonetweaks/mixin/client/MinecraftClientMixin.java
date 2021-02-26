@@ -44,6 +44,7 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	private TickInfoLabelRenderer tickInfoLabelRenderer;
 	
 	@Shadow public abstract void openScreen(Screen screen);
+	@Shadow public abstract boolean isInSingleplayer();
 	
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInitInjectAtReturn(RunArgs args, CallbackInfo ci) {
@@ -61,10 +62,12 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 		worldTickHandler.setCurrentWorld(world);
 	}
 	
-	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "RETURN"))
+	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "HEAD"))
 	private void onDisconnect(Screen screen, CallbackInfo ci) {
-		Listeners.clear();
-		ServerInfo.clear();
+		if (isInSingleplayer()) {
+			Listeners.clear();
+			ServerInfo.clear();
+		}
 		worldTickHandler.onDisconnect();
 		presetsManager.onDisconnect();
 		settingsManager.onDisconnect();
@@ -74,11 +77,6 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 		RTMenuScreen.resetLastOpenedTabIndex();
 		RTListWidget.clearSavedScrollAmounts();
 		EditSettingsListWidget.resetLastModes();
-	}
-	
-	@Inject(method = "stop", at = @At(value = "HEAD"))
-	private void onStopInjectAtHead(CallbackInfo ci) {
-		hotkeysManager.saveHotkeys();
 	}
 	
 	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;isIntegratedServerRunning()Z"))

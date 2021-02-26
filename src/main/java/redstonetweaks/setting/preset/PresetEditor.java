@@ -11,7 +11,7 @@ import redstonetweaks.util.PacketUtils;
 
 public class PresetEditor {
 	
-	private final Preset TEMP = new Preset(-Preset.nextId(), null, true, "TEMP", "A preset used to temporarily store values while a preset is being edited.", Preset.Mode.SET);
+	private final Preset TEMP = new Preset(-Preset.nextId(), null, true, "TEMP", "A preset used to temporarily store values while a preset is being edited.", Preset.Mode.SET, false);
 	
 	private final Preset preset;
 	
@@ -25,14 +25,15 @@ public class PresetEditor {
 	private String name;
 	private String description;
 	private Preset.Mode mode;
+	private boolean local;
 	
 	private boolean saved;
 	
 	public PresetEditor(Preset preset) {
-		this(preset, preset.getId(), preset.getName(), preset.getName(), preset.getDescription(), preset.getMode());
+		this(preset, preset.getId(), preset.getName(), preset.getName(), preset.getDescription(), preset.getMode(), preset.isLocal());
 	}
 	
-	private PresetEditor(Preset preset, int id, String previousName, String name, String description, Preset.Mode mode) {
+	private PresetEditor(Preset preset, int id, String previousName, String name, String description, Preset.Mode mode, boolean local) {
 		this.preset = preset;
 		
 		this.currentSettings = new HashSet<>();
@@ -51,6 +52,7 @@ public class PresetEditor {
 		this.name = name;
 		this.description = description;
 		this.mode = mode;
+		this.local = local;
 		
 		this.saved = false;
 	}
@@ -113,6 +115,18 @@ public class PresetEditor {
 	
 	public void previousMode() {
 		setMode(mode.previous());
+	}
+	
+	public boolean isLocal() {
+		return local;
+	}
+	
+	public void setIsLocal(boolean local) {
+		this.local = local;
+	}
+	
+	public void toggleIsLocal() {
+		setIsLocal(!local);
 	}
 	
 	public boolean hasSetting(ISetting setting) {
@@ -181,7 +195,7 @@ public class PresetEditor {
 	}
 	
 	private void encodeSetting(PacketByteBuf buffer, ISetting setting) {
-		setting.encodePreset(buffer, saved || !setting.hasPreset(TEMP) ? preset : TEMP);
+		setting.encodePreset(buffer, (saved || !setting.hasPreset(TEMP)) ? preset : TEMP);
 	}
 	
 	public void decode(PacketByteBuf buffer) {
@@ -227,7 +241,7 @@ public class PresetEditor {
 	}
 	
 	public boolean canSave() {
-		return !saved && Presets.isNameValid(name) && (name.equals(previousName) || Presets.isNameAvailable(name));
+		return !saved && Presets.isNameValid(name) && (name.equals(previousName) || Presets.isNameAvailable(name, local));
 	}
 	
 	public void trySaveChanges() {
@@ -242,6 +256,7 @@ public class PresetEditor {
 		preset.setName(name);
 		preset.setDescription(description);
 		preset.setMode(mode);
+		preset.setIsLocal(local);
 		
 		for (ISetting setting : changedSettings) {
 			setting.copyPresetValue(TEMP, preset);

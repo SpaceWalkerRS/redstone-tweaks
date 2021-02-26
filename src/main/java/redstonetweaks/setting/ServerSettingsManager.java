@@ -123,17 +123,21 @@ public class ServerSettingsManager implements ISettingListener {
 		Settings.toDefault();
 		Settings.enableAll();
 		
-		loadSettings();
-		
 		Settings.addListener(this);
 	}
 	
 	public void onShutdown() {
 		Settings.removeListener(this);
-		
+	}
+	
+	public void onLoadWorld() {
+		loadSettings();
+	}
+	
+	public void onSaveWorld() {
 		saveSettings();
 	}
-
+	
 	public void onPlayerJoined(ServerPlayerEntity player) {
 		if (server.isRemote()) {
 			sendSettingsToPlayer(player);
@@ -156,11 +160,15 @@ public class ServerSettingsManager implements ISettingListener {
 		
 		File directory = getSettingsFolder();
 		
+		deaf = true;
+		
 		for (File file : directory.listFiles()) {
 			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION)) {
 				loadSettings(file);
 			}
 		}
+		
+		deaf = false;
 	}
 	
 	private void loadSettings(File file) {
@@ -204,9 +212,13 @@ public class ServerSettingsManager implements ISettingListener {
 	private void saveSettings() {
 		RedstoneTweaks.LOGGER.info(String.format("Saving settings for \'%s\'", server.getSaveProperties().getLevelName()));
 		
+		deaf = true;
+		
 		for (SettingsCategory category : Settings.getCategories()) {
 			saveSettings(category);
 		}
+		
+		deaf = false;
 	}
 	
 	private void saveSettings(SettingsCategory category) {
