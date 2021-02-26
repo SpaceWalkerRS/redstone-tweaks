@@ -103,7 +103,7 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (getSelectedTab().canClose() && (keyCode == 256 && ((RTIMinecraftClient)client).getHotkeysManager().getHotkeys().toggleMenu.matchesKey(keyCode, scanCode))) {
+		if (getSelectedTab().canClose() && (keyCode == 256 || ((RTIMinecraftClient)client).getHotkeysManager().getHotkeys().toggleMenu.matchesKey(keyCode, scanCode))) {
 			onClose();
 			
 			return true;
