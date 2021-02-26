@@ -72,6 +72,7 @@ public class ServerPresetsManager implements IPresetListener {
 		Presets.removeListener(this);
 		
 		saveGlobalPresets();
+		cleanUpPresetFiles();
 	}
 	
 	public void onLoadWorld() {
@@ -177,50 +178,13 @@ public class ServerPresetsManager implements IPresetListener {
 	private void savePresets(boolean local) {
 		deaf = true;
 		
-		cleanUpPresetFiles(local);
-		
 		for (Preset preset : Presets.getAllPresets()) {
-			if (preset.isEditable() && (preset.isLocal() == local)) {
+			if (preset.isEditable() && (preset.isLocal() == local) && Presets.isActive(preset)) {
 				savePreset(preset);
 			}
 		}
 		
 		deaf = false;
-	}
-	
-	private void cleanUpPresetFiles(boolean local) {
-		File presetsFolder = getPresetsFolder(local);
-		
-		for (File file : presetsFolder.listFiles()) {
-			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION) && shouldDeleteFile(file, local)) {
-				file.delete();
-			}
-		}
-		
-		Presets.cleanUp(local);
-	}
-	
-	private boolean shouldDeleteFile(File file, boolean local) {
-		try (FileInputStream stream = new FileInputStream(file)) {
-			byte[] data = IOUtils.toByteArray(stream);
-			PacketByteBuf buffer = new PacketByteBuf(Unpooled.wrappedBuffer(data));
-			
-			String savedName = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
-			
-			for (Preset preset : Presets.getAllPresets()) {
-				try {
-					if (preset.isEditable() && (preset.isLocal() == local) && !Presets.isActive(preset) && preset.getSavedName().equals(savedName)) {
-						return true;
-					}
-				} catch (Exception e) {
-					
-				}
-			}
-		} catch (Exception e) {
-			
-		}
-		
-		return false;
 	}
 	
 	private void savePreset(Preset preset) {
@@ -251,6 +215,52 @@ public class ServerPresetsManager implements IPresetListener {
 		buffer.writeByte(preset.getMode().getIndex());
 		
 		preset.encode(buffer);
+	}
+	
+	private void cleanUpPresetFiles() {
+		cleanUpPresetFiles(false);
+		cleanUpPresetFiles(true);
+	}
+	
+	private void cleanUpPresetFiles(boolean local) {
+		File presetsFolder = getPresetsFolder(local);
+		
+		for (File file : presetsFolder.listFiles()) {
+			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION) && shouldDeleteFile(file, local)) {
+				file.delete();
+			}
+		}
+	}
+	
+	private boolean shouldDeleteFile(File file, boolean local) {
+		try (FileInputStream stream = new FileInputStream(file)) {
+			byte[] data = IOUtils.toByteArray(stream);
+			PacketByteBuf buffer = new PacketByteBuf(Unpooled.wrappedBuffer(data));
+			
+			String savedName = buffer.readString(PacketUtils.MAX_STRING_LENGTH);
+			
+			boolean shouldDelete = false;
+			
+			for (Preset preset : Presets.getAllPresets()) {
+				if (preset.isEditable() && (preset.isLocal() == local)) {
+					if (Presets.isActive(preset)) {
+						if (preset.getName().equals(savedName)) {
+							return false;
+						}
+					} else {
+						if (preset.getSavedName().equals(savedName)) {
+							shouldDelete = true;
+						}
+					}
+				}
+			}
+			
+			return shouldDelete;
+		} catch (Exception e) {
+			
+		}
+		
+		return false;
 	}
 	
 	private File getCacheDir(boolean local) {

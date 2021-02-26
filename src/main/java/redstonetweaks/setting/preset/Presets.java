@@ -34,7 +34,7 @@ public class Presets {
 		int id = preset.getId();
 		
 		if (ALL.containsKey(id) && ALL.get(id) != preset) {
-			RedstoneTweaks.LOGGER.warn(String.format("Preset %s could not be registered, as a preset with id %d has already been registered.", preset.getName(), id));
+			RedstoneTweaks.LOGGER.warn(String.format("Preset %s could not be registered, as a preset with id %d has already been registered", preset.getName(), id));
 			
 			return false;
 		}
@@ -66,10 +66,6 @@ public class Presets {
 		}
 	}
 	
-	private static void deleteAll() {
-		ALL.values().forEach((preset) -> delete(preset));
-	}
-
 	public static boolean isNameValid(String name) {
 		return name != null && !name.isEmpty();
 	}
@@ -169,25 +165,9 @@ public class Presets {
 	public static void delete() {
 		RedstoneTweaks.LOGGER.info("Deleting all presets");
 		
-		deleteAll();
-		cleanUp();
-	}
-	
-	public static void cleanUp() {
-		cleanUp(false);
-		cleanUp(true);
-	}
-	
-	public static void cleanUp(boolean local) {
-		ALL.values().removeIf((preset) -> {
-			if ((preset.isLocal() != local) || isActive(preset)) {
-				return false;
-			}
-			
-			preset.remove();
-			
-			return true;
-		});
+		ALL.clear();
+		ACTIVE_GLOBAL.clear();
+		ACTIVE_LOCAL.clear();
 	}
 	
 	public static void addListener(IPresetListener listener) {
