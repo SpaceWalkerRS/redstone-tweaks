@@ -147,7 +147,7 @@ public class ServerPresetsManager implements IPresetListener {
 		preset.decode(buffer);
 		
 		if (!Presets.register(preset)) {
-			Presets.delete(preset);
+			preset.delete();
 		}
 	}
 	

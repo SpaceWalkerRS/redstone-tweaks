@@ -160,6 +160,9 @@ public class Presets {
 	public static void softReset() {
 		ALL.values().removeIf((preset) -> {
 			if (preset.isEditable() && isActive(preset)) {
+				ACTIVE_LOCAL.values().remove(preset);
+				ACTIVE_GLOBAL.values().remove(preset);
+				
 				preset.delete();
 				
 				return true;
