@@ -196,6 +196,7 @@ public class Presets {
 		
 		ACTIVE_GLOBAL.values().remove(preset);
 		ACTIVE_LOCAL.values().remove(preset);
+		
 		register(preset);
 		
 		if (isActive(preset)) {
