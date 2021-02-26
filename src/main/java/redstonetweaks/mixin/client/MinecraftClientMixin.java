@@ -14,6 +14,7 @@ import net.minecraft.client.world.ClientWorld;
 
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.RTMenuScreen;
+import redstonetweaks.gui.preset.PresetsListWidget;
 import redstonetweaks.gui.setting.EditSettingsListWidget;
 import redstonetweaks.hotkeys.HotkeysManager;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
@@ -77,6 +78,7 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 		RTMenuScreen.resetLastOpenedTabIndex();
 		RTListWidget.clearSavedScrollAmounts();
 		EditSettingsListWidget.resetLastModes();
+		PresetsListWidget.resetLastViewMode();
 	}
 	
 	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;isIntegratedServerRunning()Z"))

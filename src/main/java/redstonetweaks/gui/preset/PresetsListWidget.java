@@ -21,6 +21,8 @@ import redstonetweaks.util.TextFormatting;
 
 public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	
+	private static ViewMode lastViewMode = ViewMode.ALL;
+	
 	private final PresetsTab parent;
 	
 	private ViewMode viewMode;
@@ -30,7 +32,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		this.parent = parent;
 		
-		this.viewMode = ViewMode.ALL;
+		this.viewMode = lastViewMode;
 	}
 	
 	@Override
@@ -109,6 +111,12 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	
 	public void setViewMode(ViewMode viewMode) {
 		this.viewMode = viewMode;
+		
+		lastViewMode = viewMode;
+	}
+	
+	public static void resetLastViewMode() {
+		lastViewMode = ViewMode.ALL;
 	}
 	
 	public class SeparatorEntry extends Entry {
@@ -168,7 +176,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		@Override
 		public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			drawCenteredText(matrices, client.textRenderer, text, getWidth() / 2, y + itemHeight / 2 - 5, TEXT_COLOR);
+			client.textRenderer.draw(matrices, text, x, y + itemHeight / 2 - 5, TEXT_COLOR);
 			
 			if (hovered && titleHovered(mouseX, mouseY)) {
 				currentTooltip = tooltip;
@@ -210,7 +218,7 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 		
 		public PresetEntry(Preset preset) {
 			this.preset = preset;
-			this.title = new TranslatableText(preset.getName()).formatted(Formatting.UNDERLINE, this.preset.isEditable() ? Formatting.UNDERLINE : Formatting.BOLD);
+			this.title = new TranslatableText(preset.getName()).formatted(this.preset.isEditable() ? Formatting.RESET : Formatting.BOLD);
 			this.tooltip = createTooltip();
 			this.children = new ArrayList<>();
 			

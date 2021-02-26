@@ -160,8 +160,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 		this.mode = mode;
 		
 		LAST_VIEW_MODES.put(category, mode);
-		
-		init();
 	}
 	
 	public static void resetLastModes() {
