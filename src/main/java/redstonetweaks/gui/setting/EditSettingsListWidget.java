@@ -72,11 +72,6 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 	}
 	
 	@Override
-	protected int getMaxPosition() {
-		return (getItemCount() - 1) * itemHeight + headerHeight;
-	}
-	
-	@Override
 	protected void initList() {
 		for (SettingsPack pack : category.getPacks()) {
 			List<Entry> settingEntries = new ArrayList<>();

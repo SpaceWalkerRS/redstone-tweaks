@@ -27,11 +27,6 @@ public class HotkeysListWidget extends RTListWidget<HotkeysListWidget.Entry> {
 	}
 	
 	@Override
-	protected int getMaxPosition() {
-		return (getItemCount() - 1) * itemHeight + headerHeight;
-	}
-	
-	@Override
 	protected void initList() {
 		for (RTKeyBinding keyBinding : hotkeys.getKeyBindings()) {
 			addEntry(new Entry(keyBinding));

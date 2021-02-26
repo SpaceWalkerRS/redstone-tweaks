@@ -63,11 +63,6 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 	}
 	
 	@Override
-	protected int getMaxPosition() {
-		return (getItemCount() - 1) * itemHeight + headerHeight;
-	}
-	
-	@Override
 	protected void initList() {
 		for (SettingsPack pack : parent.getSelectedCategory().getPacks()) {
 			List<Entry> settingEntries = new ArrayList<>();
