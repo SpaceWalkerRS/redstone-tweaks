@@ -14,6 +14,7 @@ import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.util.TextFormatting;
@@ -34,59 +35,61 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	
 	@Override
 	protected void initList() {
-		if (viewMode == ViewMode.ALL || viewMode == ViewMode.GLOBAL) {
-			addEntry(new EnvEntry(false));
-			
-			for (Preset preset : Presets.getActiveGlobalPresets()) {
-				addEntry(new PresetEntry(preset));
+		if (ServerInfo.getModVersion().isValid()) {
+			if (viewMode == ViewMode.ALL || viewMode == ViewMode.GLOBAL) {
+				addEntry(new EnvEntry(false));
 				
-				updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
-			}
-			
-			addEntry(new SeparatorEntry());
-		}
-		
-		if (viewMode == ViewMode.ALL || viewMode == ViewMode.LOCAL) {
-			addEntry(new EnvEntry(true));
-			
-			for (Preset preset : Presets.getActiveLocalPresets()) {
-				addEntry(new PresetEntry(preset));
+				for (Preset preset : Presets.getActiveGlobalPresets()) {
+					addEntry(new PresetEntry(preset));
+					
+					updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+				}
 				
-				updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+				addEntry(new SeparatorEntry());
 			}
-			
-			addEntry(new SeparatorEntry());
+			if (viewMode == ViewMode.ALL || viewMode == ViewMode.LOCAL) {
+				addEntry(new EnvEntry(true));
+				
+				for (Preset preset : Presets.getActiveLocalPresets()) {
+					addEntry(new PresetEntry(preset));
+					
+					updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+				}
+				
+				addEntry(new SeparatorEntry());
+			}
 		}
 	}
 	
 	@Override
 	protected void filterEntries(String query) {
-		if (viewMode == ViewMode.ALL || viewMode == ViewMode.GLOBAL) {
-			addEntry(new EnvEntry(false));
-			
-			for (Preset preset : Presets.getActiveGlobalPresets()) {
-				if (preset.getName().toLowerCase().contains(query)) {
-					addEntry(new PresetEntry(preset));
-					
-					updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+		if (ServerInfo.getModVersion().isValid()) {
+			if (viewMode == ViewMode.ALL || viewMode == ViewMode.GLOBAL) {
+				addEntry(new EnvEntry(false));
+				
+				for (Preset preset : Presets.getActiveGlobalPresets()) {
+					if (preset.getName().toLowerCase().contains(query)) {
+						addEntry(new PresetEntry(preset));
+						
+						updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+					}
 				}
+				
+				addEntry(new SeparatorEntry());
 			}
-			
-			addEntry(new SeparatorEntry());
-		}
-		
-		if (viewMode == ViewMode.ALL || viewMode == ViewMode.LOCAL) {
-			addEntry(new EnvEntry(true));
-			
-			for (Preset preset : Presets.getActiveLocalPresets()) {
-				if (preset.getName().toLowerCase().contains(query)) {
-					addEntry(new PresetEntry(preset));
-					
-					updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+			if (viewMode == ViewMode.ALL || viewMode == ViewMode.LOCAL) {
+				addEntry(new EnvEntry(true));
+				
+				for (Preset preset : Presets.getActiveLocalPresets()) {
+					if (preset.getName().toLowerCase().contains(query)) {
+						addEntry(new PresetEntry(preset));
+						
+						updateEntryTitleWidth(client.textRenderer.getWidth(preset.getName()));
+					}
 				}
+				
+				addEntry(new SeparatorEntry());
 			}
-			
-			addEntry(new SeparatorEntry());
 		}
 	}
 	
