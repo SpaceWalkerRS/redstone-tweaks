@@ -144,7 +144,7 @@ public class Presets {
 		return new PresetEditor(preset);
 	}
 	
-	public static void init() {
+	public static void registerDefaultPresets() {
 		Preset.resetIdCounter();
 		
 		Default.init();
@@ -155,11 +155,6 @@ public class Presets {
 		PistonMadness.init();
 		
 		RedstoneTweaks.LOGGER.info(String.format("Initialized %d built-in presets", getAllPresets().size()));
-	}
-	
-	public static void reset() {
-		delete();
-		init();
 	}
 	
 	// Delete all active presets in preparation for reloading them
@@ -177,7 +172,7 @@ public class Presets {
 	// Completely clear all presets
 	// Use on client only
 	public static void delete() {
-		RedstoneTweaks.LOGGER.info("Permanently deleting all presets");
+		RedstoneTweaks.LOGGER.info("Clearing all presets");
 		
 		Settings.clearPresets();
 		

@@ -54,8 +54,8 @@ public abstract class MinecraftServerMixin implements RTIMinecraftServer {
 	
 	@Inject(method = "save", at = @At(value = "RETURN"))
 	private void onSave(boolean suppressLogs, boolean flushChunkUpdates, boolean saveAll, CallbackInfoReturnable<Boolean> cir) {
-		settingsManager.onSaveWorld();
-		presetsManager.onSaveWorld();
+		settingsManager.onSaveWorld(suppressLogs);
+		presetsManager.onSaveWorld(suppressLogs);
 	}
 	
 	@Inject(method = "shutdown", at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/resource/ServerResourceManager;close()V"))

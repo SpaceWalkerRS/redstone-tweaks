@@ -17,8 +17,6 @@ public interface RTIPistonBlockEntity {
 	
 	public void init();
 	
-	public void setSource(boolean source);
-	
 	public void finishSource();
 	
 	public boolean isSticky();

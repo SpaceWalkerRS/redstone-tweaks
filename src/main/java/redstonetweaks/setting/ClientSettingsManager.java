@@ -149,6 +149,10 @@ public class ClientSettingsManager implements ISettingListener {
 	
 	public void onConnect() {
 		Settings.addListener(this);
+		
+		if (!client.isInSingleplayer()) {
+			Settings.toDefault();
+		}
 	}
 	
 	public void onDisconnect() {

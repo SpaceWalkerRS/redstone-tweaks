@@ -21,6 +21,7 @@ import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.listeners.ISettingListener;
+import redstonetweaks.server.ServerInfo;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.preset.Preset;
@@ -40,6 +41,8 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	private final List<RTMenuTab> tabs;
 	private final List<IAbstractButtonWidget> tabButtons;
 	
+	private final Screen previousScreen;
+	
 	private int selectedTabIndex;
 	private int headerHeight;
 	
@@ -51,6 +54,8 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 		this.client = client;
 		this.tabs = new ArrayList<>();
 		this.tabButtons = new ArrayList<>();
+		
+		this.previousScreen = client.currentScreen;
 		
 		Settings.addListener(this);
 		Presets.addListener(this);
@@ -137,7 +142,8 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 			Presets.removeListener(this);
 			
 			selectedTab.onTabClosed();
-			super.onClose();
+			
+			client.openScreen(previousScreen);
 		}
 	}
 	
@@ -208,11 +214,13 @@ public class RTMenuScreen extends Screen implements ISettingListener, IPresetLis
 	}
 	
 	private void createTabs() {
-		for (SettingsCategory category : Settings.getCategories()) {
-			tabs.add(new SettingsTab(this, category));
+		if (ServerInfo.getModVersion().isValid()) {
+			for (SettingsCategory category : Settings.getCategories()) {
+				tabs.add(new SettingsTab(this, category));
+			}
+			tabs.add(new PresetsTab(this));
+			tabs.add(new HotkeysTab(this));
 		}
-		tabs.add(new PresetsTab(this));
-		tabs.add(new HotkeysTab(this));
 		tabs.add(new InfoTab(this));
 	}
 	

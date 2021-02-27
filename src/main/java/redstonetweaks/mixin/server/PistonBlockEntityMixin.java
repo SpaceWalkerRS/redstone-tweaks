@@ -123,8 +123,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 				((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedState(pushedBlock);
 				((RTIPistonBlockEntity)parentPistonBlockEntity).setMovedBlockEntity(movedBlockEntity);
 				
-				((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingState(mergingState);
-				((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingBlockEntity(mergingBlockEntity);
+				if (mergingState != null) {
+					((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingState(mergingState);
+					((RTIPistonBlockEntity)parentPistonBlockEntity).setMergingBlockEntity(mergingBlockEntity);
+				}
 			}
 			
 			ci.cancel();
@@ -239,7 +241,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		speed = tag.contains("speed") ? tag.getInt("speed") : 2;
 		numberOfSteps = (speed == 0) ? 1.0F : speed;
 		amountPerStep = 1.0F / numberOfSteps;
-
+		
+		BlockEntity movedBlockEntity = null;
 		if (tag.contains("movedBlockEntity")) {
 			Block movedBlock = pushedBlock.getBlock();
 			
@@ -248,14 +251,18 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 				
 				if (movedBlockEntity != null) {
 					movedBlockEntity.fromTag(pushedBlock, tag.getCompound("movedBlockEntity"));
-					
-					setMovedBlockEntity(movedBlockEntity);
 				}
 			}
 		}
+		setMovedBlockEntity(movedBlockEntity);
+		
+		BlockState mergingState = null;
 		if (tag.contains("mergingState")) {
 			mergingState = NbtHelper.toBlockState(tag.getCompound("mergingState"));
 		}
+		setMergingState(mergingState);
+		
+		BlockEntity mergingBlockEntity = null;
 		if (tag.contains("mergingBlockEntity")) {
 			Block mergingBlock = mergingState.getBlock();
 			
@@ -264,11 +271,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 				
 				if (mergingBlockEntity != null) {
 					mergingBlockEntity.fromTag(mergingState, tag.getCompound("mergingBlockEntity"));
-					
-					setMergingBlockEntity(mergingBlockEntity);
 				}
 			}
 		}
+		setMergingBlockEntity(mergingBlockEntity);
 	}
 	
 	@Inject(method = "toTag", at = @At(value = "RETURN"))
@@ -338,11 +344,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 			numberOfSteps = speed;
 			amountPerStep = 1.0F / numberOfSteps;
 		}
-	}
-	
-	@Override
-	public void setSource(boolean source) {
-		this.source = source;
 	}
 	
 	@Override
@@ -515,7 +516,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (hasChildPistonBlockEntity) {
 			((RTIPistonBlockEntity)movedBlockEntity).setMovedMovingState(state);
 		} else {
-			pushedBlock = state;
+			setMovedState(state);
 		}
 	}
 	

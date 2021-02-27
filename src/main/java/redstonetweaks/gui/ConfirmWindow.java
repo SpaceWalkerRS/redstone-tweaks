@@ -41,16 +41,16 @@ public class ConfirmWindow extends RTWindow {
 		int spacing = 10;
 		
 		confirmButton = new RTButtonWidget(centerX - spacing - 80, y, 80, 20, () -> new TranslatableText("Yes"), (button) -> {
-			onConfirmed.confirm();
-			
 			screen.closeWindow(this);
+			
+			onConfirmed.confirm();
 		});
 		addContent(confirmButton);
 		
 		denyButton = new RTButtonWidget(centerX + spacing, y, 80, 20, () -> new TranslatableText("No"), (button) -> {
-			onDenied.deny();
-			
 			screen.closeWindow(this);
+			
+			onDenied.deny();
 		});
 		addContent(denyButton);
 	}

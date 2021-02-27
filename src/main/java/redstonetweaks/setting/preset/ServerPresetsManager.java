@@ -65,15 +65,16 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	public void onStartUp() {
-		Presets.addListener(this);
-		
 		loadGlobalPresets();
+		
+		Presets.registerDefaultPresets();
+		Presets.addListener(this);
 	}
 	
 	public void onShutdown() {
 		Presets.removeListener(this);
 		
-		saveGlobalPresets();
+		saveGlobalPresets(false);
 		cleanUpPresetFiles();
 	}
 	
@@ -81,8 +82,8 @@ public class ServerPresetsManager implements IPresetListener {
 		loadLocalPresets();
 	}
 	
-	public void onSaveWorld() {
-		saveLocalPresets();
+	public void onSaveWorld(boolean suppressLogs) {
+		saveLocalPresets(suppressLogs);
 	}
 	
 	public void onPlayerJoined(ServerPlayerEntity player) {
@@ -154,8 +155,8 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	public void reloadPresets() {
-		saveGlobalPresets();
-		saveLocalPresets();
+		saveGlobalPresets(false);
+		saveLocalPresets(false);
 		
 		Presets.softReset();
 		
@@ -165,14 +166,18 @@ public class ServerPresetsManager implements IPresetListener {
 		sendPresetsToPlayer(null);
 	}
 	
-	private void saveGlobalPresets() {
-		RedstoneTweaks.LOGGER.info("Saving global presets");
+	private void saveGlobalPresets(boolean suppressLogs) {
+		if (!suppressLogs) {
+			RedstoneTweaks.LOGGER.info("Saving global presets");
+		}
 		
 		savePresets(false);
 	}
 	
-	private void saveLocalPresets() {
-		RedstoneTweaks.LOGGER.info(String.format("Saving presets for \'%s\'", server.getSaveProperties().getLevelName()));
+	private void saveLocalPresets(boolean suppressLogs) {
+		if (!suppressLogs) {
+			RedstoneTweaks.LOGGER.info(String.format("Saving presets for \'%s\'", server.getSaveProperties().getLevelName()));
+		}
 		
 		savePresets(true);
 	}

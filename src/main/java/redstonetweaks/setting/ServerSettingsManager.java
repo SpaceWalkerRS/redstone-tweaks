@@ -120,9 +120,6 @@ public class ServerSettingsManager implements ISettingListener {
 	}
 	
 	public void onStartUp() {
-		Settings.toDefault();
-		Settings.enableAll();
-		
 		Settings.addListener(this);
 	}
 	
@@ -131,11 +128,14 @@ public class ServerSettingsManager implements ISettingListener {
 	}
 	
 	public void onLoadWorld() {
+		Settings.toDefault();
+		Settings.enableAll();
+		
 		loadSettings();
 	}
 	
-	public void onSaveWorld() {
-		saveSettings();
+	public void onSaveWorld(boolean suppressLogs) {
+		saveSettings(suppressLogs);
 	}
 	
 	public void onPlayerJoined(ServerPlayerEntity player) {
@@ -209,8 +209,10 @@ public class ServerSettingsManager implements ISettingListener {
 		}
 	}
 	
-	private void saveSettings() {
-		RedstoneTweaks.LOGGER.info(String.format("Saving settings for \'%s\'", server.getSaveProperties().getLevelName()));
+	private void saveSettings(boolean suppressLogs) {
+		if (!suppressLogs) {
+			RedstoneTweaks.LOGGER.info(String.format("Saving settings for \'%s\'", server.getSaveProperties().getLevelName()));
+		}
 		
 		deaf = true;
 		

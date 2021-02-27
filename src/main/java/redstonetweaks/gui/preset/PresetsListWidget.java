@@ -10,6 +10,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
 import redstonetweaks.client.PermissionManager;
+import redstonetweaks.gui.ConfirmWindow;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.widget.RTButtonWidget;
@@ -174,8 +175,8 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 	
 	public class EnvEntry extends Entry {
 		
-		private static final String GLOBAL_TOOLTIP_TEXT = "Global presets are stored in the game's run directory and are therefor available in every world.";
-		private static final String LOCAL_TOOLTIP_TEXT = "Local presets are stored in this world's save folder and are therefor only available in this world.";
+		private static final String GLOBAL_TOOLTIP_TEXT = "Global presets are stored in the game's run directory and are therefore available in every world.";
+		private static final String LOCAL_TOOLTIP_TEXT = "Local presets are stored in this world's save folder and are therefore only available in this world.";
 		private static final String DELETED_TOOLTIP_TEXT = "Deleted presets can be restored, but once you click \'Delete Forever\', that preset is gone for good!";
 		
 		private final Text text;
@@ -284,7 +285,9 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.children.add(this.editButton);
 			
 			this.deleteButton = new RTButtonWidget(0, 0, 45, 20, () -> new TranslatableText("Delete"), (button) -> {
-				((RTIMinecraftClient)screen.client).getPresetsManager().deletePreset(this.preset);
+				screen.openWindow(new ConfirmWindow(screen, String.format("Are you sure you want to delete the preset \"%s\"?", this.preset.getName()), 300, () -> {
+					((RTIMinecraftClient)screen.client).getPresetsManager().deletePreset(this.preset);
+				}, () -> {}));
 			});
 			this.children.add(deleteButton);
 		}
@@ -393,7 +396,9 @@ public class PresetsListWidget extends RTListWidget<PresetsListWidget.Entry> {
 			this.children.add(this.restoreButton);
 			
 			this.deleteForeverButton = new RTButtonWidget(0, 0, 90, 20, () -> new TranslatableText("Delete Forever"), (button) -> {
-				((RTIMinecraftClient)screen.client).getPresetsManager().deletePresetForever(this.preset);
+				screen.openWindow(new ConfirmWindow(screen, String.format("Are you sure you want to delete the preset \"%s\" forever? This cannot be undone!", this.preset.getName()), 300, () -> {
+					((RTIMinecraftClient)screen.client).getPresetsManager().deletePresetForever(this.preset);
+				}, () -> {}));
 			});
 			this.children.add(deleteForeverButton);
 		}

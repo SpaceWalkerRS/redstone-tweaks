@@ -39,28 +39,22 @@ public class ClientPresetsManager {
 	}
 	
 	public void deletePreset(Preset preset) {
-		if (client.isInSingleplayer()) {
-			Presets.delete(preset);
-		} else {
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new DeletePresetPacket(preset));
-		}
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(new DeletePresetPacket(preset));
 	}
 	
 	public void deletePresetForever(Preset preset) {
-		if (client.isInSingleplayer()) {
-			Presets.deleteForever(preset);
-		} else {
-			((RTIMinecraftClient)client).getPacketHandler().sendPacket(new DeletePresetForeverPacket(preset));
-		}
+		((RTIMinecraftClient)client).getPacketHandler().sendPacket(new DeletePresetForeverPacket(preset));
 	}
 	
 	public void onConnect() {
-		
+		if (!client.isInSingleplayer()) {
+			Presets.registerDefaultPresets();
+		}
 	}
 	
 	public void onDisconnect() {
 		if (!client.isInSingleplayer()) {
-			Presets.reset();
+			Presets.delete();
 		}
 	}
 }

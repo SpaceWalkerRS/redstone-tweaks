@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 import net.fabricmc.api.ModInitializer;
 
 import redstonetweaks.block.entity.BlockEntityTypes;
-import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.setting.settings.Settings;
 
 public class RedstoneTweaks implements ModInitializer {
@@ -20,7 +19,6 @@ public class RedstoneTweaks implements ModInitializer {
 		BlockEntityTypes.register();
 		
 		Settings.init();
-		Presets.init();
 		
 		LOGGER.info(String.format("Initialized Redstone Tweaks %s", MOD_VERSION));
 	}
