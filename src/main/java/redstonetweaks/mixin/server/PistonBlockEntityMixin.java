@@ -965,7 +965,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 		if (!additionalState.isOf(Blocks.MOVING_PISTON)) {
 			return additionalState.getCollisionShape(world, pos);
 		} else if (mergingBlockEntity != null && mergingBlockEntity instanceof PistonBlockEntity) {
-			return ((PistonBlockEntity)movedBlockEntity).getCollisionShape(world, pos);
+			return ((PistonBlockEntity)mergingBlockEntity).getCollisionShape(world, pos);
 		}
 		
 		return VoxelShapes.empty();
