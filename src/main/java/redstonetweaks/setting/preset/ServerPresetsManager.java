@@ -65,9 +65,10 @@ public class ServerPresetsManager implements IPresetListener {
 	}
 	
 	public void onStartUp() {
+		Presets.registerDefaultPresets();
+		
 		loadGlobalPresets();
 		
-		Presets.registerDefaultPresets();
 		Presets.addListener(this);
 	}
 	
