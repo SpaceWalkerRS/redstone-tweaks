@@ -279,8 +279,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Inject(method = "toTag", at = @At(value = "RETURN"))
 	private void onToTagInjectAtReturn(CompoundTag tag, CallbackInfoReturnable<?> cir) {
-		tag.putFloat("real progress", progress);
-		
 		tag.putBoolean("sticky", sticky);
 		tag.putBoolean("sourceIsMoving", sourceIsMoving);
 		tag.putInt("speed", speed);
