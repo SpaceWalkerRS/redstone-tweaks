@@ -448,7 +448,12 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Override
 	public void setMovedBlockEntity(BlockEntity blockEntity) {
-		hasChildPistonBlockEntity = false;
+		if (hasChildPistonBlockEntity) {
+			hasChildPistonBlockEntity = false;
+			
+			((RTIPistonBlockEntity)movedBlockEntity).setParentPistonBlockEntity(null);
+		}
+		
 		movedBlockEntity = blockEntity;
 		
 		if (movedBlockEntity != null) {
@@ -480,6 +485,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements RTIP
 	
 	@Override
 	public void setMergingBlockEntity(BlockEntity blockEntity) {
+		if (mergingBlockEntity instanceof PistonBlockEntity) {
+			((RTIPistonBlockEntity)mergingBlockEntity).setParentPistonBlockEntity(null);
+		}
+		
 		mergingBlockEntity = blockEntity;
 		
 		if (mergingBlockEntity != null) {
