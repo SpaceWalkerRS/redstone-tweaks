@@ -24,6 +24,4 @@ public interface RTIMinecraftClient {
 	
 	public TickInfoLabelRenderer getTickInfoLabelRenderer();
 	
-	public void openRedstoneTweaksMenu();
-	
 }

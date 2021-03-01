@@ -129,11 +129,4 @@ public abstract class MinecraftClientMixin implements RTIMinecraftClient {
 	public TickInfoLabelRenderer getTickInfoLabelRenderer() {
 		return tickInfoLabelRenderer;
 	}
-	
-	@Override
-	public void openRedstoneTweaksMenu() {
-		if (currentScreen == null) {
-			openScreen(new RTMenuScreen((MinecraftClient)(Object)this));
-		}
-	}
 }

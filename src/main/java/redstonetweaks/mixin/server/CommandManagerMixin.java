@@ -11,7 +11,7 @@ import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import redstonetweaks.command.RedstoneTweaksMenuCommand;
+
 import redstonetweaks.command.SafeStopCommand;
 import redstonetweaks.command.TickCommand;
 
@@ -22,7 +22,6 @@ public class CommandManagerMixin {
 	
 	@Inject(method="<init>", at = @At("RETURN"))
 	private void registerCommands(CommandManager.RegistrationEnvironment environment, CallbackInfo ci) {
-		RedstoneTweaksMenuCommand.registerCommand(dispatcher);
 		TickCommand.registerCommand(dispatcher);
 		
 		if (environment == CommandManager.RegistrationEnvironment.DEDICATED) {

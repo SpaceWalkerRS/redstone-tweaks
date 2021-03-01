@@ -20,7 +20,6 @@ import redstonetweaks.packet.types.LockPackPacket;
 import redstonetweaks.packet.types.LockSettingPacket;
 import redstonetweaks.packet.types.NeighborUpdateSchedulerPacket;
 import redstonetweaks.packet.types.NeighborUpdateVisualizerPacket;
-import redstonetweaks.packet.types.OpenMenuPacket;
 import redstonetweaks.packet.types.PresetPacket;
 import redstonetweaks.packet.types.PresetsPacket;
 import redstonetweaks.packet.types.ReloadPresetsPacket;
@@ -110,8 +109,7 @@ public abstract class AbstractPacketHandler {
 		APPLY_PRESET(22, ApplyPresetPacket.class),
 		LOCK_SETTING(23, LockSettingPacket.class),
 		LOCK_PACK(24, LockPackPacket.class),
-		LOCK_CATEGORY(25, LockCategoryPacket.class),
-		OPEN_MENU(26, OpenMenuPacket.class);
+		LOCK_CATEGORY(25, LockCategoryPacket.class);
 		
 		private static final PacketType[] PACKET_TYPES;
 		private static final Map<Class<? extends AbstractRedstoneTweaksPacket>, PacketType> PACKET_TO_TYPE;
