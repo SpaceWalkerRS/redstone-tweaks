@@ -76,7 +76,6 @@ public class ServerPresetsManager implements IPresetListener {
 		Presets.removeListener(this);
 		
 		saveGlobalPresets(false);
-		cleanUpPresetFiles();
 	}
 	
 	public void onLoadWorld() {
@@ -223,23 +222,6 @@ public class ServerPresetsManager implements IPresetListener {
 		buffer.writeByte(preset.getMode().getIndex());
 		
 		preset.encode(buffer);
-	}
-	
-	private void cleanUpPresetFiles() {
-		cleanUpPresetFiles(false);
-		cleanUpPresetFiles(true);
-	}
-	
-	private void cleanUpPresetFiles(boolean local) {
-		for (Preset preset : Presets.getAllPresets()) {
-			if (preset.isLocal() == local) {
-				boolean nameChanged = preset.nameChanged();
-				
-				if (!Presets.isActive(preset) || (nameChanged && Presets.isNameAvailable(preset.getSavedName(), local))) {
-					deletePresetFile(preset, nameChanged);
-				}
-			}
-		}
 	}
 	
 	private void deletePresetFile(Preset preset, boolean useSavedName) {

@@ -24,8 +24,6 @@ public interface RTIMinecraftClient {
 	
 	public TickInfoLabelRenderer getTickInfoLabelRenderer();
 	
-	public int getCurrentFps();
-	
 	public void openRedstoneTweaksMenu();
 	
 }

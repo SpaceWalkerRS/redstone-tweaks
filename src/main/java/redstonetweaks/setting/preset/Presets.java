@@ -56,8 +56,7 @@ public class Presets {
 	}
 	
 	public static void deleteForever(Preset preset) {
-		preset.markDeletedForever();
-		
+		ALL.values().remove(preset);
 		ACTIVE_LOCAL.values().remove(preset);
 		ACTIVE_GLOBAL.values().remove(preset);
 		

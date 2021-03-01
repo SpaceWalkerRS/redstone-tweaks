@@ -20,7 +20,6 @@ public class Preset {
 	private boolean local;
 	
 	private boolean nameChanged;
-	private boolean deleted;
 	
 	// Only use for initializing built-in presets
 	public Preset(String name, String description, Mode mode) {
@@ -117,14 +116,6 @@ public class Preset {
 	
 	public boolean nameChanged() {
 		return nameChanged;
-	}
-	
-	public boolean isDeletedForever() {
-		return deleted;
-	}
-	
-	public void markDeletedForever() {
-		deleted = true;
 	}
 	
 	public void encode(PacketByteBuf buffer) {
