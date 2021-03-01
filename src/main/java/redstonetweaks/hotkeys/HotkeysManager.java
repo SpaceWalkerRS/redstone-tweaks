@@ -13,11 +13,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.InputUtil.Key;
-
-import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.packet.types.TickPausePacket;
+import redstonetweaks.player.PermissionManager;
 
 public class HotkeysManager {
 	

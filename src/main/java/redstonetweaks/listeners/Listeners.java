@@ -1,6 +1,6 @@
 package redstonetweaks.listeners;
 
-import redstonetweaks.client.PermissionManager;
+import redstonetweaks.player.PermissionManager;
 import redstonetweaks.setting.preset.Presets;
 import redstonetweaks.setting.settings.Settings;
 

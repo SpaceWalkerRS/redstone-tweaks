@@ -10,8 +10,6 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.TickPriority;
-
-import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
@@ -21,6 +19,7 @@ import redstonetweaks.gui.setting.WorldTickOptionsWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTSliderWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
+import redstonetweaks.player.PermissionManager;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;

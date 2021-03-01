@@ -4,9 +4,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-
-import redstonetweaks.client.PermissionManager;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.player.PermissionManager;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.util.PacketUtils;

@@ -6,8 +6,6 @@ import java.util.Map;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
-
-import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.ConfirmWindow;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTMenuTab;
@@ -17,6 +15,7 @@ import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
 import redstonetweaks.listeners.IPermissionListener;
 import redstonetweaks.listeners.ISettingListener;
+import redstonetweaks.player.PermissionManager;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.settings.Settings;

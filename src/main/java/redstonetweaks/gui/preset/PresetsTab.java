@@ -8,8 +8,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
-
-import redstonetweaks.client.PermissionManager;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTMenuScreen;
 import redstonetweaks.gui.RTMenuTab;
@@ -18,6 +16,7 @@ import redstonetweaks.gui.WarningWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
 import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
+import redstonetweaks.player.PermissionManager;
 import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.setting.preset.PresetEditor;

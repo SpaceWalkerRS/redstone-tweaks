@@ -9,8 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-
-import redstonetweaks.client.PermissionManager;
+import redstonetweaks.player.PermissionManager;
 
 @Mixin(ClientPlayerEntity.class)
 public class ClientPlayerEntityMixin {

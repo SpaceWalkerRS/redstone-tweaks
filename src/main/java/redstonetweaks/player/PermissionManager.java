@@ -1,4 +1,4 @@
-package redstonetweaks.client;
+package redstonetweaks.player;
 
 import java.util.HashSet;
 import java.util.Set;
