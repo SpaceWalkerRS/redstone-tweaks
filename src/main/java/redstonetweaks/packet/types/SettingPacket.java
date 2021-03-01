@@ -37,7 +37,7 @@ public class SettingPacket extends AbstractRedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftServer server, ServerPlayerEntity player) {
-		if (setting != null && PermissionManager.canChangeSettings(player) && PermissionManager.canChangeSettings(player, setting.getPack().getCategory())) {
+		if (setting != null && PermissionManager.canChangeSettings(player, setting.getPack().getCategory())) {
 			setting.decode(data);
 		}
 	}

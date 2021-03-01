@@ -107,7 +107,7 @@ public class Tweaks {
 	
 	public static class CommandBlock {
 		
-		private static final SettingsPack COMMAND_BLOCK = new SettingsPack(TWEAKS, "CommandBlock");
+		private static final SettingsPack COMMAND_BLOCK = new SettingsPack(TWEAKS, "Command Block");
 		
 		public static final IntegerSetting DELAY = new IntegerSetting(COMMAND_BLOCK, "delay", Settings.Common.DESC_DELAY_ACTIVATING, 1, Settings.Common.MAX_DELAY);
 		public static final DirectionToBooleanSetting QC = new DirectionToBooleanSetting(COMMAND_BLOCK, "quasiConnectivity", Settings.Common.DESC_QC);

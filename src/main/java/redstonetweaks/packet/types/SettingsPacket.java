@@ -6,8 +6,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+
 import redstonetweaks.interfaces.mixin.RTIMinecraftClient;
-import redstonetweaks.player.PermissionManager;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.util.PacketUtils;
@@ -58,16 +58,7 @@ public class SettingsPacket extends AbstractRedstoneTweaksPacket {
 	
 	@Override
 	public void execute(MinecraftServer server, ServerPlayerEntity player) {
-		if (PermissionManager.canChangeSettings(player)) {
-			for (ISetting setting : settings) {
-				if (setting != null) {
-					setting.setEnabled(true);
-					setting.decode(data);
-				}
-			}
-		}
 		
-		data.release();
 	}
 
 	@Override
