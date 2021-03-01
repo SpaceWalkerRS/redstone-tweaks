@@ -157,8 +157,8 @@ public class UpdateOrder {
 		this.notifierOrder = notifierOrder;
 	}
 	
-	public void cycleNotifierOrder() {
-		setNotifierOrder(getNotifierOrder().next());
+	public void cycleNotifierOrder(boolean next) {
+		setNotifierOrder(next ? notifierOrder.next() : notifierOrder.previous());
 	}
 	
 	public List<AbstractNeighborUpdate> getNeighborUpdates() {
@@ -235,19 +235,19 @@ public class UpdateOrder {
 	}
 	
 	public Collection<AbstractNeighborUpdate> getUpdates(BlockPos pos, Direction sourceFacing) {
-		Collection<AbstractNeighborUpdate> updates = (getNotifierOrder() == NotifierOrder.LOCATIONAL) ? new HashSet<>() : new ArrayList<>();
+		Collection<AbstractNeighborUpdate> updates = (notifierOrder == NotifierOrder.LOCATIONAL) ? new HashSet<>() : new ArrayList<>();
 		
 		for (AbstractNeighborUpdate update : getNeighborUpdates()) {
 			AbstractNeighborUpdate copy = update.copy();
 			
-			if (getNotifierOrder() == NotifierOrder.LOCATIONAL) {
+			if (notifierOrder == NotifierOrder.LOCATIONAL) {
 				copy.setHashPos(pos, sourceFacing, offsetX, offsetY, offsetZ);
 			}
 			
 			updates.add(copy);
 		}
 		
-		if (getNotifierOrder() == NotifierOrder.RANDOM) {
+		if (notifierOrder == NotifierOrder.RANDOM) {
 			Collections.shuffle((List<AbstractNeighborUpdate>)updates);
 		}
 		
@@ -283,10 +283,14 @@ public class UpdateOrder {
 		}
 		
 		public static NotifierOrder fromIndex(int index) {
-			if (index >= 0 && index < ORDERS.length) {
-				return ORDERS[index];
+			if (index < 0) {
+				return ORDERS[ORDERS.length - 1];
 			}
-			return SEQUENTIAL;
+			if (index >= ORDERS.length) {
+				return ORDERS[0];
+			}
+			
+			return ORDERS[index];
 		}
 		
 		public String getName() {
@@ -295,6 +299,10 @@ public class UpdateOrder {
 		
 		public NotifierOrder next() {
 			return fromIndex(index + 1);
+		}
+		
+		public NotifierOrder previous() {
+			return fromIndex(index - 1);
 		}
 	}
 }

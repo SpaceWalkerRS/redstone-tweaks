@@ -3,6 +3,7 @@ package redstonetweaks.gui.setting;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -51,7 +52,7 @@ public class UpdateOrderWindow extends RTWindow {
 		updateOrder = updateOrderSupplier.get();
 		
 		notifierOrderButton = new RTButtonWidget(getX() + 32, getY() + 30, 140, 20, () -> new TranslatableText("Notifier Order: " + updateOrder.getNotifierOrder().getName()), (button) -> {
-			updateOrder.cycleNotifierOrder();
+			updateOrder.cycleNotifierOrder(!Screen.hasShiftDown());
 			
 			boolean locationalOrder = updateOrder.getNotifierOrder() == UpdateOrder.NotifierOrder.LOCATIONAL;
 			offsetButtons.setVisible(locationalOrder);
