@@ -22,6 +22,7 @@ public class RedstoneWireHelper {
 				return belowState.get(Properties.HORIZONTAL_FACING) == dir;
 			}
 		}
+		
 		return true;
 	}
 }
