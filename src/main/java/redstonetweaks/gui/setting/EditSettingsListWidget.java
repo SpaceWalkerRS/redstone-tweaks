@@ -30,6 +30,7 @@ import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.settings.Settings;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.BugFixSetting;
+import redstonetweaks.setting.types.CapacitorBehaviorSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.IntegerSetting;
@@ -380,6 +381,18 @@ public class EditSettingsListWidget extends RTListWidget<EditSettingsListWidget.
 						bSetting.set(!bSetting.get());
 					}));
 				}
+			} else
+			if (setting instanceof CapacitorBehaviorSetting) {
+				CapacitorBehaviorSetting cSetting = (CapacitorBehaviorSetting)setting;
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText("EDIT"), (button) -> {
+					CapacitorBehaviorWindow window = new CapacitorBehaviorWindow(screen, cSetting, () -> cSetting.get(), (setting) -> Settings.settingValueChanged(cSetting));
+					
+					screen.openWindow(window);
+					
+					if (!PermissionManager.canChangeSettings(client.player, category) || category.isLocked() || setting.isLocked()) {
+						window.disableButtons();
+					}
+				})).alwaysActive());
 			} else
 			if (setting instanceof IntegerSetting) {
 				IntegerSetting iSetting = (IntegerSetting)setting;

@@ -14,7 +14,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	}
 	
 	@Override
-	public void write(PacketByteBuf buffer, E[] value) {
+	protected void write(PacketByteBuf buffer, E[] value) {
 		buffer.writeInt(value.length);
 		
 		for (E element : value) {
@@ -23,7 +23,7 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	}
 	
 	@Override
-	public E[] read(PacketByteBuf buffer) {
+	protected E[] read(PacketByteBuf buffer) {
 		int size = buffer.readInt();
 		
 		E[] array = getEmptyArray(size);
@@ -37,19 +37,24 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	@Override
 	public void set(E[] newValue) {
 		if (newValue.length == getSize()) {
-			super.set(newValue.clone());
+			super.set(newValue);
 		}
 	}
 	
 	@Override
 	public void setPresetValue(Preset preset, E[] newValue) {
 		if (newValue.length == getSize()) {
-			super.setPresetValue(preset, newValue.clone());
+			super.setPresetValue(preset, newValue);
 		}
 	}
 	
 	@Override
-	public boolean valueEquals(E[] value1, E[] value2) {
+	protected E[] copy(E[] value) {
+		return value.clone();
+	}
+	
+	@Override
+	protected boolean valueEquals(E[] value1, E[] value2) {
 		return Arrays.equals(value1, value2);
 	}
 	
@@ -58,12 +63,6 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	protected abstract E readElement(PacketByteBuf buffer);
 	
 	protected abstract E[] getEmptyArray(int size);
-	
-	public abstract E stringToElement(String string);
-	
-	public String elementToString(E element) {
-		return element.toString();
-	}
 	
 	public E get(int index) {
 		if (inRange(index)) {
@@ -122,14 +121,6 @@ public abstract class ArraySetting<K, E> extends Setting<E[]> {
 	public abstract int getIndexFromKey(K key);
 	
 	public abstract K getKeyFromIndex(int index);
-	
-	public String getKeyAsString(K key) {
-		return key.toString();
-	}
-	
-	public String getKeyAsString(int index) {
-		return getKeyAsString(getKeyFromIndex(index));
-	}
 	
 	public int getSize() {
 		return getDefault().length;

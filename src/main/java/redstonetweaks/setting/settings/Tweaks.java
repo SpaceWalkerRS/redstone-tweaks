@@ -4,6 +4,7 @@ import redstonetweaks.setting.SettingsCategory;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
 import redstonetweaks.setting.types.BugFixSetting;
+import redstonetweaks.setting.types.CapacitorBehaviorSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 import redstonetweaks.setting.types.IntegerSetting;
 import redstonetweaks.setting.types.TickPrioritySetting;
@@ -464,6 +465,7 @@ public class Tweaks {
 		private static final SettingsPack REDSTONE_ORE = new SettingsPack(TWEAKS, "Redstone Ore");
 		
 		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(REDSTONE_ORE, "blockUpdateOrder", "The order in which indirect neighbors of the block are updated if redstone ore emits a strong power greater than 0.");
+		public static final CapacitorBehaviorSetting CAPACITOR_BEHAVIOR = new CapacitorBehaviorSetting(REDSTONE_ORE, "capacitorBehavior", "");
 		public static final BooleanSetting CONNECTS_TO_WIRE = new BooleanSetting(REDSTONE_ORE, "connectsToWire", "When enabled, redstone ore connects to redstone wire.");
 		public static final IntegerSetting DELAY = new IntegerSetting(REDSTONE_ORE, "delay", Settings.Common.DESC_DELAY_ACTIVATING, 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting(REDSTONE_ORE, "weakPower", Settings.Common.DESC_POWER_WEAK, 0, Settings.Common.MAX_POWER);
@@ -985,6 +987,7 @@ public class Tweaks {
 		
 		Settings.register(RedstoneOre.REDSTONE_ORE);
 		Settings.register(RedstoneOre.BLOCK_UPDATE_ORDER);
+		Settings.register(RedstoneOre.CAPACITOR_BEHAVIOR);
 		Settings.register(RedstoneOre.CONNECTS_TO_WIRE);
 		Settings.register(RedstoneOre.DELAY);
 		Settings.register(RedstoneOre.POWER_WEAK);

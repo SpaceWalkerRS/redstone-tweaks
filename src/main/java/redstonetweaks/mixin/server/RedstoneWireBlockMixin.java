@@ -32,17 +32,19 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.RedstoneWireHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.interfaces.mixin.RTIRedstoneWireBlock;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.world.common.ShapeUpdate;
 
 @Mixin(RedstoneWireBlock.class)
-public abstract class RedstoneWireBlockMixin extends AbstractBlock implements BlockEntityProvider {
+public abstract class RedstoneWireBlockMixin extends AbstractBlock implements BlockEntityProvider, RTIRedstoneWireBlock {
 	
 	@Shadow protected boolean wiresGivePower;
 	
@@ -203,6 +205,11 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	@Override
 	public BlockEntity createBlockEntity(BlockView world) {
 		return new PowerBlockEntity();
+	}
+	
+	@Override
+	public void setWiresGivePower(boolean wiresGivePower) {
+		this.wiresGivePower = wiresGivePower;
 	}
 	
 	private int getExternalPower(World world, BlockPos pos) {

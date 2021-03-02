@@ -17,17 +17,17 @@ public class IntegerSetting extends Setting<Integer> {
 	}
 	
 	@Override
-	public void write(PacketByteBuf buffer, Integer value) {
+	protected void write(PacketByteBuf buffer, Integer value) {
 		buffer.writeInt(value);
 	}
 	
 	@Override
-	public Integer read(PacketByteBuf buffer) {
+	protected Integer read(PacketByteBuf buffer) {
 		return buffer.readInt();
 	}
 	
 	@Override
-	public Integer getBackupValue() {
+	protected Integer getBackupValue() {
 		return 0;
 	}
 	

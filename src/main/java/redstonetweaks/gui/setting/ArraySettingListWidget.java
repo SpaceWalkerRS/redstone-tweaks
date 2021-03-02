@@ -36,7 +36,7 @@ public class ArraySettingListWidget<K, E> extends RTListWidget<ArraySettingListW
 		for (int index = 0; index < array.length; index++) {
 			addEntry(new Entry(index));
 			
-			updateEntryTitleWidth(client.textRenderer.getWidth(setting.getKeyAsString(index)));
+			updateEntryTitleWidth(client.textRenderer.getWidth(setting.getKeyFromIndex(index).toString()));
 		}
 	}
 	
@@ -60,7 +60,7 @@ public class ArraySettingListWidget<K, E> extends RTListWidget<ArraySettingListW
 		
 		public Entry(int index) {
 			this.index = index;
-			this.title = new TranslatableText(setting.getKeyAsString(index));
+			this.title = new TranslatableText(setting.getKeyFromIndex(index).toString());
 			this.children = new ArrayList<>();
 			
 			this.buttonPanel = new ButtonPanel();
@@ -101,7 +101,7 @@ public class ArraySettingListWidget<K, E> extends RTListWidget<ArraySettingListW
 				Boolean[] bArray = (Boolean[])array;
 				buttonPanel.addButton(new RTButtonWidget(0, 0, 100, 20, () -> {
 					Formatting color = bArray[index] ? Formatting.GREEN : Formatting.RED;
-					return new TranslatableText(setting.elementToString(array[index])).formatted(color);
+					return new TranslatableText(array[index].toString()).formatted(color);
 				}, (button) -> {
 					//System.out.println(array);
 					//System.out.println(bArray);

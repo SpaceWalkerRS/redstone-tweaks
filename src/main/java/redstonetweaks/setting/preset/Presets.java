@@ -11,6 +11,7 @@ import java.util.Set;
 import net.minecraft.world.TickPriority;
 
 import redstonetweaks.RedstoneTweaks;
+import redstonetweaks.block.capacitor.CapacitorBehavior;
 import redstonetweaks.listeners.IPresetListener;
 import redstonetweaks.setting.settings.ServerConfig;
 import redstonetweaks.setting.settings.Settings;
@@ -511,6 +512,7 @@ public class Presets {
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.SOUTH, RelativePos.NORTH).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.DOWN, RelativePos.UP).
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS_EXCEPT, RelativePos.UP, RelativePos.DOWN));
+			Tweaks.RedstoneOre.CAPACITOR_BEHAVIOR.setPresetValue(DEFAULT, new CapacitorBehavior());
 			Tweaks.RedstoneOre.CONNECTS_TO_WIRE.setPresetValue(DEFAULT, false);
 			Tweaks.RedstoneOre.DELAY.setPresetValue(DEFAULT, 0);
 			Tweaks.RedstoneOre.POWER_WEAK.setPresetValue(DEFAULT, 0);

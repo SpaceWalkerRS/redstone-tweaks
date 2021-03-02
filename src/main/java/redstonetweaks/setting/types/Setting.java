@@ -169,7 +169,7 @@ public abstract class Setting<T> implements ISetting {
 	
 	public void set(T newValue) {
 		if (!valueEquals(value, newValue)) {
-			value = newValue;
+			value = copy(newValue);
 			
 			valueChanged();
 		}
@@ -188,9 +188,9 @@ public abstract class Setting<T> implements ISetting {
 		return value;
 	}
 	
-	public abstract void write(PacketByteBuf buffer, T value);
+	protected abstract void write(PacketByteBuf buffer, T value);
 	
-	public abstract T read(PacketByteBuf buffer);
+	protected abstract T read(PacketByteBuf buffer);
 	
 	public T getPresetValue(Preset preset) {
 		return presetValues.get(preset);
@@ -202,11 +202,15 @@ public abstract class Setting<T> implements ISetting {
 	
 	public void setPresetValue(Preset preset, T value) {
 		if (preset.isEditable() ? !opOnly() : !hasPreset(preset)) {
-			presetValues.put(preset, value);
+			presetValues.put(preset, copy(value));
 		}
 	}
 	
-	public boolean valueEquals(T value1, T value2) {
+	protected T copy(T value) {
+		return value;
+	}
+	
+	protected boolean valueEquals(T value1, T value2) {
 		return value1.equals(value2);
 	}
 }

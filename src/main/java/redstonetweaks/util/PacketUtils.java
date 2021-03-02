@@ -3,6 +3,7 @@ package redstonetweaks.util;
 import net.minecraft.network.PacketByteBuf;
 
 import redstonetweaks.RedstoneTweaksVersion;
+import redstonetweaks.block.capacitor.CapacitorBehavior;
 import redstonetweaks.world.common.AbstractNeighborUpdate;
 import redstonetweaks.world.common.UpdateOrder;
 import redstonetweaks.world.common.WorldTickOptions;
@@ -71,5 +72,17 @@ public class PacketUtils {
 		options.decode(buffer);
 		
 		return options;
+	}
+	
+	public static void writeCapacitorBehavior(PacketByteBuf buffer, CapacitorBehavior behavior) {
+		behavior.encode(buffer);
+	}
+	
+	public static CapacitorBehavior readCapacitorBehavior(PacketByteBuf buffer) {
+		CapacitorBehavior behavior = new CapacitorBehavior();
+		
+		behavior.decode(buffer);
+		
+		return behavior;
 	}
 }

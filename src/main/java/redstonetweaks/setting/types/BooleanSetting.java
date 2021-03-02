@@ -10,17 +10,17 @@ public class BooleanSetting extends Setting<Boolean> {
 	}
 	
 	@Override
-	public void write(PacketByteBuf buffer, Boolean value) {
+	protected Boolean getBackupValue() {
+		return false;
+	}
+	
+	@Override
+	protected void write(PacketByteBuf buffer, Boolean value) {
 		buffer.writeBoolean(value);
 	}
 	
 	@Override
-	public Boolean read(PacketByteBuf buffer) {
+	protected Boolean read(PacketByteBuf buffer) {
 		return buffer.readBoolean();
-	}
-	
-	@Override
-	public Boolean getBackupValue() {
-		return false;
 	}
 }

@@ -12,17 +12,17 @@ public class TickPrioritySetting extends Setting<TickPriority> {
 	}
 	
 	@Override
-	public TickPriority getBackupValue() {
+	protected TickPriority getBackupValue() {
 		return TickPriority.NORMAL;
 	}
 	
 	@Override
-	public void write(PacketByteBuf buffer, TickPriority value) {
+	protected void write(PacketByteBuf buffer, TickPriority value) {
 		buffer.writeByte(value.getIndex());
 	}
 	
 	@Override
-	public TickPriority read(PacketByteBuf buffer) {
+	protected TickPriority read(PacketByteBuf buffer) {
 		return TickPriority.byIndex(buffer.readByte());
 	}
 }

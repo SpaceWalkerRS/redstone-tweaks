@@ -7,7 +7,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion.DestructionType;
+
 import redstonetweaks.block.piston.MovedBlock;
+import redstonetweaks.interfaces.mixin.RTIRedstoneWireBlock;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.settings.Tweaks;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
@@ -44,6 +46,16 @@ public class WorldHelper {
 		}
 		
 		return false;
+	}
+	
+	public static int getStrongPowerNoWire(World world, BlockPos pos) {
+		((RTIRedstoneWireBlock)Blocks.REDSTONE_WIRE).setWiresGivePower(false);
+		
+		int power = world.getReceivedStrongRedstonePower(pos);
+		
+		((RTIRedstoneWireBlock)Blocks.REDSTONE_WIRE).setWiresGivePower(true);
+		
+		return power;
 	}
 	
 	public static boolean stepByStepFilter(World world) {

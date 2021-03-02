@@ -1,8 +1,8 @@
 package redstonetweaks.setting.types;
 
 import net.minecraft.network.PacketByteBuf;
+
 import redstonetweaks.setting.SettingsPack;
-import redstonetweaks.setting.preset.Preset;
 import redstonetweaks.util.Directionality;
 import redstonetweaks.util.PacketUtils;
 import redstonetweaks.world.common.UpdateOrder;
@@ -14,27 +14,22 @@ public class UpdateOrderSetting extends Setting<UpdateOrder> {
 	}
 	
 	@Override
-	public UpdateOrder getBackupValue() {
+	protected UpdateOrder getBackupValue() {
 		return new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL);
 	}
 	
 	@Override
-	public void write(PacketByteBuf buffer, UpdateOrder value) {
+	protected void write(PacketByteBuf buffer, UpdateOrder value) {
 		PacketUtils.writeUpdateOrder(buffer, value);
 	}
 	
 	@Override
-	public UpdateOrder read(PacketByteBuf buffer) {
+	protected UpdateOrder read(PacketByteBuf buffer) {
 		return PacketUtils.readUpdateOrder(buffer);
 	}
 	
 	@Override
-	public void set(UpdateOrder newValue) {
-		super.set(newValue.copy());
-	}
-	
-	@Override
-	public void setPresetValue(Preset preset, UpdateOrder newValue) {
-		super.setPresetValue(preset, newValue.copy());
+	protected UpdateOrder copy(UpdateOrder value) {
+		return value.copy();
 	}
 }

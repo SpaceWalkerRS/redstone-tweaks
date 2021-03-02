@@ -42,6 +42,7 @@ public class PowerBlockEntity extends BlockEntity {
 	}
 	
 	public int getPower() {
+		//System.out.println("power at " + pos + " requested: " + power);
 		return power;
 	}
 	

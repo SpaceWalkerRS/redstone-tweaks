@@ -170,6 +170,9 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get() && StairsHelper.isStairs(state)) {
 			return state.isSideSolidFullSquare(world, pos, direction.getOpposite());
 		}
+		if (Tweaks.RedstoneOre.CAPACITOR_BEHAVIOR.get().isEnabled() && state.isOf(Blocks.REDSTONE_ORE)) {
+			return false;
+		}
 		
 		return state.isSolidBlock(world, pos);
 	}

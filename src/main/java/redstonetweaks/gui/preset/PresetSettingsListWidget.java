@@ -10,10 +10,12 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.TickPriority;
+
 import redstonetweaks.gui.ButtonPanel;
 import redstonetweaks.gui.RTElement;
 import redstonetweaks.gui.RTListWidget;
 import redstonetweaks.gui.setting.ArraySettingWindow;
+import redstonetweaks.gui.setting.CapacitorBehaviorWindow;
 import redstonetweaks.gui.setting.UpdateOrderWindow;
 import redstonetweaks.gui.setting.WorldTickOptionsWindow;
 import redstonetweaks.gui.widget.RTButtonWidget;
@@ -22,6 +24,7 @@ import redstonetweaks.gui.widget.RTTextFieldWidget;
 import redstonetweaks.player.PermissionManager;
 import redstonetweaks.setting.SettingsPack;
 import redstonetweaks.setting.types.BooleanSetting;
+import redstonetweaks.setting.types.CapacitorBehaviorSetting;
 import redstonetweaks.setting.types.DirectionToBooleanSetting;
 import redstonetweaks.setting.types.ISetting;
 import redstonetweaks.setting.types.IntegerSetting;
@@ -366,6 +369,18 @@ public class PresetSettingsListWidget extends RTListWidget<PresetSettingsListWid
 					button.updateMessage();
 				}));
 			} else
+			if (setting instanceof CapacitorBehaviorSetting) {
+				CapacitorBehaviorSetting cSetting = (CapacitorBehaviorSetting)setting;
+				buttonPanel.addButton((new RTButtonWidget(0, 0, 100, 20, () -> new TranslatableText(parent.getPresetEditor().isEditable() ? "EDIT" : "VIEW"), (button) -> {
+					CapacitorBehaviorWindow window = new CapacitorBehaviorWindow(screen, cSetting, () -> parent.getPresetEditor().getValue(cSetting), (setting) -> {});
+					
+					screen.openWindow(window);
+					
+					if (!parent.getPresetEditor().isEditable()) {
+						window.disableButtons();
+					}
+				})).alwaysActive());
+			}
 			if (setting instanceof IntegerSetting) {
 				IntegerSetting iSetting = (IntegerSetting)setting;
 				if (iSetting.getRange() < 10) {

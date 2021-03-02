@@ -12,7 +12,7 @@ public class DirectionToBooleanSetting extends ArraySetting<Direction, Boolean> 
 	}
 	
 	@Override
-	public Boolean[] getBackupValue() {
+	protected Boolean[] getBackupValue() {
 		return new Boolean[] {false, false, false, false, false, false};
 	}
 	
@@ -29,11 +29,6 @@ public class DirectionToBooleanSetting extends ArraySetting<Direction, Boolean> 
 	@Override
 	protected Boolean[] getEmptyArray(int size) {
 		return new Boolean[size];
-	}
-	
-	@Override
-	public Boolean stringToElement(String string) {
-		return Boolean.parseBoolean(string);
 	}
 	
 	@Override
