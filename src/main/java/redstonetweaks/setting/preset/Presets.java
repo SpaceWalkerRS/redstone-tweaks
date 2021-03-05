@@ -274,6 +274,9 @@ public class Presets {
 			Tweaks.BugFixes.MC137127.setPresetValue(DEFAULT, false);
 			Tweaks.BugFixes.MC172213.setPresetValue(DEFAULT, false);
 			
+			Tweaks.Anvil.CRUSH_CONCRETE.setPresetValue(DEFAULT, false);
+			Tweaks.Anvil.CRUSH_WOOL.setPresetValue(DEFAULT, false);
+			
 			Tweaks.ActivatorRail.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 0);
 			Tweaks.ActivatorRail.DELAY_FALLING_EDGE.setPresetValue(DEFAULT, 0);
 			Tweaks.ActivatorRail.LAZY_RISING_EDGE.setPresetValue(DEFAULT, false);

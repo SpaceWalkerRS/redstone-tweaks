@@ -12,6 +12,7 @@
   	"G4me4u"
   ],
   "contact": {
+  	"homepage": "https://modrinth.com/mod/redstonetweaks",
     "sources": "https://github.com/SpaceWalkerRS/redstone-tweaks",
     "issues": "https://github.com/SpaceWalkerRS/redstone-tweaks/issues"
   },

@@ -73,6 +73,14 @@ public class Tweaks {
 		public static final TickPrioritySetting TICK_PRIORITY_FALLING_EDGE = new TickPrioritySetting(ACTIVATOR_RAIL, "tickPriorityFallingEdge", Settings.Common.DESC_TICK_PRIORITY_FALLING_EDGE);
 	}
 	
+	public static class Anvil {
+		
+		private static final SettingsPack ANVIL = new SettingsPack(TWEAKS, "Anvil");
+		
+		public static final BooleanSetting CRUSH_CONCRETE = new BooleanSetting(ANVIL, "crushConcrete", "Make falling anvils crush concrete into concrete powder.");
+		public static final BooleanSetting CRUSH_WOOL = new BooleanSetting(ANVIL, "crushWool", "Make falling anvils flatten wool into carpets.");
+	}
+	
 	public static class Bamboo {
 		
 		private static final SettingsPack BAMBOO = new SettingsPack(TWEAKS, "Bamboo");
@@ -763,6 +771,10 @@ public class Tweaks {
 		Settings.register(BugFixes.MC136566);
 		Settings.register(BugFixes.MC137127);
 		Settings.register(BugFixes.MC172213);
+		
+		Settings.register(Anvil.ANVIL);
+		Settings.register(Anvil.CRUSH_CONCRETE);
+		Settings.register(Anvil.CRUSH_WOOL);
 		
 		Settings.register(ActivatorRail.ACTIVATOR_RAIL);
 		Settings.register(ActivatorRail.DELAY_RISING_EDGE);

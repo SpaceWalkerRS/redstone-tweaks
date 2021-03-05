@@ -46,6 +46,7 @@
 	"server.EnderChestBlockMixin",
 	"server.EndPortalFrameBlockMixin",
 	"server.EntityMixin",
+	"server.FallingBlockEntityMixin",
 	"server.FallingBlockMixin",
 	"server.FarmlandBlockMixin",
 	"server.FenceBlockMixin",
