@@ -12,7 +12,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.BlockState;
@@ -28,6 +30,7 @@ import net.minecraft.world.TickScheduler;
 
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
+import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(ServerTickScheduler.class)
 public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickScheduler, TickScheduler<T> {
@@ -47,6 +50,16 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 	@Inject(method = "tick", at = @At(value = "HEAD"))
 	private void onTickInjectAtHead(CallbackInfo ci) {
 		TickSchedulerHelper.tick();
+	}
+	
+	@ModifyConstant(
+			method = "tick",
+			constant = @Constant(
+					intValue = 65536
+			)
+	)
+	private int onTickModifyTickLimit(int oldLimit) {
+		return Tweaks.Global.SCHEDULED_TICK_LIMIT.get();
 	}
 	
 	@Override
@@ -69,8 +82,10 @@ public abstract class ServerTickSchedulerMixin<T> implements RTIServerTickSchedu
 			throw new IllegalStateException("TickNextTick list out of sync");
 		}
 		
-		if (counter > 65536) {
-			counter = 65536;
+		int limit = Tweaks.Global.SCHEDULED_TICK_LIMIT.get();
+		
+		if (counter > limit) {
+			counter = limit;
 		}
 		
 		TickSchedulerHelper.tick();

@@ -15,10 +15,11 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import redstonetweaks.helper.PistonHelper;
+import redstonetweaks.interfaces.mixin.RTIRedstoneTorch;
 import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(WallRedstoneTorchBlock.class)
-public class WallRedstoneTorchBlockMixin {
+public class WallRedstoneTorchBlockMixin implements RTIRedstoneTorch {
 	
 	@Inject(method = "shouldUnpower", at = @At(value = "HEAD"), cancellable = true)
 	private void shouldUnpower(World world, BlockPos pos, BlockState state, CallbackInfoReturnable<Boolean> cir) {
@@ -43,5 +44,12 @@ public class WallRedstoneTorchBlockMixin {
 	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
 	private int onGetWeakRedstonePower(int oldValue) {
 		return Tweaks.RedstoneTorch.POWER_WEAK.get();
+	}
+	
+	@Override
+	public BlockPos getAttachedToPos(World world, BlockPos pos, BlockState state) {
+		Direction dir = state.get(Properties.HORIZONTAL_FACING).getOpposite();
+		
+		return pos.offset(dir);
 	}
 }

@@ -6,6 +6,7 @@ import net.minecraft.world.World;
 public interface RTIBlock {
 	
 	// Return true if the action should be synced with the client
-	public boolean continueAction(World world, BlockPos pos, int type);
-	
+	default boolean continueAction(World world, BlockPos pos, int type) {
+		return false;
+	}
 }

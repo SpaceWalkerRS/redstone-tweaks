@@ -63,10 +63,6 @@ import redstonetweaks.world.server.ServerWorldTickHandler;
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World implements RTIWorld, RTIServerWorld  {
 	
-	// This is to prevent the game from freezing due to repeater clocks while microTickMode is enabled
-	// The value should be large enough that vanilla builds are unaffected
-	private static final int BLOCK_EVENT_LIMIT = 100000;
-	
 	@Shadow @Final private MinecraftServer server;
 	@Shadow @Final private boolean shouldTickTime;
 	@Shadow @Final private ServerWorldProperties worldProperties;
@@ -159,7 +155,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	
 	@Redirect(method = "processSyncedBlockEvents", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;isEmpty()Z"))
 	private boolean onProcessSyncedBlockEventsRedirectIsEmpty(ObjectLinkedOpenHashSet<BlockEvent> set) {
-		return processedBlockEvents > BLOCK_EVENT_LIMIT || set.isEmpty();
+		return processedBlockEvents > Tweaks.Global.BLOCK_EVENT_LIMIT.get() || set.isEmpty();
 	}
 	
 	@Redirect(method = "processSyncedBlockEvents", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;removeFirst()Ljava/lang/Object;"))
@@ -405,7 +401,7 @@ public abstract class ServerWorldMixin extends World implements RTIWorld, RTISer
 	@Override
 	public boolean tryContinueProcessingBlockEvents() {
 		if (isProcessingBlockEvents) {
-			if (processedBlockEvents > BLOCK_EVENT_LIMIT || syncedBlockEventQueue.isEmpty()) {
+			if (processedBlockEvents > Tweaks.Global.BLOCK_EVENT_LIMIT.get() || syncedBlockEventQueue.isEmpty()) {
 				isProcessingBlockEvents = false;
 				
 				if (Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.get()) {

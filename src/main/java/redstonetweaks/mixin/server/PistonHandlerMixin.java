@@ -25,6 +25,7 @@ import net.minecraft.block.PistonBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.SlabType;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -277,6 +278,17 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 			cir.setReturnValue(true);
 			cir.cancel();
 		}
+	}
+	
+	@Redirect(
+			method = "tryMove",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/block/BlockState;getPistonBehavior()Lnet/minecraft/block/piston/PistonBehavior;"
+			)
+	)
+	private PistonBehavior onTryMoveRedirectGetPistonBehavior(BlockState state) {
+		return PistonHelper.getPistonBehavior(state);
 	}
 	
 	@ModifyConstant(method = "tryMove", constant = @Constant(intValue = 12))

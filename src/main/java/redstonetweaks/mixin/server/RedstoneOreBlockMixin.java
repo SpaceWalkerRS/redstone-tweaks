@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -20,7 +21,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
@@ -38,6 +38,21 @@ public abstract class RedstoneOreBlockMixin extends AbstractBlock implements Blo
 	
 	public RedstoneOreBlockMixin(Settings settings) {
 		super(settings);
+	}
+	
+	@ModifyVariable(
+			method = "<init>",
+			argsOnly = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private static Settings onInitModifySettings(Settings settings) {
+		AbstractBlock.ContextPredicate solidPredicate = (state, world, pos) -> {
+			return !Tweaks.RedstoneOre.CAPACITOR_BEHAVIOR.get().isEnabled();
+		};
+		
+		return settings.solidBlock(solidPredicate);
 	}
 	
 	@Redirect(method = "onBlockBreakStart", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RedstoneOreBlock;light(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
@@ -100,7 +115,7 @@ public abstract class RedstoneOreBlockMixin extends AbstractBlock implements Blo
 	
 	@Override
 	public boolean emitsRedstonePower(BlockState state) {
-		return Tweaks.RedstoneOre.CONNECTS_TO_WIRE.get();
+		return Tweaks.RedstoneOre.CONNECTS_TO_WIRE.get() || Tweaks.RedstoneOre.CAPACITOR_BEHAVIOR.get().isEnabled();
 	}
 	
 	@Override
@@ -168,8 +183,6 @@ public abstract class RedstoneOreBlockMixin extends AbstractBlock implements Blo
 				newPower = currentPower + stepSize * (currentPower < desiredPower ? 1 : -1);
 			}
 		}
-		
-		newPower = MathHelper.clamp(newPower, 0, maxPower);
 		
 		if (currentPower != newPower) {
 			int fadeInDelay = capacitor.getIncrementDelay();

@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -25,7 +26,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
+import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIBlock;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
@@ -42,10 +43,25 @@ public abstract class ObserverBlockMixin extends AbstractBlock implements RTIBlo
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract void updateNeighbors(World world, BlockPos pos, BlockState state);
 	
+	@ModifyVariable(
+			method = "<init>",
+			argsOnly = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private static Settings onInitModifySettings(Settings settings) {
+		AbstractBlock.ContextPredicate solidPredicate = (state, world, pos) -> {
+			return Tweaks.Observer.IS_SOLID.get();
+		};
+		
+		return settings.solidBlock(solidPredicate);
+	}
+	
 	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", ordinal = 1, shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
 	private void onScheduledTickInjectBeforeSetBlockState1(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		if (Tweaks.Observer.OBSERVE_BLOCK_UPDATES.get()) {
-			TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
+			tryPowerOff(world, pos, state);
 		}
 	}
 	
@@ -61,7 +77,7 @@ public abstract class ObserverBlockMixin extends AbstractBlock implements RTIBlo
 	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
 	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos blockPos, T block, int delay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		if (!Tweaks.Observer.OBSERVE_BLOCK_UPDATES.get()) {
-			TickSchedulerHelper.scheduleBlockTick(world, pos, world.getBlockState(pos), Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
+			tryPowerOff(world, pos, world.getBlockState(pos));
 		}
 	}
 	
@@ -123,22 +139,50 @@ public abstract class ObserverBlockMixin extends AbstractBlock implements RTIBlo
 	}
 	
 	@Override
+	public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
+		return BlockHelper.microTickModeBlockEvent(state, world, pos, type, data);
+	}
+	
+	@Override
 	public boolean continueAction(World world, BlockPos pos, int type) {
 		BlockState state = world.getBlockState(pos);
 		
-		TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.Observer.DELAY_FALLING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
+		if (!world.isClient()) {
+			tryPowerOff((ServerWorld)world, pos, state);
+		}
 		updateNeighbors(world, pos, state);
 		
 		return false;
 	}
 	
 	private BlockState tryPowerOn(WorldAccess world, BlockPos pos, BlockState state) {
-		if (!Tweaks.Observer.DISABLE.get() && !world.isClient() && !world.getBlockTickScheduler().isScheduled(pos, state.getBlock())) {
-			if (TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.Observer.DELAY_RISING_EDGE.get(), Tweaks.Observer.TICK_PRIORITY_RISING_EDGE.get())) {
-				return world.getBlockState(pos);
+		if (!Tweaks.Observer.DISABLE.get() && !world.isClient()) {
+			int delay = Tweaks.Observer.DELAY_RISING_EDGE.get();
+			boolean microTickMode = Tweaks.Observer.MICRO_TICK_MODE.get();
+			
+			if (microTickMode) {
+				if (world instanceof World && !((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
+					((ServerWorld)world).addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
+				}
+			} else {
+				if (!world.getBlockTickScheduler().isScheduled(pos, state.getBlock())) {
+					if (TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.Observer.TICK_PRIORITY_RISING_EDGE.get())) {
+						return world.getBlockState(pos);
+					}
+				}
 			}
 		}
 		
 		return state;
+	}
+	
+	private void tryPowerOff(ServerWorld world, BlockPos pos, BlockState state) {
+		int delay = Tweaks.Observer.DELAY_FALLING_EDGE.get();
+		
+		if (Tweaks.Observer.MICRO_TICK_MODE.get()) {
+			world.addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
+		} else {
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
+		}
 	}
 }

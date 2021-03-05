@@ -225,6 +225,7 @@ public class Presets {
 			
 			Presets.register(DEFAULT);
 			
+			Tweaks.Global.BLOCK_EVENT_LIMIT.setPresetValue(DEFAULT, 100000);
 			Tweaks.Global.BLOCK_UPDATE_ORDER.setPresetValue(DEFAULT, new UpdateOrder(Directionality.NONE, UpdateOrder.NotifierOrder.SEQUENTIAL, AbstractNeighborUpdate.Mode.SINGLE_UPDATE, true).
 					add(RelativePos.SELF, RelativePos.WEST).
 					add(RelativePos.SELF, RelativePos.EAST).
@@ -253,13 +254,18 @@ public class Presets {
 			Tweaks.Global.INSTANT_BLOCK_EVENTS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.MERGE_SLABS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.MOVABLE_BLOCK_ENTITIES.setPresetValue(DEFAULT, false);
+			Tweaks.Global.MOVABLE_BRITTLE_BLOCKS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.MOVABLE_MOVING_BLOCKS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.POWER_MAX.setPresetValue(DEFAULT, 15);
 			Tweaks.Global.RANDOMIZE_BLOCK_EVENTS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.RANDOMIZE_DELAYS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.RANDOMIZE_TICK_PRIORITIES.setPresetValue(DEFAULT, false);
+			Tweaks.Global.SCHEDULED_TICK_LIMIT.setPresetValue(DEFAULT, 65536);
 			Tweaks.Global.SHOW_NEIGHBOR_UPDATES.setPresetValue(DEFAULT, false);
 			Tweaks.Global.SPONTANEOUS_EXPLOSIONS.setPresetValue(DEFAULT, false);
+			Tweaks.Global.STICKY_CONNECTIONS.setPresetValue(DEFAULT, false);
+			Tweaks.Global.TERRACOTTA_FORCES_MICRO_TICK_MODE.setPresetValue(DEFAULT, false);
+			Tweaks.Global.TERRACOTTA_OVERRIDES_DELAY.setPresetValue(DEFAULT, false);
 			Tweaks.Global.WORLD_TICK_OPTIONS.setPresetValue(DEFAULT, new WorldTickOptions());
 			
 			Tweaks.BugFixes.MC54711.setPresetValue(DEFAULT, false);
@@ -287,6 +293,7 @@ public class Presets {
 			Tweaks.BubbleColumn.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
 			Tweaks.Cactus.DELAY.setPresetValue(DEFAULT, 1);
+			Tweaks.Cactus.NO_U.setPresetValue(DEFAULT, false);
 			Tweaks.Cactus.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
 			Tweaks.ChorusPlant.DELAY.setPresetValue(DEFAULT, 1);
@@ -454,6 +461,8 @@ public class Presets {
 			Tweaks.Observer.DELAY_RISING_EDGE.setPresetValue(DEFAULT, 2);
 			Tweaks.Observer.DELAY_FALLING_EDGE.setPresetValue(DEFAULT, 2);
 			Tweaks.Observer.DISABLE.setPresetValue(DEFAULT, false);
+			Tweaks.Observer.IS_SOLID.setPresetValue(DEFAULT, false);
+			Tweaks.Observer.MICRO_TICK_MODE.setPresetValue(DEFAULT, false);
 			Tweaks.Observer.OBSERVE_BLOCK_UPDATES.setPresetValue(DEFAULT, false);
 			Tweaks.Observer.POWER_WEAK.setPresetValue(DEFAULT, 15);
 			Tweaks.Observer.POWER_STRONG.setPresetValue(DEFAULT, 15);
@@ -533,6 +542,7 @@ public class Presets {
 			Tweaks.RedstoneTorch.DELAY_FALLING_EDGE.setPresetValue(DEFAULT, 2);
 			Tweaks.RedstoneTorch.LAZY_RISING_EDGE.setPresetValue(DEFAULT, false);
 			Tweaks.RedstoneTorch.LAZY_FALLING_EDGE.setPresetValue(DEFAULT, false);
+			Tweaks.RedstoneTorch.MICRO_TICK_MODE.setPresetValue(DEFAULT, false);
 			Tweaks.RedstoneTorch.POWER_WEAK.setPresetValue(DEFAULT, 15);
 			Tweaks.RedstoneTorch.POWER_STRONG.setPresetValue(DEFAULT, 15);
 			Tweaks.RedstoneTorch.SOFT_INVERSION.setPresetValue(DEFAULT, false);
@@ -569,6 +579,11 @@ public class Presets {
 			
 			Tweaks.Scaffolding.DELAY.setPresetValue(DEFAULT, 1);
 			Tweaks.Scaffolding.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
+			
+			Tweaks.Shulker.IS_SOLID.setPresetValue(DEFAULT, false);
+			Tweaks.Shulker.UPDATE_NEIGHBORS_WHEN_PEEKING.setPresetValue(DEFAULT, false);
+			
+			Tweaks.ShulkerBox.UPDATE_NEIGHBORS_WHEN_PEEKING.setPresetValue(DEFAULT, false);
 			
 			Tweaks.SoulSand.DELAY.setPresetValue(DEFAULT, 20);
 			Tweaks.SoulSand.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);

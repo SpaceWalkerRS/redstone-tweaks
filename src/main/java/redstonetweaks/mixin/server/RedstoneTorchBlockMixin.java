@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.RedstoneTorchBlock;
@@ -25,14 +26,21 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 
+import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.interfaces.mixin.RTIAbstractBlockState;
+import redstonetweaks.interfaces.mixin.RTIRedstoneTorch;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.settings.Tweaks;
 
 @Mixin(RedstoneTorchBlock.class)
-public abstract class RedstoneTorchBlockMixin {
+public abstract class RedstoneTorchBlockMixin extends AbstractBlock implements RTIRedstoneTorch {
+	
+	public RedstoneTorchBlockMixin(Settings settings) {
+		super(settings);
+	}
 	
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract boolean shouldUnpower(World world, BlockPos pos, BlockState state);
@@ -95,9 +103,19 @@ public abstract class RedstoneTorchBlockMixin {
 		boolean lit = state.get(Properties.LIT);
 		
 		int delay = lit ? Tweaks.RedstoneTorch.DELAY_FALLING_EDGE.get() : Tweaks.RedstoneTorch.DELAY_RISING_EDGE.get();
-		TickPriority priority = lit ? Tweaks.RedstoneTorch.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.RedstoneTorch.TICK_PRIORITY_RISING_EDGE.get();
 		
-		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+		BlockPos attachedToPos = ((RTIRedstoneTorch)this).getAttachedToPos(world, pos, state);
+		RTIAbstractBlockState attachedToState = (RTIAbstractBlockState)world.getBlockState(attachedToPos);
+		
+		if (Tweaks.RedstoneTorch.MICRO_TICK_MODE.get() || attachedToState.forceMicroTickMode()) {
+			if (!world.isClient()) {
+				world.addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
+			}
+		} else {
+			TickPriority priority = lit ? Tweaks.RedstoneTorch.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.RedstoneTorch.TICK_PRIORITY_RISING_EDGE.get();
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, attachedToState.delayOverride(delay), attachedToState.tickPriorityOverride(priority));
+		}
 	}
 	
 	@Inject(method = "getStrongRedstonePower", at = @At(value = "HEAD"), cancellable = true)
@@ -109,6 +127,16 @@ public abstract class RedstoneTorchBlockMixin {
 	@ModifyConstant(method = "isBurnedOut", constant = @Constant(intValue = 8))
 	private static int onIsBurnedOutModifyBurnoutCount(int oldValue) {
 		return Tweaks.RedstoneTorch.BURNOUT_COUNT.get();
+	}
+	
+	@Override
+	public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
+		return BlockHelper.microTickModeBlockEvent(state, world, pos, type, data);
+	}
+	
+	@Override
+	public BlockPos getAttachedToPos(World world, BlockPos pos, BlockState state) {
+		return pos.down();
 	}
 	
 	private void updateNeighbors(World world, BlockPos pos) {

@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -320,6 +321,18 @@ public abstract class PistonBlockMixin extends Block implements RTIBlock {
 		
 		cir.setReturnValue(didBlockEvent);
 		cir.cancel();
+	}
+	
+	@ModifyVariable(
+			method = "isMovable",
+			argsOnly = true,
+			index = 4,
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private static boolean onIsMovableModifyCanBreak(boolean canBreak) {
+		return canBreak || Tweaks.Global.MOVABLE_BRITTLE_BLOCKS.get();
 	}
 	
 	@Inject(method = "isMovable", cancellable = true, at = @At(value = "FIELD", shift = Shift.BEFORE, target = "Lnet/minecraft/block/Blocks;PISTON:Lnet/minecraft/block/Block;"))

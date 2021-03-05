@@ -7,12 +7,19 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.DoorBlock;
+import net.minecraft.block.HorizontalConnectingBlock;
 import net.minecraft.block.PistonBlock;
+import net.minecraft.block.PlantBlock;
 import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.block.SlabBlock;
+import net.minecraft.block.TallPlantBlock;
+import net.minecraft.block.VineBlock;
+import net.minecraft.block.WallBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.ChestType;
+import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.block.enums.PistonType;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.block.piston.PistonBehavior;
@@ -20,6 +27,7 @@ import net.minecraft.block.piston.PistonHandler;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -29,6 +37,7 @@ import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
+import redstonetweaks.interfaces.mixin.RTIPlant;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.settings.Tweaks;
@@ -43,6 +52,34 @@ public class PistonHelper {
 		Blocks.ENDER_CHEST,
 		Blocks.END_GATEWAY,
 		Blocks.END_PORTAL
+	);
+	
+	// Blocks vegetation can be placed on
+	private static final Set<Block> SOIL_BLOCKS = ImmutableSet.of(
+		Blocks.GRASS_BLOCK,
+		Blocks.DIRT,
+		Blocks.COARSE_DIRT,
+		Blocks.PODZOL,
+		Blocks.FARMLAND,
+		Blocks.SAND,
+		Blocks.RED_SAND,
+		Blocks.TERRACOTTA,
+		Blocks.WHITE_TERRACOTTA,
+		Blocks.ORANGE_TERRACOTTA,
+		Blocks.MAGENTA_TERRACOTTA,
+		Blocks.LIGHT_BLUE_TERRACOTTA,
+		Blocks.YELLOW_TERRACOTTA,
+		Blocks.LIME_TERRACOTTA,
+		Blocks.PINK_TERRACOTTA,
+		Blocks.GRAY_TERRACOTTA,
+		Blocks.LIGHT_GRAY_TERRACOTTA,
+		Blocks.CYAN_TERRACOTTA,
+		Blocks.PURPLE_TERRACOTTA,
+		Blocks.BLUE_TERRACOTTA,
+		Blocks.BROWN_TERRACOTTA,
+		Blocks.GREEN_TERRACOTTA,
+		Blocks.RED_TERRACOTTA,
+		Blocks.BLACK_TERRACOTTA
 	);
 	
 	public static PistonHandler createPistonHandler(World world, BlockPos pos, Direction pistonDir, boolean extending, boolean sticky) {
@@ -336,6 +373,9 @@ public class PistonHelper {
 		if (Tweaks.Global.MOVABLE_MOVING_BLOCKS.get() && state.isOf(Blocks.MOVING_PISTON)) {
 			return PistonBehavior.NORMAL;
 		}
+		if (Tweaks.Global.MOVABLE_BRITTLE_BLOCKS.get() && state.getPistonBehavior() == PistonBehavior.DESTROY) {
+			return PistonBehavior.NORMAL;
+		}
 		
 		return state.getPistonBehavior();
 	}
@@ -495,6 +535,12 @@ public class PistonHelper {
 		if (Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.get() && (block == Blocks.STICKY_PISTON || block == Blocks.PISTON_HEAD)) {
 			return true;
 		}
+		if (Tweaks.Global.MOVABLE_BRITTLE_BLOCKS.get() && (block instanceof DoorBlock || block instanceof TallPlantBlock || SOIL_BLOCKS.contains(block))) {
+			return true;
+		}
+		if (Tweaks.Global.STICKY_CONNECTIONS.get() && (block instanceof HorizontalConnectingBlock || block instanceof WallBlock)) {
+			return true;
+		}
 		
 		return false;
 	}
@@ -563,6 +609,46 @@ public class PistonHelper {
 					if (PistonHelper.isPiston(adjacentState, sticky, dir.getOpposite())) {
 						return true;
 					}
+				}
+			}
+		}
+		if (Tweaks.Global.MOVABLE_BRITTLE_BLOCKS.get()) {
+			if (state.contains(Properties.DOUBLE_BLOCK_HALF) && adjacentState.isOf(state.getBlock())) {
+				if (dir.getAxis().isHorizontal()) {
+					return false;
+				}
+				
+				DoubleBlockHalf half = state.get(Properties.DOUBLE_BLOCK_HALF);
+				
+				if (half == adjacentState.get(Properties.DOUBLE_BLOCK_HALF)) {
+					return false;
+				}
+				if ((dir == Direction.UP) == (half == DoubleBlockHalf.UPPER)) {
+					return false;
+				}
+				
+				return true;
+			} else
+			if (adjacentState.getBlock() instanceof PlantBlock) {
+				return ((RTIPlant)adjacentState.getBlock()).hasAttachmentTo(adjacentState, dir.getOpposite(), state.getBlock());
+			} else
+			if (state.getBlock().isIn(BlockTags.JUNGLE_LOGS) && adjacentState.isOf(Blocks.COCOA)) {
+				if (dir.getAxis().isVertical()) {
+					return false;
+				}
+				
+				return dir.getOpposite() == adjacentState.get(Properties.HORIZONTAL_FACING);
+			} else
+			if (state.getBlock() instanceof VineBlock && adjacentState.isOf(state.getBlock())) {
+				return dir.getAxis().isVertical();
+			}
+		}
+		if (Tweaks.Global.STICKY_CONNECTIONS.get()) {
+			Block block = state.getBlock();
+			
+			if (block instanceof HorizontalConnectingBlock || block instanceof WallBlock) {
+				if (adjacentState.isOf(block)) {
+					return true;
 				}
 			}
 		}

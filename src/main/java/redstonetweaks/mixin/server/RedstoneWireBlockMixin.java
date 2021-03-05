@@ -37,6 +37,7 @@ import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.RedstoneWireHelper;
+import redstonetweaks.helper.StairsHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.interfaces.mixin.RTIRedstoneWireBlock;
 import redstonetweaks.interfaces.mixin.RTIWorld;
@@ -58,24 +59,26 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	}
 	
 	@Redirect(method = "method_27843", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
-	private boolean onMethod_27843RedirectIsSolidBlock(BlockState aboveState, BlockView world1, BlockPos up, BlockView world, BlockState state, BlockPos pos) {
+	private boolean onMethod_27843RedirectIsSolidBlock(BlockState aboveState, BlockView world1, BlockPos blockPos, BlockView world, BlockState state, BlockPos pos) {
+		BlockPos abovePos = pos.up();
+		
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
-			if (aboveState.getBlock() instanceof StairsBlock) {
-				return aboveState.isSideSolidFullSquare(world, up, Direction.DOWN);
+			if (StairsHelper.isStairs(aboveState)) {
+				return aboveState.isSideSolidFullSquare(world, abovePos, Direction.DOWN);
 			}
 		}
 		
-		return aboveState.isSolidBlock(world, pos);
+		return aboveState.isSolidBlock(world, abovePos);
 	}
 	
 	@Redirect(method = "method_27843", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RedstoneWireBlock;method_27841(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;Z)Lnet/minecraft/block/enums/WireConnection;"))
 	private WireConnection onMethod_27843RedirectMethod_27841(RedstoneWireBlock wire, BlockView world, BlockPos pos, Direction direction, boolean canConnectUp) {
 		if (canConnectUp && Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
-			BlockPos up = pos.up();
-			BlockState aboveState = world.getBlockState(up);
+			BlockPos abovePos = pos.up();
+			BlockState aboveState = world.getBlockState(abovePos);
 			
-			if (aboveState.getBlock() instanceof StairsBlock) {
-				canConnectUp = !aboveState.isSideSolidFullSquare(world, up, direction);
+			if (StairsHelper.isStairs(aboveState)) {
+				canConnectUp = !aboveState.isSideSolidFullSquare(world, abovePos, direction);
 			}
 		}
 		
@@ -102,14 +105,16 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	}
 	
 	@Redirect(method = "getRenderConnectionType", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
-	private boolean onGetRenderConnectionTypeRedirectIsSolidBlock(BlockState state, BlockView world1, BlockPos up, BlockView world, BlockPos pos, Direction direction) {
+	private boolean onGetRenderConnectionTypeRedirectIsSolidBlock(BlockState aboveState, BlockView world1, BlockPos blockPos, BlockView world, BlockPos pos, Direction direction) {
+		BlockPos abovePos = pos.up();
+		
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
-			if (state.getBlock() instanceof StairsBlock) {
-				return state.isSideSolidFullSquare(world, up, Direction.DOWN) || state.isSideSolidFullSquare(world, up, direction);
+			if (aboveState.getBlock() instanceof StairsBlock) {
+				return aboveState.isSideSolidFullSquare(world, abovePos, Direction.DOWN) || aboveState.isSideSolidFullSquare(world, abovePos, direction);
 			}
 		}
 		
-		return state.isSolidBlock(world, pos);
+		return aboveState.isSolidBlock(world, abovePos);
 	}
 	
 	@Redirect(method = "method_27841", at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/block/enums/WireConnection;SIDE:Lnet/minecraft/block/enums/WireConnection;"))
@@ -125,10 +130,11 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	@Redirect(method = "method_27841", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
 	private boolean onMethod_27841RedirectIsSolidBlock(BlockState state, BlockView world1, BlockPos side, BlockView world, BlockPos pos, Direction direction, boolean blockedAbove) {
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
-			if (state.getBlock() instanceof StairsBlock) {
+			if (StairsHelper.isStairs(state)) {
 				return state.isSideSolidFullSquare(world, side, Direction.DOWN) || state.isSideSolidFullSquare(world, side, direction.getOpposite());
 			}
 		}
+		
 		return state.isSolidBlock(world, side);
 	}
 	
@@ -264,10 +270,13 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				PowerBlockEntity powerBlockEntity = ((PowerBlockEntity)blockEntity);
 				
 				powerBlockEntity.ensureCorrectPower(state);
+				
 				return powerBlockEntity.getPower();
 			}
+			
 			return state.get(Properties.POWER);
 		}
+		
 		return 0;
 	}
 	
@@ -278,6 +287,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		if (state.getBlock() instanceof StairsBlock) {
 			return Tweaks.Stairs.FULL_FACES_ARE_SOLID.get() && state.isSideSolidFullSquare(world, pos, face);
 		}
+		
 		return false;
 	}
 	
@@ -292,6 +302,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		if (state.getBlock() instanceof StairsBlock) {
 			return Tweaks.Stairs.FULL_FACES_ARE_SOLID.get() && state.isSideSolidFullSquare(world, pos, dir);
 		}
+		
 		return false;
 	}
 	

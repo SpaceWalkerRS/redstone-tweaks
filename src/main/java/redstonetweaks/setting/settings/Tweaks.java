@@ -19,6 +19,7 @@ public class Tweaks {
 		
 		private static final SettingsPack GLOBAL = new SettingsPack(TWEAKS, "Global");
 		
+		public static final IntegerSetting BLOCK_EVENT_LIMIT = new IntegerSetting(GLOBAL, "blockEventLimit", "The maximum number of block events that can be executed each tick.", 0, Integer.MAX_VALUE);
 		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(GLOBAL, "blockUpdateOrder", "The order in which the world dispatches block updates to the neighbors of a block.");
 		public static final UpdateOrderSetting COMPARATOR_UPDATE_ORDER = new UpdateOrderSetting(GLOBAL, "comparatorUpdateOrder", "The order in which the world dispatches comparator updates to the neighbors of a block.");
 		public static final UpdateOrderSetting SHAPE_UPDATE_ORDER = new UpdateOrderSetting(GLOBAL, "shapeUpdateOrder", "The order in which the world dispatches shape updates to the neighbors of a block.");
@@ -31,13 +32,18 @@ public class Tweaks {
 		public static final BooleanSetting INSTANT_BLOCK_EVENTS = new BooleanSetting(GLOBAL, "instantBlockEvents", "Execute block events instantaneously rather than queueing them.");
 		public static final BooleanSetting MERGE_SLABS = new BooleanSetting(GLOBAL, "mergeSlabs", "Allow half slabs of the same type to be pushed together and merge into a double slab block. Additionally, sticky surfaces can only move half slabs when making physical contact with the slab. This allows double slabs to be split when one half is pulled but not the other. Note: this setting is most powerful when used in combination with \'movableMovingBlocks\'.");
 		public static final BooleanSetting MOVABLE_BLOCK_ENTITIES = new BooleanSetting(GLOBAL, "movableBlockEntities", "Allow blocks with block entities to be moved by pistons.");
+		public static final BooleanSetting MOVABLE_BRITTLE_BLOCKS = new BooleanSetting(GLOBAL, "movableBrittleBlocks", "Allow blocks that are usually destroyed by pistons to be moved.");
 		public static final BooleanSetting MOVABLE_MOVING_BLOCKS = new BooleanSetting(GLOBAL, "movableMovingBlocks", "Allow moving blocks to be moved by pistons.");
 		public static final IntegerSetting POWER_MAX = new IntegerSetting(GLOBAL, "maxPower", "The maximum power output of analogue components like redstone wire, comparators, weighted pressure plates, etc.", 0, Settings.Common.MAX_POWER);
 		public static final BooleanSetting RANDOMIZE_BLOCK_EVENTS = new BooleanSetting(GLOBAL, "randomizeBlockEvents", "Randomize the order in which block events are processed.");
 		public static final BooleanSetting RANDOMIZE_DELAYS = new BooleanSetting(GLOBAL, "randomizeDelays", "Randomize the delays of all block and fluid ticks that are scheduled.");
 		public static final BooleanSetting RANDOMIZE_TICK_PRIORITIES = new BooleanSetting(GLOBAL, "randomizeTickPriorities", "Randomize the tick priorities of all block and fluid ticks that are scheduled.");
+		public static final IntegerSetting SCHEDULED_TICK_LIMIT = new IntegerSetting(GLOBAL, "scheduledTickLimit", "The maximum number of scheduled ticks that can be executed each tick.", 0, Integer.MAX_VALUE);
 		public static final BooleanSetting SHOW_NEIGHBOR_UPDATES = new BooleanSetting(GLOBAL, "showNeighborUpdates", "When used while worlds tick in \"Step by step\" mode, neighbor updates become scheduled events. The world tick will be paused until all neighbor updates have been executed. Colored boxes are drawn at the location of each neighbor update. The white box is the notifier position, a yellow box is a block update, a blue box a shape update and a red box a comparator update.");
 		public static final BooleanSetting SPONTANEOUS_EXPLOSIONS = new BooleanSetting(GLOBAL, "spontaneousExplosions", "Allow redstone components to spontaneously explode if they are looked at the wrong way (in case of abuse with short pulses).");
+		public static final BooleanSetting STICKY_CONNECTIONS = new BooleanSetting(GLOBAL, "stickyConnections", "Make blocks like fences and walls stick together when moved if they are connected.");
+		public static final BooleanSetting TERRACOTTA_FORCES_MICRO_TICK_MODE = new BooleanSetting(GLOBAL, "terracottaForcesMicroTickMode", "When enabled, redstone components placed on or attached to clay blocks are forced into microtick mode.");
+		public static final BooleanSetting TERRACOTTA_OVERRIDES_DELAY = new BooleanSetting(GLOBAL, "terracottaOverridesDelay", "When enabled, redstone components placed on or attached to terracotta blocks have delay based on the color of the terracotta block (white = 0, orange = 1, etc.).");
 		public static final WorldTickOptionsSetting WORLD_TICK_OPTIONS = new WorldTickOptionsSetting(GLOBAL, "worldTickOptions", "Options for debugging purposes. In \"Step by step\" mode the world tick will be broken down and each of its phases executed at the given interval of server ticks. Some phases, like those of scheduled ticks, block events and block entities, will break down even further and execute one their actions per interval. Information about the current tick, current world and current phase will be displayed in the top left of the screen. A dimension filter can also be selected to control which dimensions will be affected by the \"Step by step\" mode.");
 	}
 	
@@ -95,6 +101,7 @@ public class Tweaks {
 		private static final SettingsPack CACTUS = new SettingsPack(TWEAKS, "Cactus");
 		
 		public static final IntegerSetting DELAY = new IntegerSetting(CACTUS, "delay", Settings.Common.DESC_DELAY_BREAKING, 0, Settings.Common.MAX_DELAY);
+		public static final BooleanSetting NO_U = new BooleanSetting(CACTUS, "noU", "When blocks try to break the cactus, it says \"no u\".");
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(CACTUS, "tickPriority", Settings.Common.DESC_TICK_PRIORITY);
 	}
 	
@@ -123,7 +130,7 @@ public class Tweaks {
 		public static final BooleanSetting ADDITION_MODE = new BooleanSetting(COMPARATOR, "additionMode", "When enabled, the comparator's subtract mode turns into \"addition mode\". The output will be the sum of the back input and the highest side input.");
 		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(COMPARATOR, "blockUpdateOrder", "The order in which the comparator updates its neighbors when its power output changes.");
 		public static final IntegerSetting DELAY = new IntegerSetting(COMPARATOR, "delay", "Delay in ticks before changing power output.", 0, Settings.Common.MAX_DELAY);
-		public static final BooleanSetting MICRO_TICK_MODE = new BooleanSetting(COMPARATOR, "microTickMode", "When enabled, comparators schedule block events instead of scheduled ticks.");
+		public static final BooleanSetting MICRO_TICK_MODE = new BooleanSetting(COMPARATOR, "microTickMode", Settings.Common.DESC_MICRO_TICK_MODE);
 		public static final BooleanSetting REDSTONE_BLOCKS_VALID_SIDE_INPUT = new BooleanSetting(COMPARATOR, "redstoneBlocksValidSideInput", "Count redstone blocks as valid side inputs.");
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(COMPARATOR, "tickPriority", Settings.Common.DESC_TICK_PRIORITY);
 		public static final TickPrioritySetting TICK_PRIORITY_FACING_DIODE = new TickPrioritySetting(COMPARATOR, "tickPriorityFacingDiode", Settings.Common.DESC_TICK_PRIORITY_FACING_DIODE);
@@ -395,6 +402,8 @@ public class Tweaks {
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting(OBSERVER, "delayRisingEdge", Settings.Common.DESC_DELAY_RISING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(OBSERVER, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting DISABLE = new BooleanSetting(OBSERVER, "disable", "Disable observers.");
+		public static final BooleanSetting IS_SOLID = new BooleanSetting(OBSERVER, "isSolid", "When enabled, observers are solid blocks.");
+		public static final BooleanSetting MICRO_TICK_MODE = new BooleanSetting(OBSERVER, "microTickMode", Settings.Common.DESC_MICRO_TICK_MODE);
 		public static final BooleanSetting OBSERVE_BLOCK_UPDATES = new BooleanSetting(OBSERVER, "observeBlockUpdates", "When enabled, observers react to block updates instead of shape updates.");
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting(OBSERVER, "weakPower", Settings.Common.DESC_POWER_WEAK, 0, Settings.Common.MAX_POWER);
 		public static final IntegerSetting POWER_STRONG = new IntegerSetting(OBSERVER, "strongPower", Settings.Common.DESC_POWER_STRONG, 0, Settings.Common.MAX_POWER);
@@ -485,6 +494,7 @@ public class Tweaks {
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(REDSTONE_TORCH, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting LAZY_RISING_EDGE = new BooleanSetting(REDSTONE_TORCH, "lazyRisingEdge", Settings.Common.DESC_LAZY_RISING_EDGE);
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(REDSTONE_TORCH, "lazyFallingEdge", Settings.Common.DESC_LAZY_FALLING_EDGE);
+		public static final BooleanSetting MICRO_TICK_MODE = new BooleanSetting(REDSTONE_TORCH, "microTickMode", Settings.Common.DESC_MICRO_TICK_MODE);
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting(REDSTONE_TORCH, "weakPower", Settings.Common.DESC_POWER_WEAK, 0, Settings.Common.MAX_POWER);
 		public static final IntegerSetting POWER_STRONG = new IntegerSetting(REDSTONE_TORCH, "strongPower", Settings.Common.DESC_POWER_STRONG, 0, Settings.Common.MAX_POWER);
 		public static final BooleanSetting SOFT_INVERSION = new BooleanSetting(REDSTONE_TORCH, "softInversion", "An implementation of behavior present in Bedrock Edition known as \"soft inversion\". It causes any redstone torch attached to a piston to depower when that piston is powered.");
@@ -513,7 +523,7 @@ public class Tweaks {
 		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(REPEATER, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting LAZY_RISING_EDGE = new BooleanSetting(REPEATER, "lazyRisingEdge", Settings.Common.DESC_LAZY_RISING_EDGE);
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(REPEATER, "lazyFallingEdge", Settings.Common.DESC_LAZY_FALLING_EDGE);
-		public static final BooleanSetting MICRO_TICK_MODE = new BooleanSetting(REPEATER, "microTickMode", "When enabled, repeaters schedule block events instead of scheduled ticks.");
+		public static final BooleanSetting MICRO_TICK_MODE = new BooleanSetting(REPEATER, "microTickMode", Settings.Common.DESC_MICRO_TICK_MODE);
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting(REPEATER, "weakPower", Settings.Common.DESC_POWER_WEAK, 0, Settings.Common.MAX_POWER);
 		public static final IntegerSetting POWER_STRONG = new IntegerSetting(REPEATER, "strongPower", Settings.Common.DESC_POWER_STRONG, 0, Settings.Common.MAX_POWER);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(REPEATER, "tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE);
@@ -527,6 +537,21 @@ public class Tweaks {
 		
 		public static final IntegerSetting DELAY = new IntegerSetting(SCAFFOLDING, "delay", "Delay in ticks before a scaffolding block updates its distance to the nearest supported scaffolding block.", 0, Settings.Common.MAX_DELAY);
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(SCAFFOLDING, "tickPriority", Settings.Common.DESC_TICK_PRIORITY);
+	}
+	
+	public static class Shulker {
+		
+		private static final SettingsPack SHULKER = new SettingsPack(TWEAKS, "Shulker");
+		
+		public static final BooleanSetting IS_SOLID = new BooleanSetting(SHULKER, "isSolid ", "When enabled, shulkers act like solid blocks.");
+		public static final BooleanSetting UPDATE_NEIGHBORS_WHEN_PEEKING = new BooleanSetting(SHULKER, "updateNeighborsWhenPeeking", "If isSolid is enabled, update neighboring blocks when opening or closing.");
+	}
+	
+	public static class ShulkerBox {
+		
+		private static final SettingsPack SHULKER_BOX = new SettingsPack(TWEAKS, "Shulker Box");
+		
+		public static final BooleanSetting UPDATE_NEIGHBORS_WHEN_PEEKING = new BooleanSetting(SHULKER_BOX, "updateNeighborsWhenPeeking", "Update neighboring blocks when opening or closing.");
 	}
 	
 	public static class SoulSand {
@@ -705,6 +730,7 @@ public class Tweaks {
 		Settings.register(TWEAKS);
 		
 		Settings.register(Global.GLOBAL);
+		Settings.register(Global.BLOCK_EVENT_LIMIT);
 		Settings.register(Global.BLOCK_UPDATE_ORDER);
 		Settings.register(Global.COMPARATOR_UPDATE_ORDER);
 		Settings.register(Global.SHAPE_UPDATE_ORDER);
@@ -717,13 +743,18 @@ public class Tweaks {
 		Settings.register(Global.INSTANT_BLOCK_EVENTS);
 		Settings.register(Global.MERGE_SLABS);
 		Settings.register(Global.MOVABLE_BLOCK_ENTITIES);
+		Settings.register(Global.MOVABLE_BRITTLE_BLOCKS);
 		Settings.register(Global.MOVABLE_MOVING_BLOCKS);
 		Settings.register(Global.POWER_MAX);
 		Settings.register(Global.RANDOMIZE_BLOCK_EVENTS);
 		Settings.register(Global.RANDOMIZE_DELAYS);
 		Settings.register(Global.RANDOMIZE_TICK_PRIORITIES);
+		Settings.register(Global.SCHEDULED_TICK_LIMIT);
 		Settings.register(Global.SHOW_NEIGHBOR_UPDATES);
 		Settings.register(Global.SPONTANEOUS_EXPLOSIONS);
+		Settings.register(Global.STICKY_CONNECTIONS);
+		Settings.register(Global.TERRACOTTA_FORCES_MICRO_TICK_MODE);
+		Settings.register(Global.TERRACOTTA_OVERRIDES_DELAY);
 		Settings.register(Global.WORLD_TICK_OPTIONS);
 		
 		Settings.register(BugFixes.BUG_FIXES);
@@ -757,6 +788,7 @@ public class Tweaks {
 		
 		Settings.register(Cactus.CACTUS);
 		Settings.register(Cactus.DELAY);
+		Settings.register(Cactus.NO_U);
 		Settings.register(Cactus.TICK_PRIORITY);
 		
 		Settings.register(ChorusPlant.CHORUS_PLANT);
@@ -941,6 +973,8 @@ public class Tweaks {
 		Settings.register(Observer.DELAY_RISING_EDGE);
 		Settings.register(Observer.DELAY_FALLING_EDGE);
 		Settings.register(Observer.DISABLE);
+		Settings.register(Observer.IS_SOLID);
+		Settings.register(Observer.MICRO_TICK_MODE);
 		Settings.register(Observer.OBSERVE_BLOCK_UPDATES);
 		Settings.register(Observer.POWER_WEAK);
 		Settings.register(Observer.POWER_STRONG);
@@ -1003,6 +1037,7 @@ public class Tweaks {
 		Settings.register(RedstoneTorch.DELAY_FALLING_EDGE);
 		Settings.register(RedstoneTorch.LAZY_RISING_EDGE);
 		Settings.register(RedstoneTorch.LAZY_FALLING_EDGE);
+		Settings.register(RedstoneTorch.MICRO_TICK_MODE);
 		Settings.register(RedstoneTorch.POWER_WEAK);
 		Settings.register(RedstoneTorch.POWER_STRONG);
 		Settings.register(RedstoneTorch.SOFT_INVERSION);
@@ -1033,6 +1068,13 @@ public class Tweaks {
 		Settings.register(Scaffolding.SCAFFOLDING);
 		Settings.register(Scaffolding.DELAY);
 		Settings.register(Scaffolding.TICK_PRIORITY);
+		
+		Settings.register(Shulker.SHULKER);
+		Settings.register(Shulker.IS_SOLID);
+		Settings.register(Shulker.UPDATE_NEIGHBORS_WHEN_PEEKING);
+		
+		Settings.register(ShulkerBox.SHULKER_BOX);
+		Settings.register(ShulkerBox.UPDATE_NEIGHBORS_WHEN_PEEKING);
 		
 		Settings.register(SoulSand.SOUL_SAND);
 		Settings.register(SoulSand.DELAY);

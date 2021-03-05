@@ -47,6 +47,7 @@ import redstonetweaks.block.piston.BlockEventHandler;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.StairsHelper;
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
+import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.packet.types.TickBlockEntityPacket;
@@ -169,9 +170,6 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 		}
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get() && StairsHelper.isStairs(state)) {
 			return state.isSideSolidFullSquare(world, pos, direction.getOpposite());
-		}
-		if (Tweaks.RedstoneOre.CAPACITOR_BEHAVIOR.get().isEnabled() && state.isOf(Blocks.REDSTONE_ORE)) {
-			return false;
 		}
 		
 		return state.isSolidBlock(world, pos);
@@ -440,6 +438,14 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 				int flags  = shapeUpdate.getFlags();
 				int depth = shapeUpdate.getDepth();
 				
+				if (notifierState.isOf(Blocks.MOVING_PISTON)) {
+					BlockEntity blockEntity = getBlockEntity(notifierPos);
+					
+					if (blockEntity != null && blockEntity instanceof PistonBlockEntity) {
+						notifierState = ((RTIPistonBlockEntity)blockEntity).getMovedMovingState();
+					}
+				}
+				
 				BlockState state = getBlockState(pos);
 				
 				try {
@@ -465,7 +471,6 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 				scheduleNeighborUpdate(shapeUpdate);
 			}
 		}
-		
 	}
 	
 	private void scheduleNeighborUpdate(NeighborUpdate neighborUpdate) {

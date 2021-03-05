@@ -150,6 +150,7 @@ public class Settings {
 		public static final String DESC_LAZY = "When enabled, the block is \"lazy\". Whenever it is ticked it will activate without checking for received power.";
 		public static final String DESC_LAZY_RISING_EDGE = "When enabled, the block is \"lazy\" on the rising edge. Whenever it is ticked, if it is unpowered, it will power on without checking for received power.";
 		public static final String DESC_LAZY_FALLING_EDGE = "When enabled, the block is \"lazy\" on the falling edge. Whenever it is ticked, if it is powered, it will power off without checking for received power.";
+		public static final String DESC_MICRO_TICK_MODE = "When enabled, this block updates using block events instead of scheduled ticks.";
 		public static final String DESC_POWER_WEAK = "Weak power output.";
 		public static final String DESC_POWER_STRONG = "Strong power output.";
 		public static final String DESC_QC = "A list of all directions in which quasi connectivity for this block is enabled. If quasi connectivity is enabled in a direction then the block checks for power to its neighbor in that direction.";

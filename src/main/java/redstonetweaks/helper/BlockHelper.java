@@ -5,9 +5,11 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.SideShapeType;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 
 import redstonetweaks.block.piston.PistonSettings;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
@@ -50,6 +52,18 @@ public class BlockHelper {
 			
 			if (blockEntity instanceof PistonBlockEntity) {
 				return ((RTIPistonBlockEntity)blockEntity).isSideSolid(world, pos, face, shapeType);
+			}
+		}
+		
+		return false;
+	}
+	
+	public static boolean microTickModeBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
+		if (!world.isClient()) {
+			if (type <= 1) {
+				state.scheduledTick((ServerWorld)world, pos, world.getRandom());
+			} else {
+				world.addSyncedBlockEvent(pos, state.getBlock(), type - 1, data);
 			}
 		}
 		

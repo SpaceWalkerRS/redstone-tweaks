@@ -27,8 +27,10 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
+
 import redstonetweaks.helper.TickSchedulerHelper;
 import redstonetweaks.helper.WorldHelper;
+import redstonetweaks.interfaces.mixin.RTIAbstractBlockState;
 import redstonetweaks.interfaces.mixin.RTIRedstoneDiode;
 import redstonetweaks.interfaces.mixin.RTIServerTickScheduler;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
@@ -80,11 +82,16 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	
 	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;isTicking(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;)Z"))
 	private <T> boolean onUpdatePoweredRedirectIsTicking(TickScheduler<T> scheduler, BlockPos pos, T block, World world, BlockPos blockPos, BlockState state) {
-		if (Tweaks.Comparator.MICRO_TICK_MODE.get()) {
-			return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(pos, (Block)block);
+		if (!Tweaks.Comparator.MICRO_TICK_MODE.get()) {
+			BlockPos belowPos = pos.down();
+			RTIAbstractBlockState belowState = (RTIAbstractBlockState)world.getBlockState(belowPos);
+			
+			if (!belowState.forceMicroTickMode()) {
+				return scheduler.isTicking(pos, block);
+			}
 		}
 		
-		return scheduler.isTicking(pos, block);
+		return world.isClient() || ((RTIServerWorld)world).hasBlockEvent(pos, (Block)block);
 	}
 	
 	@Redirect(method = "updatePowered", at = @At(value = "FIELD", target = "Lnet/minecraft/world/TickPriority;HIGH:Lnet/minecraft/world/TickPriority;"))
@@ -102,13 +109,18 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	}
 	
 	@Redirect(method = "updatePowered", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;ILnet/minecraft/world/TickPriority;)V"))
-	private <T> void onUpdatePoweredRedirectSchedule(TickScheduler<T> scheduler, BlockPos pos, T block, int delay, TickPriority priority, World world, BlockPos blockPos, BlockState state) {
-		if (Tweaks.Comparator.MICRO_TICK_MODE.get()) {
+	private <T> void onUpdatePoweredRedirectSchedule(TickScheduler<T> scheduler, BlockPos pos, T block, int delay, TickPriority tickPriority, World world, BlockPos blockPos, BlockState state) {
+		BlockPos belowPos = pos.down();
+		RTIAbstractBlockState belowState = (RTIAbstractBlockState)world.getBlockState(belowPos);
+		
+		delay = belowState.delayOverride(Tweaks.Comparator.DELAY.get());
+		
+		if (Tweaks.Comparator.MICRO_TICK_MODE.get() || belowState.forceMicroTickMode()) {
 			if (!world.isClient()) {
 				((ServerWorld)world).addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
 			}
 		} else {
-			TickSchedulerHelper.scheduleBlockTick(world, pos, state, Tweaks.Comparator.DELAY.get(), priority);
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, belowState.tickPriorityOverride(tickPriority));
 		}
 	}
 	
