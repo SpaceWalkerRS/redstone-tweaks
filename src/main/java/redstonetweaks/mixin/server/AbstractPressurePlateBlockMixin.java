@@ -26,6 +26,7 @@ import net.minecraft.world.World;
 
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.interfaces.mixin.RTIAbstractBlockState;
 import redstonetweaks.interfaces.mixin.RTIBlock;
 import redstonetweaks.interfaces.mixin.RTIPressurePlate;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
@@ -43,21 +44,40 @@ public abstract class AbstractPressurePlateBlockMixin extends Block implements R
 	
 	// When the pressure plate is ticked, it should call updatePlateState
 	// regardless of its current redstone output, in case the plate
-	// has activation delay and the plate is ticked to power on.
-	@ModifyConstant(method = "scheduledTick", constant = @Constant(expandZeroConditions = Constant.Condition.GREATER_THAN_ZERO))
+	// has rising edge delay and the plate is ticked to power on.
+	@ModifyConstant(
+			method = "scheduledTick",
+			constant = @Constant(
+					expandZeroConditions = Constant.Condition.GREATER_THAN_ZERO
+			)
+	)
 	private int onScheduledTickModifyCompareValue(int oldValue) {
 		return -1;
 	}
 	
-	@Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractPressurePlateBlock;updatePlateState(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)V"))
+	@Redirect(
+			method = "onEntityCollision",
+			at = @At(
+					value = "INVOKE", 
+					target = "Lnet/minecraft/block/AbstractPressurePlateBlock;updatePlateState(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)V"
+			)
+	)
 	public void onEntityCollisionRedirectUpdatePlateState(AbstractPressurePlateBlock pressurePlate, World world, BlockPos pos, BlockState state, int i) {
 		int delay = ((RTIPressurePlate)this).delayRisingEdge(state);
-		TickPriority priority = ((RTIPressurePlate)this).tickPriorityRisingEdge(state);
+		TickPriority tickPriority = ((RTIPressurePlate)this).tickPriorityRisingEdge(state);
 		
-		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+		TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, tickPriority);
 	}
 	
-	@Inject(method = "updatePlateState", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@Inject(
+			method = "updatePlateState", 
+			locals = LocalCapture.CAPTURE_FAILHARD, 
+			at = @At(
+					value = "INVOKE", 
+					shift = Shift.BEFORE, 
+					target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"
+			)
+	)
 	private void onUpdatePlateStateInjectBeforeSetBlockState(World world, BlockPos pos, BlockState state, int rsOut, CallbackInfo ci, int newPower) {
 		if (hasBlockEntity()) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
@@ -68,29 +88,59 @@ public abstract class AbstractPressurePlateBlockMixin extends Block implements R
 		}
 	}
 	
-	@ModifyArg(method = "updatePlateState", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@ModifyArg(
+			method = "updatePlateState", 
+			index = 2, 
+			at = @At(
+					value = "INVOKE", 
+					target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"
+			)
+	)
 	private int onUpdatePlateStateModifySetBlockStateFlags(int oldFlags) {
-		return oldFlags & 16;
+		return oldFlags | 16;
 	}
 	
-	@Inject(method = "updatePlateState", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@Inject(
+			method = "updatePlateState", 
+			locals = LocalCapture.CAPTURE_FAILHARD, 
+			at = @At(
+					value = "INVOKE", 
+					shift = Shift.AFTER, 
+					target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"
+			)
+	)
 	private void onUpdatePlateStateInjectAfterSetBlockState(World world, BlockPos pos, BlockState state, int rsOut, CallbackInfo ci, int newPower, boolean bl, boolean bl2, BlockState newState) {
 		newState.updateNeighbors(world, pos, 2);
 	}
 	
-	@Redirect(method = "updatePlateState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	@Redirect(
+			method = "updatePlateState", 
+			at = @At(
+					value = "INVOKE", 
+					target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"
+			)
+	)
 	private <T> void updatePlateStateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos, T block, int oldDelay, World world, BlockPos blockPos, BlockState state) {
 		if (((RTIWorld)world).immediateNeighborUpdates()) {
 			int delay = ((RTIPressurePlate)this).delayFallingEdge(state);
-			TickPriority priority = ((RTIPressurePlate)this).tickPriorityFallingEdge(state);
+			TickPriority tickPriority = ((RTIPressurePlate)this).tickPriorityFallingEdge(state);
 			
-			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, priority);
+			BlockPos belowPos = pos.down();
+			RTIAbstractBlockState belowState = (RTIAbstractBlockState)world.getBlockState(belowPos);
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, Math.max(1, belowState.delayOverride(delay)), belowState.tickPriorityOverride(tickPriority));
 		} else if (!world.isClient()) {
 			((RTIServerWorld)world).getIncompleteActionScheduler().scheduleBlockAction(pos, 0, state.getBlock());
 		}
 	}
 	
-	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
+	@Inject(
+			method = "updateNeighbors", 
+			cancellable = true, 
+			at = @At(
+					value = "HEAD"
+			)
+	)
 	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, CallbackInfo ci) {
 		BlockState state = world.getBlockState(pos);
 		((RTIWorld)world).dispatchBlockUpdates(pos, null, state.getBlock(), ((RTIPressurePlate)this).updateOrder(state));
@@ -98,17 +148,27 @@ public abstract class AbstractPressurePlateBlockMixin extends Block implements R
 		ci.cancel();
 	}
 	
-	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "HEAD"))
-	private void onGetWeakRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
-		cir.setReturnValue(((RTIPressurePlate)this).powerWeak(world, pos, state));
+	@Inject(
+			method = "getWeakRedstonePower", 
+			cancellable = true, 
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private void onGetWeakRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(getPowerOutput(world, pos, state, dir, false));
 		cir.cancel();
 	}
 	
-	@Inject(method = "getStrongRedstonePower", cancellable = true, at = @At(value = "HEAD"))
-	private void onGetStrongRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
-		int power = direction == Direction.UP ? ((RTIPressurePlate)this).powerStrong(world, pos, state) : 0;
-		
-		cir.setReturnValue(power);
+	@Inject(
+			method = "getStrongRedstonePower", 
+			cancellable = true, 
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private void onGetStrongRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(getPowerOutput(world, pos, state, dir, true));
 		cir.cancel();
 	}
 	
@@ -124,5 +184,18 @@ public abstract class AbstractPressurePlateBlockMixin extends Block implements R
 		}
 		
 		return false;
+	}
+	
+	private int getPowerOutput(BlockView world, BlockPos pos, BlockState state, Direction dir, boolean strong) {
+		if (!((RTIPressurePlate)this).isPressed(state) || (strong && dir != Direction.UP)) {
+			return 0;
+		}
+		
+		int power = strong ? ((RTIPressurePlate)this).powerStrong(world, pos, state) : ((RTIPressurePlate)this).powerWeak(world, pos, state);
+		
+		BlockPos belowPos = pos.down();
+		RTIAbstractBlockState belowState = (RTIAbstractBlockState)world.getBlockState(belowPos);
+		
+		return strong ? belowState.strongPowerOverride(power) : belowState.weakPowerOverride(power);
 	}
 }

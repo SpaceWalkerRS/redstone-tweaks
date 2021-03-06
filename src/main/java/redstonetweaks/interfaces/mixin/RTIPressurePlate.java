@@ -9,6 +9,8 @@ import redstonetweaks.world.common.UpdateOrder;
 
 public interface RTIPressurePlate {
 	
+	public boolean isPressed(BlockState state);
+	
 	public UpdateOrder updateOrder(BlockState state);
 	
 	public int delayRisingEdge(BlockState state);

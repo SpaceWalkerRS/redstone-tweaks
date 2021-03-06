@@ -264,8 +264,6 @@ public class Presets {
 			Tweaks.Global.SHOW_NEIGHBOR_UPDATES.setPresetValue(DEFAULT, false);
 			Tweaks.Global.SPONTANEOUS_EXPLOSIONS.setPresetValue(DEFAULT, false);
 			Tweaks.Global.STICKY_CONNECTIONS.setPresetValue(DEFAULT, false);
-			Tweaks.Global.TERRACOTTA_FORCES_MICRO_TICK_MODE.setPresetValue(DEFAULT, false);
-			Tweaks.Global.TERRACOTTA_OVERRIDES_DELAY.setPresetValue(DEFAULT, false);
 			Tweaks.Global.WORLD_TICK_OPTIONS.setPresetValue(DEFAULT, new WorldTickOptions());
 			
 			Tweaks.BugFixes.MC54711.setPresetValue(DEFAULT, false);
@@ -273,6 +271,12 @@ public class Presets {
 			Tweaks.BugFixes.MC136566.setPresetValue(DEFAULT, false);
 			Tweaks.BugFixes.MC137127.setPresetValue(DEFAULT, false);
 			Tweaks.BugFixes.MC172213.setPresetValue(DEFAULT, false);
+			
+			Tweaks.PropertyOverrides.CONCRETE_STRONG_POWER.setPresetValue(DEFAULT, false);
+			Tweaks.PropertyOverrides.WOOL_WEAK_POWER.setPresetValue(DEFAULT, false);
+			Tweaks.PropertyOverrides.TERRACOTTA_DELAY.setPresetValue(DEFAULT, false);
+			Tweaks.PropertyOverrides.TERRACOTTA_MICRO_TICK_MODE.setPresetValue(DEFAULT, false);
+			Tweaks.PropertyOverrides.WOOD_TICK_PRIORITY.setPresetValue(DEFAULT, false);
 			
 			Tweaks.Anvil.CRUSH_CONCRETE.setPresetValue(DEFAULT, false);
 			Tweaks.Anvil.CRUSH_WOOL.setPresetValue(DEFAULT, false);
@@ -563,6 +567,7 @@ public class Presets {
 					add(AbstractNeighborUpdate.Mode.NEIGHBORS, RelativePos.EAST, RelativePos.WEST));
 			Tweaks.RedstoneWire.DELAY.setPresetValue(DEFAULT, 0);
 			Tweaks.RedstoneWire.INVERT_FLOW_ON_GLASS.setPresetValue(DEFAULT, false);
+			Tweaks.RedstoneWire.MICRO_TICK_MODE.setPresetValue(DEFAULT, false);
 			Tweaks.RedstoneWire.SLABS_ALLOW_UP_CONNECTION.setPresetValue(DEFAULT, true);
 			Tweaks.RedstoneWire.TICK_PRIORITY.setPresetValue(DEFAULT, TickPriority.NORMAL);
 			
@@ -610,6 +615,7 @@ public class Presets {
 			Tweaks.StickyPiston.LOOSE_HEAD.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.PUSH_LIMIT.setPresetValue(DEFAULT, 12);
+			Tweaks.StickyPiston.PULL_LIMIT.setPresetValue(DEFAULT, 12);
 			Tweaks.StickyPiston.QC.setPresetValue(DEFAULT, new Boolean[] {false, true, false, false, false, false});
 			Tweaks.StickyPiston.RANDOMIZE_QC.setPresetValue(DEFAULT, false);
 			Tweaks.StickyPiston.SPEED_RISING_EDGE.setPresetValue(DEFAULT, 2);
@@ -865,6 +871,7 @@ public class Presets {
 			Tweaks.Stairs.FULL_FACES_ARE_SOLID.setPresetValue(HEAVEN, true);
 			
 			Tweaks.StickyPiston.PUSH_LIMIT.setPresetValue(HEAVEN, 69);
+			Tweaks.StickyPiston.PULL_LIMIT.setPresetValue(HEAVEN, 69);
 			Tweaks.StickyPiston.SUPPORTS_BRITTLE_BLOCKS.setPresetValue(HEAVEN, true);
 			
 			Tweaks.WhiteConcretePowder.IS_SOLID.setPresetValue(HEAVEN, false);

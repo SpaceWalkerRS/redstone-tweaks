@@ -21,6 +21,8 @@ public class SettingsMixin implements RTISettings {
 	
 	private Function<Integer, Integer> delayOverride;
 	private Function<TickPriority, TickPriority> tickPriorityOverride;
+	private Function<Integer, Integer> weakPowerOverride;
+	private Function<Integer, Integer> strongPowerOverride;
 	private Supplier<Boolean> forceMicroTickMode;
 	
 	@Inject(
@@ -32,6 +34,8 @@ public class SettingsMixin implements RTISettings {
 	private void onInitInjectAtReturn(Material material, Function<BlockState, MaterialColor> materialColorFactory, CallbackInfo ci) {
 		delayOverride = delay -> delay;
 		tickPriorityOverride = tickPriority -> tickPriority;
+		weakPowerOverride = power -> power;
+		strongPowerOverride = power -> power;
 		forceMicroTickMode = () -> false;
 	}
 	
@@ -55,6 +59,28 @@ public class SettingsMixin implements RTISettings {
 	@Override
 	public Function<TickPriority, TickPriority> getTickPriorityOverride() {
 		return tickPriorityOverride;
+	}
+	
+	@Override
+	public Settings weakPowerOverride(Function<Integer, Integer> weakPowerOverride) {
+		this.weakPowerOverride = weakPowerOverride;
+		return (Settings)(Object)this;
+	}
+	
+	@Override
+	public Function<Integer, Integer> getWeakPowerOverride() {
+		return weakPowerOverride;
+	}
+	
+	@Override
+	public Settings hardStrongOverride(Function<Integer, Integer> strongPowerOverride) {
+		this.strongPowerOverride = strongPowerOverride;
+		return (Settings)(Object)this;
+	}
+	
+	@Override
+	public Function<Integer, Integer> getStrongPowerOverride() {
+		return strongPowerOverride;
 	}
 	
 	@Override

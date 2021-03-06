@@ -36,6 +36,8 @@ public abstract class AbstractBlockStateMixin implements RTIAbstractBlockState {
 	
 	private Function<Integer, Integer> delayOverride;
 	private Function<TickPriority, TickPriority> tickPriorityOverride;
+	private Function<Integer, Integer> weakPowerOverride;
+	private Function<Integer, Integer> strongPowerOverride;
 	private Supplier<Boolean> forceMicroTickMode;
 	
 	@Shadow protected abstract BlockState asBlockState();
@@ -50,6 +52,8 @@ public abstract class AbstractBlockStateMixin implements RTIAbstractBlockState {
 	private void onInitInjectAtReturn(Block block, ImmutableMap<Property<?>, Comparable<?>> propertyMap, MapCodec<BlockState> mapCodec, CallbackInfo ci, AbstractBlock.Settings settings) {
 		delayOverride = ((RTISettings)settings).getDelayOverride();
 		tickPriorityOverride = ((RTISettings)settings).getTickPriorityOverride();
+		weakPowerOverride = ((RTISettings)settings).getWeakPowerOverride();
+		strongPowerOverride = ((RTISettings)settings).getStrongPowerOverride();
 		forceMicroTickMode = ((RTISettings)settings).getForceMicroTickMode();
 	}
 	
@@ -76,6 +80,16 @@ public abstract class AbstractBlockStateMixin implements RTIAbstractBlockState {
 	@Override
 	public TickPriority tickPriorityOverride(TickPriority tickPriority) {
 		return tickPriorityOverride.apply(tickPriority);
+	}
+	
+	@Override
+	public int weakPowerOverride(int power) {
+		return weakPowerOverride.apply(power);
+	}
+	
+	@Override
+	public int strongPowerOverride(int power) {
+		return strongPowerOverride.apply(power);
 	}
 	
 	@Override

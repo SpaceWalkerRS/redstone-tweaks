@@ -24,10 +24,13 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+
 import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.interfaces.mixin.RTIAbstractBlockState;
 import redstonetweaks.interfaces.mixin.RTIBlock;
 import redstonetweaks.interfaces.mixin.RTIServerWorld;
 import redstonetweaks.interfaces.mixin.RTIWorld;
@@ -58,14 +61,32 @@ public abstract class ObserverBlockMixin extends AbstractBlock implements RTIBlo
 		return settings.solidBlock(solidPredicate);
 	}
 	
-	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", ordinal = 1, shift = Shift.BEFORE, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@Inject(
+			method = "scheduledTick", 
+			cancellable = true, 
+			at = @At(
+					value = "INVOKE", 
+					ordinal = 1, 
+					shift = Shift.BEFORE, 
+					target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"
+			)
+	)
 	private void onScheduledTickInjectBeforeSetBlockState1(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		if (Tweaks.Observer.OBSERVE_BLOCK_UPDATES.get()) {
 			tryPowerOff(world, pos, state);
 		}
 	}
 	
-	@Inject(method = "scheduledTick", cancellable = true, at = @At(value = "INVOKE", ordinal = 1, shift = Shift.AFTER, target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+	@Inject(
+			method = "scheduledTick", 
+			cancellable = true, 
+			at = @At(
+					value = "INVOKE", 
+					ordinal = 1, 
+					shift = Shift.AFTER, 
+					target = "Lnet/minecraft/server/world/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"
+			)
+	)
 	private void onScheduledTickInjectAfterSetBlockState1(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
 		if (!((RTIWorld)world).immediateNeighborUpdates() && !Tweaks.Observer.OBSERVE_BLOCK_UPDATES.get()) {
 			((RTIServerWorld)world).getIncompleteActionScheduler().scheduleBlockAction(pos, 1, (ObserverBlock)(Object)this);
@@ -74,14 +95,26 @@ public abstract class ObserverBlockMixin extends AbstractBlock implements RTIBlo
 		}
 	}
 	
-	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	@Redirect(
+			method = "scheduledTick", 
+			at = @At(
+					value = "INVOKE", 
+					target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"
+			)
+	)
 	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos blockPos, T block, int delay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		if (!Tweaks.Observer.OBSERVE_BLOCK_UPDATES.get()) {
 			tryPowerOff(world, pos, world.getBlockState(pos));
 		}
 	}
 	
-	@Inject(method = "getStateForNeighborUpdate", cancellable = true , at = @At(value = "HEAD"))
+	@Inject(
+			method = "getStateForNeighborUpdate",
+			cancellable = true , 
+			at = @At(
+					value = "HEAD"
+			)
+	)
 	private void onGetStateForNeighborUpdateInjectAtHead(BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom, CallbackInfoReturnable<BlockState> cir) {
 		if (Tweaks.Observer.OBSERVE_BLOCK_UPDATES.get()) {
 			cir.setReturnValue(state);
@@ -89,35 +122,66 @@ public abstract class ObserverBlockMixin extends AbstractBlock implements RTIBlo
 		}
 	}
 	
-	@Inject(method = "getStateForNeighborUpdate", cancellable = true, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/ObserverBlock;scheduleTick(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)V"))
+	@Inject(
+			method = "getStateForNeighborUpdate", 
+			cancellable = true, 
+			at = @At(
+					value = "INVOKE", 
+					shift = Shift.BEFORE, 
+					target = "Lnet/minecraft/block/ObserverBlock;scheduleTick(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)V"
+			)
+	)
 	private void onGetStateForNeighborUpdateInjectBeforeScheduleTick(BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos notifierPos, CallbackInfoReturnable<BlockState> cir) {
 		cir.setReturnValue(tryPowerOn(world, pos, state));
 		cir.cancel();
 	}
 	
-	@Inject(method = "updateNeighbors", cancellable = true, at = @At(value = "HEAD"))
+	@Inject(
+			method = "updateNeighbors", 
+			cancellable = true, 
+			at = @At(
+					value = "HEAD"
+			)
+	)
 	private void onUpdateNeighborsInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
 		((RTIWorld)world).dispatchBlockUpdates(pos, state.get(Properties.FACING).getOpposite(), state.getBlock(), Tweaks.Observer.BLOCK_UPDATE_ORDER.get());
 		
 		ci.cancel();
 	}
 	
-	@Inject(method = "getStrongRedstonePower", cancellable = true, at = @At(value = "HEAD"))
-	private void onGetStrongRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
-		cir.setReturnValue(state.get(Properties.POWERED) && state.get(Properties.FACING) == direction ? Tweaks.Observer.POWER_STRONG.get() : 0);
+	@Inject(
+			method = "getStrongRedstonePower", 
+			cancellable = true, 
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private void onGetStrongRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(getPowerOutput(world, pos, state, dir, true));
 		cir.cancel();
 	}
 	
-	@Inject(method = "getWeakRedstonePower", cancellable = true, at = @At(value = "HEAD"))
-	private void onGetWeakRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
-		cir.setReturnValue(state.get(Properties.POWERED) && state.get(Properties.FACING) == direction ? Tweaks.Observer.POWER_WEAK.get() : 0);
+	@Inject(
+			method = "getWeakRedstonePower", 
+			cancellable = true, 
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private void onGetWeakRedstonePowerInjectAtHead(BlockState state, BlockView world, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(getPowerOutput(world, pos, state, dir, false));
 		cir.cancel();
 	}
 	
 	// To fix MC-136566 (https://bugs.mojang.com/browse/MC-136566) and MC-137127 (https://bugs.mojang.com/browse/MC-137127)
 	// we change the flags argument given to the setBlockState call. Enabling the 1 flag makes sure neighboring blocks are
 	// updated, fixing MC-136566. Disabling the 16 flag makes sure neighboring observers are updated, fixing MC-137127.
-	@ModifyConstant(method = "onBlockAdded", constant = @Constant(intValue = 18))
+	@ModifyConstant(
+			method = "onBlockAdded", 
+			constant = @Constant(
+					intValue = 18
+			)
+	)
 	private int onBlockAddedModifySetBlockStateFlags(int flags) {
 		if (Tweaks.BugFixes.MC136566.get()) {
 			flags |= 1;
@@ -158,15 +222,21 @@ public abstract class ObserverBlockMixin extends AbstractBlock implements RTIBlo
 	private BlockState tryPowerOn(WorldAccess world, BlockPos pos, BlockState state) {
 		if (!Tweaks.Observer.DISABLE.get() && !world.isClient()) {
 			int delay = Tweaks.Observer.DELAY_RISING_EDGE.get();
-			boolean microTickMode = Tweaks.Observer.MICRO_TICK_MODE.get();
 			
-			if (microTickMode) {
+			BlockPos frontPos = pos.offset(state.get(Properties.FACING).getOpposite());
+			RTIAbstractBlockState frontState = (RTIAbstractBlockState)world.getBlockState(frontPos);
+			
+			delay = frontState.delayOverride(delay);
+			
+			if (Tweaks.Observer.MICRO_TICK_MODE.get() || frontState.forceMicroTickMode()) {
 				if (world instanceof World && !((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
 					((ServerWorld)world).addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
 				}
 			} else {
 				if (!world.getBlockTickScheduler().isScheduled(pos, state.getBlock())) {
-					if (TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.Observer.TICK_PRIORITY_RISING_EDGE.get())) {
+					TickPriority tickPriority = Tweaks.Observer.TICK_PRIORITY_RISING_EDGE.get();
+					
+					if (TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, frontState.tickPriorityOverride(tickPriority))) {
 						return world.getBlockState(pos);
 					}
 				}
@@ -179,10 +249,36 @@ public abstract class ObserverBlockMixin extends AbstractBlock implements RTIBlo
 	private void tryPowerOff(ServerWorld world, BlockPos pos, BlockState state) {
 		int delay = Tweaks.Observer.DELAY_FALLING_EDGE.get();
 		
+		BlockPos frontPos = pos.offset(state.get(Properties.FACING).getOpposite());
+		RTIAbstractBlockState frontState = (RTIAbstractBlockState)world.getBlockState(frontPos);
+		
+		delay = frontState.delayOverride(delay);
+		
 		if (Tweaks.Observer.MICRO_TICK_MODE.get()) {
 			world.addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
 		} else {
-			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get());
+			TickPriority tickPriority = Tweaks.Observer.TICK_PRIORITY_FALLING_EDGE.get();
+			
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, frontState.tickPriorityOverride(tickPriority));
 		}
+	}
+	
+	private int getPowerOutput(BlockView world, BlockPos pos, BlockState state, Direction dir, boolean strong) {
+		if (!state.get(Properties.POWERED)) {
+			return 0;
+		}
+		
+		Direction behind = state.get(Properties.FACING);
+		
+		if (strong && dir != behind) {
+			return 0;
+		}
+		
+		int power = strong ? Tweaks.Observer.POWER_STRONG.get() : Tweaks.Observer.POWER_WEAK.get();
+		
+		BlockPos frontPos = pos.offset(behind.getOpposite());
+		RTIAbstractBlockState frontState = (RTIAbstractBlockState)world.getBlockState(frontPos);
+		
+		return strong ? frontState.strongPowerOverride(power) : frontState.weakPowerOverride(power);
 	}
 }

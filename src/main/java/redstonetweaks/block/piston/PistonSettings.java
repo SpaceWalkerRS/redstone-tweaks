@@ -70,8 +70,8 @@ public class PistonSettings {
 		return sticky ? Tweaks.StickyPiston.MOVABLE_WHEN_EXTENDED.get() : Tweaks.NormalPiston.MOVABLE_WHEN_EXTENDED.get();
 	}
 	
-	public static int pushLimit(boolean sticky) {
-		return sticky ? Tweaks.StickyPiston.PUSH_LIMIT.get() : Tweaks.NormalPiston.PUSH_LIMIT.get();
+	public static int moveLimit(boolean sticky, boolean push) {
+		return push ? (sticky ? Tweaks.StickyPiston.PUSH_LIMIT.get() : Tweaks.NormalPiston.PUSH_LIMIT.get()) : Tweaks.StickyPiston.PULL_LIMIT.get();
 	}
 	
 	public static DirectionToBooleanSetting getQC(boolean sticky) {

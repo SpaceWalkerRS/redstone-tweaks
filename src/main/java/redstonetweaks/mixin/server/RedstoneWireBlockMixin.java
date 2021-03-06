@@ -25,20 +25,23 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.block.enums.WireConnection;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import redstonetweaks.block.entity.PowerBlockEntity;
 import redstonetweaks.block.piston.PistonSettings;
+import redstonetweaks.helper.BlockHelper;
 import redstonetweaks.helper.PistonHelper;
 import redstonetweaks.helper.RedstoneWireHelper;
 import redstonetweaks.helper.StairsHelper;
 import redstonetweaks.helper.TickSchedulerHelper;
+import redstonetweaks.interfaces.mixin.RTIAbstractBlockState;
 import redstonetweaks.interfaces.mixin.RTIRedstoneWireBlock;
 import redstonetweaks.interfaces.mixin.RTIWorld;
 import redstonetweaks.setting.settings.Tweaks;
@@ -49,6 +52,7 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	
 	@Shadow protected boolean wiresGivePower;
 	
+	@Shadow protected abstract BlockState method_27840(BlockView world, BlockState state, BlockPos pos);
 	@Shadow protected abstract WireConnection method_27841(BlockView blockView, BlockPos blockPos, Direction direction, boolean bl);
 	@Shadow protected abstract void update(World world, BlockPos pos, BlockState state);
 	@Shadow protected abstract int getReceivedRedstonePower(World world, BlockPos blockPos);
@@ -58,7 +62,13 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		super(settings);
 	}
 	
-	@Redirect(method = "method_27843", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
+	@Redirect(
+			method = "method_27843",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"
+			)
+	)
 	private boolean onMethod_27843RedirectIsSolidBlock(BlockState aboveState, BlockView world1, BlockPos blockPos, BlockView world, BlockState state, BlockPos pos) {
 		BlockPos abovePos = pos.up();
 		
@@ -71,7 +81,13 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		return aboveState.isSolidBlock(world, abovePos);
 	}
 	
-	@Redirect(method = "method_27843", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RedstoneWireBlock;method_27841(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;Z)Lnet/minecraft/block/enums/WireConnection;"))
+	@Redirect(
+			method = "method_27843",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/block/RedstoneWireBlock;method_27841(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;Z)Lnet/minecraft/block/enums/WireConnection;"
+			)
+	)
 	private WireConnection onMethod_27843RedirectMethod_27841(RedstoneWireBlock wire, BlockView world, BlockPos pos, Direction direction, boolean canConnectUp) {
 		if (canConnectUp && Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
 			BlockPos abovePos = pos.up();
@@ -85,17 +101,37 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		return method_27841(world, pos, direction, canConnectUp);
 	}
 	
-	@Redirect(method = "prepare", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
+	@Redirect(
+			method = "prepare",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"
+			)
+	)
 	private BlockState onPrepareRedirectGetStateForNeighborUpdate(BlockState state, Direction direction, BlockState blockState, WorldAccess world, BlockPos mutable, BlockPos notifierPos) {
 		return state;
 	}
 	
-	@Redirect(method = "prepare", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RedstoneWireBlock;replace(Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;II)V"))
+	@Redirect(
+			method = "prepare",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/block/RedstoneWireBlock;replace(Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;II)V"
+			)
+	)
 	private void onPrepareRedirectReplace(BlockState oldState, BlockState newState, WorldAccess world, BlockPos pos, int flags, int depth) {
 		// replaced by the inject below
 	}
 	
-	@Inject(method = "prepare", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
+	@Inject(
+			method = "prepare",
+			locals = LocalCapture.CAPTURE_FAILHARD,
+			at = @At(
+					value = "INVOKE",
+					shift = Shift.BEFORE,
+					target = "Lnet/minecraft/block/BlockState;getStateForNeighborUpdate(Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"
+			)
+	)
 	private void onPrepareInjectAfterGetStateForNeighborUpdate(BlockState state, WorldAccess world, BlockPos sourcePos, int flags, int depth, CallbackInfo ci, BlockPos.Mutable mutable, Iterator<Direction> horizontalDirections, Direction direction) {
 		Direction dir = direction.getOpposite();
 		BlockPos pos = mutable.toImmutable();
@@ -104,7 +140,13 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		((RTIWorld)world).dispatchShapeUpdate(false, new ShapeUpdate(pos, notifierPos, sourcePos, world.getBlockState(notifierPos), dir, flags, depth));
 	}
 	
-	@Redirect(method = "getRenderConnectionType", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
+	@Redirect(
+			method = "getRenderConnectionType",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"
+			)
+	)
 	private boolean onGetRenderConnectionTypeRedirectIsSolidBlock(BlockState aboveState, BlockView world1, BlockPos blockPos, BlockView world, BlockPos pos, Direction direction) {
 		BlockPos abovePos = pos.up();
 		
@@ -117,17 +159,36 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		return aboveState.isSolidBlock(world, abovePos);
 	}
 	
-	@Redirect(method = "method_27841", at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/block/enums/WireConnection;SIDE:Lnet/minecraft/block/enums/WireConnection;"))
+	@Redirect(
+			method = "method_27841",
+			at = @At(
+					value = "FIELD",
+					ordinal = 0,
+					target = "Lnet/minecraft/block/enums/WireConnection;SIDE:Lnet/minecraft/block/enums/WireConnection;"
+			)
+	)
 	private WireConnection onMethod_27841RedirectWireConnectionSide() {
 		return Tweaks.RedstoneWire.SLABS_ALLOW_UP_CONNECTION.get() ? WireConnection.SIDE : WireConnection.NONE;
 	}
 	
-	@Redirect(method = "method_27841", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RedstoneWireBlock;connectsTo(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;)Z"))
+	@Redirect(
+			method = "method_27841",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/block/RedstoneWireBlock;connectsTo(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;)Z"
+			)
+	)
 	private boolean onMethod_27841RedirectConnectsTo(BlockState state, Direction dir, BlockView world, BlockPos pos, Direction direction, boolean bl) {
 		return connectsTo(world, pos.offset(direction), state, direction);
 	}
 	
-	@Redirect(method = "method_27841", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"))
+	@Redirect(
+			method = "method_27841",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/block/BlockState;isSolidBlock(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z"
+			)
+	)
 	private boolean onMethod_27841RedirectIsSolidBlock(BlockState state, BlockView world1, BlockPos side, BlockView world, BlockPos pos, Direction direction, boolean blockedAbove) {
 		if (Tweaks.Stairs.FULL_FACES_ARE_SOLID.get()) {
 			if (StairsHelper.isStairs(state)) {
@@ -138,22 +199,34 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		return state.isSolidBlock(world, side);
 	}
 	
-	@Inject(method = "update", cancellable = true, at = @At(value = "HEAD"))
+	@Inject(
+			method = "update",
+			cancellable = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
 	private void onUpdateInjectAtHead(World world, BlockPos pos, BlockState state, CallbackInfo ci) {
 		updatePowered(world, pos, state, false);
 		
 		ci.cancel();
 	}
 	
-	@Inject(method = "getReceivedRedstonePower", cancellable = true, at = @At(value = "HEAD"))
+	@Inject(
+			method = "getReceivedRedstonePower",
+			cancellable = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
 	private void onGetReceivedPowerInjectAtHead(World world, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
 		int maxPower = Tweaks.Global.POWER_MAX.get();
 		
-		int power = getExternalPower(world, pos);
+		int powerReceived = getExternalPower(world, pos);
 		int wirePower = 0;
 		
 		for (Direction dir : Direction.Type.HORIZONTAL) {
-			if (power >= maxPower) {
+			if (powerReceived >= maxPower) {
 				break;
 			}
 			
@@ -167,35 +240,66 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 			
 			boolean isSideSolid = isSideSolid(world, sidePos, sideState, dir.getOpposite());
 			
-			wirePower = Math.max(wirePower, getWirePower(world, sidePos, sideState, dir));
+			wirePower = Math.max(wirePower, getNeighboringWirePower(world, sidePos, sideState, dir));
 			if ((isSideSolid || isSolidGlass(sideState)) && !hasSolidBottom(world, abovePos, aboveState, dir)) {
-				wirePower = Math.max(wirePower, getWirePower(world, sidePos.up(), dir));
+				wirePower = Math.max(wirePower, getNeighboringWirePower(world, sidePos.up(), dir));
 			}
 			if (!(isSideSolid || isSolidGlass(belowState) || hasSolidBottom(world, sidePos, sideState, dir.getOpposite()))) {
-				wirePower = Math.max(wirePower, getWirePower(world, sidePos.down(), dir));
+				wirePower = Math.max(wirePower, getNeighboringWirePower(world, sidePos.down(), dir));
 			}
 			
-			power = Math.max(power, wirePower - 1);
+			powerReceived = Math.max(powerReceived, wirePower - 1);
 		}
 		
-		cir.setReturnValue(Math.min(power, maxPower));
+		cir.setReturnValue(Math.min(powerReceived, maxPower));
 		cir.cancel();
 	}
 	
-	@Inject(method = "onBlockAdded", at = @At(value = "INVOKE", shift = Shift.BEFORE, target = "Lnet/minecraft/block/RedstoneWireBlock;update(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"))
+	@Inject(
+			method = "onBlockAdded",
+			at = @At(
+					value = "INVOKE",
+					shift = Shift.BEFORE,
+					target = "Lnet/minecraft/block/RedstoneWireBlock;update(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"
+			)
+	)
 	private void onOnBlockAddedInjectBeforeUpdate(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo ci) {
 		if (world.getBlockEntity(pos) == null) {
 			world.setBlockEntity(pos, createBlockEntity(world));
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Redirect(method = "getWeakRedstonePower", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/block/BlockState;get(Lnet/minecraft/state/property/Property;)Ljava/lang/Comparable;"))
-	private <T extends Comparable<T>> T onGetWeakRedstonePowerRedirectGetProperty(BlockState blockState, Property<T> property, BlockState state, BlockView world, BlockPos pos, Direction dir) {
-		return (T)(Integer)getWirePower(world, pos, state, dir);
+	@Inject(
+			method = "getStrongRedstonePower",
+			cancellable = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private void onGetStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(getPowerOutput(world, pos, state, dir, true));
+		cir.cancel();
 	}
 	
-	@Inject(method = "connectsTo(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;)Z", cancellable = true, at = @At(value = "HEAD"))
+	@Inject(
+			method = "getWeakRedstonePower",
+			cancellable = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private void onGetWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(getPowerOutput(world, pos, state, dir, false));
+		cir.cancel();
+	}
+	
+	@Inject(
+			method = "connectsTo(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;)Z",
+			cancellable = true, 
+			at = @At(
+					value = "HEAD"
+			)
+	)
 	private static void onConnectsToInjectAtHead(BlockState state, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (state.getBlock() instanceof PistonBlock) {
 			cir.setReturnValue(PistonSettings.connectsToWire(PistonHelper.isSticky(state)) && direction != null && state.get(Properties.FACING) != direction.getOpposite());
@@ -206,6 +310,11 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	@Override
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		updatePowered(world, pos, state, true);
+	}
+	
+	@Override
+	public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
+		return BlockHelper.microTickModeBlockEvent(state, world, pos, type, data);
 	}
 	
 	@Override
@@ -227,15 +336,18 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 	}
 	
 	private void updatePowered(World world, BlockPos pos, BlockState state, boolean onScheduledTick) {
-		int power = getWirePower(world, pos, state, Direction.DOWN);
+		int power = state.get(Properties.POWER);
+		
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		
+		if (blockEntity instanceof PowerBlockEntity) {
+			power = ((PowerBlockEntity)blockEntity).getPower();
+		}
+		
 		int powerReceived = getReceivedRedstonePower(world, pos);
 		
 		if (power != powerReceived && world.getBlockState(pos) == state) {
-			int delay = Tweaks.RedstoneWire.DELAY.get();
-			
 			if (onScheduledTick) {
-				BlockEntity blockEntity = world.getBlockEntity(pos);
-				
 				if (blockEntity instanceof PowerBlockEntity) {
 					((PowerBlockEntity)blockEntity).setPower(powerReceived);
 				}
@@ -249,7 +361,20 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 				
 				updateNeighborsOnPowerChange(world, pos, newState);
 			} else {
-				TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, Tweaks.RedstoneWire.TICK_PRIORITY.get());
+				BlockPos belowPos = pos.down();
+				RTIAbstractBlockState belowState = (RTIAbstractBlockState)world.getBlockState(belowPos);
+				
+				int delay = belowState.delayOverride(Tweaks.RedstoneWire.DELAY.get());
+				
+				if (Tweaks.RedstoneWire.MICRO_TICK_MODE.get() || belowState.forceMicroTickMode()) {
+					if (!world.isClient()) {
+						world.addSyncedBlockEvent(pos, state.getBlock(), delay, 0);
+					}
+				} else {
+					TickPriority tickPriority = belowState.tickPriorityOverride(Tweaks.RedstoneWire.TICK_PRIORITY.get());
+					
+					TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, tickPriority);
+				}
 			}
 		}
 	}
@@ -258,26 +383,59 @@ public abstract class RedstoneWireBlockMixin extends AbstractBlock implements Bl
 		((RTIWorld)world).dispatchBlockUpdates(pos, null, state.getBlock(), Tweaks.RedstoneWire.BLOCK_UPDATE_ORDER.get());
 	}
 	
-	private int getWirePower(World world, BlockPos pos, Direction dir) {
-		return getWirePower(world, pos, world.getBlockState(pos), dir);
+	private int getNeighboringWirePower(World world, BlockPos pos, Direction dir) {
+		return getNeighboringWirePower(world, pos, world.getBlockState(pos), dir);
 	}
 	
-	private int getWirePower(BlockView world, BlockPos pos, BlockState state, Direction dir) {
-		if (RedstoneWireHelper.emitsPowerTo(world, pos, state, dir)) {
-			BlockEntity blockEntity = world.getBlockEntity(pos);
+	private int getNeighboringWirePower(World world, BlockPos pos, BlockState state, Direction dir) {
+		return state.isOf(Blocks.REDSTONE_WIRE) ? getWirePower(world, pos, dir, false) : 0;
+	}
+	
+	private int getWirePower(World world, BlockPos pos, Direction dir, boolean checkConnections) {
+		return getWirePower(world, pos, world.getBlockState(pos), dir, checkConnections);
+	}
+	
+	private int getWirePower(BlockView world, BlockPos pos, BlockState state, Direction dir, boolean checkConnections) {
+		if (!RedstoneWireHelper.emitsPowerTo(world, pos, dir)) {
+			return 0;
+		}
+		if (checkConnections && dir.getAxis().isHorizontal()) {
+			BlockState connectedState = method_27840(world, state, pos);
+			EnumProperty<WireConnection> connectionProperty = RedstoneWireBlock.DIRECTION_TO_WIRE_CONNECTION_PROPERTY.get(dir.getOpposite());
 			
-			if (blockEntity instanceof PowerBlockEntity) {
-				PowerBlockEntity powerBlockEntity = ((PowerBlockEntity)blockEntity);
-				
-				powerBlockEntity.ensureCorrectPower(state);
-				
-				return powerBlockEntity.getPower();
+			if (!connectedState.get(connectionProperty).isConnected()) {
+				return 0;
 			}
-			
-			return state.get(Properties.POWER);
 		}
 		
-		return 0;
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		
+		if (blockEntity instanceof PowerBlockEntity) {
+			PowerBlockEntity powerBlockEntity = ((PowerBlockEntity)blockEntity);
+			
+			powerBlockEntity.ensureCorrectPower(state);
+			
+			return powerBlockEntity.getPower();
+		}
+		
+		return state.get(Properties.POWER);
+	}
+	
+	private int getPowerOutput(BlockView world, BlockPos pos, BlockState state, Direction dir, boolean strong) {
+		if (!wiresGivePower || dir == Direction.DOWN) {
+			return 0;
+		}
+		
+		int power = getWirePower(world, pos, state, dir, true);
+		
+		if (power > 0) {
+			BlockPos belowPos = pos.down();
+			RTIAbstractBlockState belowState = (RTIAbstractBlockState)world.getBlockState(belowPos);
+			
+			return strong ? belowState.strongPowerOverride(power) : belowState.weakPowerOverride(power);
+		}
+		
+		return power;
 	}
 	
 	private boolean isSideSolid(World world, BlockPos pos, BlockState state, Direction face) {

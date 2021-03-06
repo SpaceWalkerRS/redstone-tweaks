@@ -293,7 +293,7 @@ public abstract class PistonHandlerMixin implements RTIPistonHandler {
 	
 	@ModifyConstant(method = "tryMove", constant = @Constant(intValue = 12))
 	private int pushLimit(int oldPushLimit) {
-		return PistonSettings.pushLimit(sticky);
+		return PistonSettings.moveLimit(sticky, retracted);
 	}
 	
 	@Redirect(method = "canMoveAdjacentBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))

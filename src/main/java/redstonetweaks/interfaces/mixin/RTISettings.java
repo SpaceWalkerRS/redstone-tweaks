@@ -16,6 +16,14 @@ public interface RTISettings {
 	
 	public Function<TickPriority, TickPriority> getTickPriorityOverride();
 	
+	public Settings weakPowerOverride(Function<Integer, Integer> weakPowerOverride);
+	
+	public Function<Integer, Integer> getWeakPowerOverride();
+	
+	public Settings hardStrongOverride(Function<Integer, Integer> strongPowerOverride);
+	
+	public Function<Integer, Integer> getStrongPowerOverride();
+	
 	public Settings forceMicroTickMode(Supplier<Boolean> forceMicroTickMode);
 	
 	public Supplier<Boolean> getForceMicroTickMode();

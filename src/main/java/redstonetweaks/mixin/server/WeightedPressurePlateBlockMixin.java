@@ -1,8 +1,6 @@
 package redstonetweaks.mixin.server;
 
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
@@ -31,28 +29,49 @@ import redstonetweaks.world.common.UpdateOrder;
 @Mixin(WeightedPressurePlateBlock.class)
 public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePlateBlock implements RTIPressurePlate, BlockEntityProvider {
 	
-	@Shadow @Final private int weight;
-	
 	protected WeightedPressurePlateBlockMixin(Settings settings) {
 		super(settings);
 	}
 	
-	@Redirect(method = "getRedstoneOutput(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "FIELD", target = "Lnet/minecraft/block/WeightedPressurePlateBlock;weight:I"))
+	@Redirect(
+			method = "getRedstoneOutput(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)I",
+			at = @At(
+					value = "FIELD", 
+					target = "Lnet/minecraft/block/WeightedPressurePlateBlock;weight:I"
+			)
+	)
 	private int getPlateWeight(WeightedPressurePlateBlock pressurePlate) {
 		return pressurePlate == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? Tweaks.LightWeightedPressurePlate.WEIGHT.get() : Tweaks.HeavyWeightedPressurePlate.WEIGHT.get();
 	}
 	
-	@ModifyConstant(method = "getRedstoneOutput(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)I", constant = @Constant(floatValue = 15.0F))
+	@ModifyConstant(
+			method = "getRedstoneOutput(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)I",
+			constant = @Constant(
+					floatValue = 15.0F
+			)
+	)
 	private float onGetRedstoneOutputModify15(float oldDelay) {
 		return Tweaks.Global.POWER_MAX.get();
 	}
 	
-	@ModifyConstant(method = "getTickRate", constant = @Constant(intValue = 10))
+	@ModifyConstant(
+			method = "getTickRate",
+			constant = @Constant(
+					intValue = 10
+			)
+	)
 	private int getWeightedPressurePlateDelay(int oldDelay) {
 		return (Block)(Object)this == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE ? Tweaks.LightWeightedPressurePlate.DELAY_FALLING_EDGE.get() : Tweaks.HeavyWeightedPressurePlate.DELAY_FALLING_EDGE.get();
 	}
 	
-	@ModifyVariable(method = "setRedstoneOutput", argsOnly = true, ordinal = 0, at = @At(value = "HEAD"))
+	@ModifyVariable(
+			method = "setRedstoneOutput",
+			argsOnly = true,
+			ordinal = 0,
+			at = @At(
+					value = "HEAD"
+			)
+	)
 	private int onSetRedstoneOutputModifyPower(int realPower) {
 		return Math.min(15, realPower);
 	}
@@ -70,6 +89,11 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 	}
 	
 	@Override
+	public boolean isPressed(BlockState state) {
+		return state.get(Properties.POWER) > 0;
+	}
+	
+	@Override
 	public UpdateOrder updateOrder(BlockState state) {
 		return isLight(state) ? Tweaks.LightWeightedPressurePlate.BLOCK_UPDATE_ORDER.get() : Tweaks.HeavyWeightedPressurePlate.BLOCK_UPDATE_ORDER.get();
 	}
@@ -77,10 +101,12 @@ public abstract class WeightedPressurePlateBlockMixin extends AbstractPressurePl
 	@Override
 	public int powerWeak(BlockView world, BlockPos pos, BlockState state) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
+		
 		if (blockEntity instanceof PowerBlockEntity) {
 			PowerBlockEntity powerBlockEntity = ((PowerBlockEntity)blockEntity);
 			
 			powerBlockEntity.ensureCorrectPower(state);
+			
 			return powerBlockEntity.getPower();
 		}
 		

@@ -16,8 +16,9 @@ import redstonetweaks.world.common.UpdateOrder;
 @Mixin(PressurePlateBlock.class)
 public class PressurePlateBlockMixin implements RTIPressurePlate {
 	
-	public boolean isStone(BlockState state) {
-		return state.getMaterial() == Material.STONE;
+	@Override
+	public boolean isPressed(BlockState state) {
+		return state.get(Properties.POWERED);
 	}
 	
 	@Override
@@ -37,12 +38,12 @@ public class PressurePlateBlockMixin implements RTIPressurePlate {
 	
 	@Override
 	public int powerWeak(BlockView world, BlockPos pos, BlockState state) {
-		return state.get(Properties.POWERED) ? (isStone(state) ? Tweaks.StonePressurePlate.POWER_WEAK.get() : Tweaks.WoodenPressurePlate.POWER_WEAK.get()) : 0;
+		return isStone(state) ? Tweaks.StonePressurePlate.POWER_WEAK.get() : Tweaks.WoodenPressurePlate.POWER_WEAK.get();
 	}
 	
 	@Override
 	public int powerStrong(BlockView world, BlockPos pos, BlockState state) {
-		return state.get(Properties.POWERED) ? (isStone(state) ? Tweaks.StonePressurePlate.POWER_STRONG.get() : Tweaks.WoodenPressurePlate.POWER_STRONG.get()) : 0;
+		return isStone(state) ? Tweaks.StonePressurePlate.POWER_STRONG.get() : Tweaks.WoodenPressurePlate.POWER_STRONG.get();
 	}
 	
 	@Override
@@ -53,5 +54,9 @@ public class PressurePlateBlockMixin implements RTIPressurePlate {
 	@Override
 	public TickPriority tickPriorityFallingEdge(BlockState state) {
 		return isStone(state) ? Tweaks.StonePressurePlate.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.WoodenPressurePlate.TICK_PRIORITY_FALLING_EDGE.get();
+	}
+	
+	public boolean isStone(BlockState state) {
+		return state.getMaterial() == Material.STONE;
 	}
 }

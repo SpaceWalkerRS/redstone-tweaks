@@ -45,7 +45,13 @@ public abstract class RedstoneTorchBlockMixin extends AbstractBlock implements R
 	@Shadow public abstract void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random);
 	@Shadow protected abstract boolean shouldUnpower(World world, BlockPos pos, BlockState state);
 	
-	@Inject(method = "onStateReplaced", cancellable = true, at = @At(value = "HEAD"))
+	@Inject(
+			method = "onStateReplaced",
+			cancellable = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
 	private void onOnStateReplacedInjectAtHead(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved, CallbackInfo ci) {
 		if (!moved) {
 			updateNeighbors(world, pos);
@@ -54,12 +60,25 @@ public abstract class RedstoneTorchBlockMixin extends AbstractBlock implements R
 		ci.cancel();
 	}
 	
-	@ModifyConstant(method = "getWeakRedstonePower", constant = @Constant(intValue = 15))
-	private int onGetWeakRedstonePower(int oldValue) {
-		return Tweaks.RedstoneTorch.POWER_WEAK.get();
+	@Inject(
+			method = "getWeakRedstonePower",
+			cancellable = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private void onGetWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(((RTIRedstoneTorch)this).getPowerOutput(world, pos, state, dir, false));
+		cir.cancel();
 	}
 	
-	@Inject(method = "shouldUnpower", at = @At(value = "HEAD"), cancellable = true)
+	@Inject(
+			method = "shouldUnpower",
+			cancellable = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
 	private void shouldUnpower(World world, BlockPos pos, BlockState state, CallbackInfoReturnable<Boolean> cir) {
 		BlockPos blockPos = pos.down();
 		
@@ -77,19 +96,36 @@ public abstract class RedstoneTorchBlockMixin extends AbstractBlock implements R
 		}
 	}
 	
-	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RedstoneTorchBlock;shouldUnpower(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
+	@Redirect(
+			method = "scheduledTick",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/block/RedstoneTorchBlock;shouldUnpower(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"
+			)
+	)
 	private boolean onScheduledRedirectShouldUnpower(RedstoneTorchBlock torch, World world, BlockPos pos, BlockState state) {
 		boolean powered = state.get(Properties.LIT);
 		boolean lazy = powered ? Tweaks.RedstoneTorch.LAZY_FALLING_EDGE.get() : Tweaks.RedstoneTorch.LAZY_RISING_EDGE.get();
 		return lazy ? powered : shouldUnpower(world, pos, state);
 	}
 	
-	@ModifyConstant(method = "scheduledTick", constant = @Constant(longValue = 60L))
+	@ModifyConstant(
+			method = "scheduledTick",
+			constant = @Constant(
+					longValue = 60L
+			)
+	)
 	private long updateBurnoutTimerDelay(long oldValue) {
 		return Tweaks.RedstoneTorch.BURNOUT_TIMER.get();
 	}
 	
-	@Redirect(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	@Redirect(
+			method = "scheduledTick", 
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/server/world/ServerTickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"
+			)
+	)
 	private <T> void onScheduledTickRedirectSchedule(ServerTickScheduler<T> tickScheduler, BlockPos pos1, T object, int oldDelay, BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		if (Tweaks.Global.SPONTANEOUS_EXPLOSIONS.get()) {
 			WorldHelper.createSpontaneousExplosion(world, pos);
@@ -98,14 +134,22 @@ public abstract class RedstoneTorchBlockMixin extends AbstractBlock implements R
 		}
 	}
 	
-	@Redirect(method = "neighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"))
+	@Redirect(
+			method = "neighborUpdate",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/world/TickScheduler;schedule(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"
+			)
+	)
 	private <T> void onNeighborUpdateRedirectSchedule(TickScheduler<T> tickScheduler, BlockPos pos1, T object, int oldDelay, BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
 		boolean lit = state.get(Properties.LIT);
 		
 		int delay = lit ? Tweaks.RedstoneTorch.DELAY_FALLING_EDGE.get() : Tweaks.RedstoneTorch.DELAY_RISING_EDGE.get();
 		
-		BlockPos attachedToPos = ((RTIRedstoneTorch)this).getAttachedToPos(world, pos, state);
+		BlockPos attachedToPos = pos.offset(((RTIRedstoneTorch)this).getFacing(state).getOpposite());
 		RTIAbstractBlockState attachedToState = (RTIAbstractBlockState)world.getBlockState(attachedToPos);
+		
+		delay = attachedToState.delayOverride(delay);
 		
 		if (Tweaks.RedstoneTorch.MICRO_TICK_MODE.get() || attachedToState.forceMicroTickMode()) {
 			if (!world.isClient()) {
@@ -114,17 +158,28 @@ public abstract class RedstoneTorchBlockMixin extends AbstractBlock implements R
 		} else {
 			TickPriority priority = lit ? Tweaks.RedstoneTorch.TICK_PRIORITY_FALLING_EDGE.get() : Tweaks.RedstoneTorch.TICK_PRIORITY_RISING_EDGE.get();
 			
-			TickSchedulerHelper.scheduleBlockTick(world, pos, state, attachedToState.delayOverride(delay), attachedToState.tickPriorityOverride(priority));
+			TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, attachedToState.tickPriorityOverride(priority));
 		}
 	}
 	
-	@Inject(method = "getStrongRedstonePower", at = @At(value = "HEAD"), cancellable = true)
-	private void onGetStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
-		cir.setReturnValue(direction == Direction.DOWN && state.get(Properties.LIT) ? Tweaks.RedstoneTorch.POWER_STRONG.get() : 0);
+	@Inject(
+			method = "getStrongRedstonePower",
+			cancellable = true,
+			at = @At(
+					value = "HEAD"
+			)
+	)
+	private void onGetStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		cir.setReturnValue(getPowerOutput(world, pos, state, dir, true));
 		cir.cancel();
 	}
 	
-	@ModifyConstant(method = "isBurnedOut", constant = @Constant(intValue = 8))
+	@ModifyConstant(
+			method = "isBurnedOut",
+			constant = @Constant(
+					intValue = 8
+			)
+	)
 	private static int onIsBurnedOutModifyBurnoutCount(int oldValue) {
 		return Tweaks.RedstoneTorch.BURNOUT_COUNT.get();
 	}
@@ -135,8 +190,33 @@ public abstract class RedstoneTorchBlockMixin extends AbstractBlock implements R
 	}
 	
 	@Override
-	public BlockPos getAttachedToPos(World world, BlockPos pos, BlockState state) {
-		return pos.down();
+	public Direction getFacing(BlockState state) {
+		return Direction.UP;
+	}
+	
+	@Override
+	public int getPowerOutput(BlockView world, BlockPos pos, BlockState state, Direction dir, boolean strong) {
+		if (!state.get(Properties.LIT) || (strong && dir != Direction.DOWN)) {
+			return 0;
+		}
+		
+		Direction facing = ((RTIRedstoneTorch)this).getFacing(state);
+		
+		if (dir == facing) {
+			return 0;
+		}
+		
+		int power = getPowerOutput(world, pos, state, strong);
+		
+		BlockPos attachedTo = pos.offset(facing.getOpposite());
+		RTIAbstractBlockState attachedToState = ((RTIAbstractBlockState)world.getBlockState(attachedTo));
+		
+		return strong ? attachedToState.strongPowerOverride(power) : attachedToState.weakPowerOverride(power);
+	}
+	
+	@Override
+	public int getPowerOutput(BlockView world, BlockPos pos, BlockState state, boolean strong) {
+		return strong ? Tweaks.RedstoneTorch.POWER_STRONG.get() : Tweaks.RedstoneTorch.POWER_WEAK.get();
 	}
 	
 	private void updateNeighbors(World world, BlockPos pos) {

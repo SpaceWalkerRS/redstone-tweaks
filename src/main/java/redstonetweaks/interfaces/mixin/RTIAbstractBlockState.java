@@ -8,6 +8,10 @@ public interface RTIAbstractBlockState {
 	
 	public TickPriority tickPriorityOverride(TickPriority tickPriority);
 	
+	public int weakPowerOverride(int power);
+	
+	public int strongPowerOverride(int power);
+	
 	public boolean forceMicroTickMode();
 	
 }

@@ -23,6 +23,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
@@ -56,6 +57,7 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 	@Redirect(method = "calculateOutputSignal", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/ComparatorBlock;getMaxInputLevelSides(Lnet/minecraft/world/WorldView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)I"))
 	private int onCalculateOutputSignalRedirectGetMaxInputLevelSides(ComparatorBlock gate, WorldView world, BlockPos pos, BlockState state) {
 		int sidePower = getMaxInputLevelSides(world, pos, state);
+		
 		return Tweaks.Comparator.ADDITION_MODE.get() ? - sidePower : sidePower;
 	}
 	
@@ -157,5 +159,10 @@ public abstract class ComparatorBlockMixin extends AbstractRedstoneGateBlock imp
 		}
 		
 		return ((RTIServerTickScheduler)world.getBlockTickScheduler()).hasScheduledTickAtTime(frontPos, frontState.getBlock(), getUpdateDelayInternal(state));
+	}
+	
+	@Override
+	public int getPowerOutput(BlockView world, BlockPos pos, BlockState state, boolean strong) {
+		return getOutputLevel(world, pos, state);
 	}
 }

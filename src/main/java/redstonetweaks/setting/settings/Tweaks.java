@@ -42,8 +42,6 @@ public class Tweaks {
 		public static final BooleanSetting SHOW_NEIGHBOR_UPDATES = new BooleanSetting(GLOBAL, "showNeighborUpdates", "When used while worlds tick in \"Step by step\" mode, neighbor updates become scheduled events. The world tick will be paused until all neighbor updates have been executed. Colored boxes are drawn at the location of each neighbor update. The white box is the notifier position, a yellow box is a block update, a blue box a shape update and a red box a comparator update.");
 		public static final BooleanSetting SPONTANEOUS_EXPLOSIONS = new BooleanSetting(GLOBAL, "spontaneousExplosions", "Allow redstone components to spontaneously explode if they are looked at the wrong way (in case of abuse with short pulses).");
 		public static final BooleanSetting STICKY_CONNECTIONS = new BooleanSetting(GLOBAL, "stickyConnections", "Make blocks like fences and walls stick together when moved if they are connected.");
-		public static final BooleanSetting TERRACOTTA_FORCES_MICRO_TICK_MODE = new BooleanSetting(GLOBAL, "terracottaForcesMicroTickMode", "When enabled, redstone components placed on or attached to clay blocks are forced into microtick mode.");
-		public static final BooleanSetting TERRACOTTA_OVERRIDES_DELAY = new BooleanSetting(GLOBAL, "terracottaOverridesDelay", "When enabled, redstone components placed on or attached to terracotta blocks have delay based on the color of the terracotta block (white = 0, orange = 1, etc.).");
 		public static final WorldTickOptionsSetting WORLD_TICK_OPTIONS = new WorldTickOptionsSetting(GLOBAL, "worldTickOptions", "Options for debugging purposes. In \"Step by step\" mode the world tick will be broken down and each of its phases executed at the given interval of server ticks. Some phases, like those of scheduled ticks, block events and block entities, will break down even further and execute one their actions per interval. Information about the current tick, current world and current phase will be displayed in the top left of the screen. A dimension filter can also be selected to control which dimensions will be affected by the \"Step by step\" mode.");
 	}
 	
@@ -56,6 +54,17 @@ public class Tweaks {
 		public static final BugFixSetting MC136566 = new BugFixSetting(BUG_FIXES, "MC-136566", "Fixes blocks not being updated when a moved active observer is placed.");
 		public static final BugFixSetting MC137127 = new BugFixSetting(BUG_FIXES, "MC-137127", "Fixes observers not being updated when a moved active observer is placed.");
 		public static final BugFixSetting MC172213 = new BugFixSetting(BUG_FIXES, "MC-172213", "A fix for the so-called \"input bug\", which causes redstone components to lose 1 tick of delay if activated by a player input. To fix this world time is incremented after all dimensions have been ticked.");
+	}
+	
+	public static class PropertyOverrides {
+		
+		private static final SettingsPack PROPERTY_OVERRIDES = new SettingsPack(TWEAKS, "Property Overrides");
+		
+		public static final BooleanSetting CONCRETE_STRONG_POWER = new BooleanSetting(PROPERTY_OVERRIDES, "concreteStrongPower", "Redstone components placed on or attached to concrete blocks have a strong power output based on the color of the concrete (white = 0, orange = 1, etc.).");
+		public static final BooleanSetting WOOL_WEAK_POWER = new BooleanSetting(PROPERTY_OVERRIDES, "woolWeakPower", "Redstone components placed on or attached to wool blocks have a weak power output based on the color of the wool (white = 0, orange = 1, etc.).");
+		public static final BooleanSetting TERRACOTTA_DELAY = new BooleanSetting(PROPERTY_OVERRIDES, "terracottaDelay", "Redstone components placed on or attached to colored terracotta blocks have a delay based on the color of the terracotta (white = 0, orange = 1, etc.).");
+		public static final BooleanSetting TERRACOTTA_MICRO_TICK_MODE = new BooleanSetting(PROPERTY_OVERRIDES, "terracottaMicroTickMode", "Redstone components placed on or attached to a terracotta block are forced into microtick mode.");
+		public static final BooleanSetting WOOD_TICK_PRIORITY = new BooleanSetting(PROPERTY_OVERRIDES, "woodTickPriority", "Redstone components placed on or attached to wood or hyphae blocks have a tick priority based on the wood-/hyphaetype (oak = EXTREMELY_HIGH, spruce = VERY_HIGH, etc.).");
 	}
 	
 	public static class ActivatorRail {
@@ -380,7 +389,7 @@ public class Tweaks {
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(NORMAL_PISTON, "lazyFallingEdge", Settings.Common.DESC_LAZY_FALLING_EDGE);
 		public static final BooleanSetting LOOSE_HEAD = new BooleanSetting(NORMAL_PISTON, "looseHead", "Make the piston head's attachment to the base a little less secure.");
 		public static final BooleanSetting MOVABLE_WHEN_EXTENDED = new BooleanSetting(NORMAL_PISTON, "movableWhenExtended", "Allow extended pistons to be moved.");
-		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(NORMAL_PISTON, "pushLimit", "The maximum number of blocks a piston can move.", 0, 2048);
+		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(NORMAL_PISTON, "pushLimit", "The maximum number of blocks a piston can push.", 0, 2048);
 		public static final DirectionToBooleanSetting QC = new DirectionToBooleanSetting(NORMAL_PISTON, "quasiConnectivity", Settings.Common.DESC_QC);
 		public static final BooleanSetting RANDOMIZE_QC = new BooleanSetting(NORMAL_PISTON, "randomizeQuasiConnectivity", Settings.Common.DESC_RANDOMIZE_QC);
 		public static final IntegerSetting SPEED_RISING_EDGE = new IntegerSetting(NORMAL_PISTON, "speedRisingEdge", "The duration of the extension in ticks.", 0, Settings.Common.MAX_DELAY);
@@ -518,6 +527,7 @@ public class Tweaks {
 		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(REDSTONE_WIRE, "blockUpdateOrder", "The order in which redstone wire updates its neighbors after a state change.");
 		public static final IntegerSetting DELAY = new IntegerSetting(REDSTONE_WIRE, "delay", Settings.Common.DESC_DELAY_ACTIVATING, 0, Settings.Common.MAX_DELAY);
 		public static final BooleanSetting INVERT_FLOW_ON_GLASS = new BooleanSetting(REDSTONE_WIRE, "invertFlowOnGlass", "When enabled, redstone wire power can flow down glass, but not up it.");
+		public static final BooleanSetting MICRO_TICK_MODE = new BooleanSetting(REDSTONE_WIRE, "microTickMode", Settings.Common.DESC_MICRO_TICK_MODE);
 		public static final BooleanSetting SLABS_ALLOW_UP_CONNECTION = new BooleanSetting(REDSTONE_WIRE, "slabsAllowUpConnection", "When enabled, redstone wire can visually and logically connect to other redstone wire on top of a neighboring slab block.");
 		public static final TickPrioritySetting TICK_PRIORITY = new TickPrioritySetting(REDSTONE_WIRE, "tickPriority", Settings.Common.DESC_TICK_PRIORITY);
 	}
@@ -597,7 +607,8 @@ public class Tweaks {
 		public static final BooleanSetting LAZY_FALLING_EDGE = new BooleanSetting(STICKY_PISTON, "lazyFallingEdge", Settings.Common.DESC_LAZY_FALLING_EDGE);
 		public static final BooleanSetting LOOSE_HEAD = new BooleanSetting(STICKY_PISTON, "looseHead", "Make the piston head's attachment to the base a little less secure.");
 		public static final BooleanSetting MOVABLE_WHEN_EXTENDED = new BooleanSetting(STICKY_PISTON, "movableWhenExtended", "Allow extended sticky pistons to be moved.");
-		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(STICKY_PISTON, "pushLimit", "The maximum number of blocks a piston can move.", 0, 2048);
+		public static final IntegerSetting PUSH_LIMIT = new IntegerSetting(STICKY_PISTON, "pushLimit", "The maximum number of blocks a piston can push.", 0, 2048);
+		public static final IntegerSetting PULL_LIMIT = new IntegerSetting(STICKY_PISTON, "pullLimit", "The maximum number of blocks a piston can pull.", 0, 2048);
 		public static final DirectionToBooleanSetting QC = new DirectionToBooleanSetting(STICKY_PISTON, "quasiConnectivity", Settings.Common.DESC_QC);
 		public static final BooleanSetting RANDOMIZE_QC = new BooleanSetting(STICKY_PISTON, "randomizeQuasiConnectivity", Settings.Common.DESC_RANDOMIZE_QC);
 		public static final IntegerSetting SPEED_RISING_EDGE = new IntegerSetting(STICKY_PISTON, "speedRisingEdge", "The duration of the extension in ticks.", 0, Settings.Common.MAX_DELAY);
@@ -615,7 +626,7 @@ public class Tweaks {
 		
 		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(STONE_BUTTON, "blockUpdateOrder", "The order in which neighboring blocks are updated when a button toggles.");
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting(STONE_BUTTON, "delayRisingEdge", Settings.Common.DESC_DELAY_RISING_EDGE, 0, Settings.Common.MAX_DELAY);
-		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(STONE_BUTTON, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 1, Settings.Common.MAX_DELAY);
+		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(STONE_BUTTON, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting(STONE_BUTTON, "weakPower", Settings.Common.DESC_POWER_WEAK, 0, Settings.Common.MAX_POWER);
 		public static final IntegerSetting POWER_STRONG = new IntegerSetting(STONE_BUTTON, "strongPower", Settings.Common.DESC_POWER_STRONG, 0, Settings.Common.MAX_POWER);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(STONE_BUTTON, "tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE);
@@ -714,7 +725,7 @@ public class Tweaks {
 		
 		public static final UpdateOrderSetting BLOCK_UPDATE_ORDER = new UpdateOrderSetting(WOODEN_BUTTON, "blockUpdateOrder", "The order in which neighboring blocks are updated when a button toggles..");
 		public static final IntegerSetting DELAY_RISING_EDGE = new IntegerSetting(WOODEN_BUTTON, "delayRisingEdge", Settings.Common.DESC_DELAY_RISING_EDGE, 0, Settings.Common.MAX_DELAY);
-		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(WOODEN_BUTTON, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 1, Settings.Common.MAX_DELAY);
+		public static final IntegerSetting DELAY_FALLING_EDGE = new IntegerSetting(WOODEN_BUTTON, "delayFallingEdge", Settings.Common.DESC_DELAY_FALLING_EDGE, 0, Settings.Common.MAX_DELAY);
 		public static final IntegerSetting POWER_WEAK = new IntegerSetting(WOODEN_BUTTON, "weakPower", Settings.Common.DESC_POWER_WEAK, 0, Settings.Common.MAX_POWER);
 		public static final IntegerSetting POWER_STRONG = new IntegerSetting(WOODEN_BUTTON, "strongPower", Settings.Common.DESC_POWER_STRONG, 0, Settings.Common.MAX_POWER);
 		public static final TickPrioritySetting TICK_PRIORITY_RISING_EDGE = new TickPrioritySetting(WOODEN_BUTTON, "tickPriorityRisingEdge", Settings.Common.DESC_TICK_PRIORITY_RISING_EDGE);
@@ -761,8 +772,6 @@ public class Tweaks {
 		Settings.register(Global.SHOW_NEIGHBOR_UPDATES);
 		Settings.register(Global.SPONTANEOUS_EXPLOSIONS);
 		Settings.register(Global.STICKY_CONNECTIONS);
-		Settings.register(Global.TERRACOTTA_FORCES_MICRO_TICK_MODE);
-		Settings.register(Global.TERRACOTTA_OVERRIDES_DELAY);
 		Settings.register(Global.WORLD_TICK_OPTIONS);
 		
 		Settings.register(BugFixes.BUG_FIXES);
@@ -771,6 +780,13 @@ public class Tweaks {
 		Settings.register(BugFixes.MC136566);
 		Settings.register(BugFixes.MC137127);
 		Settings.register(BugFixes.MC172213);
+		
+		Settings.register(PropertyOverrides.PROPERTY_OVERRIDES);
+		Settings.register(PropertyOverrides.CONCRETE_STRONG_POWER);
+		Settings.register(PropertyOverrides.WOOL_WEAK_POWER);
+		Settings.register(PropertyOverrides.TERRACOTTA_DELAY);
+		Settings.register(PropertyOverrides.TERRACOTTA_MICRO_TICK_MODE);
+		Settings.register(PropertyOverrides.WOOD_TICK_PRIORITY);
 		
 		Settings.register(Anvil.ANVIL);
 		Settings.register(Anvil.CRUSH_CONCRETE);
@@ -1061,6 +1077,7 @@ public class Tweaks {
 		Settings.register(RedstoneWire.BLOCK_UPDATE_ORDER);
 		Settings.register(RedstoneWire.DELAY);
 		Settings.register(RedstoneWire.INVERT_FLOW_ON_GLASS);
+		Settings.register(RedstoneWire.MICRO_TICK_MODE);
 		Settings.register(RedstoneWire.SLABS_ALLOW_UP_CONNECTION);
 		Settings.register(RedstoneWire.TICK_PRIORITY);
 		
@@ -1113,6 +1130,7 @@ public class Tweaks {
 		Settings.register(StickyPiston.LOOSE_HEAD);
 		Settings.register(StickyPiston.MOVABLE_WHEN_EXTENDED);
 		Settings.register(StickyPiston.PUSH_LIMIT);
+		Settings.register(StickyPiston.PULL_LIMIT);
 		Settings.register(StickyPiston.QC);
 		Settings.register(StickyPiston.RANDOMIZE_QC);
 		Settings.register(StickyPiston.SPEED_RISING_EDGE);
