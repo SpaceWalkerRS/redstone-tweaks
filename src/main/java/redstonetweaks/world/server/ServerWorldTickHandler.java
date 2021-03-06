@@ -1,6 +1,7 @@
 package redstonetweaks.world.server;
 
 import java.util.Iterator;
+import java.util.Random;
 import java.util.function.BooleanSupplier;
 
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
@@ -21,6 +22,7 @@ import redstonetweaks.packet.types.TickStatusPacket;
 import redstonetweaks.packet.types.WorldSyncPacket;
 import redstonetweaks.packet.types.WorldTimeSyncPacket;
 import redstonetweaks.setting.settings.Tweaks;
+import redstonetweaks.world.common.UpdateOrder;
 import redstonetweaks.world.common.WorldTickHandler;
 import redstonetweaks.world.common.WorldTickOptions;
 
@@ -32,6 +34,9 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 	private boolean shouldUpdateStatus;
 	
 	private boolean shouldStopServer;
+	private boolean randomizeOffset;
+	private int interval;
+	private long randomizeTicks;
 	
 	public ServerWorldTickHandler(MinecraftServer server) {
 		super();
@@ -66,6 +71,24 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		shouldStopServer = false;
 	}
 	
+	public void startRandomizingOffset(int newInterval) {
+		randomizeOffset = true;
+		interval = newInterval;
+		randomizeTicks = 0L;
+		
+		UpdateOrder.randomizeOffset(true, newInterval);
+	}
+	
+	public void stopRandomizingOffset() {
+		randomizeOffset = false;
+		
+		UpdateOrder.randomizeOffset(false, 0);
+	}
+	
+	public boolean isRandomizingOffset() {
+		return randomizeOffset;
+	}
+	
 	public void tick(BooleanSupplier shouldKeepTicking) {
 		if (doWorldTicks()) {
 			boolean stepByStep = Tweaks.Global.WORLD_TICK_OPTIONS.get().getMode() == WorldTickOptions.Mode.STEP_BY_STEP;
@@ -95,6 +118,23 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		}
 	}
 	
+	private void tickRandomOffset() {
+		if (!randomizeOffset || interval == 0) {
+			return;
+		}
+		
+		if (randomizeTicks++ % interval == 0) {
+			Random rand = new Random();
+			
+			int offsetX = rand.nextInt();
+			int offsetY = rand.nextInt();
+			int offsetZ = rand.nextInt();
+					
+			UpdateOrder.updateCachedOffset(offsetX, offsetY, offsetZ);
+			
+		}
+	}
+	
 	private void tickWorldsNormally(BooleanSupplier shouldKeepTicking) {
 		for (ServerWorld world : server.getWorlds()) {
 			if (server.getTicks() % 20 == 0) {
@@ -108,6 +148,8 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 				((RTIServerWorld)world).tickTimeAccess();
 			}
 		}
+		
+		tickRandomOffset();
 		
 		ticks--;
 	}
@@ -182,6 +224,8 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		clearCurrentTask();
 		updateStatus();
 		shouldUpdateStatus = true;
+		
+		tickRandomOffset();
 		
 		ticks--;
 	}

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
@@ -15,6 +16,12 @@ import redstonetweaks.util.PacketUtils;
 import redstonetweaks.util.RelativePos;
 
 public class UpdateOrder {
+	
+	private static boolean randomizeOffset;
+	private static int interval;
+	private static int cachedOffsetX = 0;
+	private static int cachedOffsetY = 0;
+	private static int cachedOffsetZ = 0;
 	
 	private final Directionality directionality;
 	private final AbstractNeighborUpdate.Mode defaultMode;
@@ -39,6 +46,17 @@ public class UpdateOrder {
 		this.offsetX = 0;
 		this.offsetY = 0;
 		this.offsetZ = 0;
+	}
+	
+	public static void randomizeOffset(boolean randomize, int newInterval) {
+		randomizeOffset = randomize;
+		interval = newInterval;
+	}
+	
+	public static void updateCachedOffset(int offsetX, int offsetY, int offsetZ) {
+		cachedOffsetX = offsetX;
+		cachedOffsetY = offsetY;
+		cachedOffsetZ = offsetZ;
 	}
 	
 	@Override
@@ -241,7 +259,19 @@ public class UpdateOrder {
 			AbstractNeighborUpdate copy = update.copy();
 			
 			if (notifierOrder == NotifierOrder.LOCATIONAL) {
-				copy.setHashPos(pos, sourceFacing, offsetX, offsetY, offsetZ);
+				if (randomizeOffset) {
+					if (interval == 0) {
+						Random rand = new Random();
+						
+						cachedOffsetX = rand.nextInt();
+						cachedOffsetY = rand.nextInt();
+						cachedOffsetZ = rand.nextInt();
+					}
+					
+					copy.setHashPos(pos, sourceFacing, cachedOffsetX, cachedOffsetY, cachedOffsetZ);
+				} else {
+					copy.setHashPos(pos, sourceFacing, offsetX, offsetY, offsetZ);
+				}
 			}
 			
 			updates.add(copy);

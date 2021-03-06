@@ -11,7 +11,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
 import redstonetweaks.interfaces.mixin.RTIMinecraftServer;
-import redstonetweaks.setting.settings.ServerConfig;
+import redstonetweaks.player.PermissionManager;
 import redstonetweaks.world.server.ServerWorldTickHandler;
 
 public class TickCommand {
@@ -79,11 +79,11 @@ public class TickCommand {
 		try {
 			ServerPlayerEntity player = source.getPlayer();
 			
-			return player.hasPermissionLevel(2) || ServerConfig.Permissions.TICK_COMMAND.get();
+			return PermissionManager.canUseTickCommand(player);
 		} catch (CommandSyntaxException e) {
 			e.printStackTrace();
 		}
 		
-		return true;
+		return false;
 	}
 }

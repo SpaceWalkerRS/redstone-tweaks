@@ -30,11 +30,13 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 
 import redstonetweaks.block.piston.MotionType;
 import redstonetweaks.block.piston.MovedBlock;
 import redstonetweaks.block.piston.PistonSettings;
+import redstonetweaks.interfaces.mixin.RTIAbstractBlockState;
 import redstonetweaks.interfaces.mixin.RTIPistonBlockEntity;
 import redstonetweaks.interfaces.mixin.RTIPistonHandler;
 import redstonetweaks.interfaces.mixin.RTIPlant;
@@ -693,16 +695,25 @@ public class PistonHelper {
 		
 		Direction facing = state.get(Properties.FACING);
 		int delay;
+		TickPriority tickPriority;
 		boolean lazy;
 		if (extended) {
 			delay = PistonSettings.delayFallingEdge(sticky);
+			tickPriority = PistonSettings.tickPriorityFallingEdge(sticky);
 			lazy = PistonSettings.lazyFallingEdge(sticky);
 		} else {
 			delay = PistonSettings.delayRisingEdge(sticky);
+			tickPriority = PistonSettings.tickPriorityRisingEdge(sticky);
 			lazy = PistonSettings.lazyRisingEdge(sticky);
 		}
-		boolean powered = PistonHelper.isReceivingPower(world, pos, sticky, facing, false);
 		
+		BlockPos frontPos = pos.offset(facing, extended ? 2 : 1);
+		BlockState frontState = world.getBlockState(frontPos);
+		
+		delay = ((RTIAbstractBlockState)frontState).delayOverride(delay);
+		tickPriority = ((RTIAbstractBlockState)frontState).tickPriorityOverride(tickPriority);
+		
+		boolean powered = PistonHelper.isReceivingPower(world, pos, sticky, facing, false);
 		boolean shouldExtend = (onScheduledTick && lazy) ? !extended : powered;
 		
 		if (shouldExtend && !extended) {
@@ -715,22 +726,19 @@ public class PistonHelper {
 			
 			if (type == MotionType.NONE) {
 				if (powered && PistonSettings.updateSelf(sticky)) {
-					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, PistonSettings.tickPriorityRisingEdge(sticky));
+					world.getBlockTickScheduler().schedule(pos, state.getBlock(), 1, tickPriority);
 				}
 			} else {
 				if (onScheduledTick) {
 					world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
 				} else if (delay == 0 || Tweaks.Global.DELAY_MULTIPLIER.get() == 0 || !((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
-					TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, PistonSettings.tickPriorityRisingEdge(sticky));
+					TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, tickPriority);
 				}
 			}
 		} else if (!shouldExtend && extended && (!PistonSettings.looseHead(sticky) || PistonHelper.hasPistonHead(world, pos, sticky, facing))) {
 			int type = MotionType.RETRACT_A;
 			
 			if (sticky && PistonSettings.canMoveSelf(sticky)) {
-				BlockPos frontPos = pos.offset(facing, 2);
-				BlockState frontState = world.getBlockState(frontPos);
-				
 				if (!PistonHelper.isPushingBlock(world, frontPos, frontState, facing) && PistonHelper.canPull(frontState) && !(PistonBlock.isMovable(frontState, world, frontPos, facing.getOpposite(), false, facing) && createPistonHandler(world, pos, facing, false, sticky).calculatePush())) {
 					type = MotionType.RETRACT_FORWARDS;
 				}
@@ -745,7 +753,7 @@ public class PistonHelper {
 				
 				world.addSyncedBlockEvent(pos, state.getBlock(), type, facing.getId());
 			} else if (delay == 0 || Tweaks.Global.DELAY_MULTIPLIER.get() == 0 || !((RTIServerWorld)world).hasBlockEvent(pos, state.getBlock())) {
-				TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, PistonSettings.tickPriorityFallingEdge(sticky));
+				TickSchedulerHelper.scheduleBlockTick(world, pos, state, delay, tickPriority);
 			}
 		}
 		

@@ -270,7 +270,7 @@ public abstract class ObserverBlockMixin extends AbstractBlock implements RTIBlo
 		
 		Direction behind = state.get(Properties.FACING);
 		
-		if (strong && dir != behind) {
+		if (dir != behind) {
 			return 0;
 		}
 		

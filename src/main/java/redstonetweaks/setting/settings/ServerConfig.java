@@ -14,6 +14,7 @@ public class ServerConfig {
 		
 		public static final BooleanSetting EDIT_SETTINGS = new BooleanSetting(PERMISSIONS, "editSettings", "Allow non-OP players to change settings.");
 		public static final BooleanSetting EDIT_PRESETS = new BooleanSetting(PERMISSIONS, "editPresets", "Allow non-OP players to edit presets.");
+		public static final BooleanSetting RANDOM_OFFSET_COMMAND = new BooleanSetting(PERMISSIONS, "randomOffsetCommand", "Allow non-OP players to use the randomoffset command and its hotkeys.");
 		public static final BooleanSetting TICK_COMMAND = new BooleanSetting(PERMISSIONS, "tickCommand", "Allow non-OP players to use the tick command and its hotkeys.");
 	}
 	
@@ -23,6 +24,7 @@ public class ServerConfig {
 		Settings.register(Permissions.PERMISSIONS);
 		Settings.register(Permissions.EDIT_SETTINGS);
 		Settings.register(Permissions.EDIT_PRESETS);
+		Settings.register(Permissions.RANDOM_OFFSET_COMMAND);
 		Settings.register(Permissions.TICK_COMMAND);
 	}
 }

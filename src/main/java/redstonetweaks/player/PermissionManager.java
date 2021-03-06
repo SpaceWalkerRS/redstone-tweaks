@@ -54,6 +54,10 @@ public class PermissionManager {
 		return ServerInfo.getModVersion().isValid() && isOp(player);
 	}
 	
+	public static boolean canUseRandomOffsetCommand(PlayerEntity player) {
+		return ServerInfo.getModVersion().isValid() && (isOp(player) || ServerConfig.Permissions.RANDOM_OFFSET_COMMAND.get());
+	}
+	
 	public static boolean canUseTickCommand(PlayerEntity player) {
 		return ServerInfo.getModVersion().isValid() && (isOp(player) || ServerConfig.Permissions.TICK_COMMAND.get());
 	}
