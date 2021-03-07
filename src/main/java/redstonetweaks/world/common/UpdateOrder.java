@@ -6,27 +6,26 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-
+import net.minecraft.world.World;
+import redstonetweaks.listeners.IOffsetListener;
 import redstonetweaks.util.Directionality;
 import redstonetweaks.util.PacketUtils;
 import redstonetweaks.util.RelativePos;
 
-public class UpdateOrder {
+public class UpdateOrder implements IOffsetListener {
 	
-	private static boolean randomizeOffset;
-	private static int interval;
-	private static int cachedOffsetX = 0;
-	private static int cachedOffsetY = 0;
-	private static int cachedOffsetZ = 0;
+	private static final Set<IOffsetListener> LISTENERS = new HashSet<>();
 	
 	private final Directionality directionality;
 	private final AbstractNeighborUpdate.Mode defaultMode;
 	private final boolean forceDefaultMode;
 	
+	private boolean randomizeOffset;
 	private int offsetX;
 	private int offsetY;
 	private int offsetZ;
@@ -46,17 +45,20 @@ public class UpdateOrder {
 		this.offsetX = 0;
 		this.offsetY = 0;
 		this.offsetZ = 0;
+		
+		LISTENERS.add(this);
 	}
 	
-	public static void randomizeOffset(boolean randomize, int newInterval) {
-		randomizeOffset = randomize;
-		interval = newInterval;
+	public static void randomizeOffset() {
+		LISTENERS.forEach(listener -> listener.offsetRandomized());
 	}
 	
-	public static void updateCachedOffset(int offsetX, int offsetY, int offsetZ) {
-		cachedOffsetX = offsetX;
-		cachedOffsetY = offsetY;
-		cachedOffsetZ = offsetZ;
+	public static void updateOffset(int offsetX, int offsetY, int offsetZ) {
+		LISTENERS.forEach(listener -> listener.offsetUpdated(offsetX, offsetY, offsetZ));
+	}
+	
+	public static void clearListeners() {
+		LISTENERS.clear();
 	}
 	
 	@Override
@@ -88,6 +90,20 @@ public class UpdateOrder {
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public void offsetRandomized() {
+		randomizeOffset = true;
+	}
+	
+	@Override
+	public void offsetUpdated(int offsetX, int offsetY, int offsetZ) {
+		if (randomizeOffset) {
+			randomizeOffset = false;
+		}
+		
+		setOffset(offsetX, offsetY, offsetZ);
 	}
 	
 	public void encode(PacketByteBuf buffer) {
@@ -252,26 +268,26 @@ public class UpdateOrder {
 		return index >= 0 && index < getNeighborUpdates().size();
 	}
 	
-	public Collection<AbstractNeighborUpdate> getUpdates(BlockPos pos, Direction sourceFacing) {
+	public Collection<AbstractNeighborUpdate> getUpdates(World world, BlockPos pos, Direction sourceFacing) {
 		Collection<AbstractNeighborUpdate> updates = (notifierOrder == NotifierOrder.LOCATIONAL) ? new HashSet<>() : new ArrayList<>();
+		
+		int offsetX = this.offsetX;
+		int offsetY = this.offsetY;
+		int offsetZ = this.offsetZ;
+		
+		if (randomizeOffset) {
+			Random rand = world.getRandom();
+			
+			offsetX = rand.nextInt();
+			offsetY = rand.nextInt();
+			offsetZ = rand.nextInt();
+		}
 		
 		for (AbstractNeighborUpdate update : getNeighborUpdates()) {
 			AbstractNeighborUpdate copy = update.copy();
 			
 			if (notifierOrder == NotifierOrder.LOCATIONAL) {
-				if (randomizeOffset) {
-					if (interval == 0) {
-						Random rand = new Random();
-						
-						cachedOffsetX = rand.nextInt();
-						cachedOffsetY = rand.nextInt();
-						cachedOffsetZ = rand.nextInt();
-					}
-					
-					copy.setHashPos(pos, sourceFacing, cachedOffsetX, cachedOffsetY, cachedOffsetZ);
-				} else {
-					copy.setHashPos(pos, sourceFacing, offsetX, offsetY, offsetZ);
-				}
+				copy.setHashPos(pos, sourceFacing, offsetX, offsetY, offsetZ);
 			}
 			
 			updates.add(copy);

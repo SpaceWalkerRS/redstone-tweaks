@@ -79,9 +79,9 @@ public class RandomOffsetCommand {
 			
 			return PermissionManager.canUseRandomOffsetCommand(player);
 		} catch (CommandSyntaxException e) {
-			e.printStackTrace();
+			
 		}
 		
-		return true;
+		return false;
 	}
 }

@@ -319,7 +319,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Override
 	public void dispatchBlockUpdates(BlockPos sourcePos, Direction sourceFacing, Block sourceBlock, UpdateOrder updateOrder) {
-		for (AbstractNeighborUpdate update : updateOrder.getUpdates(sourcePos, sourceFacing)) {
+		for (AbstractNeighborUpdate update : updateOrder.getUpdates(world(), sourcePos, sourceFacing)) {
 			BlockPos notifierPos = update.getNotifierPos().toBlockPos(sourcePos, sourceFacing);
 			
 			switch (update.getMode()) {
@@ -340,14 +340,14 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Override
 	public void dispatchBlockUpdatesAround(BlockPos notifierPos, BlockPos sourcePos, Direction sourceFacing, Block sourceBlock) {
-		for (AbstractNeighborUpdate update : Tweaks.Global.BLOCK_UPDATE_ORDER.get().getUpdates(notifierPos, sourceFacing)) {
+		for (AbstractNeighborUpdate update : Tweaks.Global.BLOCK_UPDATE_ORDER.get().getUpdates(world(), notifierPos, sourceFacing)) {
 			dispatchBlockUpdate(false, update.toBlockUpdate(world(), notifierPos, sourcePos, sourceFacing, sourceBlock));
 		}
 	}
 	
 	@Override
 	public void dispatchBlockUpdatesAroundExcept(BlockPos notifierPos, BlockPos sourcePos, Direction sourceFacing, Block sourceBlock, RelativePos except) {
-		for (AbstractNeighborUpdate update : Tweaks.Global.BLOCK_UPDATE_ORDER.get().getUpdates(notifierPos, sourceFacing)) {
+		for (AbstractNeighborUpdate update : Tweaks.Global.BLOCK_UPDATE_ORDER.get().getUpdates(world(), notifierPos, sourceFacing)) {
 			if (!update.getUpdatePos().equals(except)) {
 				dispatchBlockUpdate(false, update.toBlockUpdate(world(), notifierPos, sourcePos, sourceFacing, sourceBlock));
 			}
@@ -373,7 +373,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Override
 	public void dispatchComparatorUpdatesAround(BlockPos notifierPos, BlockPos sourcePos, Direction sourceFacing, Block sourceBlock) {
-		for (AbstractNeighborUpdate update : Tweaks.Global.COMPARATOR_UPDATE_ORDER.get().getUpdates(notifierPos, sourceFacing)) {
+		for (AbstractNeighborUpdate update : Tweaks.Global.COMPARATOR_UPDATE_ORDER.get().getUpdates(world(), notifierPos, sourceFacing)) {
 			ComparatorUpdate comparatorUpdate = update.toComparatorUpdate(world(), notifierPos, sourcePos, sourceFacing, sourceBlock);
 			
 			if (comparatorUpdate != null) {
@@ -422,7 +422,7 @@ public abstract class WorldMixin implements RTIWorld, WorldAccess, WorldView {
 	
 	@Override
 	public void dispatchShapeUpdatesAround(BlockPos notifierPos, BlockPos sourcePos, BlockState notifierState, int flags, int depth) {
-		for (AbstractNeighborUpdate update : Tweaks.Global.SHAPE_UPDATE_ORDER.get().getUpdates(notifierPos, null)) {
+		for (AbstractNeighborUpdate update : Tweaks.Global.SHAPE_UPDATE_ORDER.get().getUpdates(world(), notifierPos, null)) {
 			dispatchShapeUpdate(false, update.toShapeUpdate(world(), notifierPos, notifierPos, notifierState, flags, depth));
 		}
 	}

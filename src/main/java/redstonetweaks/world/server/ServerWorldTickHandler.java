@@ -76,13 +76,15 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		interval = newInterval;
 		randomizeTicks = 0L;
 		
-		UpdateOrder.randomizeOffset(true, newInterval);
+		if (interval == 0) {
+			UpdateOrder.randomizeOffset();
+		} else {
+			UpdateOrder.updateOffset(0, 0, 0);
+		}
 	}
 	
 	public void stopRandomizingOffset() {
 		randomizeOffset = false;
-		
-		UpdateOrder.randomizeOffset(false, 0);
 	}
 	
 	public boolean isRandomizingOffset() {
@@ -104,10 +106,10 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 					
 					broadcastChunkData();
 				}
-			} else if (!shouldStopServer) {
-				tickWorldsNormally(shouldKeepTicking);
-			} else {
+			} else if (shouldStopServer) {
 				server.stop(false);
+			} else {
+				tickWorldsNormally(shouldKeepTicking);
 			}
 			
 			if (ticks == 0) {
@@ -124,14 +126,13 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		}
 		
 		if (randomizeTicks++ % interval == 0) {
-			Random rand = new Random();
+			Random rand = server.getOverworld().getRandom();
 			
 			int offsetX = rand.nextInt();
 			int offsetY = rand.nextInt();
 			int offsetZ = rand.nextInt();
 					
-			UpdateOrder.updateCachedOffset(offsetX, offsetY, offsetZ);
-			
+			UpdateOrder.updateOffset(offsetX, offsetY, offsetZ);
 		}
 	}
 	
@@ -173,21 +174,7 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 			startTick();
 			break;
 		case TICKING_WORLDS:
-			if (currentWorld == null) {
-				shouldUpdateStatus = true;
-			} else {
-				if (WorldHelper.stepByStepFilter(currentWorld)) {
-					tickWorldNormally((ServerWorld)currentWorld, shouldKeepTicking);
-					
-					switchWorld();
-				} else {
-					inWorldTick = true;
-					
-					tickWorld(shouldKeepTicking);
-					
-					inWorldTick = false;
-				}
-			}
+			continueTickingWorlds(shouldKeepTicking);
 			break;
 		case END_TICK:
 			endTick();
@@ -212,6 +199,24 @@ public class ServerWorldTickHandler extends WorldTickHandler {
 		}
 		
 		shouldUpdateStatus = true;
+	}
+	
+	private void continueTickingWorlds(BooleanSupplier shouldKeepTicking) {
+		if (currentWorld == null) {
+			shouldUpdateStatus = true;
+		} else {
+			if (WorldHelper.stepByStepFilter(currentWorld)) {
+				tickWorldNormally((ServerWorld)currentWorld, shouldKeepTicking);
+				
+				switchWorld();
+			} else {
+				inWorldTick = true;
+				
+				tickWorld(shouldKeepTicking);
+				
+				inWorldTick = false;
+			}
+		}
 	}
 	
 	private void endTick() {

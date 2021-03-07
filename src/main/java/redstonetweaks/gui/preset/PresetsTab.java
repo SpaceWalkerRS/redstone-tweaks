@@ -61,7 +61,7 @@ public class PresetsTab extends RTMenuTab {
 	
 	@Override
 	public boolean charTyped(char chr, int keyCode) {
-		if (getFocused() == null || !getFocused().charTyped(chr, keyCode)) {
+		if ((getFocused() == null || !getFocused().charTyped(chr, keyCode)) && !hasWindowOpen()) {
 			setFocused(searchBox);
 			
 			return searchBox.charTyped(chr, keyCode);
