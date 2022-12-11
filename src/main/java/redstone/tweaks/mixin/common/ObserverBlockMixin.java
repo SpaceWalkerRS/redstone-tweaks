@@ -22,7 +22,7 @@ public class ObserverBlockMixin {
 		)
 	)
 	private void disableObservers(LevelAccessor level, BlockPos pos, CallbackInfo ci) {
-		if (Tweaks.Observer.disable()) {
+		if (!level.isClientSide() && Tweaks.Observer.disable()) {
 			ci.cancel();
 		}
 	}
