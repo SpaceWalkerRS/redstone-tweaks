@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"package": "redstone.tweaks.mixin",
+	"compatibilityLevel": "JAVA_16",
+	"mixins": [	
+		"common.ObserverBlockMixin"
+	],
+	"client": [
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

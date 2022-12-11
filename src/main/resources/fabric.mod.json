@@ -1,48 +1,47 @@
 {
-  "schemaVersion": 1,
-  "id": "redstonetweaks",
-  "version": "${version}",
+	"schemaVersion": 1,
+	"id": "redstone-tweaks",
+	"version": "${version}",
 
-  "name": "Redstone Tweaks",
-  "description": "Customize your redstone experience!",
-  "authors": [
-    "Space Walker"
-  ],
-  "contributors": [
-  	"G4me4u"
-  ],
-  "contact": {
-  	"homepage": "https://modrinth.com/mod/redstonetweaks",
-    "sources": "https://github.com/SpaceWalkerRS/redstone-tweaks",
-    "issues": "https://github.com/SpaceWalkerRS/redstone-tweaks/issues"
-  },
+	"name": "Redstone Tweaks",
+	"description": "Customize your redstone experience!",
+	"authors": [
+		"Space Walker"
+	],
+	"contributors": [
+		"G4me4u"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/redstonetweaks",
+		"sources": "https://github.com/SpaceWalkerRS/redstone-tweaks",
+		"issues": "https://github.com/SpaceWalkerRS/redstone-tweaks/issues"
+	},
 
-  "license": "MIT License",
-  "icon": "assets/redstonetweaks/icon.png",
+	"license": "MIT License",
+	"icon": "assets/redstone-tweaks/icon.png",
 
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      "redstonetweaks.RedstoneTweaks"
-    ]
-  },
-  "mixins": [
-    "redstonetweaks.mixins.json"
-  ],
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"redstone.tweaks.RedstoneTweaksMod"
+		],
+		"g4mespeed": [
+			"redstone.tweaks.g4mespeed.RedstoneTweaksExtension"
+		]
+	},
+	"mixins": [
+		"redstone-tweaks.mixins.json"
+	],
 
-  "depends": {
-    "minecraft": "1.16.x"
-  },
+	"depends": {
+		"minecraft": "1.19.x"
+	},
   
-  "custom": {
-  	"modmenu": {
-  	  "links": {
-  	    "modmenu.discord": "https://discord.gg/EJC9zkX"
-  	  }
-  	},
-  	"lithium:options": {
-  	  "mixin.world.tick_scheduler": false,
-  	  "mixin.block.moving_block_shapes": false
-    }
-  }
+	"custom": {
+		"modmenu": {
+ 			"links": {
+				"modmenu.discord": "https://discord.gg/EJC9zkX"
+			}
+		}
+	}
 }
