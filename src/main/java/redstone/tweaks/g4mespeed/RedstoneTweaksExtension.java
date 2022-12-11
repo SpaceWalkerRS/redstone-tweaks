@@ -42,7 +42,7 @@ public class RedstoneTweaksExtension implements GSIExtension {
 
 	@Override
 	public String getTranslationPath() {
-		return null;
+		return "";
 	}
 
 	@Override
