@@ -19,15 +19,17 @@ public class RedstoneTweaksExtension implements GSIExtension {
 
 	public static final GSExtensionInfo INFO = new GSExtensionInfo(NAME, UID, VERSION);
 
+	private final RedstoneTweaksModule clientModule;
 	private final RedstoneTweaksModule serverModule;
 
 	public RedstoneTweaksExtension() {
+		this.clientModule = new RedstoneTweaksModule();
 		this.serverModule = new RedstoneTweaksModule();
 	}
 
 	@Override
 	public void addClientModules(GSClientController controller) {
-
+		controller.addModule(clientModule);
 	}
 
 	@Override
