@@ -12,6 +12,8 @@ public class RedstoneTweaksMod implements ModInitializer {
 	public static final String MOD_VERSION = "1.0.0";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
+	public static final boolean DEBUG = true;
+
 	@Override
 	public void onInitialize() {
 
