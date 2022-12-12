@@ -122,7 +122,7 @@ public class ObserverBlockMixin implements BlockOverrides {
 
 	@Override
 	public Boolean overrideTriggerEvent(BlockState state, Level level, BlockPos pos, int type, int data) {
-		return BlockOverrides.microTick(level, pos, state, type, data);
+		return BlockOverrides.scheduleOrDoMicroTick(level, pos, state, type, data);
 	}
 
 	private void scheduleOn(Level level, BlockPos pos) {

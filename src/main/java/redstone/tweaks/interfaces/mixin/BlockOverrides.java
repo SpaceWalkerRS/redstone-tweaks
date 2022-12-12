@@ -1,10 +1,16 @@
 package redstone.tweaks.interfaces.mixin;
 
+import java.util.Map;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.ticks.TickPriority;
 
 public interface BlockOverrides {
 
@@ -30,12 +36,47 @@ public interface BlockOverrides {
 		return null;
 	}
 
-	public static boolean microTick(Level level, BlockPos pos, BlockState state, int type, int data) {
-		if (!level.isClientSide()) {
-			if (type > 1) {
-				level.blockEvent(pos, state.getBlock(), type - 1, data);
+	/**
+	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#tick BlockBehaviour.tick}.
+	 * 
+	 * @return whether to override the method call
+	 */
+	default boolean overrideTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand) {
+		return false;
+	}
+
+	public static void scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state, int delay, TickPriority priority) {
+		if (level instanceof ServerLevel) {
+			if (delay > 0) {
+				level.scheduleTick(pos, state.getBlock(), delay, priority);
 			} else {
-				state.tick((ServerLevel)level, pos, level.random);
+				state.tick((ServerLevel) level, pos, level.getRandom());
+			}
+		}
+	}
+
+	public static boolean scheduleOrDoMicroTick(LevelAccessor level, BlockPos pos, BlockState state, int type, int data) {
+		if (level instanceof ServerLevel) {
+			if (type > 1) {
+				((ServerLevel) level).blockEvent(pos, state.getBlock(), type - 1, data);
+			} else {
+				state.tick((ServerLevel) level, pos, level.getRandom());
+			}
+		}
+
+		return false;
+	}
+
+	public static boolean hasSignal(Level level, BlockPos pos, Map<Direction, Boolean> qc, boolean randQC) {
+		return level.hasNeighborSignal(pos) || hasQuasiSignal(level, pos, qc, randQC);
+	}
+
+	public static boolean hasQuasiSignal(Level level, BlockPos pos, Map<Direction, Boolean> qc, boolean randQC) {
+		for (Direction dir : Direction.values()) {
+			if (qc.get(dir) && (!randQC || level.random.nextBoolean())) {
+				if (level.hasNeighborSignal(pos.relative(dir))) {
+					return true;
+				}
 			}
 		}
 

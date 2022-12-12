@@ -8,8 +8,11 @@ import com.g4mesoft.core.client.GSClientController;
 import com.g4mesoft.core.server.GSServerController;
 import com.g4mesoft.packet.GSIPacket;
 import com.g4mesoft.registry.GSSupplierRegistry;
+import com.g4mesoft.setting.GSSettingManager;
 
 import redstone.tweaks.RedstoneTweaksMod;
+import redstone.tweaks.g4mespeed.setting.decoder.QuasiConnectivitySettingDecoder;
+import redstone.tweaks.g4mespeed.setting.decoder.TickPrioritySettingDecoder;
 
 public class RedstoneTweaksExtension implements GSIExtension {
 
@@ -49,7 +52,8 @@ public class RedstoneTweaksExtension implements GSIExtension {
 
 	@Override
 	public void init() {
-
+		GSSettingManager.registerSettingDecoder(new TickPrioritySettingDecoder());
+		GSSettingManager.registerSettingDecoder(new QuasiConnectivitySettingDecoder());
 	}
 
 	@Override

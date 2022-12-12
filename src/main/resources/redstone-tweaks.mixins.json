@@ -3,8 +3,19 @@
 	"package": "redstone.tweaks.mixin",
 	"compatibilityLevel": "JAVA_16",
 	"mixins": [	
+		"common.AnvilBlockMixin",
+		"common.BambooStalkBlockMixin",
+		"common.BubbleColumnBlockMixin",
 		"common.BlockBehaviourMixin",
-		"common.ObserverBlockMixin"
+		"common.CactusBlockMixin",
+		"common.ChorusPlantBlockMixin",
+		"common.CommandBlockMixin",
+		"common.ComparatorBlockMixin",
+		"common.DiodeBlockMixin",
+		"common.ObserverBlockMixin",
+		"common.PistonBaseBlockMixin",
+		"common.PoweredRailBlockMixin",
+		"common.RepeaterBlockMixin"
 	],
 	"client": [
 	],

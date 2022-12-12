@@ -7,6 +7,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -44,6 +46,21 @@ public class BlockBehaviourMixin implements BlockOverrides {
 
 		if (override != null) {
 			cir.setReturnValue(override);
+		}
+	}
+
+	@Inject(
+		method = "tick",
+		cancellable = true,
+		at = @At(
+			value = "HEAD"
+		)
+	)
+	private void rtTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand, CallbackInfo ci) {
+		boolean override = overrideTick(state, level, pos, rand);
+
+		if (override) {
+			ci.cancel();
 		}
 	}
 }
