@@ -71,6 +71,40 @@ public abstract class DiodeBlockMixin implements DiodeOverrides {
 		}
 	}
 
+	@Inject(
+		method = "tick",
+		locals = LocalCapture.CAPTURE_FAILHARD,
+		cancellable = true,
+		at = @At(
+			value = "INVOKE",
+			ordinal = 1,
+			target = "Lnet/minecraft/server/level/ServerLevel;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"
+		)
+	)
+	private void rtTweakRisingEdgeLazy(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand, CallbackInfo ci, boolean powered, boolean shouldBePowered) {
+		if (!shouldBePowered) {
+			ci.cancel();
+		}
+	}
+
+	@Inject(
+		method = "tick",
+		at = @At(
+			value = "INVOKE",
+			shift = Shift.AFTER,
+			ordinal = 1,
+			target = "Lnet/minecraft/server/level/ServerLevel;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"
+		)
+	)
+	private void rtTweakFallingEdgeDelayAndTickPriority(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand, CallbackInfo ci) {
+		if (!rtReceivingPower) {
+			int delay = Tweaks.Repeater.delayFallingEdge();
+			TickPriority priority = Tweaks.Repeater.tickPriorityFallingEdge();
+
+			BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);
+		}
+	}
+
 	@Redirect(
 		method = "tick",
 		at = @At(
@@ -79,10 +113,7 @@ public abstract class DiodeBlockMixin implements DiodeOverrides {
 		)
 	)
 	private void rtTweakFallingEdgeDelayAndTickPriority(ServerLevel _level, BlockPos _pos, Block block, int delay, TickPriority priority, BlockState state, ServerLevel level, BlockPos pos, RandomSource rand) {
-		delay = Tweaks.Repeater.delayFallingEdge();
-		priority = Tweaks.Repeater.tickPriorityFallingEdge();
-
-		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);
+		// replaced by inject above
 	}
 
 	@Inject(

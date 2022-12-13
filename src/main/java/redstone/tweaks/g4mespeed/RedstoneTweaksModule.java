@@ -111,6 +111,48 @@ public class RedstoneTweaksModule implements GSIModule {
 
 	@Override
 	public void registerServerSettings(GSSettingManager settings) {
+		settings.registerSetting(globalCategory, globalSignalMax);
+
+		settings.registerSetting(activatorRailCategory, activatorRailDelayRisingEdge);
+		settings.registerSetting(activatorRailCategory, activatorRailDelayFallingEdge);
+		settings.registerSetting(activatorRailCategory, activatorRailLazyRisingEdge);
+		settings.registerSetting(activatorRailCategory, activatorRailLazyFallingEdge);
+		settings.registerSetting(activatorRailCategory, activatorRailPowerLimit);
+		settings.registerSetting(activatorRailCategory, activatorRailQuasiConnectivity);
+		settings.registerSetting(activatorRailCategory, activatorRailRandomizeQuasiConnectivity);
+		settings.registerSetting(activatorRailCategory, activatorRailTickPriorityRisingEdge);
+		settings.registerSetting(activatorRailCategory, activatorRailTickPriorityFallingEdge);
+
+		settings.registerSetting(anvilCategory, anvilCrushConcrete);
+		settings.registerSetting(anvilCategory, anvilCrushWool);
+
+		settings.registerSetting(bambooCategory, bambooDelay);
+		settings.registerSetting(bambooCategory, bambooTickPriority);
+
+		settings.registerSetting(barrierCategory, barrierMovable);
+
+		settings.registerSetting(bubbleColumnCategory, bubbleColumnDelay);
+		settings.registerSetting(bubbleColumnCategory, bubbleColumnTickPriority);
+
+		settings.registerSetting(cactusCategory, cactusDelay);
+		settings.registerSetting(cactusCategory, cactusNou);
+		settings.registerSetting(cactusCategory, cactusTickPriority);
+
+		settings.registerSetting(chorusPlantCategory, chorusPlantDelay);
+		settings.registerSetting(chorusPlantCategory, chorusPlantTickPriority);
+
+		settings.registerSetting(commandBlockCategory, commandBlockDelay);
+		settings.registerSetting(commandBlockCategory, commandBlockQuasiConnectivity);
+		settings.registerSetting(commandBlockCategory, commandBlockRandomizeQuasiConnectivity);
+		settings.registerSetting(commandBlockCategory, commandBlockTickPriority);
+
+		settings.registerSetting(comparatorCategory, comparatorAdditionMode);
+		settings.registerSetting(comparatorCategory, comparatorDelay);
+		settings.registerSetting(comparatorCategory, comparatorMicroTickMode);
+		settings.registerSetting(comparatorCategory, comparatorRedstoneBlockAlternateInput);
+		settings.registerSetting(comparatorCategory, comparatorTickPriority);
+		settings.registerSetting(comparatorCategory, comparatorTickPriorityPrioritized);
+
 		settings.registerSetting(observerCategory, observerDelayRisingEdge);
 		settings.registerSetting(observerCategory, observerDelayFallingEdge);
 		settings.registerSetting(observerCategory, observerDisable);
@@ -120,6 +162,27 @@ public class RedstoneTweaksModule implements GSIModule {
 		settings.registerSetting(observerCategory, observerSignalDirect);
 		settings.registerSetting(observerCategory, observerTickPriorityRisingEdge);
 		settings.registerSetting(observerCategory, observerTickPriorityFallingEdge);
+
+		settings.registerSetting(poweredRailCategory, poweredRailDelayRisingEdge);
+		settings.registerSetting(poweredRailCategory, poweredRailDelayFallingEdge);
+		settings.registerSetting(poweredRailCategory, poweredRailLazyRisingEdge);
+		settings.registerSetting(poweredRailCategory, poweredRailLazyFallingEdge);
+		settings.registerSetting(poweredRailCategory, poweredRailPowerLimit);
+		settings.registerSetting(poweredRailCategory, poweredRailQuasiConnectivity);
+		settings.registerSetting(poweredRailCategory, poweredRailRandomizeQuasiConnectivity);
+		settings.registerSetting(poweredRailCategory, poweredRailTickPriorityRisingEdge);
+		settings.registerSetting(poweredRailCategory, poweredRailTickPriorityFallingEdge);
+
+		settings.registerSetting(repeaterCategory, repeaterDelayRisingEdge);
+		settings.registerSetting(repeaterCategory, repeaterDelayFallingEdge);
+		settings.registerSetting(repeaterCategory, repeaterLazyRisingEdge);
+		settings.registerSetting(repeaterCategory, repeaterLazyFallingEdge);
+		settings.registerSetting(repeaterCategory, repeaterMicroTickMode);
+		settings.registerSetting(repeaterCategory, repeaterSignal);
+		settings.registerSetting(repeaterCategory, repeaterSignalDirect);
+		settings.registerSetting(repeaterCategory, repeaterTickPriorityRisingEdge);
+		settings.registerSetting(repeaterCategory, repeaterTickPriorityFallingEdge);
+		settings.registerSetting(repeaterCategory, repeaterTickPriorityPrioritized);
 	}
 
 	private static class Constants {
