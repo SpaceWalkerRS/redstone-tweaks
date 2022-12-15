@@ -11,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CommandBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,7 +30,7 @@ public class CommandBlockMixin {
 			target = "Lnet/minecraft/world/level/Level;hasNeighborSignal(Lnet/minecraft/core/BlockPos;)Z"
 		)
 	)
-	private boolean rtTweakNeighborQC(Level level, BlockPos pos) {
+	private boolean rtTweakQuasiConnectivity(Level level, BlockPos pos) {
 		Map<Direction, Boolean> qc = Tweaks.CommandBlock.quasiConnectivity();
 		boolean randQC = Tweaks.CommandBlock.randomizeQuasiConnectivity();
 
@@ -44,10 +45,7 @@ public class CommandBlockMixin {
 		)
 	)
 	private void rtTweakDelayAndTickPriority(Level _level, BlockPos _pos, Block block, int delay, BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
-		delay = Tweaks.CommandBlock.delay();
-		TickPriority priority = Tweaks.CommandBlock.tickPriority();
-
-		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);
+		scheduleOrDoTick(level, pos, state);
 	}
 
 	@Redirect(
@@ -58,7 +56,11 @@ public class CommandBlockMixin {
 		)
 	)
 	private void rtTweakDelayAndTickPriority(ServerLevel _level, BlockPos _pos, Block block, int delay, BlockState state, ServerLevel level, BlockPos pos, RandomSource rand) {
-		delay = Tweaks.CommandBlock.delay();
+		scheduleOrDoTick(level, pos, state);
+	}
+
+	private static void scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state) {
+		int delay = Tweaks.CommandBlock.delay();
 		TickPriority priority = Tweaks.CommandBlock.tickPriority();
 
 		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);

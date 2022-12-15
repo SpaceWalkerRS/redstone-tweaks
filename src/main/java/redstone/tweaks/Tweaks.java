@@ -177,6 +177,193 @@ public class Tweaks {
 		}
 	}
 
+	public static class Composter {
+
+		public static int delay() {
+			return module().composterDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().composterTickPriority.getValue();
+		}
+	}
+
+	public static class Coral {
+
+		public static int delayMin() {
+			return module().coralDelayMin.getValue();
+		}
+
+		public static int delayMax() {
+			return module().coralDelayMax.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().coralTickPriority.getValue();
+		}
+	}
+
+	public static class DaylightDetector {
+
+		public static boolean emitDirectSignal() {
+			return module().daylightDetectorEmitDirectSignal.getValue();
+		}
+	}
+
+	public static class DetectorRail {
+
+		public static int delay() {
+			return module().detectorRailDelay.getValue();
+		}
+
+		public static int signal() {
+			return module().detectorRailSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().detectorRailSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().detectorRailTickPriority.getValue();
+		}
+	}
+
+	public static class DirtPath {
+
+		public static int delay() {
+			return module().dirtPathDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().dirtPathTickPriority.getValue();
+		}
+	}
+
+	public static class Dispenser {
+
+		public static int delay() {
+			return module().dispenserDelay.getValue();
+		}
+
+		public static boolean lazy() {
+			return module().dispenserLazy.getValue();
+		}
+
+		public static Map<Direction, Boolean> quasiConnectivity() {
+			return module().dispenserQuasiConnectivity.getValue();
+		}
+
+		public static boolean quasiConnectivity(Direction dir) {
+			return module().dispenserQuasiConnectivity.getValue(dir);
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().dispenserRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().dispenserTickPriority.getValue();
+		}
+	}
+
+	public static class DragonEgg {
+
+		public static int delay() {
+			return module().dragonEggDelay.getValue();
+		}
+	}
+
+	public static class Dropper {
+
+		public static int delay() {
+			return module().dropperDelay.getValue();
+		}
+
+		public static boolean lazy() {
+			return module().dropperLazy.getValue();
+		}
+
+		public static Map<Direction, Boolean> quasiConnectivity() {
+			return module().dropperQuasiConnectivity.getValue();
+		}
+
+		public static boolean quasiConnectivity(Direction dir) {
+			return module().dropperQuasiConnectivity.getValue(dir);
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().dropperRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().dropperTickPriority.getValue();
+		}
+	}
+
+	public static class FallingBlock {
+
+		public static int delay() {
+			return module().fallingBlockDelay.getValue();
+		}
+
+		public static boolean suspendedByStickyBlocks() {
+			return module().fallingBlockSuspendedByStickyBlocks.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().fallingBlockTickPriority.getValue();
+		}
+	}
+
+	public static class Farmland {
+
+		public static int delay() {
+			return module().farmlandDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().farmlandTickPriority.getValue();
+		}
+	}
+
+	public static class Fire {
+
+		public static int delayMin() {
+			return module().fireDelayMin.getValue();
+		}
+
+		public static int delayMax() {
+			return module().fireDelayMax.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().fireTickPriority.getValue();
+		}
+	}
+
+	public static class FrostedIce {
+
+		public static int delayMin() {
+			return module().frostedIceDelayMin.getValue();
+		}
+
+		public static int delayMax() {
+			return module().frostedIceDelayMax.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().frostedIceTickPriority.getValue();
+		}
+	}
+
+	public static class Hay {
+
+		public static boolean blockMisalignedPistonMove() {
+			return module().hayBlockMisalignedPistonMove.getValue();
+		}
+	}
+
 	public static class Observer {
 
 		public static int delayRisingEdge() {

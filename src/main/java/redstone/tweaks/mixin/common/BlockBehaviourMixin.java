@@ -7,8 +7,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -61,6 +63,21 @@ public class BlockBehaviourMixin implements BlockOverrides {
 
 		if (override) {
 			ci.cancel();
+		}
+	}
+
+	@Inject(
+		method = "getDirectSignal",
+		cancellable = true,
+		at = @At(
+			value = "HEAD"
+		)
+	)
+	private void rtGetDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		Integer override = overrideGetDirectSignal(state, level, pos, dir);
+
+		if (override != null) {
+			cir.setReturnValue(override);
 		}
 	}
 }

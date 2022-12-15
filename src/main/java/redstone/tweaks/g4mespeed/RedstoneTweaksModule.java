@@ -1,7 +1,11 @@
 package redstone.tweaks.g4mespeed;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import com.g4mesoft.core.GSIModule;
 import com.g4mesoft.core.GSIModuleManager;
+import com.g4mesoft.setting.GSSetting;
 import com.g4mesoft.setting.GSSettingCategory;
 import com.g4mesoft.setting.GSSettingManager;
 import com.g4mesoft.setting.types.GSBooleanSetting;
@@ -17,6 +21,8 @@ import redstone.tweaks.g4mespeed.setting.types.TickPrioritySetting;
 public class RedstoneTweaksModule implements GSIModule {
 
 	private static final boolean SHOW_IN_GUI = RedstoneTweaksMod.DEBUG;
+
+	public final Set<GSSettingCategory> categories = new LinkedHashSet<>();
 
 	public final GSSettingCategory globalCategory = new GSSettingCategory("global");
 	public final GSIntegerSetting globalSignalMax = new GSIntegerSetting("signalMax", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
@@ -70,6 +76,67 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final TickPrioritySetting comparatorTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
 	public final TickPrioritySetting comparatorTickPriorityPrioritized = new TickPrioritySetting("tickPriorityPrioritized", TickPriority.HIGH, SHOW_IN_GUI);
 
+	public final GSSettingCategory composterCategory = new GSSettingCategory("composter");
+	public final GSIntegerSetting composterDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting composterTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory coralCategory = new GSSettingCategory("coral");
+	public final GSIntegerSetting coralDelayMin = new GSIntegerSetting("delayMin", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting coralDelayMax = new GSIntegerSetting("delayMax", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting coralTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory daylightDetectorCategory = new GSSettingCategory("daylightDetector");
+	public final GSBooleanSetting daylightDetectorEmitDirectSignal = new GSBooleanSetting("emitDirectSignal", true, SHOW_IN_GUI);
+
+	public final GSSettingCategory detectorRailCategory = new GSSettingCategory("detectorRail");
+	public final GSIntegerSetting detectorRailDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting detectorRailSignal = new GSIntegerSetting("signal", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting detectorRailSignalDirect = new GSIntegerSetting("signalDirect", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting detectorRailTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory dirtPathCategory = new GSSettingCategory("grassPath");
+	public final GSIntegerSetting dirtPathDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting dirtPathTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory dispenserCategory = new GSSettingCategory("dispenser");
+	public final GSIntegerSetting dispenserDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSBooleanSetting dispenserLazy = new GSBooleanSetting("lazy", true, SHOW_IN_GUI);
+	public final QuasiConnectivitySetting dispenserQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_GUI);
+	public final GSBooleanSetting dispenserRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_GUI);
+	public final TickPrioritySetting dispenserTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory dragonEggCategory = new GSSettingCategory("dragonEgg");
+	public final GSIntegerSetting dragonEggDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+
+	public final GSSettingCategory dropperCategory = new GSSettingCategory("dropper");
+	public final GSIntegerSetting dropperDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSBooleanSetting dropperLazy = new GSBooleanSetting("lazy", true, SHOW_IN_GUI);
+	public final QuasiConnectivitySetting dropperQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_GUI);
+	public final GSBooleanSetting dropperRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_GUI);
+	public final TickPrioritySetting dropperTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory fallingBlockCategory = new GSSettingCategory("fallingBlock");
+	public final GSIntegerSetting fallingBlockDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSBooleanSetting fallingBlockSuspendedByStickyBlocks = new GSBooleanSetting("suspendedByStickyBlocks", false, SHOW_IN_GUI);
+	public final TickPrioritySetting fallingBlockTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory farmlandCategory = new GSSettingCategory("farmland");
+	public final GSIntegerSetting farmlandDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting farmlandTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory fireCategory = new GSSettingCategory("fire");
+	public final GSIntegerSetting fireDelayMin = new GSIntegerSetting("delayMin", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting fireDelayMax = new GSIntegerSetting("delayMax", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting fireTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory frostedIceCategory = new GSSettingCategory("frostedIce");
+	public final GSIntegerSetting frostedIceDelayMin = new GSIntegerSetting("delayMin", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting frostedIceDelayMax = new GSIntegerSetting("delayMax", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting frostedIceTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory hayCategory = new GSSettingCategory("hay");
+	public final GSBooleanSetting hayBlockMisalignedPistonMove = new GSBooleanSetting("blockMisalignedPistonMove", true, SHOW_IN_GUI);
+
 	public final GSSettingCategory observerCategory = new GSSettingCategory("observer");
 	public final GSIntegerSetting observerDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
 	public final GSIntegerSetting observerDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
@@ -110,79 +177,147 @@ public class RedstoneTweaksModule implements GSIModule {
 	}
 
 	@Override
-	public void registerServerSettings(GSSettingManager settings) {
-		settings.registerSetting(globalCategory, globalSignalMax);
+	public void registerClientSettings(GSSettingManager manager) {
+		registerCommonSettings(manager);
+	}
 
-		settings.registerSetting(activatorRailCategory, activatorRailDelayRisingEdge);
-		settings.registerSetting(activatorRailCategory, activatorRailDelayFallingEdge);
-		settings.registerSetting(activatorRailCategory, activatorRailLazyRisingEdge);
-		settings.registerSetting(activatorRailCategory, activatorRailLazyFallingEdge);
-		settings.registerSetting(activatorRailCategory, activatorRailPowerLimit);
-		settings.registerSetting(activatorRailCategory, activatorRailQuasiConnectivity);
-		settings.registerSetting(activatorRailCategory, activatorRailRandomizeQuasiConnectivity);
-		settings.registerSetting(activatorRailCategory, activatorRailTickPriorityRisingEdge);
-		settings.registerSetting(activatorRailCategory, activatorRailTickPriorityFallingEdge);
+	@Override
+	public void registerServerSettings(GSSettingManager manager) {
+		registerCommonSettings(manager);
+	}
 
-		settings.registerSetting(anvilCategory, anvilCrushConcrete);
-		settings.registerSetting(anvilCategory, anvilCrushWool);
+	private void registerCommonSettings(GSSettingManager manager) {
+		categories.clear();
 
-		settings.registerSetting(bambooCategory, bambooDelay);
-		settings.registerSetting(bambooCategory, bambooTickPriority);
+		registerSettings(manager, globalCategory,
+			globalSignalMax);
+		registerSettings(manager, activatorRailCategory,
+			activatorRailDelayRisingEdge,
+			activatorRailDelayFallingEdge,
+			activatorRailLazyRisingEdge,
+			activatorRailLazyFallingEdge,
+			activatorRailPowerLimit,
+			activatorRailQuasiConnectivity,
+			activatorRailRandomizeQuasiConnectivity,
+			activatorRailTickPriorityRisingEdge,
+			activatorRailTickPriorityFallingEdge);
+		registerSettings(manager, anvilCategory,
+			anvilCrushConcrete,
+			anvilCrushWool);
+		registerSettings(manager, bambooCategory,
+			bambooDelay,
+			bambooTickPriority);
+		registerSettings(manager, barrierCategory,
+			barrierMovable);
+		registerSettings(manager, bubbleColumnCategory,
+			bubbleColumnDelay,
+			bubbleColumnTickPriority);
+		registerSettings(manager, cactusCategory,
+			cactusDelay,
+			cactusNou,
+			cactusTickPriority);
+		registerSettings(manager, chorusPlantCategory,
+			chorusPlantDelay,
+			chorusPlantTickPriority);
+		registerSettings(manager, commandBlockCategory,
+			commandBlockDelay,
+			commandBlockQuasiConnectivity,
+			commandBlockRandomizeQuasiConnectivity,
+			commandBlockTickPriority);
+		registerSettings(manager, comparatorCategory,
+			comparatorAdditionMode,
+			comparatorDelay,
+			comparatorMicroTickMode,
+			comparatorRedstoneBlockAlternateInput,
+			comparatorTickPriority,
+			comparatorTickPriorityPrioritized);
+		registerSettings(manager, composterCategory,
+			composterDelay,
+			composterTickPriority);
+		registerSettings(manager, coralCategory,
+			coralDelayMin,
+			coralDelayMax,
+			coralTickPriority);
+		registerSettings(manager, daylightDetectorCategory,
+			daylightDetectorEmitDirectSignal);
+		registerSettings(manager, detectorRailCategory,
+			detectorRailDelay,
+			detectorRailSignal,
+			detectorRailSignalDirect,
+			detectorRailTickPriority);
+		registerSettings(manager, dirtPathCategory,
+			dirtPathDelay,
+			dirtPathTickPriority);
+		registerSettings(manager, dispenserCategory,
+			dispenserDelay,
+			dispenserLazy,
+			dispenserQuasiConnectivity,
+			dispenserRandomizeQuasiConnectivity,
+			dispenserTickPriority);
+		registerSettings(manager, dragonEggCategory,
+			dragonEggDelay);
+		registerSettings(manager, dropperCategory,
+			dropperDelay,
+			dropperLazy,
+			dropperQuasiConnectivity,
+			dropperRandomizeQuasiConnectivity,
+			dropperTickPriority);
+		registerSettings(manager, fallingBlockCategory,
+			fallingBlockDelay,
+			fallingBlockSuspendedByStickyBlocks,
+			fallingBlockTickPriority);
+		registerSettings(manager, farmlandCategory,
+			farmlandDelay,
+			farmlandTickPriority);
+		registerSettings(manager, fireCategory,
+			fireDelayMin,
+			fireDelayMax,
+			fireTickPriority);
+		registerSettings(manager, frostedIceCategory,
+			frostedIceDelayMin,
+			frostedIceDelayMax,
+			frostedIceTickPriority);
+		registerSettings(manager, hayCategory,
+			hayBlockMisalignedPistonMove);
+		registerSettings(manager, observerCategory,
+			observerDelayRisingEdge,
+			observerDelayFallingEdge,
+			observerDisable,
+			observerMicroTickMode,
+			observerObserveBlockUpdates,
+			observerSignal,
+			observerSignalDirect,
+			observerTickPriorityRisingEdge,
+			observerTickPriorityFallingEdge);
+		registerSettings(manager, poweredRailCategory,
+			poweredRailDelayRisingEdge,
+			poweredRailDelayFallingEdge,
+			poweredRailLazyRisingEdge,
+			poweredRailLazyFallingEdge,
+			poweredRailPowerLimit,
+			poweredRailQuasiConnectivity,
+			poweredRailRandomizeQuasiConnectivity,
+			poweredRailTickPriorityRisingEdge,
+			poweredRailTickPriorityFallingEdge);
+		registerSettings(manager, repeaterCategory,
+			repeaterDelayRisingEdge,
+			repeaterDelayFallingEdge,
+			repeaterLazyRisingEdge,
+			repeaterLazyFallingEdge,
+			repeaterMicroTickMode,
+			repeaterSignal,
+			repeaterSignalDirect,
+			repeaterTickPriorityRisingEdge,
+			repeaterTickPriorityFallingEdge,
+			repeaterTickPriorityPrioritized);
+	}
 
-		settings.registerSetting(barrierCategory, barrierMovable);
+	private void registerSettings(GSSettingManager manager, GSSettingCategory category, GSSetting<?>... settings) {
+		categories.add(category);
 
-		settings.registerSetting(bubbleColumnCategory, bubbleColumnDelay);
-		settings.registerSetting(bubbleColumnCategory, bubbleColumnTickPriority);
-
-		settings.registerSetting(cactusCategory, cactusDelay);
-		settings.registerSetting(cactusCategory, cactusNou);
-		settings.registerSetting(cactusCategory, cactusTickPriority);
-
-		settings.registerSetting(chorusPlantCategory, chorusPlantDelay);
-		settings.registerSetting(chorusPlantCategory, chorusPlantTickPriority);
-
-		settings.registerSetting(commandBlockCategory, commandBlockDelay);
-		settings.registerSetting(commandBlockCategory, commandBlockQuasiConnectivity);
-		settings.registerSetting(commandBlockCategory, commandBlockRandomizeQuasiConnectivity);
-		settings.registerSetting(commandBlockCategory, commandBlockTickPriority);
-
-		settings.registerSetting(comparatorCategory, comparatorAdditionMode);
-		settings.registerSetting(comparatorCategory, comparatorDelay);
-		settings.registerSetting(comparatorCategory, comparatorMicroTickMode);
-		settings.registerSetting(comparatorCategory, comparatorRedstoneBlockAlternateInput);
-		settings.registerSetting(comparatorCategory, comparatorTickPriority);
-		settings.registerSetting(comparatorCategory, comparatorTickPriorityPrioritized);
-
-		settings.registerSetting(observerCategory, observerDelayRisingEdge);
-		settings.registerSetting(observerCategory, observerDelayFallingEdge);
-		settings.registerSetting(observerCategory, observerDisable);
-		settings.registerSetting(observerCategory, observerMicroTickMode);
-		settings.registerSetting(observerCategory, observerObserveBlockUpdates);
-		settings.registerSetting(observerCategory, observerSignal);
-		settings.registerSetting(observerCategory, observerSignalDirect);
-		settings.registerSetting(observerCategory, observerTickPriorityRisingEdge);
-		settings.registerSetting(observerCategory, observerTickPriorityFallingEdge);
-
-		settings.registerSetting(poweredRailCategory, poweredRailDelayRisingEdge);
-		settings.registerSetting(poweredRailCategory, poweredRailDelayFallingEdge);
-		settings.registerSetting(poweredRailCategory, poweredRailLazyRisingEdge);
-		settings.registerSetting(poweredRailCategory, poweredRailLazyFallingEdge);
-		settings.registerSetting(poweredRailCategory, poweredRailPowerLimit);
-		settings.registerSetting(poweredRailCategory, poweredRailQuasiConnectivity);
-		settings.registerSetting(poweredRailCategory, poweredRailRandomizeQuasiConnectivity);
-		settings.registerSetting(poweredRailCategory, poweredRailTickPriorityRisingEdge);
-		settings.registerSetting(poweredRailCategory, poweredRailTickPriorityFallingEdge);
-
-		settings.registerSetting(repeaterCategory, repeaterDelayRisingEdge);
-		settings.registerSetting(repeaterCategory, repeaterDelayFallingEdge);
-		settings.registerSetting(repeaterCategory, repeaterLazyRisingEdge);
-		settings.registerSetting(repeaterCategory, repeaterLazyFallingEdge);
-		settings.registerSetting(repeaterCategory, repeaterMicroTickMode);
-		settings.registerSetting(repeaterCategory, repeaterSignal);
-		settings.registerSetting(repeaterCategory, repeaterSignalDirect);
-		settings.registerSetting(repeaterCategory, repeaterTickPriorityRisingEdge);
-		settings.registerSetting(repeaterCategory, repeaterTickPriorityFallingEdge);
-		settings.registerSetting(repeaterCategory, repeaterTickPriorityPrioritized);
+		for (GSSetting<?> setting : settings) {
+			manager.registerSetting(category, setting);
+		}
 	}
 
 	private static class Constants {

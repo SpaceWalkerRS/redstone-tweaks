@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -32,8 +33,8 @@ public class ObserverBlockMixin implements BlockOverrides {
 			target = "Lnet/minecraft/server/level/ServerLevel;scheduleTick(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;I)V"
 		)
 	)
-	private void rtTweakFallingEdgeDelayAndTickPriority(ServerLevel level, BlockPos pos, Block block, int delay) {
-		scheduleOff(level, pos);
+	private void rtTweakFallingEdgeDelayAndTickPriority(ServerLevel _level, BlockPos _pos, Block block, int delay, BlockState state, ServerLevel level, BlockPos pos, RandomSource randomSource) {
+		scheduleOrDoTick(level, pos, state, true);
 	}
 
 	@Inject(
@@ -71,7 +72,7 @@ public class ObserverBlockMixin implements BlockOverrides {
 	)
 	private void rtTweakRisingEdgeDelayAndTickPriority(LevelAccessor level, BlockPos pos, Block block, int delay) {
 		if (level instanceof Level) {
-			scheduleOn((Level)level, pos);
+			scheduleOrDoTick((Level)level, pos, level.getBlockState(pos), false);
 		}
 	}
 
@@ -114,7 +115,7 @@ public class ObserverBlockMixin implements BlockOverrides {
 		}
 
 		if (neighborPos.equals(pos) || neighborPos.equals(pos.relative(state.getValue(ObserverBlock.FACING)))) {
-			scheduleOn(level, pos);
+			scheduleOrDoTick(level, pos, state, false);
 		}
 
 		return false;
@@ -122,29 +123,14 @@ public class ObserverBlockMixin implements BlockOverrides {
 
 	@Override
 	public Boolean overrideTriggerEvent(BlockState state, Level level, BlockPos pos, int type, int data) {
-		return BlockOverrides.scheduleOrDoMicroTick(level, pos, state, type, data);
+		return BlockOverrides.scheduleOrDoTick(level, pos, state, type, TickPriority.NORMAL, Tweaks.Observer::microTickMode);
 	}
 
-	private void scheduleOn(Level level, BlockPos pos) {
-		int delay = Tweaks.Observer.delayRisingEdge();
-		TickPriority priority = Tweaks.Observer.tickPriorityRisingEdge();
+	private static void scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state, boolean powered) {
+		int delay = powered ? Tweaks.Observer.delayFallingEdge() : Tweaks.Observer.delayRisingEdge();
+		TickPriority priority = powered ? Tweaks.Observer.tickPriorityFallingEdge() : Tweaks.Observer.tickPriorityRisingEdge();
 
-		schedule(level, pos, delay, priority);
-	}
-
-	private void scheduleOff(Level level, BlockPos pos) {
-		int delay = Tweaks.Observer.delayFallingEdge();
-		TickPriority priority = Tweaks.Observer.tickPriorityFallingEdge();
-
-		schedule(level, pos, delay, priority);
-	}
-
-	private void schedule(Level level, BlockPos pos, int delay, TickPriority priority) {
-		if (Tweaks.Observer.microTickMode()) {
-			level.blockEvent(pos, block(), delay, 0);
-		} else {
-			level.scheduleTick(pos, block(), delay, priority);
-		}
+		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, Tweaks.Observer::microTickMode);
 	}
 
 	private int getSignal(Level level, BlockPos pos, BlockState state, Direction dir, boolean direct) {

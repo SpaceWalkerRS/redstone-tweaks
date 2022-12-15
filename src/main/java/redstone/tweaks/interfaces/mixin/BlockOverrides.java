@@ -1,11 +1,13 @@
 package redstone.tweaks.interfaces.mixin;
 
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -28,7 +30,7 @@ public interface BlockOverrides {
 	}
 
 	/**
-	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#neighborChanged BlockBehaviour.triggerEvent}.
+	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#neighborChanged BlockBehaviour.neighborChanged}.
 	 * 
 	 * @return the result of the method call, or null if not to override it
 	 */
@@ -45,20 +47,27 @@ public interface BlockOverrides {
 		return false;
 	}
 
-	public static void scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state, int delay, TickPriority priority) {
-		if (level instanceof ServerLevel) {
-			if (delay > 0) {
-				level.scheduleTick(pos, state.getBlock(), delay, priority);
-			} else {
-				state.tick((ServerLevel) level, pos, level.getRandom());
-			}
-		}
+	/**
+	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#getDirectSignal BlockBehaviour.getDirectSignal}.
+	 * 
+	 * @return the result of the method call, or null if not to override it
+	 */
+	default Integer overrideGetDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir) {
+		return null;
 	}
 
-	public static boolean scheduleOrDoMicroTick(LevelAccessor level, BlockPos pos, BlockState state, int type, int data) {
+	public static boolean scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state, int delay, TickPriority priority) {
+		return scheduleOrDoTick(level, pos, state, delay, priority, () -> false);
+	}
+
+	public static boolean scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state, int delay, TickPriority priority, BooleanSupplier doMicroTick) {
 		if (level instanceof ServerLevel) {
-			if (type > 1) {
-				((ServerLevel) level).blockEvent(pos, state.getBlock(), type - 1, data);
+			if (delay > 0) {
+				if (doMicroTick.getAsBoolean()) {
+					((ServerLevel) level).blockEvent(pos, state.getBlock(), delay - 1, 0);
+				} else {
+					level.scheduleTick(pos, state.getBlock(), delay, priority);
+				}
 			} else {
 				state.tick((ServerLevel) level, pos, level.getRandom());
 			}

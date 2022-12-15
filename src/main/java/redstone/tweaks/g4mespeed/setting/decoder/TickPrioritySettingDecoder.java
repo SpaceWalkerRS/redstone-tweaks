@@ -1,6 +1,6 @@
 package redstone.tweaks.g4mespeed.setting.decoder;
 
-import com.g4mesoft.setting.decoder.GSISettingDecoder;
+import com.g4mesoft.setting.GSISettingDecoder;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.ticks.TickPriority;

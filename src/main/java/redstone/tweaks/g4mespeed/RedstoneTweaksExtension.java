@@ -52,8 +52,8 @@ public class RedstoneTweaksExtension implements GSIExtension {
 
 	@Override
 	public void init() {
-		GSSettingManager.registerSettingDecoder(new TickPrioritySettingDecoder());
-		GSSettingManager.registerSettingDecoder(new QuasiConnectivitySettingDecoder());
+		GSSettingManager.registerDecoder(new TickPrioritySettingDecoder());
+		GSSettingManager.registerDecoder(new QuasiConnectivitySettingDecoder());
 	}
 
 	@Override

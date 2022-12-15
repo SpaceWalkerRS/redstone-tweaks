@@ -3,7 +3,7 @@ package redstone.tweaks.g4mespeed.setting.decoder;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.g4mesoft.setting.decoder.GSISettingDecoder;
+import com.g4mesoft.setting.GSISettingDecoder;
 
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;

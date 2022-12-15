@@ -4,6 +4,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.RepeaterBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,5 +29,20 @@ public class RepeaterBlockMixin implements DiodeOverrides {
 	@Override
 	public boolean invertAlternateSignal(BlockState state) {
 		return false;
+	}
+
+	@Override
+	public boolean microTickMode() {
+		return Tweaks.Repeater.microTickMode();
+	}
+
+	@Override
+	public int signal(BlockGetter level, BlockPos pos, BlockState state) {
+		return Tweaks.Repeater.signal();
+	}
+
+	@Override
+	public int signalDirect(BlockGetter level, BlockPos pos, BlockState state) {
+		return Tweaks.Repeater.signalDirect();
 	}
 }
