@@ -48,6 +48,24 @@ public interface BlockOverrides {
 	}
 
 	/**
+	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#isSignalSource BlockBehaviour.isSignalSource}.
+	 * 
+	 * @return the result of the method call, or null if not to override it
+	 */
+	default Boolean overrideIsSignalSource(BlockState state) {
+		return null;
+	}
+
+	/**
+	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#getSignal BlockBehaviour.getSignal}.
+	 * 
+	 * @return the result of the method call, or null if not to override it
+	 */
+	default Integer overrideGetSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir) {
+		return null;
+	}
+
+	/**
 	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#getDirectSignal BlockBehaviour.getDirectSignal}.
 	 * 
 	 * @return the result of the method call, or null if not to override it
@@ -69,7 +87,7 @@ public interface BlockOverrides {
 					level.scheduleTick(pos, state.getBlock(), delay, priority);
 				}
 			} else {
-				state.tick((ServerLevel) level, pos, level.getRandom());
+				state.tick((ServerLevel)level, pos, level.getRandom());
 			}
 		}
 

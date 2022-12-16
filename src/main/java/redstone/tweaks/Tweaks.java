@@ -364,6 +364,248 @@ public class Tweaks {
 		}
 	}
 
+	public static class HeavyWeightedPressurePlate {
+
+		public static int delayRisingEdge() {
+			return module().heavyWeightedPressurePlateDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().heavyWeightedPressurePlateDelayFallingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().heavyWeightedPressurePlateTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().heavyWeightedPressurePlateTickPriorityFallingEdge.getValue();
+		}
+
+		public static int weight() {
+			return module().heavyWeightedPressurePlateWeight.getValue();
+		}
+	}
+
+	public static class Hopper {
+
+		public static int cooldown() {
+			return module().hopperCooldown.getValue();
+		}
+
+		public static int cooldownPrioritized() {
+			return module().hopperCooldownPrioritized.getValue();
+		}
+
+		public static int delayRisingEdge() {
+			return module().hopperDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().hopperDelayFallingEdge.getValue();
+		}
+
+		public static boolean lazyRisingEdge() {
+			return module().hopperLazyRisingEdge.getValue();
+		}
+
+		public static boolean lazyFallingEdge() {
+			return module().hopperLazyFallingEdge.getValue();
+		}
+	
+		public static Map<Direction, Boolean> quasiConnectivity() {
+			return module().hopperQuasiConnectivity.getValue();
+		}
+
+		public static boolean quasiConnectivity(Direction dir) {
+			return module().hopperQuasiConnectivity.getValue(dir);
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().hopperRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().hopperTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().hopperTickPriorityFallingEdge.getValue();
+		}
+	}
+
+	public static class Lava {
+
+		public static int delay() {
+			return module().lavaDelay.getValue();
+		}
+
+		public static int delayNether() {
+			return module().lavaDelayNether.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().lavaTickPriority.getValue();
+		}
+	}
+
+	public static class Leaves {
+
+		public static int delay() {
+			return module().leavesDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().leavesTickPriority.getValue();
+		}
+	}
+
+	public static class Lectern {
+
+		public static int delayRisingEdge() {
+			return module().lecternDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().lecternDelayFallingEdge.getValue();
+		}
+
+		public static int signal() {
+			return module().lecternSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().lecternSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().lecternTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().lecternTickPriorityFallingEdge.getValue();
+		}
+	}
+
+	public static class Lever {
+
+		public static int delayRisingEdge() {
+			return module().leverDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().leverDelayFallingEdge.getValue();
+		}
+
+		public static int signal() {
+			return module().leverSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().leverSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().leverTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().leverTickPriorityFallingEdge.getValue();
+		}
+	}
+
+	public static class LightWeightedPressurePlate {
+
+		public static int delayRisingEdge() {
+			return module().lightWeightedPressurePlateDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().lightWeightedPressurePlateDelayFallingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().lightWeightedPressurePlateTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().lightWeightedPressurePlateTickPriorityFallingEdge.getValue();
+		}
+
+		public static int weight() {
+			return module().lightWeightedPressurePlateWeight.getValue();
+		}
+	}
+
+	public static class MagentaGlazedTerracotta {
+
+		public static boolean signalDiode() {
+			return module().magentaGlazedTerracottaSignalDiode.getValue();
+		}
+	}
+
+	public static class Magma {
+
+		public static int delay() {
+			return module().magmaDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().magmaTickPriority.getValue();
+		}
+	}
+
+	public static class NormalPiston {
+
+		public static int delayRisingEdge() {
+			return module().normalPistonDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().normalPistonDelayFallingEdge.getValue();
+		}
+
+		public static boolean ignorePowerFromFront() {
+			return module().normalPistonIgnorePowerFromFront.getValue();
+		}
+
+		public static boolean lazyRisingEdge() {
+			return module().normalPistonLazyRisingEdge.getValue();
+		}
+
+		public static boolean lazyFallingEdge() {
+			return module().normalPistonLazyFallingEdge.getValue();
+		}
+
+		public static Map<Direction, Boolean> quasiConnectivity() {
+			return module().normalPistonQuasiConnectivity.getValue();
+		}
+
+		public static boolean quasiConnectivity(Direction dir) {
+			return module().normalPistonQuasiConnectivity.getValue(dir);
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().normalPistonRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static int speedRisingEdge() {
+			return module().normalPistonSpeedRisingEdge.getValue();
+		}
+
+		public static int speedFallingEdge() {
+			return module().normalPistonSpeedFallingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().normalPistonTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().normalPistonTickPriorityFallingEdge.getValue();
+		}
+	}
+
 	public static class Observer {
 
 		public static int delayRisingEdge() {
@@ -400,6 +642,73 @@ public class Tweaks {
 
 		public static TickPriority tickPriorityFallingEdge() {
 			return module().observerTickPriorityFallingEdge.getValue();
+		}
+	}
+
+	public static class Piston {
+
+		public static int delayRisingEdge(boolean sticky) {
+			return sticky ? StickyPiston.delayRisingEdge() : NormalPiston.delayRisingEdge();
+		}
+
+		public static int delayFallingEdge(boolean sticky) {
+			return sticky ? StickyPiston.delayFallingEdge() : NormalPiston.delayFallingEdge();
+		}
+
+		public static int delay(boolean extend, boolean sticky) {
+			return extend ? delayRisingEdge(sticky) : delayFallingEdge(sticky);
+		}
+
+		public static boolean ignorePowerFromFront(boolean sticky) {
+			return sticky ? StickyPiston.ignorePowerFromFront() : NormalPiston.ignorePowerFromFront();
+		}
+
+		public static boolean lazyRisingEdge(boolean sticky) {
+			return sticky ? StickyPiston.lazyRisingEdge() : NormalPiston.lazyRisingEdge();
+		}
+
+		public static boolean lazyFallingEdge(boolean sticky) {
+			return sticky ? StickyPiston.lazyFallingEdge() : NormalPiston.lazyFallingEdge();
+		}
+
+		public static boolean lazy(boolean extend, boolean sticky) {
+			return extend ? lazyRisingEdge(sticky) : lazyFallingEdge(sticky);
+		}
+
+		public static Map<Direction, Boolean> quasiConnectivity(boolean sticky) {
+			return sticky ? StickyPiston.quasiConnectivity() : NormalPiston.quasiConnectivity();
+		}
+
+		public static boolean quasiConnectivity(boolean sticky, Direction dir) {
+			return sticky ? StickyPiston.quasiConnectivity(dir) : NormalPiston.quasiConnectivity(dir);
+		}
+
+		public static boolean randomizeQuasiConnectivity(boolean sticky) {
+			return sticky ? StickyPiston.randomizeQuasiConnectivity() : NormalPiston.randomizeQuasiConnectivity();
+		}
+
+		public static int speedRisingEdge(boolean sticky) {
+			return sticky ? StickyPiston.speedRisingEdge() : NormalPiston.speedRisingEdge();
+		}
+
+		public static int speedFallingEdge(boolean sticky) {
+			return sticky ? StickyPiston.speedFallingEdge() : NormalPiston.speedFallingEdge();
+		}
+
+		public static int speed(boolean extend, boolean sticky) {
+			return extend ? speedRisingEdge(sticky) : speedFallingEdge(sticky);
+		}
+
+		public static TickPriority tickPriorityRisingEdge(boolean sticky) {
+			return sticky ? StickyPiston.tickPriorityRisingEdge() : NormalPiston.tickPriorityRisingEdge();
+		}
+
+		public static TickPriority tickPriorityFallingEdge(boolean sticky) {
+			return sticky ? StickyPiston.tickPriorityFallingEdge() : NormalPiston.tickPriorityFallingEdge();
+		}
+
+		public static TickPriority tickPriority(boolean extend, boolean sticky) {
+			return extend ? tickPriorityRisingEdge(sticky) : tickPriorityFallingEdge(sticky);
 		}
 	}
 
@@ -486,6 +795,122 @@ public class Tweaks {
 
 		public static TickPriority tickPriorityPrioritized() {
 			return module().repeaterTickPriorityPrioritized.getValue();
+		}
+	}
+
+	public static class StickyPiston {
+
+		public static int delayRisingEdge() {
+			return module().stickyPistonDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().stickyPistonDelayFallingEdge.getValue();
+		}
+
+		public static boolean ignorePowerFromFront() {
+			return module().stickyPistonIgnorePowerFromFront.getValue();
+		}
+
+		public static boolean lazyRisingEdge() {
+			return module().stickyPistonLazyRisingEdge.getValue();
+		}
+
+		public static boolean lazyFallingEdge() {
+			return module().stickyPistonLazyFallingEdge.getValue();
+		}
+
+		public static Map<Direction, Boolean> quasiConnectivity() {
+			return module().stickyPistonQuasiConnectivity.getValue();
+		}
+
+		public static boolean quasiConnectivity(Direction dir) {
+			return module().stickyPistonQuasiConnectivity.getValue(dir);
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().stickyPistonRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static int speedRisingEdge() {
+			return module().stickyPistonSpeedRisingEdge.getValue();
+		}
+
+		public static int speedFallingEdge() {
+			return module().stickyPistonSpeedFallingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().stickyPistonTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().stickyPistonTickPriorityFallingEdge.getValue();
+		}
+	}
+
+	public static class StonePressurePlate {
+
+		public static int delayRisingEdge() {
+			return module().stonePressurePlateDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().stonePressurePlateDelayFallingEdge.getValue();
+		}
+	
+		public static int signal() {
+			return module().stonePressurePlateSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().stonePressurePlateSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().stonePressurePlateTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().stonePressurePlateTickPriorityFallingEdge.getValue();
+		}
+	}
+
+	public static class Water {
+
+		public static int delay() {
+			return module().waterDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().waterTickPriority.getValue();
+		}
+	}
+
+	public static class WoodenPressurePlate {
+
+		public static int delayRisingEdge() {
+			return module().woodenPressurePlateDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().woodenPressurePlateDelayFallingEdge.getValue();
+		}
+	
+		public static int signal() {
+			return module().woodenPressurePlateSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().woodenPressurePlateSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().woodenPressurePlateTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().woodenPressurePlateTickPriorityFallingEdge.getValue();
 		}
 	}
 

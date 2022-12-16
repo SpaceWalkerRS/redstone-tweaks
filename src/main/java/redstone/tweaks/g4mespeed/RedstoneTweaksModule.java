@@ -137,6 +137,77 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSSettingCategory hayCategory = new GSSettingCategory("hay");
 	public final GSBooleanSetting hayBlockMisalignedPistonMove = new GSBooleanSetting("blockMisalignedPistonMove", true, SHOW_IN_GUI);
 
+	public final GSSettingCategory heavyWeightedPressurePlateCategory = new GSSettingCategory("heavyWeightedPressurePlate");
+	public final GSIntegerSetting heavyWeightedPressurePlateDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting heavyWeightedPressurePlateDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting heavyWeightedPressurePlateTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final TickPrioritySetting heavyWeightedPressurePlateTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final GSIntegerSetting heavyWeightedPressurePlateWeight = new GSIntegerSetting("weight", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+
+	public final GSSettingCategory hopperCategory = new GSSettingCategory("hopper");
+	public final GSIntegerSetting hopperCooldown = new GSIntegerSetting("cooldown", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting hopperCooldownPrioritized = new GSIntegerSetting("cooldownPrioritized", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting hopperDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting hopperDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSBooleanSetting hopperLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", false, SHOW_IN_GUI);
+	public final GSBooleanSetting hopperLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_GUI);
+	public final QuasiConnectivitySetting hopperQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_GUI);
+	public final GSBooleanSetting hopperRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_GUI);
+	public final TickPrioritySetting hopperTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final TickPrioritySetting hopperTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory lavaCategory = new GSSettingCategory("lava");
+	public final GSIntegerSetting lavaDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting lavaDelayNether = new GSIntegerSetting("delayNether", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting lavaTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory leavesCategory = new GSSettingCategory("leaves");
+	public final GSIntegerSetting leavesDelay = new GSIntegerSetting("delay", 1, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting leavesTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory lecternCategory = new GSSettingCategory("lectern");
+	public final GSIntegerSetting lecternDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting lecternDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting lecternSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting lecternSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting lecternTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final TickPrioritySetting lecternTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory leverCategory = new GSSettingCategory("lever");
+	public final GSIntegerSetting leverDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting leverDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting leverSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting leverSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting leverTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final TickPrioritySetting leverTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory lightWeightedPressurePlateCategory = new GSSettingCategory("lightWeightedPressurePlate");
+	public final GSIntegerSetting lightWeightedPressurePlateDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting lightWeightedPressurePlateDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting lightWeightedPressurePlateTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final TickPrioritySetting lightWeightedPressurePlateTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final GSIntegerSetting lightWeightedPressurePlateWeight = new GSIntegerSetting("weight", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+
+	public final GSSettingCategory magentaGlazedTerracottaCategory = new GSSettingCategory("magentaGlazedTerracotta");
+	public final GSBooleanSetting magentaGlazedTerracottaSignalDiode = new GSBooleanSetting("signalDiode", false, SHOW_IN_GUI);
+
+	public final GSSettingCategory magmaCategory = new GSSettingCategory("magma");
+	public final GSIntegerSetting magmaDelay = new GSIntegerSetting("delay", 1, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting magmaTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory normalPistonCategory = new GSSettingCategory("normalPiston");
+	public final GSIntegerSetting normalPistonDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting normalPistonDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSBooleanSetting normalPistonIgnorePowerFromFront = new GSBooleanSetting("ignorePowerFromFront", true, SHOW_IN_GUI);
+	public final GSBooleanSetting normalPistonLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", true, SHOW_IN_GUI);
+	public final GSBooleanSetting normalPistonLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_GUI);
+	public final QuasiConnectivitySetting normalPistonQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_GUI);
+	public final GSBooleanSetting normalPistonRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_GUI);
+	public final GSIntegerSetting normalPistonSpeedRisingEdge = new GSIntegerSetting("speedRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting normalPistonSpeedFallingEdge = new GSIntegerSetting("speedFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting normalPistonTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final TickPrioritySetting normalPistonTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+
 	public final GSSettingCategory observerCategory = new GSSettingCategory("observer");
 	public final GSIntegerSetting observerDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
 	public final GSIntegerSetting observerDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
@@ -171,22 +242,46 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final TickPrioritySetting repeaterTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.VERY_HIGH, SHOW_IN_GUI);
 	public final TickPrioritySetting repeaterTickPriorityPrioritized = new TickPrioritySetting("tickPriorityPrioritized", TickPriority.EXTREMELY_HIGH, SHOW_IN_GUI);
 
+	public final GSSettingCategory stickyPistonCategory = new GSSettingCategory("stickyPiston");
+	public final GSIntegerSetting stickyPistonDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting stickyPistonDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSBooleanSetting stickyPistonIgnorePowerFromFront = new GSBooleanSetting("ignorePowerFromFront", true, SHOW_IN_GUI);
+	public final GSBooleanSetting stickyPistonLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", true, SHOW_IN_GUI);
+	public final GSBooleanSetting stickyPistonLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_GUI);
+	public final QuasiConnectivitySetting stickyPistonQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_GUI);
+	public final GSBooleanSetting stickyPistonRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_GUI);
+	public final GSIntegerSetting stickyPistonSpeedRisingEdge = new GSIntegerSetting("speedRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting stickyPistonSpeedFallingEdge = new GSIntegerSetting("speedFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting stickyPistonTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final TickPrioritySetting stickyPistonTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory stonePressurePlateCategory = new GSSettingCategory("stonePressurePlate");
+	public final GSIntegerSetting stonePressurePlateDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting stonePressurePlateDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting stonePressurePlateSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting stonePressurePlateSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting stonePressurePlateTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final TickPrioritySetting stonePressurePlateTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory waterCategory = new GSSettingCategory("water");
+	public final GSIntegerSetting waterDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting waterTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_GUI);
+
+	public final GSSettingCategory woodenPressurePlateCategory = new GSSettingCategory("woodenPressurePlate");
+	public final GSIntegerSetting woodenPressurePlateDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting woodenPressurePlateDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting woodenPressurePlateSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting woodenPressurePlateSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
+	public final TickPrioritySetting woodenPressurePlateTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+	public final TickPrioritySetting woodenPressurePlateTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
+
 	@Override
 	public void init(GSIModuleManager manager) {
 
 	}
 
 	@Override
-	public void registerClientSettings(GSSettingManager manager) {
-		registerCommonSettings(manager);
-	}
-
-	@Override
 	public void registerServerSettings(GSSettingManager manager) {
-		registerCommonSettings(manager);
-	}
-
-	private void registerCommonSettings(GSSettingManager manager) {
 		categories.clear();
 
 		registerSettings(manager, globalCategory,
@@ -279,6 +374,67 @@ public class RedstoneTweaksModule implements GSIModule {
 			frostedIceTickPriority);
 		registerSettings(manager, hayCategory,
 			hayBlockMisalignedPistonMove);
+		registerSettings(manager, heavyWeightedPressurePlateCategory,
+			heavyWeightedPressurePlateDelayRisingEdge,
+			heavyWeightedPressurePlateDelayFallingEdge,
+			heavyWeightedPressurePlateTickPriorityRisingEdge,
+			heavyWeightedPressurePlateTickPriorityFallingEdge,
+			heavyWeightedPressurePlateWeight);
+		registerSettings(manager, hopperCategory,
+			hopperCooldown,
+			hopperCooldownPrioritized,
+			hopperDelayRisingEdge,
+			hopperDelayFallingEdge,
+			hopperLazyRisingEdge,
+			hopperLazyFallingEdge,
+			hopperQuasiConnectivity,
+			hopperRandomizeQuasiConnectivity,
+			hopperTickPriorityRisingEdge,
+			hopperTickPriorityFallingEdge);
+		registerSettings(manager, lavaCategory,
+			lavaDelay,
+			lavaDelayNether,
+			lavaTickPriority);
+		registerSettings(manager, leavesCategory,
+			leavesDelay,
+			leavesTickPriority);
+		registerSettings(manager, lecternCategory,
+			lecternDelayRisingEdge,
+			lecternDelayFallingEdge,
+			lecternSignal,
+			lecternSignalDirect,
+			lecternTickPriorityRisingEdge,
+			lecternTickPriorityFallingEdge);
+		registerSettings(manager, leverCategory,
+			leverDelayRisingEdge,
+			leverDelayFallingEdge,
+			leverSignal,
+			leverSignalDirect,
+			leverTickPriorityRisingEdge,
+			leverTickPriorityFallingEdge);
+		registerSettings(manager, lightWeightedPressurePlateCategory,
+			lightWeightedPressurePlateDelayRisingEdge,
+			lightWeightedPressurePlateDelayFallingEdge,
+			lightWeightedPressurePlateTickPriorityRisingEdge,
+			lightWeightedPressurePlateTickPriorityFallingEdge,
+			lightWeightedPressurePlateWeight);
+		registerSettings(manager, magentaGlazedTerracottaCategory,
+			magentaGlazedTerracottaSignalDiode);
+		registerSettings(manager, magmaCategory,
+			magmaDelay,
+			magmaTickPriority);
+		registerSettings(manager, normalPistonCategory,
+			normalPistonDelayRisingEdge,
+			normalPistonDelayFallingEdge,
+			normalPistonIgnorePowerFromFront,
+			normalPistonLazyRisingEdge,
+			normalPistonLazyFallingEdge,
+			normalPistonQuasiConnectivity,
+			normalPistonRandomizeQuasiConnectivity,
+			normalPistonSpeedRisingEdge,
+			normalPistonSpeedFallingEdge,
+			normalPistonTickPriorityRisingEdge,
+			normalPistonTickPriorityFallingEdge);
 		registerSettings(manager, observerCategory,
 			observerDelayRisingEdge,
 			observerDelayFallingEdge,
@@ -310,9 +466,42 @@ public class RedstoneTweaksModule implements GSIModule {
 			repeaterTickPriorityRisingEdge,
 			repeaterTickPriorityFallingEdge,
 			repeaterTickPriorityPrioritized);
+		registerSettings(manager, stickyPistonCategory,
+			stickyPistonDelayRisingEdge,
+			stickyPistonDelayFallingEdge,
+			stickyPistonIgnorePowerFromFront,
+			stickyPistonLazyRisingEdge,
+			stickyPistonLazyFallingEdge,
+			stickyPistonQuasiConnectivity,
+			stickyPistonRandomizeQuasiConnectivity,
+			stickyPistonSpeedRisingEdge,
+			stickyPistonSpeedFallingEdge,
+			stickyPistonTickPriorityRisingEdge,
+			stickyPistonTickPriorityFallingEdge);
+		registerSettings(manager, stonePressurePlateCategory,
+			stonePressurePlateDelayRisingEdge,
+			stonePressurePlateDelayFallingEdge,
+			stonePressurePlateSignal,
+			stonePressurePlateSignalDirect,
+			stonePressurePlateTickPriorityRisingEdge,
+			stonePressurePlateTickPriorityFallingEdge);
+		registerSettings(manager, waterCategory,
+			waterDelay,
+			waterTickPriority);
+		registerSettings(manager, woodenPressurePlateCategory,
+			woodenPressurePlateDelayRisingEdge,
+			woodenPressurePlateDelayFallingEdge,
+			woodenPressurePlateSignal,
+			woodenPressurePlateSignalDirect,
+			woodenPressurePlateTickPriorityRisingEdge,
+			woodenPressurePlateTickPriorityFallingEdge);
 	}
 
 	private void registerSettings(GSSettingManager manager, GSSettingCategory category, GSSetting<?>... settings) {
+		if (categories.contains(category)) {
+			throw new IllegalStateException("Settings for category " + category.getName() + " have already been registered!");
+		}
+
 		categories.add(category);
 
 		for (GSSetting<?> setting : settings) {

@@ -158,7 +158,7 @@ public abstract class DiodeBlockMixin implements DiodeOverrides {
 		method = "checkTickOnNeighbor",
 		at = @At(
 			value = "FIELD",
-			target = "Lnet/minecraft/world/ticks/TickPriority;HIGHL:Lnet/minecraft/world/ticks/TickPriority;"
+			target = "Lnet/minecraft/world/ticks/TickPriority;HIGH:Lnet/minecraft/world/ticks/TickPriority;"
 		)
 	)
 	private TickPriority rtTweakRisingEdgeTickPriority() {

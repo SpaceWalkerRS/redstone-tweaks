@@ -67,6 +67,36 @@ public class BlockBehaviourMixin implements BlockOverrides {
 	}
 
 	@Inject(
+		method = "isSignalSource",
+		cancellable = true,
+		at = @At(
+			value = "HEAD"
+		)
+	)
+	private void rtIsSignalSource(BlockState state, CallbackInfoReturnable<Boolean> cir) {
+		Boolean override = overrideIsSignalSource(state);
+
+		if (override != null) {
+			cir.setReturnValue(override);
+		}
+	}
+
+	@Inject(
+		method = "getSignal",
+		cancellable = true,
+		at = @At(
+			value = "HEAD"
+		)
+	)
+	private void rtGetSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+		Integer override = overrideGetDirectSignal(state, level, pos, dir);
+
+		if (override != null) {
+			cir.setReturnValue(override);
+		}
+	}
+
+	@Inject(
 		method = "getDirectSignal",
 		cancellable = true,
 		at = @At(
