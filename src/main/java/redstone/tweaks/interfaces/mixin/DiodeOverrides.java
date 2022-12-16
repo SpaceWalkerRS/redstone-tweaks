@@ -8,7 +8,7 @@ public interface DiodeOverrides extends BlockOverrides {
 
 	boolean invertAlternateSignal(BlockState state);
 
-	boolean microTickMode();
+	boolean microtickMode();
 
 	int signal(BlockGetter level, BlockPos pos, BlockState state);
 

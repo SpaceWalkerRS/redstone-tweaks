@@ -13,6 +13,10 @@ public class Tweaks {
 
 	public static class Global {
 
+		public static boolean movableBlockEntities() {
+			return module().globalMovableBlockEntities.getValue();
+		}
+
 		public static int signalMax() {
 			return module().globalSignalMax.getValue();
 		}
@@ -160,7 +164,7 @@ public class Tweaks {
 			return module().comparatorDelay.getValue();
 		}
 
-		public static boolean microTickMode() {
+		public static boolean microtickMode() {
 			return module().comparatorMicroTickMode.getValue();
 		}
 
@@ -577,6 +581,22 @@ public class Tweaks {
 			return module().normalPistonLazyFallingEdge.getValue();
 		}
 
+		public static boolean looseHead() {
+			return module().normalPistonLooseHead.getValue();
+		}
+
+		public static boolean movableWhenExtended() {
+			return module().normalPistonMovableWhenExtended.getValue();
+		}
+
+		public static int pushLimit() {
+			return module().normalPistonPushLimit.getValue();
+		}
+
+		public static int pullLimit() {
+			return -1;
+		}
+
 		public static Map<Direction, Boolean> quasiConnectivity() {
 			return module().normalPistonQuasiConnectivity.getValue();
 		}
@@ -673,6 +693,26 @@ public class Tweaks {
 
 		public static boolean lazy(boolean extend, boolean sticky) {
 			return extend ? lazyRisingEdge(sticky) : lazyFallingEdge(sticky);
+		}
+
+		public static boolean looseHead(boolean sticky) {
+			return sticky ? StickyPiston.looseHead() : NormalPiston.looseHead();
+		}
+
+		public static boolean movableWhenExtended(boolean sticky) {
+			return sticky ? StickyPiston.movableWhenExtended() : NormalPiston.movableWhenExtended();
+		}
+
+		public static int pushLimit(boolean sticky) {
+			return sticky ? StickyPiston.pushLimit() : NormalPiston.pushLimit();
+		}
+
+		public static int pullLimit(boolean sticky) {
+			return sticky ? StickyPiston.pullLimit() : NormalPiston.pullLimit();
+		}
+
+		public static int moveLimit(boolean extend, boolean sticky) {
+			return extend ? pushLimit(sticky) : pullLimit(sticky);
 		}
 
 		public static Map<Direction, Boolean> quasiConnectivity(boolean sticky) {
@@ -773,7 +813,7 @@ public class Tweaks {
 			return module().repeaterLazyFallingEdge.getValue();
 		}
 
-		public static boolean microTickMode() {
+		public static boolean microtickMode() {
 			return module().repeaterMicroTickMode.getValue();
 		}
 
@@ -820,6 +860,22 @@ public class Tweaks {
 			return module().stickyPistonLazyFallingEdge.getValue();
 		}
 
+		public static boolean looseHead() {
+			return module().stickyPistonLooseHead.getValue();
+		}
+
+		public static boolean movableWhenExtended() {
+			return module().stickyPistonMovableWhenExtended.getValue();
+		}
+
+		public static int pushLimit() {
+			return module().stickyPistonPushLimit.getValue();
+		}
+
+		public static int pullLimit() {
+			return module().stickyPistonPullLimit.getValue();
+		}
+
 		public static Map<Direction, Boolean> quasiConnectivity() {
 			return module().stickyPistonQuasiConnectivity.getValue();
 		}
@@ -838,6 +894,10 @@ public class Tweaks {
 
 		public static int speedFallingEdge() {
 			return module().stickyPistonSpeedFallingEdge.getValue();
+		}
+
+		public static boolean superSticky() {
+			return module().stickyPistonSuperSticky.getValue();
 		}
 
 		public static TickPriority tickPriorityRisingEdge() {

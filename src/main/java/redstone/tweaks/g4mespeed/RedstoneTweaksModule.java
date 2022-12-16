@@ -25,6 +25,7 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final Set<GSSettingCategory> categories = new LinkedHashSet<>();
 
 	public final GSSettingCategory globalCategory = new GSSettingCategory("global");
+	public final GSBooleanSetting globalMovableBlockEntities = new GSBooleanSetting("movableBlockEntities", false, SHOW_IN_GUI);
 	public final GSIntegerSetting globalSignalMax = new GSIntegerSetting("signalMax", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_GUI);
 
 	public final GSSettingCategory activatorRailCategory = new GSSettingCategory("activatorRail");
@@ -201,6 +202,9 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSBooleanSetting normalPistonIgnorePowerFromFront = new GSBooleanSetting("ignorePowerFromFront", true, SHOW_IN_GUI);
 	public final GSBooleanSetting normalPistonLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", true, SHOW_IN_GUI);
 	public final GSBooleanSetting normalPistonLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_GUI);
+	public final GSBooleanSetting normalPistonLooseHead = new GSBooleanSetting("looseHead", false, SHOW_IN_GUI);
+	public final GSBooleanSetting normalPistonMovableWhenExtended = new GSBooleanSetting("movableWhenExtended", false, SHOW_IN_GUI);
+	public final GSIntegerSetting normalPistonPushLimit = new GSIntegerSetting("pushLimit", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
 	public final QuasiConnectivitySetting normalPistonQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_GUI);
 	public final GSBooleanSetting normalPistonRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_GUI);
 	public final GSIntegerSetting normalPistonSpeedRisingEdge = new GSIntegerSetting("speedRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
@@ -248,10 +252,15 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSBooleanSetting stickyPistonIgnorePowerFromFront = new GSBooleanSetting("ignorePowerFromFront", true, SHOW_IN_GUI);
 	public final GSBooleanSetting stickyPistonLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", true, SHOW_IN_GUI);
 	public final GSBooleanSetting stickyPistonLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_GUI);
+	public final GSBooleanSetting stickyPistonLooseHead = new GSBooleanSetting("looseHead", false, SHOW_IN_GUI);
+	public final GSBooleanSetting stickyPistonMovableWhenExtended = new GSBooleanSetting("movableWhenExtended", false, SHOW_IN_GUI);
+	public final GSIntegerSetting stickyPistonPushLimit = new GSIntegerSetting("pushLimit", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSIntegerSetting stickyPistonPullLimit = new GSIntegerSetting("pullLimit", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
 	public final QuasiConnectivitySetting stickyPistonQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_GUI);
 	public final GSBooleanSetting stickyPistonRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_GUI);
 	public final GSIntegerSetting stickyPistonSpeedRisingEdge = new GSIntegerSetting("speedRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
 	public final GSIntegerSetting stickyPistonSpeedFallingEdge = new GSIntegerSetting("speedFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_GUI);
+	public final GSBooleanSetting stickyPistonSuperSticky = new GSBooleanSetting("superSticky", false, SHOW_IN_GUI);
 	public final TickPrioritySetting stickyPistonTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
 	public final TickPrioritySetting stickyPistonTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_GUI);
 
@@ -285,6 +294,7 @@ public class RedstoneTweaksModule implements GSIModule {
 		categories.clear();
 
 		registerSettings(manager, globalCategory,
+			globalMovableBlockEntities,
 			globalSignalMax);
 		registerSettings(manager, activatorRailCategory,
 			activatorRailDelayRisingEdge,
@@ -429,6 +439,9 @@ public class RedstoneTweaksModule implements GSIModule {
 			normalPistonIgnorePowerFromFront,
 			normalPistonLazyRisingEdge,
 			normalPistonLazyFallingEdge,
+			normalPistonLooseHead,
+			normalPistonMovableWhenExtended,
+			normalPistonPushLimit,
 			normalPistonQuasiConnectivity,
 			normalPistonRandomizeQuasiConnectivity,
 			normalPistonSpeedRisingEdge,
@@ -472,10 +485,15 @@ public class RedstoneTweaksModule implements GSIModule {
 			stickyPistonIgnorePowerFromFront,
 			stickyPistonLazyRisingEdge,
 			stickyPistonLazyFallingEdge,
+			stickyPistonLooseHead,
+			stickyPistonMovableWhenExtended,
+			stickyPistonPushLimit,
+			stickyPistonPullLimit,
 			stickyPistonQuasiConnectivity,
 			stickyPistonRandomizeQuasiConnectivity,
 			stickyPistonSpeedRisingEdge,
 			stickyPistonSpeedFallingEdge,
+			stickyPistonSuperSticky,
 			stickyPistonTickPriorityRisingEdge,
 			stickyPistonTickPriorityFallingEdge);
 		registerSettings(manager, stonePressurePlateCategory,

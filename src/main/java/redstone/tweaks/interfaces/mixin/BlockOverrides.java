@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.ticks.TickPriority;
 
 public interface BlockOverrides {
@@ -74,15 +75,38 @@ public interface BlockOverrides {
 		return null;
 	}
 
+	/**
+	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#getPistonPushReaction BlockBehaviour.getPistonPushReaction}.
+	 * 
+	 * @return the result of the method call, or null if not to override it
+	 */
+	default PushReaction overrideGetPistonPushReaction(BlockState state) {
+		return null;
+	}
+
+	/**
+	 * @return whether this block is sticky in any way when moved by pistons
+	 */
+	default boolean isSticky(BlockState state) {
+		return false;
+	}
+
+	/**
+	 * @return whether the neighboring block is pulled along if this block is moved by pistons
+	 */
+	default boolean isStickyToNeighbor(Level level, BlockPos pos, BlockState state, BlockPos neighborPos, BlockState neighborState, Direction dir, Direction moveDir) {
+		return false;
+	}
+
 	public static boolean scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state, int delay, TickPriority priority) {
 		return scheduleOrDoTick(level, pos, state, delay, priority, () -> false);
 	}
 
-	public static boolean scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state, int delay, TickPriority priority, BooleanSupplier doMicroTick) {
+	public static boolean scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state, int delay, TickPriority priority, BooleanSupplier microtickMode) {
 		if (level instanceof ServerLevel) {
 			if (delay > 0) {
-				if (doMicroTick.getAsBoolean()) {
-					((ServerLevel) level).blockEvent(pos, state.getBlock(), delay - 1, 0);
+				if (microtickMode.getAsBoolean()) {
+					((ServerLevel)level).blockEvent(pos, state.getBlock(), delay - 1, 0);
 				} else {
 					level.scheduleTick(pos, state.getBlock(), delay, priority);
 				}

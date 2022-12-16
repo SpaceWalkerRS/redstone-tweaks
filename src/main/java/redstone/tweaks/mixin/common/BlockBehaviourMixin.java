@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.PushReaction;
 
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
 
@@ -105,6 +106,21 @@ public class BlockBehaviourMixin implements BlockOverrides {
 	)
 	private void rtGetDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
 		Integer override = overrideGetDirectSignal(state, level, pos, dir);
+
+		if (override != null) {
+			cir.setReturnValue(override);
+		}
+	}
+
+	@Inject(
+		method = "getPistonPushReaction",
+		cancellable = true,
+		at = @At(
+			value = "HEAD"
+		)
+	)
+	private void rtGetPistonPushReaction(BlockState state, CallbackInfoReturnable<PushReaction> cir) {
+		PushReaction override = overrideGetPistonPushReaction(state);
 
 		if (override != null) {
 			cir.setReturnValue(override);

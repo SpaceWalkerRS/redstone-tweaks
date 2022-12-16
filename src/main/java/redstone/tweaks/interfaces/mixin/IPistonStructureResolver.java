@@ -1,9 +1,7 @@
 package redstone.tweaks.interfaces.mixin;
 
-public interface IPistonMovingBlockEntity {
+public interface IPistonStructureResolver {
 
 	void init(PistonOverrides source);
-
-	float getAmountPerStep();
 
 }
