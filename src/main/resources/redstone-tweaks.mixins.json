@@ -46,8 +46,13 @@
 		"common.delay.WaterFluidMixin",
 		"common.delay.WeightedPressurePlateBlockMixin",
 
+		"common.movable.BlockEntityMixin",
+		"common.movable.LevelChunkMixin",
+		"common.movable.LevelMixin",
+		"common.movable.MovingPistonBlockMixin",
 		"common.movable.PistonBaseBlockMixin",
 		"common.movable.PistonHeadBlockMixin",
+		"common.movable.PistonMovingBlockEntityMixin",
 		"common.movable.PistonStructureResolverMixin",
 
 		"common.nou.CactusBlockMixin",
@@ -74,18 +79,19 @@
 		"common.signal.RepeaterBlockMixin",
 		"common.signal.WeightedPressurePlateBlockMixin",
 
-		"common.speed.PistonBaseBlockMixin",
 		"common.speed.PistonMovingBlockEntityMixin",
 
 		"common.sticky.ChestBlockMixin",
 		"common.sticky.FallingBlockMixin",
 		"common.sticky.HoneyBlockMixin",
+		"common.sticky.MovingPistonBlockMixin",
 		"common.sticky.PistonBaseBlockMixin",
 		"common.sticky.PistonHeadBlockMixin",
 		"common.sticky.PistonStructureResolverMixin",
 		"common.sticky.SlimeBlockMixin"
 	],
 	"client": [
+		"client.movable.PistonHeadRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

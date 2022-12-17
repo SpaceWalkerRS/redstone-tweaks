@@ -17,6 +17,10 @@ public class Tweaks {
 			return module().globalMovableBlockEntities.getValue();
 		}
 
+		public static boolean movableMovingBlocks() {
+			return module().globalMovableMovingBlocks.getValue();
+		}
+
 		public static int signalMax() {
 			return module().globalSignalMax.getValue();
 		}

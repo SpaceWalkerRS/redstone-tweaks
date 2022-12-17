@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.Block;
 import redstone.tweaks.interfaces.mixin.ILevel;
 
 @Mixin(ServerLevel.class)
-public class ServerLevelMixin implements ILevel {
+public abstract class ServerLevelMixin implements ILevel {
 
 	@Shadow private ObjectLinkedOpenHashSet<BlockEventData> blockEvents;
 

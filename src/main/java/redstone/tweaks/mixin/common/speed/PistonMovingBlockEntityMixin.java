@@ -19,7 +19,7 @@ import redstone.tweaks.interfaces.mixin.IPistonMovingBlockEntity;
 import redstone.tweaks.interfaces.mixin.PistonOverrides;
 
 @Mixin(PistonMovingBlockEntity.class)
-public class PistonMovingBlockEntityMixin implements IPistonMovingBlockEntity {
+public abstract class PistonMovingBlockEntityMixin implements IPistonMovingBlockEntity {
 
 	@Shadow private boolean extending;
 	@Shadow private float progress;

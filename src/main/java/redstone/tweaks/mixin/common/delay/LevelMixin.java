@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Block;
 import redstone.tweaks.interfaces.mixin.ILevel;
 
 @Mixin(Level.class)
-public class LevelMixin implements ILevel {
+public abstract class LevelMixin implements ILevel {
 
 	@Override
 	public boolean hasBlockEvent(BlockPos pos, Block block) {
