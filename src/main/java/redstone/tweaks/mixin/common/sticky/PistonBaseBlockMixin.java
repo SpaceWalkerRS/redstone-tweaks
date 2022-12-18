@@ -11,13 +11,12 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.PistonType;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.PistonOverrides;
 
 @Mixin(PistonBaseBlock.class)
-public class PistonBaseBlockMixin implements PistonOverrides {
+public abstract class PistonBaseBlockMixin implements PistonOverrides {
 
 	@Shadow @Final private boolean isSticky;
 
@@ -47,7 +46,7 @@ public class PistonBaseBlockMixin implements PistonOverrides {
 			return false;
 		}
 
-		boolean headSticky = (neighborState.getValue(PistonHeadBlock.TYPE) == PistonType.STICKY);
+		boolean headSticky = PistonOverrides.isHeadSticky(neighborState);
 
 		if (isSticky != headSticky) {
 			return false;

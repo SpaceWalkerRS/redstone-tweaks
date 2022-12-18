@@ -4,4 +4,6 @@ public interface IPistonStructureResolver {
 
 	void init(PistonOverrides source);
 
+	boolean resolveMoving();
+
 }

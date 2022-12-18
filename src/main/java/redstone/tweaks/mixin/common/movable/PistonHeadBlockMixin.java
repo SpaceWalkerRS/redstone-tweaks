@@ -12,11 +12,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.PistonType;
 import net.minecraft.world.level.material.PushReaction;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
+import redstone.tweaks.interfaces.mixin.PistonOverrides;
 
 @Mixin(PistonHeadBlock.class)
 public class PistonHeadBlockMixin implements BlockOverrides {
@@ -31,8 +31,7 @@ public class PistonHeadBlockMixin implements BlockOverrides {
 		)
 	)
 	private boolean rtShouldDestroyBaseOnRemove(PistonHeadBlock head, BlockState headState, BlockState behindState, BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-		boolean isSticky = (state.getValue(PistonHeadBlock.TYPE) == PistonType.STICKY);
-		return !movedByPiston && !Tweaks.Piston.looseHead(isSticky) && isFittingBase(headState, behindState);
+		return !movedByPiston && !Tweaks.Piston.looseHead(PistonOverrides.isHeadSticky(state)) && isFittingBase(headState, behindState);
 	}
 
 	@Inject(
@@ -54,7 +53,7 @@ public class PistonHeadBlockMixin implements BlockOverrides {
 	}
 
 	private static boolean isMovable(BlockState state) {
-		boolean isSticky = (state.getValue(PistonHeadBlock.TYPE) == PistonType.STICKY);
+		boolean isSticky = PistonOverrides.isHeadSticky(state);
 
 		if (Tweaks.Piston.looseHead(isSticky)) {
 			return true;

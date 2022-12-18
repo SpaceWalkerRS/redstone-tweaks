@@ -1,7 +1,6 @@
 package redstone.tweaks.mixin.common.quasi_connectivity;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -17,8 +16,6 @@ import redstone.tweaks.interfaces.mixin.PistonOverrides;
 @Mixin(PistonBaseBlock.class)
 public abstract class PistonBaseBlockMixin implements PistonOverrides {
 
-	@Shadow private boolean isSticky;
-
 	@Inject(
 		method = "getNeighborSignal",
 		cancellable = true,
@@ -27,6 +24,6 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		)
 	)
 	private void rtTweakQuasiConnectivity(Level level, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> cir) {
-		cir.setReturnValue(hasSignal(level, pos, facing, Tweaks.Piston.quasiConnectivity(isSticky), Tweaks.Piston.randomizeQuasiConnectivity(isSticky)));
+		cir.setReturnValue(hasSignal(level, pos, facing, Tweaks.Piston.quasiConnectivity(isSticky()), Tweaks.Piston.randomizeQuasiConnectivity(isSticky())));
 	}
 }

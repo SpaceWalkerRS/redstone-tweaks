@@ -1,7 +1,6 @@
 package redstone.tweaks.mixin.common.movable;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -26,8 +25,6 @@ import redstone.tweaks.interfaces.mixin.PistonOverrides;
 @Mixin(PistonBaseBlock.class)
 public abstract class PistonBaseBlockMixin implements PistonOverrides {
 
-	@Shadow private boolean isSticky;
-
 	@Inject(
 		method = "checkIfExtend",
 		cancellable = true,
@@ -36,11 +33,11 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		)
 	)
 	private void rtIgnoreRetractionWithoutHead(Level level, BlockPos pos, BlockState state, CallbackInfo ci) {
-		if (Tweaks.Piston.looseHead(isSticky) && state.getValue(PistonBaseBlock.EXTENDED)) {
+		if (Tweaks.Piston.looseHead(isSticky()) && state.getValue(PistonBaseBlock.EXTENDED)) {
 			Direction facing = state.getValue(PistonBaseBlock.FACING);
 			BlockPos frontPos = pos.relative(facing);
 
-			if (!PistonOverrides.isHead(level, frontPos, facing, isSticky)) {
+			if (!PistonOverrides.isHead(level, frontPos, facing, isSticky())) {
 				ci.cancel();
 			}
 		}
@@ -124,7 +121,9 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		)
 	)
 	private static boolean rtTweakMovableBlockEntities(BlockState state) {
-		return false; // replaced by inject above
+		// replaced by inject above to fix block entities
+		// ignoring the push reaction property
+		return false;
 	}
 
 	@Inject(
@@ -138,11 +137,11 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 	)
 	private void rtIgnoreRetractionWithoutHead(BlockState state, Level level, BlockPos pos, int i, int j, CallbackInfoReturnable<Boolean> cir) {
 		if (!level.isClientSide()) {
-			if (Tweaks.Piston.looseHead(isSticky) && state.getValue(PistonBaseBlock.EXTENDED)) {
+			if (Tweaks.Piston.looseHead(isSticky()) && state.getValue(PistonBaseBlock.EXTENDED)) {
 				Direction facing = state.getValue(PistonBaseBlock.FACING);
 				BlockPos frontPos = pos.relative(facing);
 
-				if (!PistonOverrides.isHead(level, frontPos, facing, isSticky)) {
+				if (!PistonOverrides.isHead(level, frontPos, facing, isSticky())) {
 					cir.setReturnValue(false);
 				}
 			}
@@ -201,7 +200,7 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 	}
 
 	private static boolean isMovable(BlockState state) {
-		boolean isSticky = ((PistonOverrides)state.getBlock()).isSticky();
+		boolean isSticky = PistonOverrides.isBaseSticky(state);
 
 		if (Tweaks.Piston.looseHead(isSticky)) {
 			return true;

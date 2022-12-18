@@ -24,7 +24,7 @@ import redstone.tweaks.interfaces.mixin.IPistonStructureResolver;
 import redstone.tweaks.interfaces.mixin.PistonOverrides;
 
 @Mixin(PistonStructureResolver.class)
-public class PistonStructureResolverMixin implements IPistonStructureResolver {
+public abstract class PistonStructureResolverMixin implements IPistonStructureResolver {
 
 	@Shadow @Final private Level level;
 	@Shadow @Final private boolean extending;

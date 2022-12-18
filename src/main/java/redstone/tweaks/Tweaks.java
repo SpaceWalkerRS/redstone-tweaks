@@ -573,6 +573,14 @@ public class Tweaks {
 			return module().normalPistonDelayFallingEdge.getValue();
 		}
 
+		public static boolean headUpdatesNeighborsOnExtension() {
+			return module().normalPistonHeadUpdatesNeighborsOnExtension.getValue();
+		}
+
+		public static boolean headUpdatesNeighborsOnRetraction() {
+			return true;
+		}
+
 		public static boolean ignorePowerFromFront() {
 			return module().normalPistonIgnorePowerFromFront.getValue();
 		}
@@ -671,6 +679,18 @@ public class Tweaks {
 
 	public static class Piston {
 
+		public static boolean doBlockDropping() {
+			return StickyPiston.blockDropping();
+		}
+
+		public static boolean doFastBlockDropping() {
+			return doBlockDropping() && StickyPiston.fastBlockDropping();
+		}
+
+		public static boolean doSuperBlockDropping() {
+			return doBlockDropping() && StickyPiston.superBlockDropping();
+		}
+
 		public static int delayRisingEdge(boolean sticky) {
 			return sticky ? StickyPiston.delayRisingEdge() : NormalPiston.delayRisingEdge();
 		}
@@ -681,6 +701,18 @@ public class Tweaks {
 
 		public static int delay(boolean extend, boolean sticky) {
 			return extend ? delayRisingEdge(sticky) : delayFallingEdge(sticky);
+		}
+
+		public static boolean doDoubleRetraction() {
+			return StickyPiston.doubleRetraction() && !StickyPiston.movableWhenExtended() && !StickyPiston.looseHead();
+		}
+
+		public static boolean headUpdatesNeighborsOnExtension(boolean sticky) {
+			return sticky ? StickyPiston.headUpdatesNeighborsOnExtension() : NormalPiston.headUpdatesNeighborsOnExtension();
+		}
+
+		public static boolean headUpdatesNeighborsOnRetraction(boolean sticky) {
+			return sticky ? StickyPiston.headUpdatesNeighborsOnRetraction() : NormalPiston.headUpdatesNeighborsOnRetraction();
 		}
 
 		public static boolean ignorePowerFromFront(boolean sticky) {
@@ -844,12 +876,48 @@ public class Tweaks {
 
 	public static class StickyPiston {
 
+		/**
+		 * use {@link redstone.tweaks.Tweaks.Piston#doBlockDropping Piston.doBlockDropping}!
+		 */
+		public static boolean blockDropping() {
+			return module().stickyPistonBlockDropping.getValue();
+		}
+
+		/**
+		 * use {@link redstone.tweaks.Tweaks.Piston#doFastBlockDropping Piston.doFastBlockDropping}!
+		 */
+		public static boolean fastBlockDropping() {
+			return module().stickyPistonFastBlockDropping.getValue();
+		}
+
+		/**
+		 * use {@link redstone.tweaks.Tweaks.Piston#doSuperBlockDropping Piston.doSuperBlockDropping}!
+		 */
+		public static boolean superBlockDropping() {
+			return module().stickyPistonSuperBlockDropping.getValue();
+		}
+
 		public static int delayRisingEdge() {
 			return module().stickyPistonDelayRisingEdge.getValue();
 		}
 
 		public static int delayFallingEdge() {
 			return module().stickyPistonDelayFallingEdge.getValue();
+		}
+
+		/**
+		 * use {@link redstone.tweaks.Tweaks.Piston#doDoubleRetraction Piston.doDoubleRetraction}!
+		 */
+		public static boolean doubleRetraction() {
+			return module().stickyPistonDoubleRetraction.getValue();
+		}
+
+		public static boolean headUpdatesNeighborsOnExtension() {
+			return module().stickyPistonHeadUpdatesNeighborsOnExtension.getValue();
+		}
+
+		public static boolean headUpdatesNeighborsOnRetraction() {
+			return module().stickyPistonHeadUpdatesNeighborsOnRetraction.getValue();
 		}
 
 		public static boolean ignorePowerFromFront() {

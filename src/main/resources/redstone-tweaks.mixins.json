@@ -5,6 +5,9 @@
 	"mixins": [	
 		"common.BlockBehaviourMixin",
 
+		"common.block_dropping.PistonBaseBlockMixin",
+		"common.block_dropping.PistonStructureResolverMixin",
+
 		"common.crush.AnvilBlockMixin",
 
 		"common.delay.BambooStalkBlockMixin",
@@ -46,6 +49,8 @@
 		"common.delay.WaterFluidMixin",
 		"common.delay.WeightedPressurePlateBlockMixin",
 
+		"common.double_retraction.PistonBaseBlockMixin",
+
 		"common.movable.BlockEntityMixin",
 		"common.movable.LevelChunkMixin",
 		"common.movable.LevelMixin",
@@ -54,6 +59,8 @@
 		"common.movable.PistonHeadBlockMixin",
 		"common.movable.PistonMovingBlockEntityMixin",
 		"common.movable.PistonStructureResolverMixin",
+
+		"common.neighbor_updates.PistonBaseBlockMixin",
 
 		"common.nou.CactusBlockMixin",
 

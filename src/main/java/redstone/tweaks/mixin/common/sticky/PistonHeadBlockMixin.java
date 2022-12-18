@@ -8,7 +8,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.PistonType;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
@@ -19,7 +18,7 @@ public class PistonHeadBlockMixin implements BlockOverrides {
 
 	@Override
 	public boolean isSticky(BlockState state) {
-		boolean isSticky = (state.getValue(PistonHeadBlock.TYPE) == PistonType.STICKY);
+		boolean isSticky = PistonOverrides.isHeadSticky(state);
 		return (!Tweaks.Piston.looseHead(isSticky) && Tweaks.Piston.movableWhenExtended(isSticky)) || (isSticky && Tweaks.StickyPiston.superSticky());
 	}
 
@@ -32,7 +31,7 @@ public class PistonHeadBlockMixin implements BlockOverrides {
 			return false;
 		}
 
-		boolean isSticky = (state.getValue(PistonHeadBlock.TYPE) == PistonType.STICKY);
+		boolean isSticky = PistonOverrides.isHeadSticky(state);
 
 		if (facing == dir) {
 			return isSticky && Tweaks.StickyPiston.superSticky();
@@ -43,11 +42,11 @@ public class PistonHeadBlockMixin implements BlockOverrides {
 			if (!Tweaks.Piston.movableWhenExtended(isSticky)) {
 				return false;
 			}
-			if (!(neighborState.getBlock() instanceof PistonOverrides)) {
+			if (!PistonOverrides.isBase(level, neighborPos, neighborState)) {
 				return false;
 			}
 
-			boolean baseSticky = ((PistonOverrides)neighborState.getBlock()).isSticky();
+			boolean baseSticky = PistonOverrides.isBaseSticky(neighborState);
 
 			if (isSticky != baseSticky) {
 				return false;
