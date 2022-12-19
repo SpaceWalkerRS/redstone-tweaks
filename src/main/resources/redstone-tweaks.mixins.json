@@ -60,6 +60,9 @@
 		"common.movable.PistonMovingBlockEntityMixin",
 		"common.movable.PistonStructureResolverMixin",
 
+		"common.move_self.PistonBaseBlockMixin",
+		"common.move_self.PistonMovingBlockEntityMixin",
+
 		"common.neighbor_updates.PistonBaseBlockMixin",
 
 		"common.nou.CactusBlockMixin",
@@ -98,7 +101,8 @@
 		"common.sticky.SlimeBlockMixin"
 	],
 	"client": [
-		"client.movable.PistonHeadRendererMixin"
+		"client.movable.PistonHeadRendererMixin",
+		"client.move_self.PistonHeadRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -56,16 +56,7 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		)
 	)
 	private void rtTweakDelayAndTickPriority(Level _level, BlockPos _pos, Block piston, int type, int data, Level level, BlockPos pos, BlockState state) {
-		if (ticking) {
-			level.blockEvent(pos, piston, type, data);
-		} else {
-			boolean extend = !state.getValue(PistonBaseBlock.EXTENDED);
-
-			int delay = Tweaks.Piston.delay(extend, isSticky());
-			TickPriority priority = Tweaks.Piston.tickPriority(extend, isSticky());
-
-			BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);
-		}
+		queueBlockEvent(level, pos, state, type, data);
 	}
 
 	@Redirect(
@@ -89,5 +80,19 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		ticking = false;
 
 		return true;
+	}
+
+	@Override
+	public void queueBlockEvent(Level level, BlockPos pos, BlockState state, int type, int data) {
+		if (ticking) {
+			level.blockEvent(pos, block(), type, data);
+		} else {
+			boolean extend = !state.getValue(PistonBaseBlock.EXTENDED);
+
+			int delay = Tweaks.Piston.delay(extend, isSticky());
+			TickPriority priority = Tweaks.Piston.tickPriority(extend, isSticky());
+
+			BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);
+		}
 	}
 }

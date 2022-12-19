@@ -23,6 +23,8 @@ public interface PistonOverrides extends BlockOverrides {
 
 	boolean isSticky();
 
+	void queueBlockEvent(Level level, BlockPos pos, BlockState state, int type, int data);
+
 	void doBlockDropping(Level level, BlockPos pos, Direction facing, boolean extending);
 
 	default boolean hasSignal(Level level, BlockPos pos, Direction facing, Map<Direction, Boolean> qc, boolean randQC) {
@@ -91,6 +93,10 @@ public interface PistonOverrides extends BlockOverrides {
 		return blockEntity;
 	}
 
+	public static void dropMovingBlock(PistonOverrides piston, Level level, BlockPos pos, Direction facing) {
+		dropMovingBlock(level, pos.relative(facing, 2), facing);
+	}
+
 	public static void dropMovingStructure(PistonOverrides piston, Level level, BlockPos pos, Direction facing, boolean extending) {
 		if (extending) {
 			pos = pos.relative(facing);
@@ -107,24 +113,27 @@ public interface PistonOverrides extends BlockOverrides {
 		List<BlockPos> structure = structureResolver.getToPush();
 
 		for (int i = 0; i < structure.size(); i++) {
-			BlockPos movingPos = structure.get(i);
-			BlockState movingState = level.getBlockState(movingPos);
+			dropMovingBlock(level, structure.get(i), facing);
+		}
+	}
 
-			if (!movingState.is(Blocks.MOVING_PISTON)) {
-				continue;
-			}
+	private static void dropMovingBlock(Level level, BlockPos pos, Direction facing) {
+		BlockState state = level.getBlockState(pos);
 
-			BlockEntity movingBlockEntity = level.getBlockEntity(movingPos);
+		if (!state.is(Blocks.MOVING_PISTON)) {
+			return;
+		}
 
-			if (!(movingBlockEntity instanceof PistonMovingBlockEntity)) {
-				continue;
-			}
+		BlockEntity blockEntity = level.getBlockEntity(pos);
 
-			PistonMovingBlockEntity mbe = (PistonMovingBlockEntity)movingBlockEntity;
+		if (!(blockEntity instanceof PistonMovingBlockEntity)) {
+			return;
+		}
 
-			if (mbe.isExtending() && mbe.getDirection() == facing) {
-				mbe.finalTick();
-			}
+		PistonMovingBlockEntity mbe = (PistonMovingBlockEntity)blockEntity;
+
+		if (mbe.isExtending() && mbe.getDirection() == facing) {
+			mbe.finalTick();
 		}
 	}
 }

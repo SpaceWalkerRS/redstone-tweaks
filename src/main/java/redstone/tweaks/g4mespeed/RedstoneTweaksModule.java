@@ -199,6 +199,7 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final TickPrioritySetting magmaTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory normalPistonCategory = new GSSettingCategory("normalPiston");
+	public final GSBooleanSetting normalPistonCanMoveSelf = new GSBooleanSetting("canMoveSelf", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting normalPistonDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting normalPistonDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting normalPistonHeadUpdatesNeighborsOnExtension = new GSBooleanSetting("headUpdatesNeighborsOnExtension", true, SHOW_IN_G4MESPEED_GUI);
@@ -253,6 +254,7 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSBooleanSetting stickyPistonBlockDropping = new GSBooleanSetting("blockDropping", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonFastBlockDropping = new GSBooleanSetting("fastBlockDropping", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonSuperBlockDropping = new GSBooleanSetting("superBlockDropping", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting stickyPistonCanMoveSelf = new GSBooleanSetting("canMoveSelf", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonDoubleRetraction = new GSBooleanSetting("doubleRetraction", false, SHOW_IN_G4MESPEED_GUI);
@@ -444,6 +446,7 @@ public class RedstoneTweaksModule implements GSIModule {
 			magmaDelay,
 			magmaTickPriority);
 		registerSettings(manager, normalPistonCategory,
+			normalPistonCanMoveSelf,
 			normalPistonDelayRisingEdge,
 			normalPistonDelayFallingEdge,
 			normalPistonHeadUpdatesNeighborsOnExtension,
@@ -494,6 +497,7 @@ public class RedstoneTweaksModule implements GSIModule {
 			stickyPistonBlockDropping,
 			stickyPistonFastBlockDropping,
 			stickyPistonSuperBlockDropping,
+			stickyPistonCanMoveSelf,
 			stickyPistonDelayRisingEdge,
 			stickyPistonDelayFallingEdge,
 			stickyPistonDoubleRetraction,

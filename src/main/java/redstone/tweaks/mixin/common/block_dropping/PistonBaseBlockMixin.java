@@ -18,16 +18,6 @@ import redstone.tweaks.interfaces.mixin.PistonOverrides;
 @Mixin(PistonBaseBlock.class)
 public abstract class PistonBaseBlockMixin implements PistonOverrides {
 
-	// needs to be a thread local since in singleplayer the server
-	// and client could access this field at the same time
-	private final ThreadLocal<Boolean> finishFrontBlock = new ThreadLocal<>() {
-
-		@Override
-		protected Boolean initialValue() {
-	        return false;
-	    }
-	};
-
 	@Redirect(
 		method = "checkIfExtend",
 		at = @At(
@@ -76,15 +66,11 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		)
 	)
 	private void rtCancelBlockDropping(PistonMovingBlockEntity movingBlockEntity) {
-		if (finishFrontBlock.get()) {
-			movingBlockEntity.finalTick();
-		}
+		// replaced by the method below
 	}
 
 	@Override
 	public void doBlockDropping(Level level, BlockPos pos, Direction facing, boolean extending) {
-		boolean finishFrontBlock = false;
-
 		if (Tweaks.Piston.doBlockDropping()) {
 			if (Tweaks.Piston.doFastBlockDropping()) {
 				// "fast" block dropping: moved structure is
@@ -94,8 +80,7 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 					PistonOverrides.dropMovingStructure(this, level, pos, facing, !extending);
 				} else {
 					// drop only the moving block directly in front
-					// the vanilla method takes care of this for us
-					finishFrontBlock = !extending;
+					PistonOverrides.dropMovingBlock(this, level, pos, facing);
 				}
 			} else {
 				// "slow" block dropping: moved structure keeps
@@ -106,7 +91,5 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 			// structure so it can be retracted again
 			PistonOverrides.dropMovingStructure(this, level, pos, facing, !extending);
 		}
-
-		this.finishFrontBlock.set(finishFrontBlock);
 	}
 }

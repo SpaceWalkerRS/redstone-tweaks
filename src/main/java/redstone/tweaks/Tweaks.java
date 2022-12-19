@@ -565,6 +565,10 @@ public class Tweaks {
 
 	public static class NormalPiston {
 
+		public static boolean canMoveSelf() {
+			return module().normalPistonCanMoveSelf.getValue();
+		}
+
 		public static int delayRisingEdge() {
 			return module().normalPistonDelayRisingEdge.getValue();
 		}
@@ -678,6 +682,10 @@ public class Tweaks {
 	}
 
 	public static class Piston {
+
+		public static boolean canMoveSelf(boolean sticky) {
+			return sticky ? StickyPiston.canMoveSelf() : NormalPiston.canMoveSelf();
+		}
 
 		public static boolean doBlockDropping() {
 			return StickyPiston.blockDropping();
@@ -895,6 +903,10 @@ public class Tweaks {
 		 */
 		public static boolean superBlockDropping() {
 			return module().stickyPistonSuperBlockDropping.getValue();
+		}
+
+		public static boolean canMoveSelf() {
+			return module().stickyPistonCanMoveSelf.getValue();
 		}
 
 		public static int delayRisingEdge() {
