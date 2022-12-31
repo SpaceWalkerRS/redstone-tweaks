@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -19,13 +18,13 @@ import redstone.tweaks.world.level.block.QuasiConnectivity;
 public class BaseRailBlockMixin implements BlockOverrides {
 	
 	@Redirect(
-		method = "neighborChanged",
+		method = "updateDir",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/world/level/Level;hasNeighborSignal(Lnet/minecraft/core/BlockPos;)Z"
 		)
 	)
-	private boolean rtTweakQuasiConnectivity(Level _level, BlockPos _pos, BlockState _state, boolean force, BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+	private boolean rtTweakQuasiConnectivity(Level _level, BlockPos _pos, Level level, BlockPos pos, BlockState state, boolean force) {
 		if (block() == Blocks.RAIL) {
 			QuasiConnectivity qc = Tweaks.Rail.quasiConnectivity();
 			boolean randQC = Tweaks.Rail.randomizeQuasiConnectivity();

@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.NoteBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -29,7 +29,7 @@ public class NoteBlockMixin implements NoteBlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtTweakDelayAndTickPriority(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston, CallbackInfo ci) {
+	private void rtTweakDelayAndTickPriority(Entity entity, BlockState state, Level level, BlockPos pos, CallbackInfo ci) {
 		if (!ticking) {
 			int delay = Tweaks.NoteBlock.delay();
 
