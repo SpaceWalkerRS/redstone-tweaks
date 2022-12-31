@@ -1,7 +1,5 @@
 package redstone.tweaks.mixin.common.quasi_connectivity;
 
-import java.util.Map;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -9,15 +7,16 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
+
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
 import redstone.tweaks.interfaces.mixin.DispenserOverrides;
+import redstone.tweaks.world.level.block.QuasiConnectivity;
 
 @Mixin(DispenserBlock.class)
 public abstract class DispenserBlockMixin implements DispenserOverrides {
@@ -30,7 +29,7 @@ public abstract class DispenserBlockMixin implements DispenserOverrides {
 		)
 	)
 	private boolean rtTweakQuasiConnectivity(Level level, BlockPos pos) {
-		Map<Direction, Boolean> qc = quasiConnectivity();
+		QuasiConnectivity qc = quasiConnectivity();
 		boolean randQC = randomizeQuasiConnectivity();
 
 		return BlockOverrides.hasSignal(level, pos, qc, randQC);
@@ -55,13 +54,8 @@ public abstract class DispenserBlockMixin implements DispenserOverrides {
 	}
 
 	@Override
-	public Map<Direction, Boolean> quasiConnectivity() {
+	public QuasiConnectivity quasiConnectivity() {
 		return Tweaks.Dispenser.quasiConnectivity();
-	}
-
-	@Override
-	public boolean quasiConnectivity(Direction dir) {
-		return Tweaks.Dispenser.quasiConnectivity(dir);
 	}
 
 	@Override

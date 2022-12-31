@@ -1,9 +1,8 @@
 package redstone.tweaks.interfaces.mixin;
 
-import java.util.Map;
-
-import net.minecraft.core.Direction;
 import net.minecraft.world.ticks.TickPriority;
+
+import redstone.tweaks.world.level.block.QuasiConnectivity;
 
 public interface DispenserOverrides extends BlockOverrides {
 
@@ -11,9 +10,7 @@ public interface DispenserOverrides extends BlockOverrides {
 
 	boolean lazy();
 
-	Map<Direction, Boolean> quasiConnectivity();
-
-	boolean quasiConnectivity(Direction dir);
+	QuasiConnectivity quasiConnectivity();
 
 	boolean randomizeQuasiConnectivity();
 

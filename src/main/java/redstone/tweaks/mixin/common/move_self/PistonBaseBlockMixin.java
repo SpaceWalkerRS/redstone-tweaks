@@ -37,6 +37,24 @@ public abstract class PistonBaseBlockMixin extends Block implements PistonOverri
 	@Shadow private boolean getNeighborSignal(Level level, BlockPos pos, Direction facing) { return false; }
 	@Shadow private boolean moveBlocks(Level level, BlockPos pos, Direction facing, boolean extending) { return false; }
 
+	@Inject(
+		method = "checkIfExtend",
+		cancellable = true,
+		at = @At(
+			value = "HEAD"
+		)
+	)
+	private void rtIgnorePushBackwardsAgainstExtendingHead(Level level, BlockPos pos, BlockState state, CallbackInfo ci) {
+		if (Tweaks.Piston.canMoveSelf(isSticky()) && !state.getValue(PistonBaseBlock.EXTENDED)) {
+			Direction facing = state.getValue(PistonBaseBlock.FACING);
+			BlockPos frontPos = pos.relative(facing);
+
+			if (PistonOverrides.isHead(level, frontPos, facing, isSticky())) {
+				ci.cancel();
+			}
+		}
+	}
+
 	@Redirect(
 		method = "checkIfExtend",
 		at = @At(
@@ -49,6 +67,8 @@ public abstract class PistonBaseBlockMixin extends Block implements PistonOverri
 			return true;
 		}
 
+		boolean moveFailed = true;
+
 		if (Tweaks.Piston.canMoveSelf(isSticky())) {
 			Direction facing = state.getValue(PistonBaseBlock.FACING);
 			BlockPos headPos = pos.relative(facing);
@@ -57,7 +77,12 @@ public abstract class PistonBaseBlockMixin extends Block implements PistonOverri
 
 			if (structureResolver.resolve() && !PistonOverrides.isHead(level, headPos, facing, isSticky())) {
 				queueBlockEvent(level, pos, state, MotionType.EXTEND_BACKWARDS, facing.get3DDataValue());
+				moveFailed = false;
 			}
+		}
+
+		if (moveFailed && Tweaks.Piston.updateSelf(isSticky())) {
+			level.scheduleTick(pos, block(), 1);
 		}
 
 		return false;
@@ -151,7 +176,7 @@ public abstract class PistonBaseBlockMixin extends Block implements PistonOverri
 
 		if (!level.isClientSide() && getNeighborSignal(level, pos, facing)) {
 			if (Tweaks.Piston.doDoubleRetraction()) {
-				level.setBlock(pos, state.setValue(PistonBaseBlock.EXTENDED, true), Block.UPDATE_KNOWN_SHAPE);
+				level.setBlock(pos, state.setValue(PistonBaseBlock.EXTENDED, true), Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_INVISIBLE);
 			}
 
 			return false;
@@ -160,11 +185,8 @@ public abstract class PistonBaseBlockMixin extends Block implements PistonOverri
 		BlockPos frontPos = pos.relative(facing, 2);
 		BlockState frontState = level.getBlockState(frontPos);
 
-		if (frontState.isAir()) {
-			return false;
-		}
-		if (PistonBaseBlock.isPushable(frontState, level, frontPos, facing.getOpposite(), true, facing)) {
-			return false;
+		if (frontState.isAir() || PistonBaseBlock.isPushable(frontState, level, frontPos, facing.getOpposite(), true, facing)) {
+			return state.triggerEvent(level, pos, MotionType.RETRACT, data);
 		}
 
 		BlockPos headPos = pos.relative(facing);

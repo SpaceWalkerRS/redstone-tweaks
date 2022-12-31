@@ -1,12 +1,10 @@
 package redstone.tweaks.interfaces.mixin;
 
-import java.util.Map;
-
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.Tweaks;
+import redstone.tweaks.world.level.block.QuasiConnectivity;
 
 public interface PoweredRailOverrides extends BlockOverrides {
 
@@ -20,7 +18,7 @@ public interface PoweredRailOverrides extends BlockOverrides {
 		return isActivatorRail() ? Tweaks.ActivatorRail.powerLimit() : Tweaks.PoweredRail.powerLimit();
 	}
 
-	default Map<Direction, Boolean> quasiConnectivity() {
+	default QuasiConnectivity quasiConnectivity() {
 		return isActivatorRail() ? Tweaks.ActivatorRail.quasiConnectivity() : Tweaks.PoweredRail.quasiConnectivity();
 	}
 

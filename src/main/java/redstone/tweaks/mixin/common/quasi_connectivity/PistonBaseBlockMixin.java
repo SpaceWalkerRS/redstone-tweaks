@@ -10,7 +10,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 
-import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.PistonOverrides;
 
 @Mixin(PistonBaseBlock.class)
@@ -24,6 +23,6 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		)
 	)
 	private void rtTweakQuasiConnectivity(Level level, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> cir) {
-		cir.setReturnValue(hasSignal(level, pos, facing, Tweaks.Piston.quasiConnectivity(isSticky()), Tweaks.Piston.randomizeQuasiConnectivity(isSticky())));
+		cir.setReturnValue(hasSignal(level, pos, facing));
 	}
 }

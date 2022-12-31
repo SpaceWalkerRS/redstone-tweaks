@@ -4,16 +4,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -21,10 +18,30 @@ import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import redstone.tweaks.Tweaks;
+import redstone.tweaks.interfaces.mixin.BlockOverrides;
 import redstone.tweaks.interfaces.mixin.PistonOverrides;
 
 @Mixin(PistonBaseBlock.class)
-public class PistonBaseBlockMixin {
+public abstract class PistonBaseBlockMixin implements PistonOverrides {
+
+	@Inject(
+		method = "onPlace",
+		at = @At(
+			value = "INVOKE",
+			shift = Shift.AFTER,
+			target = "Lnet/minecraft/world/level/block/piston/PistonBaseBlock;checkIfExtend(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"
+		)
+	)
+	private void rtSendBlockChange(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston, CallbackInfo ci) {
+		// make sure the client finishes this moving block
+		if (state.getValue(PistonBaseBlock.EXTENDED) && oldState.is(Blocks.MOVING_PISTON)) {
+			BlockState newState = level.getBlockState(pos);
+
+			if (newState.is(block()) && !newState.getValue(PistonBaseBlock.EXTENDED)) {
+				BlockOverrides.sendBlockChange(level, pos, state);
+			}
+		}
+	}
 
 	@Inject(
 		method = "checkIfExtend",
@@ -54,17 +71,8 @@ public class PistonBaseBlockMixin {
 			BlockPos frontPos = pos.relative(facing, 2);
 			BlockState frontState = level.getBlockState(frontPos);
 
-			if (PistonOverrides.isBase(level, frontPos, frontState)) {
-				PlayerList playerList = level.getServer().getPlayerList();
-
-				double x = frontPos.getX();
-				double y = frontPos.getY();
-				double z = frontPos.getZ();
-				double range = playerList.getSimulationDistance();
-				ResourceKey<Level> key = level.dimension();
-
-				Packet<?> packet = new ClientboundBlockUpdatePacket(frontPos, frontState);
-				playerList.broadcast(null, x, y, z, range, key, packet);
+			if (PistonOverrides.isBase(frontState)) {
+				BlockOverrides.sendBlockChange(level, frontPos, frontState);
 			}
 		}
 	}
@@ -100,7 +108,7 @@ public class PistonBaseBlockMixin {
 			BlockPos frontPos = pos.relative(facing, 2);
 			BlockState frontState = level.getBlockState(frontPos);
 
-			if (PistonOverrides.isBase(level, frontPos, frontState)) {
+			if (PistonOverrides.isBase(frontState)) {
 				Direction frontFacing = frontState.getValue(PistonBaseBlock.FACING);
 				boolean frontSticky = PistonOverrides.isBaseSticky(frontState);
 				BlockPos headPos = frontPos.relative(frontFacing);

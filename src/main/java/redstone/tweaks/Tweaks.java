@@ -1,13 +1,11 @@
 package redstone.tweaks;
 
-import java.util.Map;
-
 import com.g4mesoft.core.GSController;
 
-import net.minecraft.core.Direction;
 import net.minecraft.world.ticks.TickPriority;
-
 import redstone.tweaks.g4mespeed.RedstoneTweaksModule;
+import redstone.tweaks.world.level.block.CapacitorBehavior;
+import redstone.tweaks.world.level.block.QuasiConnectivity;
 
 public class Tweaks {
 
@@ -48,12 +46,8 @@ public class Tweaks {
 			return module().activatorRailPowerLimit.getValue();
 		}
 
-		public static Map<Direction, Boolean> quasiConnectivity() {
+		public static QuasiConnectivity quasiConnectivity() {
 			return module().activatorRailQuasiConnectivity.getValue();
-		}
-
-		public static boolean quasiConnectivity(Direction dir) {
-			return module().activatorRailQuasiConnectivity.getValue(dir);
 		}
 
 		public static boolean randomizeQuasiConnectivity() {
@@ -141,12 +135,8 @@ public class Tweaks {
 			return module().commandBlockDelay.getValue();
 		}
 
-		public static Map<Direction, Boolean> quasiConnectivity() {
+		public static QuasiConnectivity quasiConnectivity() {
 			return module().commandBlockQuasiConnectivity.getValue();
-		}
-
-		public static boolean quasiConnectivity(Direction dir) {
-			return module().commandBlockQuasiConnectivity.getValue(dir);
 		}
 
 		public static boolean randomizeQuasiConnectivity() {
@@ -258,12 +248,8 @@ public class Tweaks {
 			return module().dispenserLazy.getValue();
 		}
 
-		public static Map<Direction, Boolean> quasiConnectivity() {
+		public static QuasiConnectivity quasiConnectivity() {
 			return module().dispenserQuasiConnectivity.getValue();
-		}
-
-		public static boolean quasiConnectivity(Direction dir) {
-			return module().dispenserQuasiConnectivity.getValue(dir);
 		}
 
 		public static boolean randomizeQuasiConnectivity() {
@@ -292,12 +278,8 @@ public class Tweaks {
 			return module().dropperLazy.getValue();
 		}
 
-		public static Map<Direction, Boolean> quasiConnectivity() {
+		public static QuasiConnectivity quasiConnectivity() {
 			return module().dropperQuasiConnectivity.getValue();
-		}
-
-		public static boolean quasiConnectivity(Direction dir) {
-			return module().dropperQuasiConnectivity.getValue(dir);
 		}
 
 		public static boolean randomizeQuasiConnectivity() {
@@ -421,12 +403,8 @@ public class Tweaks {
 			return module().hopperLazyFallingEdge.getValue();
 		}
 	
-		public static Map<Direction, Boolean> quasiConnectivity() {
+		public static QuasiConnectivity quasiConnectivity() {
 			return module().hopperQuasiConnectivity.getValue();
-		}
-
-		public static boolean quasiConnectivity(Direction dir) {
-			return module().hopperQuasiConnectivity.getValue(dir);
 		}
 
 		public static boolean randomizeQuasiConnectivity() {
@@ -569,6 +547,10 @@ public class Tweaks {
 			return module().normalPistonCanMoveSelf.getValue();
 		}
 
+		public static boolean connectToWire() {
+			return module().normalPistonConnectToWire.getValue();
+		}
+
 		public static int delayRisingEdge() {
 			return module().normalPistonDelayRisingEdge.getValue();
 		}
@@ -587,6 +569,14 @@ public class Tweaks {
 
 		public static boolean ignorePowerFromFront() {
 			return module().normalPistonIgnorePowerFromFront.getValue();
+		}
+
+		public static boolean ignoreUpdatesWhileExtending() {
+			return module().normalPistonIgnoreUpdatesWhileExtending.getValue();
+		}
+
+		public static boolean ignoreUpdatesWhileRetracting() {
+			return module().normalPistonIgnoreUpdatesWhileRetracting.getValue();
 		}
 
 		public static boolean lazyRisingEdge() {
@@ -613,12 +603,8 @@ public class Tweaks {
 			return -1;
 		}
 
-		public static Map<Direction, Boolean> quasiConnectivity() {
+		public static QuasiConnectivity quasiConnectivity() {
 			return module().normalPistonQuasiConnectivity.getValue();
-		}
-
-		public static boolean quasiConnectivity(Direction dir) {
-			return module().normalPistonQuasiConnectivity.getValue(dir);
 		}
 
 		public static boolean randomizeQuasiConnectivity() {
@@ -639,6 +625,33 @@ public class Tweaks {
 
 		public static TickPriority tickPriorityFallingEdge() {
 			return module().normalPistonTickPriorityFallingEdge.getValue();
+		}
+
+		public static boolean updateSelf() {
+			return module().normalPistonUpdateSelf.getValue();
+		}
+	}
+
+	public static class NoteBlock {
+
+		public static int delay() {
+			return module().noteBlockDelay.getValue();
+		}
+
+		public static boolean lazy() {
+			return module().noteBlockLazy.getValue();
+		}
+
+		public static QuasiConnectivity quasiConnectivity() {
+			return module().noteBlockQuasiConnectivity.getValue();
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().noteBlockRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().noteBlockTickPriority.getValue();
 		}
 	}
 
@@ -683,10 +696,6 @@ public class Tweaks {
 
 	public static class Piston {
 
-		public static boolean canMoveSelf(boolean sticky) {
-			return sticky ? StickyPiston.canMoveSelf() : NormalPiston.canMoveSelf();
-		}
-
 		public static boolean doBlockDropping() {
 			return StickyPiston.blockDropping();
 		}
@@ -697,6 +706,14 @@ public class Tweaks {
 
 		public static boolean doSuperBlockDropping() {
 			return doBlockDropping() && StickyPiston.superBlockDropping();
+		}
+
+		public static boolean canMoveSelf(boolean sticky) {
+			return sticky ? StickyPiston.canMoveSelf() : NormalPiston.canMoveSelf();
+		}
+
+		public static boolean connectToWire(boolean sticky) {
+			return sticky ? StickyPiston.connectToWire() : NormalPiston.connectToWire();
 		}
 
 		public static int delayRisingEdge(boolean sticky) {
@@ -725,6 +742,14 @@ public class Tweaks {
 
 		public static boolean ignorePowerFromFront(boolean sticky) {
 			return sticky ? StickyPiston.ignorePowerFromFront() : NormalPiston.ignorePowerFromFront();
+		}
+
+		public static boolean ignoreUpdatesWhileExtending(boolean sticky) {
+			return sticky ? StickyPiston.ignoreUpdatesWhileExtending() : NormalPiston.ignoreUpdatesWhileExtending();
+		}
+
+		public static boolean ignoreUpdatesWhileRetracting(boolean sticky) {
+			return sticky ? StickyPiston.ignoreUpdatesWhileRetracting() : NormalPiston.ignoreUpdatesWhileRetracting();
 		}
 
 		public static boolean lazyRisingEdge(boolean sticky) {
@@ -759,12 +784,8 @@ public class Tweaks {
 			return extend ? pushLimit(sticky) : pullLimit(sticky);
 		}
 
-		public static Map<Direction, Boolean> quasiConnectivity(boolean sticky) {
+		public static QuasiConnectivity quasiConnectivity(boolean sticky) {
 			return sticky ? StickyPiston.quasiConnectivity() : NormalPiston.quasiConnectivity();
-		}
-
-		public static boolean quasiConnectivity(boolean sticky, Direction dir) {
-			return sticky ? StickyPiston.quasiConnectivity(dir) : NormalPiston.quasiConnectivity(dir);
 		}
 
 		public static boolean randomizeQuasiConnectivity(boolean sticky) {
@@ -794,6 +815,10 @@ public class Tweaks {
 		public static TickPriority tickPriority(boolean extend, boolean sticky) {
 			return extend ? tickPriorityRisingEdge(sticky) : tickPriorityFallingEdge(sticky);
 		}
+
+		public static boolean updateSelf(boolean sticky) {
+			return sticky ? StickyPiston.updateSelf() : NormalPiston.updateSelf();
+		}
 	}
 
 	public static class PoweredRail {
@@ -818,12 +843,8 @@ public class Tweaks {
 			return module().poweredRailPowerLimit.getValue();
 		}
 
-		public static Map<Direction, Boolean> quasiConnectivity() {
+		public static QuasiConnectivity quasiConnectivity() {
 			return module().poweredRailQuasiConnectivity.getValue();
-		}
-
-		public static boolean quasiConnectivity(Direction dir) {
-			return module().poweredRailQuasiConnectivity.getValue(dir);
 		}
 
 		public static boolean randomizeQuasiConnectivity() {
@@ -836,6 +857,121 @@ public class Tweaks {
 
 		public static TickPriority tickPriorityFallingEdge() {
 			return module().poweredRailTickPriorityFallingEdge.getValue();
+		}
+	}
+
+	public static class Rail {
+
+		public static int delay() {
+			return module().railDelay.getValue();
+		}
+
+		public static QuasiConnectivity quasiConnectivity() {
+			return module().railQuasiConnectivity.getValue();
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().railRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().railTickPriority.getValue();
+		}
+	}
+
+	public static class RedSand {
+
+		public static boolean connectToWire() {
+			return module().redSandConnectToWire.getValue();
+		}
+
+		public static int signal() {
+			return module().redSandSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().redSandSignalDirect.getValue();
+		}
+	}
+
+	public static class RedstoneBlock {
+
+		public static int signal() {
+			return module().redstoneBlockSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().redstoneBlockSignalDirect.getValue();
+		}
+	}
+
+	public static class RedstoneLamp {
+
+		public static int delayRisingEdge() {
+			return module().redstoneLampDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().redstoneLampDelayFallingEdge.getValue();
+		}
+
+		public static int delay(boolean lit) {
+			return lit ? delayFallingEdge() : delayRisingEdge();
+		}
+
+		public static boolean lazyRisingEdge() {
+			return module().redstoneLampLazyRisingEdge.getValue();
+		}
+
+		public static boolean lazyFallingEdge() {
+			return module().redstoneLampLazyFallingEdge.getValue();
+		}
+
+		public static QuasiConnectivity quasiConnectivity() {
+			return module().redstoneLampQuasiConnectivity.getValue();
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().redstoneLampRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().redstoneLampTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().redstoneLampTickPriorityFallingEdge.getValue();
+		}
+
+		public static TickPriority tickPriority(boolean lit) {
+			return lit ? tickPriorityFallingEdge() : tickPriorityRisingEdge();
+		}
+	}
+
+	public static class RedstoneOre {
+
+		public static CapacitorBehavior capacitorBehavior() {
+			return module().redstoneOreCapacitorBehavior.getValue();
+		}
+
+		public static boolean connectToWire() {
+			return module().redstoneOreConnectToWire.getValue();
+		}
+
+		public static int delay() {
+			return module().redstoneOreDelay.getValue();
+		}
+
+		public static int signal() {
+			return module().redstoneOreSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().redstoneOreSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().redstoneOreTickPriority.getValue();
 		}
 	}
 
@@ -909,6 +1045,10 @@ public class Tweaks {
 			return module().stickyPistonCanMoveSelf.getValue();
 		}
 
+		public static boolean connectToWire() {
+			return module().stickyPistonConnectToWire.getValue();
+		}
+
 		public static int delayRisingEdge() {
 			return module().stickyPistonDelayRisingEdge.getValue();
 		}
@@ -936,6 +1076,14 @@ public class Tweaks {
 			return module().stickyPistonIgnorePowerFromFront.getValue();
 		}
 
+		public static boolean ignoreUpdatesWhileExtending() {
+			return module().stickyPistonIgnoreUpdatesWhileExtending.getValue();
+		}
+
+		public static boolean ignoreUpdatesWhileRetracting() {
+			return module().stickyPistonIgnoreUpdatesWhileRetracting.getValue();
+		}
+
 		public static boolean lazyRisingEdge() {
 			return module().stickyPistonLazyRisingEdge.getValue();
 		}
@@ -960,12 +1108,8 @@ public class Tweaks {
 			return module().stickyPistonPullLimit.getValue();
 		}
 
-		public static Map<Direction, Boolean> quasiConnectivity() {
+		public static QuasiConnectivity quasiConnectivity() {
 			return module().stickyPistonQuasiConnectivity.getValue();
-		}
-
-		public static boolean quasiConnectivity(Direction dir) {
-			return module().stickyPistonQuasiConnectivity.getValue(dir);
 		}
 
 		public static boolean randomizeQuasiConnectivity() {
@@ -990,6 +1134,10 @@ public class Tweaks {
 
 		public static TickPriority tickPriorityFallingEdge() {
 			return module().stickyPistonTickPriorityFallingEdge.getValue();
+		}
+
+		public static boolean updateSelf() {
+			return module().stickyPistonUpdateSelf.getValue();
 		}
 	}
 

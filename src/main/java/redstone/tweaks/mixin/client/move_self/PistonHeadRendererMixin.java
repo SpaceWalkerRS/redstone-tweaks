@@ -35,7 +35,7 @@ public class PistonHeadRendererMixin {
 		)
 	)
 	private void rtRenderMoveSelf(PistonHeadRenderer renderer, BlockPos pos, BlockState state, PoseStack _stack, MultiBufferSource _bufferSource, Level level, boolean cull, int _overlay, PistonMovingBlockEntity mbe, float partialTick, PoseStack stack, MultiBufferSource bufferSource, int light, int overlay) {
-		boolean isExtendingSourceBase = mbe.isSourcePiston() && mbe.isExtending() && PistonOverrides.isBase(level, pos, state);
+		boolean isExtendingSourceBase = mbe.isSourcePiston() && mbe.isExtending() && PistonOverrides.isBase(state);
 
 		if (isExtendingSourceBase) {
 			state = state.setValue(PistonBaseBlock.EXTENDED, true);

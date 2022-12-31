@@ -23,6 +23,36 @@ import redstone.tweaks.interfaces.mixin.BlockOverrides;
 public class BlockBehaviourMixin implements BlockOverrides {
 
 	@Inject(
+		method = "onPlace",
+		cancellable = true,
+		at = @At(
+			value = "HEAD"
+		)
+	)
+	private void rtOnPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston, CallbackInfo ci) {
+		boolean override = overrideOnPlace(state, level, pos, oldState, movedByPiston);
+
+		if (override) {
+			ci.cancel();
+		}
+	}
+
+	@Inject(
+		method = "onRemove",
+		cancellable = true,
+		at = @At(
+			value = "HEAD"
+		)
+	)
+	private void rtOnRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston, CallbackInfo ci) {
+		boolean override = overrideOnRemove(state, level, pos, newState, movedByPiston);
+
+		if (override) {
+			ci.cancel();
+		}
+	}
+
+	@Inject(
 		method = "neighborChanged",
 		cancellable = true,
 		at = @At(

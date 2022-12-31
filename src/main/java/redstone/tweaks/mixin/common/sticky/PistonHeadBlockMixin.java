@@ -42,7 +42,7 @@ public class PistonHeadBlockMixin implements BlockOverrides {
 			if (!Tweaks.Piston.movableWhenExtended(isSticky)) {
 				return false;
 			}
-			if (!PistonOverrides.isBase(level, neighborPos, neighborState)) {
+			if (!PistonOverrides.isBase(neighborState)) {
 				return false;
 			}
 

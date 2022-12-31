@@ -1,11 +1,14 @@
 package redstone.tweaks.interfaces.mixin;
 
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -15,10 +18,30 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.ticks.TickPriority;
 
+import redstone.tweaks.world.level.block.QuasiConnectivity;
+
 public interface BlockOverrides {
 
 	default Block block() {
 		return (Block)this;
+	}
+
+	/**
+	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#onPlace BlockBehaviour.onPlace}.
+	 * 
+	 * @return whether to override the method call
+	 */
+	default boolean overrideOnPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+		return false;
+	}
+
+	/**
+	 * Override for {@link net.minecraft.world.level.block.state.BlockBehaviour#onRemove BlockBehaviour.onRemove}.
+	 * 
+	 * @return whether to override the method call
+	 */
+	default boolean overrideOnRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+		return false;
 	}
 
 	/**
@@ -118,13 +141,13 @@ public interface BlockOverrides {
 		return false;
 	}
 
-	public static boolean hasSignal(Level level, BlockPos pos, Map<Direction, Boolean> qc, boolean randQC) {
+	public static boolean hasSignal(Level level, BlockPos pos, QuasiConnectivity qc, boolean randQC) {
 		return level.hasNeighborSignal(pos) || hasQuasiSignal(level, pos, qc, randQC);
 	}
 
-	public static boolean hasQuasiSignal(Level level, BlockPos pos, Map<Direction, Boolean> qc, boolean randQC) {
+	public static boolean hasQuasiSignal(Level level, BlockPos pos, QuasiConnectivity qc, boolean randQC) {
 		for (Direction dir : Direction.values()) {
-			if (qc.get(dir) && (!randQC || level.random.nextBoolean())) {
+			if (qc.isEnabled(dir) && (!randQC || level.random.nextBoolean())) {
 				if (level.hasNeighborSignal(pos.relative(dir))) {
 					return true;
 				}
@@ -132,5 +155,22 @@ public interface BlockOverrides {
 		}
 
 		return false;
+	}
+
+	public static void sendBlockChange(Level level, BlockPos pos, BlockState state) {
+		if (level.isClientSide()) {
+			return;
+		}
+
+		PlayerList playerList = level.getServer().getPlayerList();
+
+		double x = pos.getX();
+		double y = pos.getY();
+		double z = pos.getZ();
+		double range = playerList.getSimulationDistance();
+		ResourceKey<Level> key = level.dimension();
+
+		Packet<?> packet = new ClientboundBlockUpdatePacket(pos, state);
+		playerList.broadcast(null, x, y, z, range, key, packet);
 	}
 }

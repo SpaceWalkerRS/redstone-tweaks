@@ -11,6 +11,7 @@ import com.g4mesoft.registry.GSSupplierRegistry;
 import com.g4mesoft.setting.GSSettingManager;
 
 import redstone.tweaks.RedstoneTweaksMod;
+import redstone.tweaks.g4mespeed.setting.decoder.CapacitorBehaviorSettingDecoder;
 import redstone.tweaks.g4mespeed.setting.decoder.QuasiConnectivitySettingDecoder;
 import redstone.tweaks.g4mespeed.setting.decoder.TickPrioritySettingDecoder;
 
@@ -52,8 +53,9 @@ public class RedstoneTweaksExtension implements GSIExtension {
 
 	@Override
 	public void init() {
-		GSSettingManager.registerDecoder(new TickPrioritySettingDecoder());
+		GSSettingManager.registerDecoder(new CapacitorBehaviorSettingDecoder());
 		GSSettingManager.registerDecoder(new QuasiConnectivitySettingDecoder());
+		GSSettingManager.registerDecoder(new TickPrioritySettingDecoder());
 	}
 
 	@Override

@@ -14,7 +14,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.ticks.TickPriority;
-
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
 import redstone.tweaks.interfaces.mixin.PistonOverrides;
@@ -87,7 +86,7 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		if (ticking) {
 			level.blockEvent(pos, block(), type, data);
 		} else {
-			boolean extend = !state.getValue(PistonBaseBlock.EXTENDED);
+			boolean extend = MotionType.isExtend(type);
 
 			int delay = Tweaks.Piston.delay(extend, isSticky());
 			TickPriority priority = Tweaks.Piston.tickPriority(extend, isSticky());

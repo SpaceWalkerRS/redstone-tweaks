@@ -1,7 +1,6 @@
 package redstone.tweaks.interfaces.mixin;
 
 import java.util.List;
-import java.util.Map;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,9 +24,7 @@ public interface PistonOverrides extends BlockOverrides {
 
 	void queueBlockEvent(Level level, BlockPos pos, BlockState state, int type, int data);
 
-	void doBlockDropping(Level level, BlockPos pos, Direction facing, boolean extending);
-
-	default boolean hasSignal(Level level, BlockPos pos, Direction facing, Map<Direction, Boolean> qc, boolean randQC) {
+	default boolean hasSignal(Level level, BlockPos pos, Direction facing) {
 		boolean ignoreFront = Tweaks.Piston.ignorePowerFromFront(isSticky());
 
 		for (Direction dir : Directions.ALL) {
@@ -39,14 +36,14 @@ public interface PistonOverrides extends BlockOverrides {
 			}
 		}
 
-		return BlockOverrides.hasQuasiSignal(level, pos, qc, randQC);
+		return BlockOverrides.hasQuasiSignal(level, pos, Tweaks.Piston.quasiConnectivity(isSticky()), Tweaks.Piston.randomizeQuasiConnectivity(isSticky()));
 	}
 
 	public static boolean isBase(Level level, BlockPos pos) {
-		return isBase(level, pos, level.getBlockState(pos));
+		return isBase(level.getBlockState(pos));
 	}
 
-	public static boolean isBase(Level level, BlockPos pos, BlockState state) {
+	public static boolean isBase(BlockState state) {
 		return state.getBlock() instanceof PistonBaseBlock;
 	}
 
@@ -59,15 +56,21 @@ public interface PistonOverrides extends BlockOverrides {
 	}
 
 	public static boolean isHead(Level level, BlockPos pos, BlockState state, Direction facing, boolean isSticky) {
-		if (state.is(Blocks.PISTON_HEAD)) {
-			return state.getValue(PistonHeadBlock.FACING) == facing && isHeadSticky(state) == isSticky;
-		}
-		if (state.is(Blocks.MOVING_PISTON)) {
-			BlockEntity blockEntity = level.getBlockEntity(pos);
+		return isStaticHead(state, facing, isSticky) || isExtendingHead(level, pos, facing, isSticky);
+	}
 
-			if (blockEntity instanceof PistonMovingBlockEntity) {
-				PistonMovingBlockEntity mbe = (PistonMovingBlockEntity)blockEntity;
-				return mbe.isSourcePiston() && mbe.isExtending() && mbe.getDirection() == facing;
+	public static boolean isStaticHead(BlockState state, Direction facing, boolean isSticky) {
+		return state.is(Blocks.PISTON_HEAD) && state.getValue(PistonHeadBlock.FACING) == facing && isHeadSticky(state) == isSticky;
+	}
+
+	public static boolean isExtendingHead(Level level, BlockPos pos, Direction facing, boolean isSticky) {
+		BlockEntity blockEntity = level.getBlockEntity(pos);
+
+		if (blockEntity instanceof PistonMovingBlockEntity) {
+			PistonMovingBlockEntity mbe = (PistonMovingBlockEntity)blockEntity;
+
+			if (mbe.isSourcePiston() && mbe.isExtending()) {
+				return isStaticHead(mbe.getMovedState(), facing, isSticky);
 			}
 		}
 
@@ -93,8 +96,8 @@ public interface PistonOverrides extends BlockOverrides {
 		return blockEntity;
 	}
 
-	public static void dropMovingBlock(PistonOverrides piston, Level level, BlockPos pos, Direction facing) {
-		dropMovingBlock(level, pos.relative(facing, 2), facing);
+	public static void dropMovingBlock(PistonOverrides piston, Level level, BlockPos pos, Direction facing, boolean extending) {
+		dropMovingBlock(level, pos.relative(facing, extending ? 2 : 1), facing, extending);
 	}
 
 	public static void dropMovingStructure(PistonOverrides piston, Level level, BlockPos pos, Direction facing, boolean extending) {
@@ -113,11 +116,11 @@ public interface PistonOverrides extends BlockOverrides {
 		List<BlockPos> structure = structureResolver.getToPush();
 
 		for (int i = 0; i < structure.size(); i++) {
-			dropMovingBlock(level, structure.get(i), facing);
+			dropMovingBlock(level, structure.get(i), facing, extending);
 		}
 	}
 
-	private static void dropMovingBlock(Level level, BlockPos pos, Direction facing) {
+	private static void dropMovingBlock(Level level, BlockPos pos, Direction facing, boolean extending) {
 		BlockState state = level.getBlockState(pos);
 
 		if (!state.is(Blocks.MOVING_PISTON)) {
@@ -132,7 +135,7 @@ public interface PistonOverrides extends BlockOverrides {
 
 		PistonMovingBlockEntity mbe = (PistonMovingBlockEntity)blockEntity;
 
-		if (mbe.isExtending() && mbe.getDirection() == facing) {
+		if (mbe.isExtending() == extending && mbe.getDirection() == facing) {
 			mbe.finalTick();
 		}
 	}

@@ -30,7 +30,7 @@ public class PistonMovingBlockEntityMixin {
 		if (mbe.isSourcePiston() && mbe.isExtending() && mbe.getProgress(0.0F) > 0.25F) {
 			BlockState movedState = mbe.getMovedState();
 
-			if (PistonOverrides.isBase(level, pos, movedState) && movedState.getValue(PistonBaseBlock.EXTENDED)) {
+			if (PistonOverrides.isBase(movedState) && movedState.getValue(PistonBaseBlock.EXTENDED)) {
 				Direction facing = movedState.getValue(PistonBaseBlock.FACING);
 				boolean isSticky = PistonOverrides.isBaseSticky(movedState);
 				BlockPos frontPos = pos.relative(facing);

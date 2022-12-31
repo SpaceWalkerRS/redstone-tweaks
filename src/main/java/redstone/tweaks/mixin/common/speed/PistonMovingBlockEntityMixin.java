@@ -21,10 +21,11 @@ import redstone.tweaks.interfaces.mixin.PistonOverrides;
 @Mixin(PistonMovingBlockEntity.class)
 public abstract class PistonMovingBlockEntityMixin implements IPistonMovingBlockEntity {
 
+	private static final String NBT_KEY_SPEED = "rt_speed";
+
 	@Shadow private boolean extending;
 	@Shadow private float progress;
 
-	private PistonOverrides rt_source;
 	private int rt_speed = 2;
 	private float rt_amountPerStep = 0.5F;
 	private float gs_numberOfSteps = 2.0F;
@@ -36,7 +37,9 @@ public abstract class PistonMovingBlockEntityMixin implements IPistonMovingBlock
 		)
 	)
 	private void rtLoadNbt(CompoundTag nbt, CallbackInfo ci) {
-		initSpeed(nbt.getInt("rt_speed"));
+		if (nbt.contains(NBT_KEY_SPEED)) {
+			initSpeed(nbt.getInt(NBT_KEY_SPEED));
+		}
 	}
 
 	@Inject(
@@ -46,7 +49,7 @@ public abstract class PistonMovingBlockEntityMixin implements IPistonMovingBlock
 		)
 	)
 	private void rtSaveNbt(CompoundTag nbt, CallbackInfo ci) {
-		nbt.putInt("rt_speed", rt_speed);
+		nbt.putInt(NBT_KEY_SPEED, rt_speed);
 	}
 
 	@ModifyConstant(
@@ -61,9 +64,7 @@ public abstract class PistonMovingBlockEntityMixin implements IPistonMovingBlock
 
 	@Override
 	public void init(PistonOverrides source) {
-		rt_source = source;
-
-		initSpeed(Tweaks.Piston.speed(extending, rt_source.isSticky()));
+		initSpeed(Tweaks.Piston.speed(extending, source.isSticky()));
 	}
 
 	@Override

@@ -2,8 +2,11 @@ package redstone.tweaks.mixin.common.block_dropping;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -32,6 +35,19 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		return movingBlockEntity.isExtending() && Tweaks.Piston.doBlockDropping();
 	}
 
+	@Inject(
+		method = "triggerEvent",
+		locals = LocalCapture.CAPTURE_FAILHARD,
+		at = @At(
+			value = "INVOKE",
+			ordinal = 0,
+			target = "Lnet/minecraft/world/level/block/piston/PistonBaseBlock;moveBlocks(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Z)Z"
+		)
+	)
+	private void rtDropBlocksOnExtension(BlockState state, Level level, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir, Direction facing) {
+		doBlockDropping(level, pos, facing, false);
+	}
+
 	@Redirect(
 		method = "triggerEvent",
 		slice = @Slice(
@@ -46,14 +62,16 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 			target = "Lnet/minecraft/world/level/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"
 		)
 	)
-	private BlockState rtDoBlockDropping(Level _level, BlockPos frontPos, BlockState state, Level level, BlockPos pos, int type, int data) {
+	private BlockState rtDropBlocksOnRetraction(Level _level, BlockPos frontPos, BlockState state, Level level, BlockPos pos, int type, int data) {
 		Direction facing = state.getValue(PistonBaseBlock.FACING);
 		BlockState frontState = level.getBlockState(frontPos);
 
-		doBlockDropping(level, pos, facing, false);
+		doBlockDropping(level, pos, facing, true);
 
 		// The state that is return is used to determine whether the
 		// piston should try to retract the blocks in front of it.
+		// If we do not want the block to be dropped we return the
+		// placed block state rather than the moving block state.
 		return Tweaks.Piston.doBlockDropping() ? frontState : level.getBlockState(frontPos);
 	}
 
@@ -69,18 +87,17 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		// replaced by the method below
 	}
 
-	@Override
-	public void doBlockDropping(Level level, BlockPos pos, Direction facing, boolean extending) {
+	private void doBlockDropping(Level level, BlockPos pos, Direction facing, boolean extending) {
 		if (Tweaks.Piston.doBlockDropping()) {
 			if (Tweaks.Piston.doFastBlockDropping()) {
 				// "fast" block dropping: moved structure is
-				// placed but not retracted again
+				// placed and not retracted again
 				if (Tweaks.Piston.doSuperBlockDropping()) {
 					// drop entire moving structure
-					PistonOverrides.dropMovingStructure(this, level, pos, facing, !extending);
+					PistonOverrides.dropMovingStructure(this, level, pos, facing, extending);
 				} else {
 					// drop only the moving block directly in front
-					PistonOverrides.dropMovingBlock(this, level, pos, facing);
+					PistonOverrides.dropMovingBlock(this, level, pos, facing, extending);
 				}
 			} else {
 				// "slow" block dropping: moved structure keeps
@@ -89,7 +106,7 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		} else {
 			// no block dropping: place the entire moved
 			// structure so it can be retracted again
-			PistonOverrides.dropMovingStructure(this, level, pos, facing, !extending);
+			PistonOverrides.dropMovingStructure(this, level, pos, facing, extending);
 		}
 	}
 }

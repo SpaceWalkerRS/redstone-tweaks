@@ -8,6 +8,8 @@
 		"common.block_dropping.PistonBaseBlockMixin",
 		"common.block_dropping.PistonStructureResolverMixin",
 
+		"common.connect_to_wire.RedStoneWireBlockMixin",
+
 		"common.crush.AnvilBlockMixin",
 
 		"common.delay.BambooStalkBlockMixin",
@@ -40,16 +42,23 @@
 		"common.delay.LeverBlockMixin",
 		"common.delay.LiquidBlockMixin",
 		"common.delay.MagmaBlockMixin",
+		"common.delay.NoteBlockMixin",
 		"common.delay.ObserverBlockMixin",
 		"common.delay.PistonBaseBlockMixin",
 		"common.delay.PoweredRailBlockMixin",
 		"common.delay.PressurePlateBlockMixin",
+		"common.delay.RailBlockMixin",
+		"common.delay.RedstoneLampBlockMixin",
+		"common.delay.RedStoneOreBlockMixin",
 		"common.delay.RepeaterBlockMixin",
 		"common.delay.ServerLevelMixin",
 		"common.delay.WaterFluidMixin",
 		"common.delay.WeightedPressurePlateBlockMixin",
 
 		"common.double_retraction.PistonBaseBlockMixin",
+
+		"common.ignore_updates_while_moving.MovingPistonBlockMixin",
+		"common.ignore_updates_while_moving.PistonBaseBlockMixin",
 
 		"common.movable.BlockEntityMixin",
 		"common.movable.LevelChunkMixin",
@@ -69,12 +78,15 @@
 
 		"common.observer.ObserverBlockMixin",
 
+		"common.quasi_connectivity.BaseRailBlockMixin",
 		"common.quasi_connectivity.CommandBlockMixin",
 		"common.quasi_connectivity.DispenserBlockMixin",
 		"common.quasi_connectivity.DropperBlockMixin",
 		"common.quasi_connectivity.HopperBlockMixin",
+		"common.quasi_connectivity.NoteBlockMixin",
 		"common.quasi_connectivity.PistonBaseBlockMixin",
 		"common.quasi_connectivity.PoweredRailBlockMixin",
+		"common.quasi_connectivity.RedstoneLampBlockMixin",
 
 		"common.signal.ComparatorBlockMixin",
 		"common.signal.DaylightDetectorBlockMixin",
@@ -84,9 +96,12 @@
 		"common.signal.LecternBlockMixin",
 		"common.signal.LeverBlockMixin",
 		"common.signal.ObserverBlockMixin",
+		"common.signal.PoweredBlockMixin",
 		"common.signal.PoweredRailBlockMixin",
 		"common.signal.PressurePlateBlockMixin",
+		"common.signal.RedStoneOreBlockMixin",
 		"common.signal.RepeaterBlockMixin",
+		"common.signal.SandBlockMixin",
 		"common.signal.WeightedPressurePlateBlockMixin",
 
 		"common.speed.PistonMovingBlockEntityMixin",
@@ -98,11 +113,16 @@
 		"common.sticky.PistonBaseBlockMixin",
 		"common.sticky.PistonHeadBlockMixin",
 		"common.sticky.PistonStructureResolverMixin",
-		"common.sticky.SlimeBlockMixin"
+		"common.sticky.SlimeBlockMixin",
+
+		"common.update_self.PistonBaseBlockMixin"
 	],
 	"client": [
 		"client.movable.PistonHeadRendererMixin",
+
 		"client.move_self.PistonHeadRendererMixin"
+	],
+	"server": [
 	],
 	"injectors": {
 		"defaultRequire": 1

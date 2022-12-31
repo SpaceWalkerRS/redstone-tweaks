@@ -16,8 +16,10 @@ import net.minecraft.world.level.redstone.Redstone;
 import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.RedstoneTweaksMod;
+import redstone.tweaks.g4mespeed.setting.types.CapacitorBehaviorSetting;
 import redstone.tweaks.g4mespeed.setting.types.QuasiConnectivitySetting;
 import redstone.tweaks.g4mespeed.setting.types.TickPrioritySetting;
+import redstone.tweaks.world.level.block.CapacitorBehavior;
 
 public class RedstoneTweaksModule implements GSIModule {
 
@@ -200,10 +202,13 @@ public class RedstoneTweaksModule implements GSIModule {
 
 	public final GSSettingCategory normalPistonCategory = new GSSettingCategory("normalPiston");
 	public final GSBooleanSetting normalPistonCanMoveSelf = new GSBooleanSetting("canMoveSelf", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting normalPistonConnectToWire = new GSBooleanSetting("connectToWire", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting normalPistonDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting normalPistonDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting normalPistonHeadUpdatesNeighborsOnExtension = new GSBooleanSetting("headUpdatesNeighborsOnExtension", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting normalPistonIgnorePowerFromFront = new GSBooleanSetting("ignorePowerFromFront", true, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting normalPistonIgnoreUpdatesWhileExtending = new GSBooleanSetting("ignoreUpdatesWhileExtending", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting normalPistonIgnoreUpdatesWhileRetracting = new GSBooleanSetting("ignoreUpdatesWhileRetracting", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting normalPistonLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting normalPistonLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting normalPistonLooseHead = new GSBooleanSetting("looseHead", false, SHOW_IN_G4MESPEED_GUI);
@@ -215,6 +220,14 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSIntegerSetting normalPistonSpeedFallingEdge = new GSIntegerSetting("speedFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting normalPistonTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting normalPistonTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting normalPistonUpdateSelf = new GSBooleanSetting("updateSelf", false, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory noteBlockCategory = new GSSettingCategory("noteBlock");
+	public final GSIntegerSetting noteBlockDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting noteBlockLazy = new GSBooleanSetting("lazy", true, SHOW_IN_G4MESPEED_GUI);
+	public final QuasiConnectivitySetting noteBlockQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting noteBlockRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting noteBlockTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory observerCategory = new GSSettingCategory("observer");
 	public final GSIntegerSetting observerDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -238,6 +251,39 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final TickPrioritySetting poweredRailTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting poweredRailTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
+	public final GSSettingCategory railCategory = new GSSettingCategory("rail");
+	public final GSIntegerSetting railDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final QuasiConnectivitySetting railQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting railRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting railTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory redSandCategory = new GSSettingCategory("redSand");
+	public final GSBooleanSetting redSandConnectToWire = new GSBooleanSetting("connectToWire", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redSandSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redSandSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory redstoneBlockCategory = new GSSettingCategory("redstoneBlock");
+	public final GSIntegerSetting redstoneBlockSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneBlockSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory redstoneLampCategory = new GSSettingCategory("redstoneLamp");
+	public final GSIntegerSetting redstoneLampDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneLampDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneLampLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", true, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneLampLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_G4MESPEED_GUI);
+	public final QuasiConnectivitySetting redstoneLampQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneLampRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting redstoneLampTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.HIGH, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting redstoneLampTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.VERY_HIGH, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory redstoneOreCategory = new GSSettingCategory("redstoneOre");
+	public final CapacitorBehaviorSetting redstoneOreCapacitorBehavior = new CapacitorBehaviorSetting("capacitorBehavior", new CapacitorBehavior(), SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneOreConnectToWire = new GSBooleanSetting("connectToWire", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneOreDelay = new GSIntegerSetting("delay", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneOreSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneOreSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting redstoneOreTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
 	public final GSSettingCategory repeaterCategory = new GSSettingCategory("repeater");
 	public final GSIntegerSetting repeaterDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting repeaterDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -255,12 +301,15 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSBooleanSetting stickyPistonFastBlockDropping = new GSBooleanSetting("fastBlockDropping", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonSuperBlockDropping = new GSBooleanSetting("superBlockDropping", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonCanMoveSelf = new GSBooleanSetting("canMoveSelf", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting stickyPistonConnectToWire = new GSBooleanSetting("connectToWire", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonDoubleRetraction = new GSBooleanSetting("doubleRetraction", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonHeadUpdatesNeighborsOnExtension = new GSBooleanSetting("headUpdatesNeighborsOnExtension", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonHeadUpdatesNeighborsOnRetraction = new GSBooleanSetting("headUpdatesNeighborsOnRetraction", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonIgnorePowerFromFront = new GSBooleanSetting("ignorePowerFromFront", true, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting stickyPistonIgnoreUpdatesWhileExtending = new GSBooleanSetting("ignoreUpdatesWhileExtending", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting stickyPistonIgnoreUpdatesWhileRetracting = new GSBooleanSetting("ignoreUpdatesWhileRetracting", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonLooseHead = new GSBooleanSetting("looseHead", false, SHOW_IN_G4MESPEED_GUI);
@@ -274,6 +323,7 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSBooleanSetting stickyPistonSuperSticky = new GSBooleanSetting("superSticky", false, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting stickyPistonTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting stickyPistonTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting stickyPistonUpdateSelf = new GSBooleanSetting("updateSelf", false, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory stonePressurePlateCategory = new GSSettingCategory("stonePressurePlate");
 	public final GSIntegerSetting stonePressurePlateDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -447,10 +497,13 @@ public class RedstoneTweaksModule implements GSIModule {
 			magmaTickPriority);
 		registerSettings(manager, normalPistonCategory,
 			normalPistonCanMoveSelf,
+			normalPistonConnectToWire,
 			normalPistonDelayRisingEdge,
 			normalPistonDelayFallingEdge,
 			normalPistonHeadUpdatesNeighborsOnExtension,
 			normalPistonIgnorePowerFromFront,
+			normalPistonIgnoreUpdatesWhileExtending,
+			normalPistonIgnoreUpdatesWhileRetracting,
 			normalPistonLazyRisingEdge,
 			normalPistonLazyFallingEdge,
 			normalPistonLooseHead,
@@ -461,7 +514,14 @@ public class RedstoneTweaksModule implements GSIModule {
 			normalPistonSpeedRisingEdge,
 			normalPistonSpeedFallingEdge,
 			normalPistonTickPriorityRisingEdge,
-			normalPistonTickPriorityFallingEdge);
+			normalPistonTickPriorityFallingEdge,
+			normalPistonUpdateSelf);
+		registerSettings(manager, noteBlockCategory,
+			noteBlockDelay,
+			noteBlockLazy,
+			noteBlockQuasiConnectivity,
+			noteBlockRandomizeQuasiConnectivity,
+			noteBlockTickPriority);
 		registerSettings(manager, observerCategory,
 			observerDelayRisingEdge,
 			observerDelayFallingEdge,
@@ -482,6 +542,34 @@ public class RedstoneTweaksModule implements GSIModule {
 			poweredRailRandomizeQuasiConnectivity,
 			poweredRailTickPriorityRisingEdge,
 			poweredRailTickPriorityFallingEdge);
+		registerSettings(manager, railCategory,
+			railDelay,
+			railQuasiConnectivity,
+			railRandomizeQuasiConnectivity,
+			railTickPriority);
+		registerSettings(manager, redSandCategory,
+			redSandConnectToWire,
+			redSandSignal,
+			redSandSignalDirect);
+		registerSettings(manager, redstoneBlockCategory,
+			redstoneBlockSignal,
+			redstoneBlockSignalDirect);
+		registerSettings(manager, redstoneLampCategory,
+			redstoneLampDelayRisingEdge,
+			redstoneLampDelayFallingEdge,
+			redstoneLampLazyRisingEdge,
+			redstoneLampLazyFallingEdge,
+			redstoneLampQuasiConnectivity,
+			redstoneLampRandomizeQuasiConnectivity,
+			redstoneLampTickPriorityRisingEdge,
+			redstoneLampTickPriorityFallingEdge);
+		registerSettings(manager, redstoneOreCategory,
+			redstoneOreCapacitorBehavior,
+			redstoneOreConnectToWire,
+			redstoneOreDelay,
+			redstoneOreSignal,
+			redstoneOreSignalDirect,
+			redstoneOreTickPriority);
 		registerSettings(manager, repeaterCategory,
 			repeaterDelayRisingEdge,
 			repeaterDelayFallingEdge,
@@ -498,12 +586,15 @@ public class RedstoneTweaksModule implements GSIModule {
 			stickyPistonFastBlockDropping,
 			stickyPistonSuperBlockDropping,
 			stickyPistonCanMoveSelf,
+			stickyPistonConnectToWire,
 			stickyPistonDelayRisingEdge,
 			stickyPistonDelayFallingEdge,
 			stickyPistonDoubleRetraction,
 			stickyPistonHeadUpdatesNeighborsOnExtension,
 			stickyPistonHeadUpdatesNeighborsOnRetraction,
 			stickyPistonIgnorePowerFromFront,
+			stickyPistonIgnoreUpdatesWhileExtending,
+			stickyPistonIgnoreUpdatesWhileRetracting,
 			stickyPistonLazyRisingEdge,
 			stickyPistonLazyFallingEdge,
 			stickyPistonLooseHead,
@@ -516,7 +607,8 @@ public class RedstoneTweaksModule implements GSIModule {
 			stickyPistonSpeedFallingEdge,
 			stickyPistonSuperSticky,
 			stickyPistonTickPriorityRisingEdge,
-			stickyPistonTickPriorityFallingEdge);
+			stickyPistonTickPriorityFallingEdge,
+			stickyPistonUpdateSelf);
 		registerSettings(manager, stonePressurePlateCategory,
 			stonePressurePlateDelayRisingEdge,
 			stonePressurePlateDelayFallingEdge,
