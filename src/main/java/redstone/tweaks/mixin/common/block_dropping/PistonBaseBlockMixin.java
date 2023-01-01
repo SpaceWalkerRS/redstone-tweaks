@@ -53,6 +53,7 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		slice = @Slice(
 			from = @At(
 				value = "FIELD",
+				ordinal = 1,
 				target = "Lnet/minecraft/world/level/block/piston/PistonBaseBlock;isSticky:Z"
 			)
 		),
@@ -68,7 +69,7 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 
 		doBlockDropping(level, pos, facing, true);
 
-		// The state that is return is used to determine whether the
+		// The returned state is used to determine whether the
 		// piston should try to retract the blocks in front of it.
 		// If we do not want the block to be dropped we return the
 		// placed block state rather than the moving block state.
@@ -84,7 +85,7 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		)
 	)
 	private void rtCancelBlockDropping(PistonMovingBlockEntity movingBlockEntity) {
-		// replaced by the method below
+		// replaced by the inject above
 	}
 
 	private void doBlockDropping(Level level, BlockPos pos, Direction facing, boolean extending) {

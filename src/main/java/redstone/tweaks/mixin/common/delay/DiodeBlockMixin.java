@@ -161,10 +161,6 @@ public abstract class DiodeBlockMixin implements DiodeOverrides {
 
 	@Override
 	public Boolean overrideTriggerEvent(BlockState state, Level level, BlockPos pos, int type, int data) {
-		if (microtickMode()) {
-			return BlockOverrides.scheduleOrDoTick(level, pos, state, type, TickPriority.NORMAL, this::microtickMode);
-		}
-
-		return null;
+		return BlockOverrides.scheduleOrDoTick(level, pos, state, type, TickPriority.NORMAL, this::microtickMode);
 	}
 }

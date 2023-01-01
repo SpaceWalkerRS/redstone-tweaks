@@ -20,6 +20,7 @@ import redstone.tweaks.g4mespeed.setting.types.CapacitorBehaviorSetting;
 import redstone.tweaks.g4mespeed.setting.types.QuasiConnectivitySetting;
 import redstone.tweaks.g4mespeed.setting.types.TickPrioritySetting;
 import redstone.tweaks.world.level.block.CapacitorBehavior;
+import redstone.tweaks.world.level.block.QuasiConnectivity;
 
 public class RedstoneTweaksModule implements GSIModule {
 
@@ -54,6 +55,18 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSSettingCategory barrierCategory = new GSSettingCategory("barrier");
 	public final GSBooleanSetting barrierMovable = new GSBooleanSetting("movable", false, SHOW_IN_G4MESPEED_GUI);
 
+	public final GSSettingCategory bigDripleafCategory = new GSSettingCategory("bigDripleaf");
+	public final GSIntegerSetting bigDripleafDelay = new GSIntegerSetting("delay", 1, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting bigDripleafDelayUnstable = new GSIntegerSetting("delayUnstable", 1, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting bigDripleafDelayPartial = new GSIntegerSetting("delayPartial", 1, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting bigDripleafDelayFull = new GSIntegerSetting("delayFull", 1, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final QuasiConnectivitySetting bigDripleafQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting bigDripleafRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting bigDripleafTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting bigDripleafTickPriorityUnstable = new TickPrioritySetting("tickPriorityUnstable", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting bigDripleafTickPriorityPartial = new TickPrioritySetting("tickPriorityPartial", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting bigDripleafTickPriorityFull = new TickPrioritySetting("tickPriorityFull", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
 	public final GSSettingCategory bubbleColumnCategory = new GSSettingCategory("bubbleColumn");
 	public final GSIntegerSetting bubbleColumnDelay = new GSIntegerSetting("delay", 5, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting bubbleColumnTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
@@ -62,6 +75,10 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSIntegerSetting cactusDelay = new GSIntegerSetting("delay", 1, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting cactusNou = new GSBooleanSetting("nou", false, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting cactusTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory cauldronCategory = new GSSettingCategory("cauldron");
+	public final GSIntegerSetting cauldronDelay = new GSIntegerSetting("delay", 1, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting cauldronTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory chorusPlantCategory = new GSSettingCategory("chorusPlant");
 	public final GSIntegerSetting chorusPlantDelay = new GSIntegerSetting("delay", 1, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -76,7 +93,7 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSSettingCategory comparatorCategory = new GSSettingCategory("comparator");
 	public final GSBooleanSetting comparatorAdditionMode = new GSBooleanSetting("additionMode", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting comparatorDelay = new GSIntegerSetting("delay", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
-	public final GSBooleanSetting comparatorMicroTickMode = new GSBooleanSetting("microTickMode", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting comparatorMicrotickMode = new GSBooleanSetting("microtickMode", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting comparatorRedstoneBlockAlternateInput = new GSBooleanSetting("redstoneBlockAlternateInput", true, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting comparatorTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting comparatorTickPriorityPrioritized = new TickPrioritySetting("tickPriorityPrioritized", TickPriority.HIGH, SHOW_IN_G4MESPEED_GUI);
@@ -134,6 +151,11 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSIntegerSetting fireDelayMax = new GSIntegerSetting("delayMax", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting fireTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
+	public final GSSettingCategory frogspawnCategory = new GSSettingCategory("frogspawn");
+	public final GSIntegerSetting frogspawnDelayHatchMin = new GSIntegerSetting("delayHatchMin", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting frogspawnDelayHatchMax = new GSIntegerSetting("delayHatchMax", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting frogspawnTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
 	public final GSSettingCategory frostedIceCategory = new GSSettingCategory("frostedIce");
 	public final GSIntegerSetting frostedIceDelayMin = new GSIntegerSetting("delayMin", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting frostedIceDelayMax = new GSIntegerSetting("delayMax", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -186,6 +208,14 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final TickPrioritySetting leverTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting leverTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
+	public final GSSettingCategory lightningRodCategory = new GSSettingCategory("lightningRod");
+	public final GSIntegerSetting lightningRodDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting lightningRodDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting lightningRodSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting lightningRodSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting lightningRodTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting lightningRodTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
 	public final GSSettingCategory lightWeightedPressurePlateCategory = new GSSettingCategory("lightWeightedPressurePlate");
 	public final GSIntegerSetting lightWeightedPressurePlateDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting lightWeightedPressurePlateDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -214,7 +244,7 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSBooleanSetting normalPistonLooseHead = new GSBooleanSetting("looseHead", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting normalPistonMovableWhenExtended = new GSBooleanSetting("movableWhenExtended", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting normalPistonPushLimit = new GSIntegerSetting("pushLimit", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
-	public final QuasiConnectivitySetting normalPistonQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", Direction.UP, SHOW_IN_G4MESPEED_GUI);
+	public final QuasiConnectivitySetting normalPistonQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", new QuasiConnectivity().setRange(Direction.UP, 1), SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting normalPistonRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting normalPistonSpeedRisingEdge = new GSIntegerSetting("speedRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting normalPistonSpeedFallingEdge = new GSIntegerSetting("speedFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -233,12 +263,18 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSIntegerSetting observerDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting observerDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting observerDisable = new GSBooleanSetting("disable", false, SHOW_IN_G4MESPEED_GUI);
-	public final GSBooleanSetting observerMicroTickMode = new GSBooleanSetting("microTickMode", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting observerMicrotickMode = new GSBooleanSetting("microtickMode", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting observerObserveBlockUpdates = new GSBooleanSetting("observeBlockUpdates", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting observerSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting observerSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting observerTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting observerTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory pointedDripstoneCategory = new GSSettingCategory("pointedDripstone");
+	public final GSIntegerSetting pointedDripstoneDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting pointedDripstoneDelayBelow = new GSIntegerSetting("delayBelow", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting pointedDripstoneTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting pointedDripstoneTickPriorityBelow = new TickPrioritySetting("tickPriorityBelow", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory poweredRailCategory = new GSSettingCategory("poweredRail");
 	public final GSIntegerSetting poweredRailDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 0, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -284,17 +320,66 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSIntegerSetting redstoneOreSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting redstoneOreTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
+	public final GSSettingCategory redstoneTorchCategory = new GSSettingCategory("redstoneTorch");
+	public final GSIntegerSetting redstoneTorchBurnoutCount = new GSIntegerSetting("burnoutCount", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneTorchBurnoutTimer = new GSIntegerSetting("burnoutTimer", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneTorchDelayBurnout = new GSIntegerSetting("delayBurnout", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneTorchDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneTorchDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneTorchLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", true, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneTorchLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneTorchMicrotickMode = new GSBooleanSetting("microtickMode", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneTorchSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting redstoneTorchSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneTorchSoftInversion = new GSBooleanSetting("softInversion", false, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting redstoneTorchTickPriorityBurnout = new TickPrioritySetting("tickPriorityBurnout", TickPriority.EXTREMELY_HIGH, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting redstoneTorchTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.HIGH, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting redstoneTorchTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.VERY_HIGH, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory redstoneWireCategory = new GSSettingCategory("redstoneWire");
+	public final GSIntegerSetting redstoneWireDelay = new GSIntegerSetting("delay", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneWireInvertFlowOnGlass = new GSBooleanSetting("invertFlowOnGlass", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneWireMicrotickMode = new GSBooleanSetting("microtickMode", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting redstoneWireSlabsAllowUpConnection = new GSBooleanSetting("slabsAllowUpConnection", false, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting redstoneWireTickPriority = new TickPrioritySetting("tickPriority", TickPriority.EXTREMELY_HIGH, SHOW_IN_G4MESPEED_GUI);
+
 	public final GSSettingCategory repeaterCategory = new GSSettingCategory("repeater");
 	public final GSIntegerSetting repeaterDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting repeaterDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting repeaterLazyRisingEdge = new GSBooleanSetting("lazyRisingEdge", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting repeaterLazyFallingEdge = new GSBooleanSetting("lazyFallingEdge", false, SHOW_IN_G4MESPEED_GUI);
-	public final GSBooleanSetting repeaterMicroTickMode = new GSBooleanSetting("microTickMode", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting repeaterMicrotickMode = new GSBooleanSetting("microtickMode", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting repeaterSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting repeaterSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting repeaterTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.HIGH, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting repeaterTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.VERY_HIGH, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting repeaterTickPriorityPrioritized = new TickPrioritySetting("tickPriorityPrioritized", TickPriority.EXTREMELY_HIGH, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory scaffoldingCategory = new GSSettingCategory("scaffolding");
+	public final GSIntegerSetting scaffoldingDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting scaffoldingTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory sculkCatalystCategory = new GSSettingCategory("sculkCatalyst");
+	public final GSIntegerSetting sculkCatalystDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting sculkCatalystTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory sculkSensorCategory = new GSSettingCategory("sculkSensor");
+	public final GSIntegerSetting sculkSensorDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting sculkSensorTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory shulkerCategory = new GSSettingCategory("shulker");
+	public final GSBooleanSetting shulkerConductRedstone = new GSBooleanSetting("conductRedstone", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting shulkerUpdateNeighborsWhenPeeking = new GSBooleanSetting("updateNeighborsWhenPeeking", false, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory shulkerBoxCategory = new GSSettingCategory("shulkerBox");
+	public final GSBooleanSetting shulkerBoxUpdateNeighborsWhenPeeking = new GSBooleanSetting("updateNeighborsWhenPeeking", false, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory soulSandCategory = new GSSettingCategory("soulSand");
+	public final GSIntegerSetting soulSandDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting soulSandTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory stairsCategory = new GSSettingCategory("stairs");
+	public final GSBooleanSetting stairsConductRedstone = new GSBooleanSetting("conductRedstone", false, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory stickyPistonCategory = new GSSettingCategory("stickyPiston");
 	public final GSBooleanSetting stickyPistonBlockDropping = new GSBooleanSetting("blockDropping", true, SHOW_IN_G4MESPEED_GUI);
@@ -316,7 +401,7 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSBooleanSetting stickyPistonMovableWhenExtended = new GSBooleanSetting("movableWhenExtended", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonPushLimit = new GSIntegerSetting("pushLimit", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonPullLimit = new GSIntegerSetting("pullLimit", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
-	public final QuasiConnectivitySetting stickyPistonQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", Direction.UP, SHOW_IN_G4MESPEED_GUI);
+	public final QuasiConnectivitySetting stickyPistonQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", new QuasiConnectivity().setRange(Direction.UP, 1), SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonSpeedRisingEdge = new GSIntegerSetting("speedRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonSpeedFallingEdge = new GSIntegerSetting("speedFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -324,6 +409,14 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final TickPrioritySetting stickyPistonTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting stickyPistonTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonUpdateSelf = new GSBooleanSetting("updateSelf", false, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory stoneButtonCategory = new GSSettingCategory("stoneButton");
+	public final GSIntegerSetting stoneButtonDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting stoneButtonDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting stoneButtonSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting stoneButtonSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting stoneButtonTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting stoneButtonTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory stonePressurePlateCategory = new GSSettingCategory("stonePressurePlate");
 	public final GSIntegerSetting stonePressurePlateDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -333,9 +426,52 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final TickPrioritySetting stonePressurePlateTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting stonePressurePlateTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
+	public final GSSettingCategory sugarCaneCategory = new GSSettingCategory("sugarCane");
+	public final GSIntegerSetting sugarCaneDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting sugarCaneTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory targetCategory = new GSSettingCategory("target");
+	public final GSIntegerSetting targetDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting targetDelayArrow = new GSIntegerSetting("delayArrow", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting targetEmitDirectSignal = new GSBooleanSetting("emitDirectSignal", false, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting targetTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory tntCategory = new GSSettingCategory("tnt");
+	public final GSIntegerSetting tntDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting tntFuseTime = new GSIntegerSetting("fuseTime", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting tntLazy = new GSBooleanSetting("lazy", false, SHOW_IN_G4MESPEED_GUI);
+	public final QuasiConnectivitySetting tntQuasiConnectivity = new QuasiConnectivitySetting("quasiConnectivity", SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting tntRandomizeQuasiConnectivity = new GSBooleanSetting("randomizeQuasiConnectivity", false, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting tntTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory tripWireCategory = new GSSettingCategory("tripWire");
+	public final GSIntegerSetting tripWireDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting tripWireTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory tripWireHookCategory = new GSSettingCategory("tripWireHook");
+	public final GSIntegerSetting tripWireHookDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting tripWireHookSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting tripWireHookSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting tripWireHookTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory vinesCategory = new GSSettingCategory("vines");
+	public final GSIntegerSetting vinesDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting vinesTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
 	public final GSSettingCategory waterCategory = new GSSettingCategory("water");
 	public final GSIntegerSetting waterDelay = new GSIntegerSetting("delay", 20, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final TickPrioritySetting waterTickPriority = new TickPrioritySetting("tickPriority", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory whiteConcretePowderCategory = new GSSettingCategory("whiteConcretePowder");
+	public final GSBooleanSetting whiteConcretePowderConductRedstone = new GSBooleanSetting("conductRedstone", false, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory woodenButtonCategory = new GSSettingCategory("woodenButton");
+	public final GSIntegerSetting woodenButtonDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting woodenButtonDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting woodenButtonSignal = new GSIntegerSetting("signal", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting woodenButtonSignalDirect = new GSIntegerSetting("signalDirect", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting woodenButtonTickPriorityRisingEdge = new TickPrioritySetting("tickPriorityRisingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
+	public final TickPrioritySetting woodenButtonTickPriorityFallingEdge = new TickPrioritySetting("tickPriorityFallingEdge", TickPriority.NORMAL, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory woodenPressurePlateCategory = new GSSettingCategory("woodenPressurePlate");
 	public final GSIntegerSetting woodenPressurePlateDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 1, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -376,6 +512,17 @@ public class RedstoneTweaksModule implements GSIModule {
 			bambooTickPriority);
 		registerSettings(manager, barrierCategory,
 			barrierMovable);
+		registerSettings(manager, bigDripleafCategory,
+			bigDripleafDelay,
+			bigDripleafDelayUnstable,
+			bigDripleafDelayPartial,
+			bigDripleafDelayFull,
+			bigDripleafQuasiConnectivity,
+			bigDripleafRandomizeQuasiConnectivity,
+			bigDripleafTickPriority,
+			bigDripleafTickPriorityUnstable,
+			bigDripleafTickPriorityPartial,
+			bigDripleafTickPriorityFull);
 		registerSettings(manager, bubbleColumnCategory,
 			bubbleColumnDelay,
 			bubbleColumnTickPriority);
@@ -383,6 +530,9 @@ public class RedstoneTweaksModule implements GSIModule {
 			cactusDelay,
 			cactusNou,
 			cactusTickPriority);
+		registerSettings(manager, cauldronCategory,
+			cauldronDelay,
+			cauldronTickPriority);
 		registerSettings(manager, chorusPlantCategory,
 			chorusPlantDelay,
 			chorusPlantTickPriority);
@@ -394,7 +544,7 @@ public class RedstoneTweaksModule implements GSIModule {
 		registerSettings(manager, comparatorCategory,
 			comparatorAdditionMode,
 			comparatorDelay,
-			comparatorMicroTickMode,
+			comparatorMicrotickMode,
 			comparatorRedstoneBlockAlternateInput,
 			comparatorTickPriority,
 			comparatorTickPriorityPrioritized);
@@ -440,6 +590,10 @@ public class RedstoneTweaksModule implements GSIModule {
 			fireDelayMin,
 			fireDelayMax,
 			fireTickPriority);
+		registerSettings(manager, frogspawnCategory,
+			frogspawnDelayHatchMin,
+			frogspawnDelayHatchMax,
+			frogspawnTickPriority);
 		registerSettings(manager, frostedIceCategory,
 			frostedIceDelayMin,
 			frostedIceDelayMax,
@@ -484,6 +638,13 @@ public class RedstoneTweaksModule implements GSIModule {
 			leverSignalDirect,
 			leverTickPriorityRisingEdge,
 			leverTickPriorityFallingEdge);
+		registerSettings(manager, lightningRodCategory,
+			lightningRodDelayRisingEdge,
+			lightningRodDelayFallingEdge,
+			lightningRodSignal,
+			lightningRodSignalDirect,
+			lightningRodTickPriorityRisingEdge,
+			lightningRodTickPriorityFallingEdge);
 		registerSettings(manager, lightWeightedPressurePlateCategory,
 			lightWeightedPressurePlateDelayRisingEdge,
 			lightWeightedPressurePlateDelayFallingEdge,
@@ -526,12 +687,17 @@ public class RedstoneTweaksModule implements GSIModule {
 			observerDelayRisingEdge,
 			observerDelayFallingEdge,
 			observerDisable,
-			observerMicroTickMode,
+			observerMicrotickMode,
 			observerObserveBlockUpdates,
 			observerSignal,
 			observerSignalDirect,
 			observerTickPriorityRisingEdge,
 			observerTickPriorityFallingEdge);
+		registerSettings(manager, pointedDripstoneCategory,
+			pointedDripstoneDelay,
+			pointedDripstoneDelayBelow,
+			pointedDripstoneTickPriority,
+			pointedDripstoneTickPriorityBelow);
 		registerSettings(manager, poweredRailCategory,
 			poweredRailDelayRisingEdge,
 			poweredRailDelayFallingEdge,
@@ -570,17 +736,57 @@ public class RedstoneTweaksModule implements GSIModule {
 			redstoneOreSignal,
 			redstoneOreSignalDirect,
 			redstoneOreTickPriority);
+		registerSettings(manager, redstoneTorchCategory,
+			redstoneTorchBurnoutCount,
+			redstoneTorchBurnoutTimer,
+			redstoneTorchDelayBurnout,
+			redstoneTorchDelayRisingEdge,
+			redstoneTorchDelayFallingEdge,
+			redstoneTorchLazyRisingEdge,
+			redstoneTorchLazyFallingEdge,
+			redstoneTorchMicrotickMode,
+			redstoneTorchSignal,
+			redstoneTorchSignalDirect,
+			redstoneTorchSoftInversion,
+			redstoneTorchTickPriorityBurnout,
+			redstoneTorchTickPriorityRisingEdge,
+			redstoneTorchTickPriorityFallingEdge);
+		registerSettings(manager, redstoneWireCategory,
+			redstoneWireDelay,
+			redstoneWireInvertFlowOnGlass,
+			redstoneWireMicrotickMode,
+			redstoneWireSlabsAllowUpConnection,
+			redstoneWireTickPriority);
 		registerSettings(manager, repeaterCategory,
 			repeaterDelayRisingEdge,
 			repeaterDelayFallingEdge,
 			repeaterLazyRisingEdge,
 			repeaterLazyFallingEdge,
-			repeaterMicroTickMode,
+			repeaterMicrotickMode,
 			repeaterSignal,
 			repeaterSignalDirect,
 			repeaterTickPriorityRisingEdge,
 			repeaterTickPriorityFallingEdge,
 			repeaterTickPriorityPrioritized);
+		registerSettings(manager, scaffoldingCategory,
+			scaffoldingDelay,
+			scaffoldingTickPriority);
+		registerSettings(manager, sculkCatalystCategory,
+			sculkCatalystDelay,
+			sculkCatalystTickPriority);
+		registerSettings(manager, sculkSensorCategory,
+			sculkSensorDelay,
+			sculkSensorTickPriority);
+		registerSettings(manager, shulkerCategory,
+			shulkerConductRedstone,
+			shulkerUpdateNeighborsWhenPeeking);
+		registerSettings(manager, shulkerBoxCategory,
+			shulkerBoxUpdateNeighborsWhenPeeking);
+		registerSettings(manager, soulSandCategory,
+			soulSandDelay,
+			soulSandTickPriority);
+		registerSettings(manager, stairsCategory,
+			stairsConductRedstone);
 		registerSettings(manager, stickyPistonCategory,
 			stickyPistonBlockDropping,
 			stickyPistonFastBlockDropping,
@@ -609,6 +815,13 @@ public class RedstoneTweaksModule implements GSIModule {
 			stickyPistonTickPriorityRisingEdge,
 			stickyPistonTickPriorityFallingEdge,
 			stickyPistonUpdateSelf);
+		registerSettings(manager, stoneButtonCategory,
+			stoneButtonDelayRisingEdge,
+			stoneButtonDelayFallingEdge,
+			stoneButtonSignal,
+			stoneButtonSignalDirect,
+			stoneButtonTickPriorityRisingEdge,
+			stoneButtonTickPriorityFallingEdge);
 		registerSettings(manager, stonePressurePlateCategory,
 			stonePressurePlateDelayRisingEdge,
 			stonePressurePlateDelayFallingEdge,
@@ -616,9 +829,44 @@ public class RedstoneTweaksModule implements GSIModule {
 			stonePressurePlateSignalDirect,
 			stonePressurePlateTickPriorityRisingEdge,
 			stonePressurePlateTickPriorityFallingEdge);
+		registerSettings(manager, sugarCaneCategory,
+			sugarCaneDelay,
+			sugarCaneTickPriority);
+		registerSettings(manager, targetCategory,
+			targetDelay,
+			targetDelayArrow,
+			targetEmitDirectSignal,
+			targetTickPriority);
+		registerSettings(manager, tntCategory,
+			tntDelay,
+			tntFuseTime,
+			tntLazy,
+			tntQuasiConnectivity,
+			tntRandomizeQuasiConnectivity,
+			tntTickPriority);
+		registerSettings(manager, tripWireCategory,
+			tripWireDelay,
+			tripWireTickPriority);
+		registerSettings(manager, tripWireHookCategory,
+			tripWireHookDelay,
+			tripWireHookSignal,
+			tripWireHookSignalDirect,
+			tripWireHookTickPriority);
+		registerSettings(manager, vinesCategory,
+			vinesDelay,
+			vinesTickPriority);
 		registerSettings(manager, waterCategory,
 			waterDelay,
 			waterTickPriority);
+		registerSettings(manager, whiteConcretePowderCategory,
+			whiteConcretePowderConductRedstone);
+		registerSettings(manager, woodenButtonCategory,
+			woodenButtonDelayRisingEdge,
+			woodenButtonDelayFallingEdge,
+			woodenButtonSignal,
+			woodenButtonSignalDirect,
+			woodenButtonTickPriorityRisingEdge,
+			woodenButtonTickPriorityFallingEdge);
 		registerSettings(manager, woodenPressurePlateCategory,
 			woodenPressurePlateDelayRisingEdge,
 			woodenPressurePlateDelayFallingEdge,

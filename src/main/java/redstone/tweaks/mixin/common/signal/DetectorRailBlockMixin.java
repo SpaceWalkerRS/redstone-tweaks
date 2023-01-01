@@ -1,44 +1,34 @@
 package redstone.tweaks.mixin.common.signal;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.DetectorRailBlock;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.Redstone;
 
 import redstone.tweaks.Tweaks;
 
 @Mixin(DetectorRailBlock.class)
 public class DetectorRailBlockMixin {
 
-	@Inject(
+	@ModifyConstant(
 		method = "getSignal",
-		cancellable = true,
-		at = @At(
-			value = "HEAD"
+		constant = @Constant(
+			intValue = Redstone.SIGNAL_MAX
 		)
 	)
-	private void rtTweakSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
-		if (state.getValue(DetectorRailBlock.POWERED)) {
-			cir.setReturnValue(Tweaks.DetectorRail.signal());
-		}
+	private int rtTweakSignal(int signal) {
+		return Tweaks.DetectorRail.signal();
 	}
 
-	@Inject(
+	@ModifyConstant(
 		method = "getDirectSignal",
-		cancellable = true,
-		at = @At(
-			value = "HEAD"
+		constant = @Constant(
+			intValue = Redstone.SIGNAL_MAX
 		)
 	)
-	private void rtTweakSignalDirect(BlockState state, BlockGetter level, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
-		if (state.getValue(DetectorRailBlock.POWERED) && dir == Direction.UP) {
-			cir.setReturnValue(Tweaks.DetectorRail.signalDirect());
-		}
+	private int rtTweakDirectSignal(int signal) {
+		return Tweaks.DetectorRail.signalDirect();
 	}
 }

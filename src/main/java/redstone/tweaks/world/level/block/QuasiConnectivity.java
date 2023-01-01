@@ -9,7 +9,7 @@ import redstone.tweaks.util.Directions;
 
 public class QuasiConnectivity {
 
-	private final EnumMap<Direction, Boolean> enabled;
+	private final EnumMap<Direction, Integer> range;
 
 	public QuasiConnectivity(QuasiConnectivity other) {
 		this();
@@ -18,18 +18,10 @@ public class QuasiConnectivity {
 	}
 
 	public QuasiConnectivity(Direction... enabled) {
-		this();
-
-		for (Direction dir : enabled) {
-			this.enabled.put(dir, true);
-		}
-	}
-
-	private QuasiConnectivity() {
-		this.enabled = new EnumMap<>(Direction.class);
+		this.range = new EnumMap<>(Direction.class);
 
 		for (Direction dir : Directions.ALL) {
-			this.enabled.put(dir, false);
+			this.range.put(dir, 0);
 		}
 	}
 
@@ -44,42 +36,36 @@ public class QuasiConnectivity {
 
 		QuasiConnectivity other = (QuasiConnectivity)obj;
 
-		return enabled.equals(other.enabled);
+		return range.equals(other.range);
 	}
 
-	public boolean isEnabled(Direction dir) {
-		return enabled.get(dir);
+	public int getRange(Direction dir) {
+		return range.get(dir);
 	}
 
-	public void setEnabled(Direction dir, boolean enabled) {
-		this.enabled.put(dir, enabled);
+	public QuasiConnectivity setRange(Direction dir, int range) {
+		if (range >= 0) {
+			this.range.put(dir, range);
+		}
+
+		return this;
 	}
 
 	public void set(QuasiConnectivity other) {
 		for (Direction dir : Directions.ALL) {
-			enabled.put(dir, other.enabled.get(dir));
+			range.put(dir, other.range.get(dir));
 		}
 	}
 
 	public void encode(FriendlyByteBuf buffer) {
-		byte flags = 0;
-
 		for (Direction dir : Directions.ALL) {
-			if (isEnabled(dir)) {
-				flags |= 1 << dir.get3DDataValue();
-			}
+			buffer.writeInt(getRange(dir));
 		}
-
-		buffer.writeByte(flags);
 	}
 
 	public QuasiConnectivity decode(FriendlyByteBuf buffer) {
-		byte flags = buffer.readByte();
-
 		for (Direction dir : Directions.ALL) {
-			if ((flags & (1 << dir.get3DDataValue())) != 0) {
-				setEnabled(dir, true);
-			}
+			setRange(dir, buffer.readInt());
 		}
 
 		return this;

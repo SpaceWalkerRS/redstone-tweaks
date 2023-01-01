@@ -47,6 +47,6 @@ public class ObserverBlockMixin implements ObserverOverrides {
 
 	@Override
 	public Boolean overrideTriggerEvent(BlockState state, Level level, BlockPos pos, int type, int data) {
-		return BlockOverrides.scheduleOrDoTick(level, pos, state, type, TickPriority.NORMAL, Tweaks.Observer::microTickMode);
+		return BlockOverrides.scheduleOrDoTick(level, pos, state, type, TickPriority.NORMAL, Tweaks.Observer::microtickMode);
 	}
 }

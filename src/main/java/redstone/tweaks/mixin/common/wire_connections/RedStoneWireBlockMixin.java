@@ -1,4 +1,4 @@
-package redstone.tweaks.mixin.common.connect_to_wire;
+package redstone.tweaks.mixin.common.wire_connections;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.RedStoneWireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RedstoneSide;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.PistonOverrides;
@@ -23,6 +24,18 @@ import redstone.tweaks.interfaces.mixin.PistonOverrides;
 public class RedStoneWireBlockMixin {
 
 	@Shadow private static boolean shouldConnectTo(BlockState state, Direction side) { return false; }
+
+	@Redirect(
+		method = "getConnectingSide(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Z)Lnet/minecraft/world/level/block/state/properties/RedstoneSide;",
+		at = @At(
+			value = "FIELD",
+			ordinal = 0,
+			target = "Lnet/minecraft/world/level/block/state/properties/RedstoneSide;SIDE:Lnet/minecraft/world/level/block/state/properties/RedstoneSide;"
+		)
+	)
+	private RedstoneSide rtTweakSlabsAllowUpConnection() {
+		return Tweaks.RedstoneWire.slabsAllowUpConnection() ? RedstoneSide.SIDE : RedstoneSide.NONE;
+	}
 
 	@Redirect(
 		method = "getConnectingSide(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Z)Lnet/minecraft/world/level/block/state/properties/RedstoneSide;",

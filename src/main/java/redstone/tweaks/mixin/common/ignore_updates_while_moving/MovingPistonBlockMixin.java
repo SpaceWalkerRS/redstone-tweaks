@@ -77,12 +77,13 @@ public class MovingPistonBlockMixin implements BlockOverrides {
 		PistonOverrides piston = (PistonOverrides)pistonState.getBlock();
 
 		Direction facing = pistonState.getValue(PistonBaseBlock.FACING);
-		boolean isExtended = pistonState.getValue(PistonBaseBlock.EXTENDED);
-		boolean hasSignal = piston.hasSignal(level, pos, facing);
-		boolean lazy = Tweaks.Piston.lazy(!isExtended, piston.isSticky());
-		boolean shouldBeExtended = (ticking && lazy) ? !isExtended : hasSignal;
+		boolean extended = pistonState.getValue(PistonBaseBlock.EXTENDED);
 
-		if (isExtended != shouldBeExtended) {
+		boolean hasSignal = piston.hasSignal(level, pos, facing);
+		boolean lazy = Tweaks.Piston.lazy(!extended, piston.isSticky());
+		boolean shouldBeExtended = (ticking && lazy) ? !extended : hasSignal;
+
+		if (extended != shouldBeExtended) {
 			queueBlockEvent(piston, level, pos, state, MotionType.NONE, 0);
 		}
 

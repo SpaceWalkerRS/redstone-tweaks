@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.redstone.Redstone;
 
 import redstone.tweaks.Tweaks;
 
@@ -14,7 +15,7 @@ public class LeverBlockMixin {
 	@ModifyConstant(
 		method = "getSignal",
 		constant = @Constant(
-			intValue = 15
+			intValue = Redstone.SIGNAL_MAX
 		)
 	)
 	private int rtTweakSignal(int signal) {
@@ -24,7 +25,7 @@ public class LeverBlockMixin {
 	@ModifyConstant(
 		method = "getDirectSignal",
 		constant = @Constant(
-			intValue = 15
+			intValue = Redstone.SIGNAL_MAX
 		)
 	)
 	private int rtTweakDirectSignal(int signal) {

@@ -29,7 +29,7 @@ public class BlockBehaviourMixin implements BlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtOnPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston, CallbackInfo ci) {
+	private void rtOverrideOnPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston, CallbackInfo ci) {
 		boolean override = overrideOnPlace(state, level, pos, oldState, movedByPiston);
 
 		if (override) {
@@ -44,7 +44,7 @@ public class BlockBehaviourMixin implements BlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtOnRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston, CallbackInfo ci) {
+	private void rtOverrideOnRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston, CallbackInfo ci) {
 		boolean override = overrideOnRemove(state, level, pos, newState, movedByPiston);
 
 		if (override) {
@@ -59,7 +59,7 @@ public class BlockBehaviourMixin implements BlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtNeighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston, CallbackInfo ci) {
+	private void rtOverrideNeighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston, CallbackInfo ci) {
 		boolean override = overrideNeighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
 
 		if (override) {
@@ -74,7 +74,7 @@ public class BlockBehaviourMixin implements BlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtTriggerEvent(BlockState state, Level level, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
+	private void rtOverrideTriggerEvent(BlockState state, Level level, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir) {
 		Boolean override = overrideTriggerEvent(state, level, pos, type, data);
 
 		if (override != null) {
@@ -89,7 +89,7 @@ public class BlockBehaviourMixin implements BlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand, CallbackInfo ci) {
+	private void rtOverrideTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand, CallbackInfo ci) {
 		boolean override = overrideTick(state, level, pos, rand);
 
 		if (override) {
@@ -104,7 +104,7 @@ public class BlockBehaviourMixin implements BlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtIsSignalSource(BlockState state, CallbackInfoReturnable<Boolean> cir) {
+	private void rtOverrideIsSignalSource(BlockState state, CallbackInfoReturnable<Boolean> cir) {
 		Boolean override = overrideIsSignalSource(state);
 
 		if (override != null) {
@@ -119,7 +119,7 @@ public class BlockBehaviourMixin implements BlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtGetSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+	private void rtOverrideGetSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
 		Integer override = overrideGetDirectSignal(state, level, pos, dir);
 
 		if (override != null) {
@@ -134,7 +134,7 @@ public class BlockBehaviourMixin implements BlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtGetDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
+	private void rtOverrideGetDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir, CallbackInfoReturnable<Integer> cir) {
 		Integer override = overrideGetDirectSignal(state, level, pos, dir);
 
 		if (override != null) {
@@ -149,7 +149,7 @@ public class BlockBehaviourMixin implements BlockOverrides {
 			value = "HEAD"
 		)
 	)
-	private void rtGetPistonPushReaction(BlockState state, CallbackInfoReturnable<PushReaction> cir) {
+	private void rtOverrideGetPistonPushReaction(BlockState state, CallbackInfoReturnable<PushReaction> cir) {
 		PushReaction override = overrideGetPistonPushReaction(state);
 
 		if (override != null) {

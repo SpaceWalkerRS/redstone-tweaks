@@ -27,10 +27,7 @@ public class MagmaBlockMixin {
 		)
 	)
 	private void rtTweakDelayAndTickPriority(LevelAccessor _level, BlockPos _pos, Block block, int delay, BlockState state, Direction dir, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-		delay = Tweaks.Magma.delay();
-		TickPriority priority = Tweaks.Magma.tickPriority();
-
-		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);
+		scheduleOrDoTick(level, pos, state);
 	}
 
 	@Redirect(
@@ -41,7 +38,11 @@ public class MagmaBlockMixin {
 		)
 	)
 	private void rtTweakDelayAndTickPriority(Level _level, BlockPos _pos, Block block, int delay, BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
-		delay = Tweaks.Magma.delay();
+		scheduleOrDoTick(level, pos, state);
+	}
+
+	private static void scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state) {
+		int delay = Tweaks.Magma.delay();
 		TickPriority priority = Tweaks.Magma.tickPriority();
 
 		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);

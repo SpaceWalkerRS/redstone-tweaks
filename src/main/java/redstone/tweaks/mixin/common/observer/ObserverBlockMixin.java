@@ -28,7 +28,7 @@ public class ObserverBlockMixin implements ObserverOverrides {
 		)
 	)
 	private void rtObserveBlockUpdates(BlockState state, Direction dir, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos, CallbackInfoReturnable<BlockState> cir) {
-		if (!level.isClientSide() && Tweaks.Observer.observeBlockUpdates()) {
+		if (Tweaks.Observer.observeBlockUpdates()) {
 			cir.setReturnValue(state);
 		}
 	}
@@ -41,7 +41,7 @@ public class ObserverBlockMixin implements ObserverOverrides {
 		)
 	)
 	private void rtDisable(LevelAccessor level, BlockPos pos, CallbackInfo ci) {
-		if (!level.isClientSide() && Tweaks.Observer.disable()) {
+		if (Tweaks.Observer.disable()) {
 			ci.cancel();
 		}
 	}

@@ -14,8 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 import net.minecraft.world.level.block.piston.PistonStructureResolver;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -45,14 +43,8 @@ public abstract class PistonStructureResolverMixin implements IPistonStructureRe
 	private void rtPreventSelfPush(CallbackInfoReturnable<Boolean> cir, BlockState state) {
 		// make sure a piston does not push its own extending head
 		if (extending && state.is(Blocks.MOVING_PISTON)) {
-			BlockEntity blockEntity = level.getBlockEntity(startPos);
-
-			if (blockEntity instanceof PistonMovingBlockEntity) {
-				PistonMovingBlockEntity mbe = (PistonMovingBlockEntity)blockEntity;
-
-				if (mbe.isSourcePiston() && mbe.isExtending() && mbe.getDirection() == pushDirection) {
-					cir.setReturnValue(false);
-				}
+			if (PistonOverrides.isExtendingHead(level, startPos, pushDirection, source.isSticky())) {
+				cir.setReturnValue(false);
 			}
 		}
 	}
@@ -63,7 +55,7 @@ public abstract class PistonStructureResolverMixin implements IPistonStructureRe
 			intValue = 12
 		)
 	)
-	private int rtTweakPushLimit(int limit) {
+	private int rtTweakMoveLimit(int limit) {
 		return Tweaks.Piston.moveLimit(extending, source.isSticky());
 	}
 

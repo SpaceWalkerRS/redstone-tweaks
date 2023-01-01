@@ -32,6 +32,7 @@ public abstract class LevelMixin implements ILevel {
 	)
 	private void rtPushBlockEntity(CallbackInfoReturnable<Boolean> cir) {
 		queuedBlockEntities.push(movedBlockEntity);
+		movedBlockEntity = null;
 	}
 
 	@Inject(
@@ -44,7 +45,6 @@ public abstract class LevelMixin implements ILevel {
 	)
 	private void rtPopBlockEntity(CallbackInfoReturnable<Boolean> cir) {
 		queuedBlockEntities.pop();
-		movedBlockEntity = null;
 	}
 
 	@Override

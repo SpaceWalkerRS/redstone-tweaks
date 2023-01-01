@@ -147,9 +147,13 @@ public interface BlockOverrides {
 
 	public static boolean hasQuasiSignal(Level level, BlockPos pos, QuasiConnectivity qc, boolean randQC) {
 		for (Direction dir : Direction.values()) {
-			if (qc.isEnabled(dir) && (!randQC || level.random.nextBoolean())) {
-				if (level.hasNeighborSignal(pos.relative(dir))) {
-					return true;
+			int range = qc.getRange(dir);
+
+			if (range > 0 && (!randQC || level.random.nextBoolean())) {
+				for (int d = 1; d <= range; d++) {
+					if (level.hasNeighborSignal(pos.relative(dir, d))) {
+						return true;
+					}
 				}
 			}
 		}

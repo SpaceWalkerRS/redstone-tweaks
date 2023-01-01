@@ -2,8 +2,6 @@ package redstone.tweaks.g4mespeed.setting.types;
 
 import com.g4mesoft.setting.GSSetting;
 
-import net.minecraft.core.Direction;
-
 import redstone.tweaks.world.level.block.QuasiConnectivity;
 
 public class QuasiConnectivitySetting extends GSSetting<QuasiConnectivity> {
@@ -12,10 +10,6 @@ public class QuasiConnectivitySetting extends GSSetting<QuasiConnectivity> {
 
 	public QuasiConnectivitySetting(String name, boolean visibleInGui) {
 		this(name, new QuasiConnectivity(), visibleInGui);
-	}
-
-	public QuasiConnectivitySetting(String name, Direction defaultEnabledDir, boolean visibleInGui) {
-		this(name, new QuasiConnectivity(defaultEnabledDir), visibleInGui);
 	}
 
 	public QuasiConnectivitySetting(String name, QuasiConnectivity defaultValue, boolean visibleInGui) {

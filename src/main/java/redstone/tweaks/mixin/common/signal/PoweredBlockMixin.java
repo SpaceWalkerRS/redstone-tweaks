@@ -1,6 +1,8 @@
 package redstone.tweaks.mixin.common.signal;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,6 +18,16 @@ import redstone.tweaks.util.Directions;
 
 @Mixin(PoweredBlock.class)
 public class PoweredBlockMixin implements BlockOverrides {
+
+	@ModifyConstant(
+		method = "getSignal",
+		constant = @Constant(
+			intValue = Redstone.SIGNAL_MAX
+		)
+	)
+	private int rtTweakSignal(int signal) {
+		return Tweaks.RedstoneBlock.signal();
+	}
 
 	@Override
 	public boolean overrideOnPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
@@ -33,16 +45,6 @@ public class PoweredBlockMixin implements BlockOverrides {
 		}
 
 		return false;
-	}
-
-	@Override
-	public Boolean overrideIsSignalSource(BlockState state) {
-		return Tweaks.RedstoneBlock.signal() > Redstone.SIGNAL_MIN || Tweaks.RedstoneBlock.signalDirect() > Redstone.SIGNAL_MIN;
-	}
-
-	@Override
-	public Integer overrideGetSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir) {
-		return Tweaks.RedstoneBlock.signal();
 	}
 
 	@Override

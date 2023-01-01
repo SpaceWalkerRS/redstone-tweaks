@@ -13,6 +13,6 @@ public interface ObserverOverrides extends BlockOverrides {
 		int delay = powered ? Tweaks.Observer.delayFallingEdge() : Tweaks.Observer.delayRisingEdge();
 		TickPriority priority = powered ? Tweaks.Observer.tickPriorityFallingEdge() : Tweaks.Observer.tickPriorityRisingEdge();
 
-		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, Tweaks.Observer::microTickMode);
+		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, Tweaks.Observer::microtickMode);
 	}
 }

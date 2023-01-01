@@ -28,6 +28,8 @@ import redstone.tweaks.interfaces.mixin.IPistonMovingBlockEntity;
 @Mixin(PistonMovingBlockEntity.class)
 public abstract class PistonMovingBlockEntityMixin extends BlockEntity implements IPistonMovingBlockEntity {
 
+	private static final String NBT_KEY_MOVED_BLOCKENTITY = "rt_movedBlockEntity";
+
 	@Shadow private Direction direction;
 	@Shadow private float progress;
 	@Shadow private BlockState movedState;
@@ -86,7 +88,7 @@ public abstract class PistonMovingBlockEntityMixin extends BlockEntity implement
 		)
 	)
 	private void rtLoadNbt(CompoundTag nbt, CallbackInfo ci) {
-		if (movedState.hasBlockEntity() && nbt.contains("rt_movedBlockEntity")) {
+		if (movedState.hasBlockEntity() && nbt.contains(NBT_KEY_MOVED_BLOCKENTITY)) {
 			BlockEntity blockEntity = null;
 
 			if (movedState.is(Blocks.MOVING_PISTON)) {
@@ -94,6 +96,8 @@ public abstract class PistonMovingBlockEntityMixin extends BlockEntity implement
 			} else {
 				blockEntity = ((EntityBlock)movedState.getBlock()).newBlockEntity(worldPosition, movedState);
 			}
+
+			blockEntity.load(nbt.getCompound(NBT_KEY_MOVED_BLOCKENTITY));
 
 			setMovedBlock(movedState, blockEntity);
 		}
@@ -107,7 +111,7 @@ public abstract class PistonMovingBlockEntityMixin extends BlockEntity implement
 	)
 	private void rtSaveNbt(CompoundTag nbt, CallbackInfo ci) {
 		if (movedBlockEntity != null) {
-			nbt.put("rt_movedBlockEntity", movedBlockEntity.saveWithoutMetadata());
+			nbt.put(NBT_KEY_MOVED_BLOCKENTITY, movedBlockEntity.saveWithoutMetadata());
 		}
 	}
 

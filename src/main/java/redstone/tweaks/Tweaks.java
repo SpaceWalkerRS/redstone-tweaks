@@ -92,6 +92,49 @@ public class Tweaks {
 		}
 	}
 
+	public static class BigDripleaf {
+
+		public static int delay() {
+			return module().bigDripleafDelay.getValue();
+		}
+
+		public static int delayUnstable() {
+			return module().bigDripleafDelayUnstable.getValue();
+		}
+
+		public static int delayPartial() {
+			return module().bigDripleafDelayPartial.getValue();
+		}
+
+		public static int delayFull() {
+			return module().bigDripleafDelayFull.getValue();
+		}
+
+		public static QuasiConnectivity quasiConnectivity() {
+			return module().bigDripleafQuasiConnectivity.getValue();
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().bigDripleafRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().bigDripleafTickPriority.getValue();
+		}
+
+		public static TickPriority tickPriorityUnstable() {
+			return module().bigDripleafTickPriorityUnstable.getValue();
+		}
+
+		public static TickPriority tickPriorityPartial() {
+			return module().bigDripleafTickPriorityPartial.getValue();
+		}
+
+		public static TickPriority tickPriorityFull() {
+			return module().bigDripleafTickPriorityFull.getValue();
+		}
+	}
+
 	public static class BubbleColumn {
 
 		public static int delay() {
@@ -100,6 +143,33 @@ public class Tweaks {
 
 		public static TickPriority tickPriority() {
 			return module().bubbleColumnTickPriority.getValue();
+		}
+	}
+
+	public static class Button {
+
+		public static int delayRisingEdge(boolean wooden) {
+			return wooden ? WoodenButton.delayRisingEdge() : StoneButton.delayRisingEdge();
+		}
+
+		public static int delayFallingEdge(boolean wooden) {
+			return wooden ? WoodenButton.delayFallingEdge() : StoneButton.delayFallingEdge();
+		}
+	
+		public static int signal(boolean wooden) {
+			return wooden ? WoodenButton.signal() : StoneButton.signal();
+		}
+
+		public static int signalDirect(boolean wooden) {
+			return wooden ? WoodenButton.signalDirect() : StoneButton.signalDirect();
+		}
+
+		public static TickPriority tickPriorityRisingEdge(boolean wooden) {
+			return wooden ? WoodenButton.tickPriorityRisingEdge() : StoneButton.tickPriorityRisingEdge();
+		}
+
+		public static TickPriority tickPriorityFallingEdge(boolean wooden) {
+			return wooden ? WoodenButton.tickPriorityFallingEdge() : StoneButton.tickPriorityFallingEdge();
 		}
 	}
 
@@ -115,6 +185,17 @@ public class Tweaks {
 
 		public static TickPriority tickPriority() {
 			return module().cactusTickPriority.getValue();
+		}
+	}
+
+	public static class Cauldron {
+
+		public static int delay() {
+			return module().cauldronDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().cauldronTickPriority.getValue();
 		}
 	}
 
@@ -159,7 +240,7 @@ public class Tweaks {
 		}
 
 		public static boolean microtickMode() {
-			return module().comparatorMicroTickMode.getValue();
+			return module().comparatorMicrotickMode.getValue();
 		}
 
 		public static boolean redstoneBlockAlternateInput() {
@@ -332,6 +413,21 @@ public class Tweaks {
 		}
 	}
 
+	public static class Frogspawn {
+
+		public static int delayHatchMin() {
+			return module().frogspawnDelayHatchMin.getValue();
+		}
+
+		public static int delayHatchMax() {
+			return module().frogspawnDelayHatchMax.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().frogspawnTickPriority.getValue();
+		}
+	}
+
 	public static class FrostedIce {
 
 		public static int delayMin() {
@@ -470,6 +566,33 @@ public class Tweaks {
 
 		public static TickPriority tickPriorityFallingEdge() {
 			return module().lecternTickPriorityFallingEdge.getValue();
+		}
+	}
+
+	public static class LightningRod {
+
+		public static int delayRisingEdge() {
+			return module().lightningRodDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().lightningRodDelayFallingEdge.getValue();
+		}
+
+		public static int signal() {
+			return module().lightningRodSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().lightningRodSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().lightningRodTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().lightningRodTickPriorityFallingEdge.getValue();
 		}
 	}
 
@@ -669,8 +792,8 @@ public class Tweaks {
 			return module().observerDisable.getValue();
 		}
 
-		public static boolean microTickMode() {
-			return module().observerMicroTickMode.getValue();
+		public static boolean microtickMode() {
+			return module().observerMicrotickMode.getValue();
 		}
 
 		public static boolean observeBlockUpdates() {
@@ -818,6 +941,25 @@ public class Tweaks {
 
 		public static boolean updateSelf(boolean sticky) {
 			return sticky ? StickyPiston.updateSelf() : NormalPiston.updateSelf();
+		}
+	}
+
+	public static class PointedDripstone {
+
+		public static int delay() {
+			return module().pointedDripstoneDelay.getValue();
+		}
+
+		public static int delayBelow() {
+			return module().pointedDripstoneDelayBelow.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().pointedDripstoneTickPriority.getValue();
+		}
+
+		public static TickPriority tickPriorityBelow() {
+			return module().pointedDripstoneTickPriorityBelow.getValue();
 		}
 	}
 
@@ -975,6 +1117,100 @@ public class Tweaks {
 		}
 	}
 
+	public static class RedstoneTorch {
+
+		public static int burnoutCount() {
+			return module().redstoneTorchBurnoutCount.getValue();
+		}
+
+		public static int burnoutTimer() {
+			return module().redstoneTorchBurnoutTimer.getValue();
+		}
+
+		public static int delayBurnout() {
+			return module().redstoneTorchDelayBurnout.getValue();
+		}
+
+		public static int delayRisingEdge() {
+			return module().redstoneTorchDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().redstoneTorchDelayFallingEdge.getValue();
+		}
+
+		public static int delay(boolean lit) {
+			return lit ? delayFallingEdge() : delayRisingEdge();
+		}
+
+		public static boolean lazyRisingEdge() {
+			return module().redstoneTorchLazyRisingEdge.getValue();
+		}
+
+		public static boolean lazyFallingEdge() {
+			return module().redstoneTorchLazyFallingEdge.getValue();
+		}
+
+		public static boolean lazy(boolean lit) {
+			return lit ? lazyFallingEdge() : lazyRisingEdge();
+		}
+
+		public static boolean microtickMode() {
+			return module().redstoneTorchMicrotickMode.getValue();
+		}
+
+		public static int signal() {
+			return module().redstoneTorchSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().redstoneTorchSignalDirect.getValue();
+		}
+
+		public static boolean softInversion() {
+			return module().redstoneTorchSoftInversion.getValue();
+		}
+
+		public static TickPriority tickPriorityBurnout() {
+			return module().redstoneTorchTickPriorityBurnout.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().redstoneTorchTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().redstoneTorchTickPriorityFallingEdge.getValue();
+		}
+
+		public static TickPriority tickPriority(boolean lit) {
+			return lit ? tickPriorityFallingEdge() : tickPriorityRisingEdge();
+		}
+	}
+
+	public static class RedstoneWire {
+
+		public static int delay() {
+			return module().redstoneWireDelay.getValue();
+		}
+
+		public static boolean invertFlowOnGlass() {
+			return module().redstoneWireInvertFlowOnGlass.getValue();
+		}
+
+		public static boolean microtickMode() {
+			return module().redstoneWireMicrotickMode.getValue();
+		}
+
+		public static boolean slabsAllowUpConnection() {
+			return module().redstoneWireSlabsAllowUpConnection.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().redstoneWireTickPriority.getValue();
+		}
+	}
+
 	public static class Repeater {
 
 		public static int delayRisingEdge() {
@@ -994,7 +1230,7 @@ public class Tweaks {
 		}
 
 		public static boolean microtickMode() {
-			return module().repeaterMicroTickMode.getValue();
+			return module().repeaterMicrotickMode.getValue();
 		}
 
 		public static int signal() {
@@ -1015,6 +1251,75 @@ public class Tweaks {
 
 		public static TickPriority tickPriorityPrioritized() {
 			return module().repeaterTickPriorityPrioritized.getValue();
+		}
+	}
+
+	public static class Scaffolding {
+
+		public static int delay() {
+			return module().scaffoldingDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().scaffoldingTickPriority.getValue();
+		}
+	}
+
+	public static class SculkCatalyst {
+
+		public static int delay() {
+			return module().sculkCatalystDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().sculkCatalystTickPriority.getValue();
+		}
+	}
+
+	public static class SculkSensor {
+
+		public static int delay() {
+			return module().sculkSensorDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().sculkSensorTickPriority.getValue();
+		}
+	}
+
+	public static class Shulker {
+
+		public static boolean conductRedstone() {
+			return module().shulkerConductRedstone.getValue();
+		}
+
+		public static boolean updateNeighborsWhenPeeking() {
+			return module().shulkerUpdateNeighborsWhenPeeking.getValue();
+		}
+	}
+
+	public static class ShulkerBox {
+
+		public static boolean updateNeighborsWhenPeeking() {
+			return module().shulkerBoxUpdateNeighborsWhenPeeking.getValue();
+		}
+	}
+
+	public static class SoulSand {
+
+		public static int delay() {
+			return module().soulSandDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().soulSandTickPriority.getValue();
+		}
+	}
+
+	public static class Stairs {
+
+		public static boolean conductRedstone() {
+			return module().stairsConductRedstone.getValue();
 		}
 	}
 
@@ -1141,6 +1446,33 @@ public class Tweaks {
 		}
 	}
 
+	public static class StoneButton {
+
+		public static int delayRisingEdge() {
+			return module().stoneButtonDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().stoneButtonDelayFallingEdge.getValue();
+		}
+	
+		public static int signal() {
+			return module().stoneButtonSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().stoneButtonSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().stoneButtonTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().stoneButtonTickPriorityFallingEdge.getValue();
+		}
+	}
+
 	public static class StonePressurePlate {
 
 		public static int delayRisingEdge() {
@@ -1168,6 +1500,104 @@ public class Tweaks {
 		}
 	}
 
+	public static class SugarCane {
+
+		public static int delay() {
+			return module().sugarCaneDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().sugarCaneTickPriority.getValue();
+		}
+	}
+
+	public static class Target {
+
+		public static int delay() {
+			return module().targetDelay.getValue();
+		}
+
+		public static int delayArrow() {
+			return module().targetDelayArrow.getValue();
+		}
+
+		public static boolean emitDirectSignal() {
+			return module().targetEmitDirectSignal.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().targetTickPriority.getValue();
+		}
+	}
+
+	public static class TNT {
+
+		public static int delay() {
+			return module().tntDelay.getValue();
+		}
+
+		public static int fuseTime() {
+			return module().tntFuseTime.getValue();
+		}
+
+		public static boolean lazy() {
+			return module().tntLazy.getValue();
+		}
+
+		public static QuasiConnectivity quasiConnectivity() {
+			return module().tntQuasiConnectivity.getValue();
+		}
+
+		public static boolean randomizeQuasiConnectivity() {
+			return module().tntRandomizeQuasiConnectivity.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().targetTickPriority.getValue();
+		}
+	}
+
+	public static class TripWire {
+
+		public static int delay() {
+			return module().tripWireDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().tripWireTickPriority.getValue();
+		}
+	}
+
+	public static class TripWireHook {
+
+		public static int delay() {
+			return module().tripWireHookDelay.getValue();
+		}
+
+		public static int signal() {
+			return module().tripWireHookSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().tripWireHookSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().tripWireHookTickPriority.getValue();
+		}
+	}
+
+	public static class Vines {
+
+		public static int delay() {
+			return module().vinesDelay.getValue();
+		}
+
+		public static TickPriority tickPriority() {
+			return module().vinesTickPriority.getValue();
+		}
+	}
+
 	public static class Water {
 
 		public static int delay() {
@@ -1176,6 +1606,40 @@ public class Tweaks {
 
 		public static TickPriority tickPriority() {
 			return module().waterTickPriority.getValue();
+		}
+	}
+
+	public static class WhiteConcretePowder {
+
+		public static boolean conductRedstone() {
+			return module().whiteConcretePowderConductRedstone.getValue();
+		}
+	}
+
+	public static class WoodenButton {
+
+		public static int delayRisingEdge() {
+			return module().woodenButtonDelayRisingEdge.getValue();
+		}
+
+		public static int delayFallingEdge() {
+			return module().woodenButtonDelayFallingEdge.getValue();
+		}
+	
+		public static int signal() {
+			return module().woodenButtonSignal.getValue();
+		}
+
+		public static int signalDirect() {
+			return module().woodenButtonSignalDirect.getValue();
+		}
+
+		public static TickPriority tickPriorityRisingEdge() {
+			return module().woodenButtonTickPriorityRisingEdge.getValue();
+		}
+
+		public static TickPriority tickPriorityFallingEdge() {
+			return module().woodenButtonTickPriorityFallingEdge.getValue();
 		}
 	}
 
@@ -1205,9 +1669,6 @@ public class Tweaks {
 			return module().woodenPressurePlateTickPriorityFallingEdge.getValue();
 		}
 	}
-
-
-	// helper methods
 
 	private static RedstoneTweaksModule module() {
 		GSController controller = GSController.getInstanceOnThread();

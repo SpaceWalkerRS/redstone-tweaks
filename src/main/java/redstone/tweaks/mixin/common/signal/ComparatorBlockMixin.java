@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.ComparatorBlock;
 import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ComparatorMode;
+import net.minecraft.world.level.redstone.Redstone;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.DiodeOverrides;
@@ -25,7 +26,7 @@ public abstract class ComparatorBlockMixin extends DiodeBlock implements DiodeOv
 	@ModifyConstant(
 		method = "shouldTurnOn",
 		constant = @Constant(
-			intValue = 0,
+			intValue = Redstone.SIGNAL_MIN,
 			ordinal = 0
 		)
 	)
@@ -36,7 +37,7 @@ public abstract class ComparatorBlockMixin extends DiodeBlock implements DiodeOv
 	@ModifyConstant(
 		method = "getInputSignal",
 		constant = @Constant(
-			intValue = 15
+			intValue = Redstone.SIGNAL_MAX
 		)
 	)
 	private int rtTweakInputSignal(int fifteen, Level level, BlockPos pos, BlockState state) {

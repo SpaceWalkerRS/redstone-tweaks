@@ -33,8 +33,8 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 		)
 	)
 	private void rtSendBlockChange(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston, CallbackInfo ci) {
-		// make sure the client finishes this moving block
-		if (state.getValue(PistonBaseBlock.EXTENDED) && oldState.is(Blocks.MOVING_PISTON)) {
+		// make sure the client places this moving block
+		if (!level.isClientSide() && state.getValue(PistonBaseBlock.EXTENDED) && oldState.is(Blocks.MOVING_PISTON)) {
 			BlockState newState = level.getBlockState(pos);
 
 			if (newState.is(block()) && !newState.getValue(PistonBaseBlock.EXTENDED)) {
@@ -66,7 +66,7 @@ public abstract class PistonBaseBlockMixin implements PistonOverrides {
 			target = "Lnet/minecraft/world/level/block/piston/PistonBaseBlock;moveBlocks(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Z)Z"
 		)
 	)
-	private void rtSendBlockUpdate(BlockState state, Level level, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir, Direction facing) {
+	private void rtSendBlockChange(BlockState state, Level level, BlockPos pos, int type, int data, CallbackInfoReturnable<Boolean> cir, Direction facing) {
 		if (!level.isClientSide() && Tweaks.Piston.doDoubleRetraction()) {
 			BlockPos frontPos = pos.relative(facing, 2);
 			BlockState frontState = level.getBlockState(frontPos);

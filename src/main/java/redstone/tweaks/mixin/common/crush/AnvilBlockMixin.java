@@ -30,7 +30,7 @@ public class AnvilBlockMixin {
 			value = "HEAD"
 		)
 	)
-	private void rtOnLand(Level level, BlockPos pos, BlockState state, BlockState oldState, FallingBlockEntity blockEntity, CallbackInfo ci) {
+	private void rtCrushBlockBelow(Level level, BlockPos pos, BlockState state, BlockState oldState, FallingBlockEntity blockEntity, CallbackInfo ci) {
 		BlockPos below = pos.below();
 		BlockState belowState = level.getBlockState(below);
 		BlockState crushedState = crush(belowState);
