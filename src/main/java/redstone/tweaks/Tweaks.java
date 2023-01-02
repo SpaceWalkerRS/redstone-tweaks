@@ -99,26 +99,26 @@ public class Tweaks {
 		}
 	}
 
-	public static class PropertyOverrides {
+	public static class BehaviorOverrides {
 
 		public static boolean delay() {
-			return module().propertyOverridesDelay.getValue();
+			return module().behaviorOverridesDelay.getValue();
 		}
 
 		public static boolean microtickMode() {
-			return module().propertyOverridesMicrotickMode.getValue();
+			return module().behaviorOverridesMicrotickMode.getValue();
 		}
 
 		public static boolean signal() {
-			return module().propertyOverridesSignal.getValue();
+			return module().behaviorOverridesSignal.getValue();
 		}
 
 		public static boolean signalDirect() {
-			return module().propertyOverridesSignalDirect.getValue();
+			return module().behaviorOverridesSignalDirect.getValue();
 		}
 
 		public static boolean tickPriority() {
-			return module().propertyOverridesTickPriority.getValue();
+			return module().behaviorOverridesTickPriority.getValue();
 		}
 	}
 
@@ -1761,8 +1761,6 @@ public class Tweaks {
 		}
 	}
 
-	private static final RedstoneTweaksModule DUMMY_MODULE = new RedstoneTweaksModule();
-
 	private static RedstoneTweaksModule module() {
 		GSController controller = GSController.getInstanceOnThread();
 
@@ -1774,6 +1772,6 @@ public class Tweaks {
 			}
 		}
 
-		return DUMMY_MODULE;
+		return RedstoneTweaksModule.SERVER;
 	}
 }

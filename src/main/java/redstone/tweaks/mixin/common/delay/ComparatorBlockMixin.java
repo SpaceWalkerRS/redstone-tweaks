@@ -15,10 +15,10 @@ import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.Tweaks;
+import redstone.tweaks.interfaces.mixin.BehaviorOverrides;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
 import redstone.tweaks.interfaces.mixin.DiodeOverrides;
 import redstone.tweaks.interfaces.mixin.ILevel;
-import redstone.tweaks.interfaces.mixin.PropertyOverrides;
 
 @Mixin(ComparatorBlock.class)
 public abstract class ComparatorBlockMixin implements DiodeOverrides {
@@ -78,10 +78,10 @@ public abstract class ComparatorBlockMixin implements DiodeOverrides {
 		BlockPos belowPos = pos.below();
 		BlockState belowState = level.getBlockState(belowPos);
 
-		delay = PropertyOverrides.overrideDelay(belowState, Tweaks.Comparator.delay());
-		priority = PropertyOverrides.overrideTickPriority(belowState, priority);
+		delay = BehaviorOverrides.overrideDelay(belowState, Tweaks.Comparator.delay());
+		priority = BehaviorOverrides.overrideTickPriority(belowState, priority);
 
-		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> PropertyOverrides.overrideMicrotickMode(belowState, microtickMode()));
+		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> BehaviorOverrides.overrideMicrotickMode(belowState, microtickMode()));
 	}
 
 	@Inject(

@@ -1,4 +1,4 @@
-package redstone.tweaks.mixin.common.property_overrides;
+package redstone.tweaks.mixin.common.behavior_overrides;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.ticks.TickPriority;
 
-import redstone.tweaks.interfaces.mixin.PropertyOverrides;
+import redstone.tweaks.interfaces.mixin.BehaviorOverrides;
 
 @Mixin(Blocks.class)
 public class BlocksMixin {
@@ -84,22 +84,22 @@ public class BlocksMixin {
 	}
 
 	private static void overrideDelay(Block block, int delay) {
-		((PropertyOverrides)block).setDelayOverride(delay);
+		((BehaviorOverrides)block).setDelayOverride(delay);
 	}
 
 	private static void overrideMicrotickMode(Block block, boolean microtickMode) {
-		((PropertyOverrides)block).setMicrotickModeOverride(microtickMode);
+		((BehaviorOverrides)block).setMicrotickModeOverride(microtickMode);
 	}
 
 	private static void overrideSignal(Block block, int signal) {
-		((PropertyOverrides)block).setSignalOverride(signal);
+		((BehaviorOverrides)block).setSignalOverride(signal);
 	}
 
 	private static void overrideDirectSignal(Block block, int signal) {
-		((PropertyOverrides)block).setDirectSignalOverride(signal);
+		((BehaviorOverrides)block).setDirectSignalOverride(signal);
 	}
 
 	private static void overrideTickPriority(Block block, TickPriority priority) {
-		((PropertyOverrides)block).setTickPriorityOverride(priority);
+		((BehaviorOverrides)block).setTickPriorityOverride(priority);
 	}
 }

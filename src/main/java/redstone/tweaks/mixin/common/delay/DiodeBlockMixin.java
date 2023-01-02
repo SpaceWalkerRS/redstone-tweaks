@@ -20,10 +20,10 @@ import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.Tweaks;
+import redstone.tweaks.interfaces.mixin.BehaviorOverrides;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
 import redstone.tweaks.interfaces.mixin.DiodeOverrides;
 import redstone.tweaks.interfaces.mixin.ILevel;
-import redstone.tweaks.interfaces.mixin.PropertyOverrides;
 
 @Mixin(DiodeBlock.class)
 public abstract class DiodeBlockMixin implements DiodeOverrides {
@@ -70,10 +70,10 @@ public abstract class DiodeBlockMixin implements DiodeOverrides {
 			BlockPos belowPos = pos.below();
 			BlockState belowState = level.getBlockState(belowPos);
 
-			delay = PropertyOverrides.overrideDelay(belowState, delay);
-			priority = PropertyOverrides.overrideTickPriority(belowState, priority);
+			delay = BehaviorOverrides.overrideDelay(belowState, delay);
+			priority = BehaviorOverrides.overrideTickPriority(belowState, priority);
 
-			BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> PropertyOverrides.overrideMicrotickMode(belowState, microtickMode()));
+			BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> BehaviorOverrides.overrideMicrotickMode(belowState, microtickMode()));
 		}
 	}
 
@@ -110,10 +110,10 @@ public abstract class DiodeBlockMixin implements DiodeOverrides {
 			BlockPos belowPos = pos.below();
 			BlockState belowState = level.getBlockState(belowPos);
 
-			delay = PropertyOverrides.overrideDelay(belowState, delay);
-			priority = PropertyOverrides.overrideTickPriority(belowState, priority);
+			delay = BehaviorOverrides.overrideDelay(belowState, delay);
+			priority = BehaviorOverrides.overrideTickPriority(belowState, priority);
 
-			BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> PropertyOverrides.overrideMicrotickMode(belowState, microtickMode()));
+			BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> BehaviorOverrides.overrideMicrotickMode(belowState, microtickMode()));
 		}
 	}
 
@@ -139,7 +139,7 @@ public abstract class DiodeBlockMixin implements DiodeOverrides {
 		BlockPos belowPos = pos.below();
 		BlockState belowState = level.getBlockState(belowPos);
 
-		return PropertyOverrides.overrideMicrotickMode(belowState, microtickMode()) ? ((ILevel)level).hasBlockEvent(pos, block()) : ticks.willTickThisTick(pos, block);
+		return BehaviorOverrides.overrideMicrotickMode(belowState, microtickMode()) ? ((ILevel)level).hasBlockEvent(pos, block()) : ticks.willTickThisTick(pos, block);
 	}
 
 	@Redirect(
@@ -186,10 +186,10 @@ public abstract class DiodeBlockMixin implements DiodeOverrides {
 		BlockPos belowPos = pos.below();
 		BlockState belowState = level.getBlockState(belowPos);
 
-		delay = PropertyOverrides.overrideDelay(belowState, delay);
-		priority = PropertyOverrides.overrideTickPriority(belowState, priority);
+		delay = BehaviorOverrides.overrideDelay(belowState, delay);
+		priority = BehaviorOverrides.overrideTickPriority(belowState, priority);
 
-		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> PropertyOverrides.overrideMicrotickMode(belowState, microtickMode()));
+		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> BehaviorOverrides.overrideMicrotickMode(belowState, microtickMode()));
 	}
 
 	@Override

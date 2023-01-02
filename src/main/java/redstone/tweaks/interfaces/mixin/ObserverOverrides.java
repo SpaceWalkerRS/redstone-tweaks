@@ -19,9 +19,9 @@ public interface ObserverOverrides extends BlockOverrides {
 		BlockPos frontPos = pos.relative(facing.getOpposite());
 		BlockState frontState = level.getBlockState(frontPos);
 
-		delay = PropertyOverrides.overrideDelay(frontState, delay);
-		priority = PropertyOverrides.overrideTickPriority(frontState, priority);
+		delay = BehaviorOverrides.overrideDelay(frontState, delay);
+		priority = BehaviorOverrides.overrideTickPriority(frontState, priority);
 
-		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> PropertyOverrides.overrideMicrotickMode(frontState, Tweaks.Observer.microtickMode()));
+		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> BehaviorOverrides.overrideMicrotickMode(frontState, Tweaks.Observer.microtickMode()));
 	}
 }

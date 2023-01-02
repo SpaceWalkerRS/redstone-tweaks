@@ -15,8 +15,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.redstone.Redstone;
 
 import redstone.tweaks.Tweaks;
+import redstone.tweaks.interfaces.mixin.BehaviorOverrides;
 import redstone.tweaks.interfaces.mixin.DiodeOverrides;
-import redstone.tweaks.interfaces.mixin.PropertyOverrides;
 
 @Mixin(DiodeBlock.class)
 public abstract class DiodeBlockMixin implements DiodeOverrides {
@@ -74,9 +74,9 @@ public abstract class DiodeBlockMixin implements DiodeOverrides {
 			BlockState belowState = level.getBlockState(belowPos);
 
 			if (direct) {
-				return PropertyOverrides.overrideDirectSignal(belowState, signalDirect(level, pos, state));
+				return BehaviorOverrides.overrideDirectSignal(belowState, signalDirect(level, pos, state));
 			} else {
-				return PropertyOverrides.overrideSignal(belowState, signal(level, pos, state));
+				return BehaviorOverrides.overrideSignal(belowState, signal(level, pos, state));
 			}
 		}
 

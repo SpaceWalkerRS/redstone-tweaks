@@ -16,8 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.redstone.Redstone;
 
 import redstone.tweaks.Tweaks;
+import redstone.tweaks.interfaces.mixin.BehaviorOverrides;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
-import redstone.tweaks.interfaces.mixin.PropertyOverrides;
 
 @Mixin(ObserverBlock.class)
 public class ObserverBlockMixin implements BlockOverrides {
@@ -36,9 +36,9 @@ public class ObserverBlockMixin implements BlockOverrides {
 		BlockState frontState = level.getBlockState(frontPos);
 
 		if (requestDirectSignal) {
-			return PropertyOverrides.overrideDirectSignal(frontState, Tweaks.Observer.signalDirect());
+			return BehaviorOverrides.overrideDirectSignal(frontState, Tweaks.Observer.signalDirect());
 		} else {
-			return PropertyOverrides.overrideSignal(frontState, Tweaks.Observer.signal());
+			return BehaviorOverrides.overrideSignal(frontState, Tweaks.Observer.signal());
 		}
 	}
 

@@ -5,6 +5,9 @@
 	"mixins": [	
 		"common.BlockBehaviourMixin",
 
+		"common.behavior_overrides.BlockBehaviourMixin",
+		"common.behavior_overrides.BlocksMixin",
+
 		"common.block_dropping.PistonBaseBlockMixin",
 		"common.block_dropping.PistonStructureResolverMixin",
 
@@ -137,9 +140,6 @@
 		"common.nou.CactusBlockMixin",
 
 		"common.observer.ObserverBlockMixin",
-
-		"common.property_overrides.BlockBehaviourMixin",
-		"common.property_overrides.BlocksMixin",
 
 		"common.quasi_connectivity.BaseRailBlockMixin",
 		"common.quasi_connectivity.BigDripleafBlockMixin",

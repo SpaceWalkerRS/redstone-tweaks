@@ -14,8 +14,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.Tweaks;
+import redstone.tweaks.interfaces.mixin.BehaviorOverrides;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
-import redstone.tweaks.interfaces.mixin.PropertyOverrides;
 import redstone.tweaks.interfaces.mixin.RedstoneTorchOverrides;
 
 @Mixin(RedstoneTorchBlock.class)
@@ -54,10 +54,10 @@ public abstract class RedstoneTorchBlockMixin implements RedstoneTorchOverrides 
 		BlockPos behindPos = pos.relative(facing.getOpposite());
 		BlockState behindState = level.getBlockState(behindPos);
 
-		delay = PropertyOverrides.overrideDelay(behindState, delay);
-		priority = PropertyOverrides.overrideTickPriority(behindState, priority);
+		delay = BehaviorOverrides.overrideDelay(behindState, delay);
+		priority = BehaviorOverrides.overrideTickPriority(behindState, priority);
 
-		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> PropertyOverrides.overrideMicrotickMode(behindState, Tweaks.RedstoneTorch.microtickMode()));
+		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> BehaviorOverrides.overrideMicrotickMode(behindState, Tweaks.RedstoneTorch.microtickMode()));
 	}
 
 	@Override

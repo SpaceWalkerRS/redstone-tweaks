@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.redstone.Redstone;
 
 import redstone.tweaks.Tweaks;
-import redstone.tweaks.interfaces.mixin.PropertyOverrides;
+import redstone.tweaks.interfaces.mixin.BehaviorOverrides;
 import redstone.tweaks.interfaces.mixin.RedstoneTorchOverrides;
 
 @Mixin(RedstoneTorchBlock.class)
@@ -36,9 +36,9 @@ public abstract class RedstoneTorchBlockMixin implements RedstoneTorchOverrides 
 		BlockState behindState = level.getBlockState(behindPos);
 
 		if (requestDirectSignal()) {
-			return PropertyOverrides.overrideDirectSignal(behindState, Tweaks.RedstoneTorch.signalDirect());
+			return BehaviorOverrides.overrideDirectSignal(behindState, Tweaks.RedstoneTorch.signalDirect());
 		} else {
-			return PropertyOverrides.overrideSignal(behindState, Tweaks.RedstoneTorch.signal());
+			return BehaviorOverrides.overrideSignal(behindState, Tweaks.RedstoneTorch.signal());
 		}
 	}
 

@@ -24,6 +24,9 @@ import redstone.tweaks.world.level.block.QuasiConnectivity;
 
 public class RedstoneTweaksModule implements GSIModule {
 
+	public static final RedstoneTweaksModule CLIENT = new RedstoneTweaksModule();
+	public static final RedstoneTweaksModule SERVER = new RedstoneTweaksModule();
+
 	private static final boolean SHOW_IN_G4MESPEED_GUI = RedstoneTweaksMod.DEBUG;
 
 	public final Set<GSSettingCategory> categories = new LinkedHashSet<>();
@@ -52,12 +55,12 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSBooleanSetting bugFixesMC137127 = new GSBooleanSetting("MC137127", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting bugFixesMC172213 = new GSBooleanSetting("MC172213", false, SHOW_IN_G4MESPEED_GUI);
 
-	public final GSSettingCategory propertyOverridesCategory = new GSSettingCategory("propertyOverrides");
-	public final GSBooleanSetting propertyOverridesDelay = new GSBooleanSetting("delay", false, SHOW_IN_G4MESPEED_GUI);
-	public final GSBooleanSetting propertyOverridesMicrotickMode = new GSBooleanSetting("microtickMode", false, SHOW_IN_G4MESPEED_GUI);
-	public final GSBooleanSetting propertyOverridesSignal = new GSBooleanSetting("signal", false, SHOW_IN_G4MESPEED_GUI);
-	public final GSBooleanSetting propertyOverridesSignalDirect = new GSBooleanSetting("signalDirect", false, SHOW_IN_G4MESPEED_GUI);
-	public final GSBooleanSetting propertyOverridesTickPriority = new GSBooleanSetting("tickPriority", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSSettingCategory behaviorOverridesCategory = new GSSettingCategory("behaviorOverrides");
+	public final GSBooleanSetting behaviorOverridesDelay = new GSBooleanSetting("delay", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting behaviorOverridesMicrotickMode = new GSBooleanSetting("microtickMode", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting behaviorOverridesSignal = new GSBooleanSetting("signal", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting behaviorOverridesSignalDirect = new GSBooleanSetting("signalDirect", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting behaviorOverridesTickPriority = new GSBooleanSetting("tickPriority", false, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory activatorRailCategory = new GSSettingCategory("activatorRail");
 	public final GSIntegerSetting activatorRailDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 0, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -537,12 +540,12 @@ public class RedstoneTweaksModule implements GSIModule {
 			bugFixesMC136566,
 			bugFixesMC137127,
 			bugFixesMC172213);
-		registerSettings(manager, propertyOverridesCategory,
-			propertyOverridesDelay,
-			propertyOverridesMicrotickMode,
-			propertyOverridesSignal,
-			propertyOverridesSignalDirect,
-			propertyOverridesTickPriority);
+		registerSettings(manager, behaviorOverridesCategory,
+			behaviorOverridesDelay,
+			behaviorOverridesMicrotickMode,
+			behaviorOverridesSignal,
+			behaviorOverridesSignalDirect,
+			behaviorOverridesTickPriority);
 		registerSettings(manager, activatorRailCategory,
 			activatorRailDelayRisingEdge,
 			activatorRailDelayFallingEdge,
