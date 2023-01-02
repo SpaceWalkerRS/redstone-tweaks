@@ -19,6 +19,7 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.world.level.block.QuasiConnectivity;
+import redstone.tweaks.world.level.ticks.ScheduledTicks;
 
 public interface BlockOverrides {
 
@@ -127,11 +128,13 @@ public interface BlockOverrides {
 
 	public static boolean scheduleOrDoTick(LevelAccessor level, BlockPos pos, BlockState state, int delay, TickPriority priority, BooleanSupplier microtickMode) {
 		if (level instanceof ServerLevel) {
+			delay = ScheduledTicks.prepareDelay(delay);
+
 			if (delay > 0) {
 				if (microtickMode.getAsBoolean()) {
 					((ServerLevel)level).blockEvent(pos, state.getBlock(), delay - 1, 0);
 				} else {
-					level.scheduleTick(pos, state.getBlock(), delay, priority);
+					level.scheduleTick(pos, state.getBlock(), delay, ScheduledTicks.preparePriority(priority));
 				}
 			} else {
 				state.tick((ServerLevel)level, pos, level.getRandom());

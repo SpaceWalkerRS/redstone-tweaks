@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.ticks.TickPriority;
 
+import redstone.tweaks.interfaces.mixin.BlockOverrides;
 import redstone.tweaks.interfaces.mixin.PoweredRailOverrides;
 
 @Mixin(PoweredRailBlock.class)
@@ -37,7 +38,7 @@ public abstract class PoweredRailBlockMixin implements PoweredRailOverrides {
 
 			if (delay > 0) {
 				TickPriority priority = powered ? tickPriorityFallingEdge() : tickPriorityRisingEdge();
-				level.scheduleTick(pos, block(), delay, priority);
+				BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);
 
 				ci.cancel();
 			}

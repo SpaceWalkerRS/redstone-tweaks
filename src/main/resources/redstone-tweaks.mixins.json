@@ -8,6 +8,8 @@
 		"common.block_dropping.PistonBaseBlockMixin",
 		"common.block_dropping.PistonStructureResolverMixin",
 
+		"common.block_events.ServerLevelMixin",
+
 		"common.burnout.RedstoneTorchBlockMixin",
 
 		"common.crush.AnvilBlockMixin",
@@ -124,6 +126,7 @@
 		"common.move_self.PistonBaseBlockMixin",
 		"common.move_self.PistonMovingBlockEntityMixin",
 
+		"common.neighbor_updates.BlockStateBaseMixin",
 		"common.neighbor_updates.PistonBaseBlockMixin",
 
 		"common.nou.CactusBlockMixin",
@@ -141,6 +144,8 @@
 		"common.quasi_connectivity.PoweredRailBlockMixin",
 		"common.quasi_connectivity.RedstoneLampBlockMixin",
 		"common.quasi_connectivity.TntBlockMixin",
+
+		"common.scheduled_ticks.LevelTicksMixin",
 
 		"common.signal.AirBlockMixin",
 		"common.signal.BasePressurePlateBlockMixin",
@@ -175,7 +180,9 @@
 
 		"common.speed.PistonMovingBlockEntityMixin",
 
+		"common.sticky.ChainBlockMixin",
 		"common.sticky.ChestBlockMixin",
+		"common.sticky.CrossCollisionBlockMixin",
 		"common.sticky.FallingBlockMixin",
 		"common.sticky.HoneyBlockMixin",
 		"common.sticky.MovingPistonBlockMixin",
@@ -183,6 +190,7 @@
 		"common.sticky.PistonHeadBlockMixin",
 		"common.sticky.PistonStructureResolverMixin",
 		"common.sticky.SlimeBlockMixin",
+		"common.sticky.WallBlockMixin",
 
 		"common.update_self.PistonBaseBlockMixin",
 

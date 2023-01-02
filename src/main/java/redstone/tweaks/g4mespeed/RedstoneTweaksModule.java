@@ -29,9 +29,21 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final Set<GSSettingCategory> categories = new LinkedHashSet<>();
 
 	public final GSSettingCategory globalCategory = new GSSettingCategory("global");
+	public final GSIntegerSetting globalBlockEventLimit = new GSIntegerSetting("blockEventLimit", 1000000, 0, Integer.MAX_VALUE, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting globalChainstone = new GSBooleanSetting("chainstone", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting globalDelayMultiplier = new GSIntegerSetting("delayMultiplier", 1, 0, Integer.MAX_VALUE, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting globalDoBlockUpdates = new GSBooleanSetting("doBlockUpdates", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting globalDoShapeUpdates = new GSBooleanSetting("doShapeUpdates", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting globalDoubleRetraction = new GSBooleanSetting("doubleRetraction", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting globalInstantBlockEvents = new GSBooleanSetting("instantBlockEvents", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting globalMovableBlockEntities = new GSBooleanSetting("movableBlockEntities", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting globalMovableMovingBlocks = new GSBooleanSetting("movableMovingBlocks", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting globalRandomizeBlockEvents = new GSBooleanSetting("randomizeBlockEvents", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting globalRandomizeScheduledTickDelays = new GSBooleanSetting("randomizeScheduledTickDelays", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting globalRandomizeScheduledTickPriorities = new GSBooleanSetting("randomizeScheduledTickPriorities", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSIntegerSetting globalScheduledTickLimit = new GSIntegerSetting("scheduledTickLimit", 1000000, 0, Integer.MAX_VALUE, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting globalSignalMax = new GSIntegerSetting("signalMax", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting globalStickyConnections = new GSBooleanSetting("stickyConnections", false, SHOW_IN_G4MESPEED_GUI);
 
 	public final GSSettingCategory activatorRailCategory = new GSSettingCategory("activatorRail");
 	public final GSIntegerSetting activatorRailDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 0, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -389,7 +401,6 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSBooleanSetting stickyPistonConnectToWire = new GSBooleanSetting("connectToWire", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting stickyPistonDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 2, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
-	public final GSBooleanSetting stickyPistonDoubleRetraction = new GSBooleanSetting("doubleRetraction", false, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonHeadUpdatesNeighborsOnExtension = new GSBooleanSetting("headUpdatesNeighborsOnExtension", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonHeadUpdatesNeighborsOnRetraction = new GSBooleanSetting("headUpdatesNeighborsOnRetraction", true, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting stickyPistonIgnorePowerFromFront = new GSBooleanSetting("ignorePowerFromFront", true, SHOW_IN_G4MESPEED_GUI);
@@ -491,9 +502,21 @@ public class RedstoneTweaksModule implements GSIModule {
 		categories.clear();
 
 		registerSettings(manager, globalCategory,
+			globalBlockEventLimit,
+			globalChainstone,
+			globalDelayMultiplier,
+			globalDoBlockUpdates,
+			globalDoShapeUpdates,
+			globalDoubleRetraction,
+			globalInstantBlockEvents,
 			globalMovableBlockEntities,
 			globalMovableMovingBlocks,
-			globalSignalMax);
+			globalRandomizeBlockEvents,
+			globalRandomizeScheduledTickDelays,
+			globalRandomizeScheduledTickPriorities,
+			globalScheduledTickLimit,
+			globalSignalMax,
+			globalStickyConnections);
 		registerSettings(manager, activatorRailCategory,
 			activatorRailDelayRisingEdge,
 			activatorRailDelayFallingEdge,
@@ -795,7 +818,6 @@ public class RedstoneTweaksModule implements GSIModule {
 			stickyPistonConnectToWire,
 			stickyPistonDelayRisingEdge,
 			stickyPistonDelayFallingEdge,
-			stickyPistonDoubleRetraction,
 			stickyPistonHeadUpdatesNeighborsOnExtension,
 			stickyPistonHeadUpdatesNeighborsOnRetraction,
 			stickyPistonIgnorePowerFromFront,

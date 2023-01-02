@@ -3,6 +3,7 @@ package redstone.tweaks;
 import com.g4mesoft.core.GSController;
 
 import net.minecraft.world.ticks.TickPriority;
+
 import redstone.tweaks.g4mespeed.RedstoneTweaksModule;
 import redstone.tweaks.world.level.block.CapacitorBehavior;
 import redstone.tweaks.world.level.block.QuasiConnectivity;
@@ -10,6 +11,37 @@ import redstone.tweaks.world.level.block.QuasiConnectivity;
 public class Tweaks {
 
 	public static class Global {
+
+		public static int blockEventLimit() {
+			return module().globalBlockEventLimit.getValue();
+		}
+
+		public static boolean chainstone() {
+			return module().globalChainstone.getValue();
+		}
+
+		public static int delayMultiplier() {
+			return module().globalDelayMultiplier.getValue();
+		}
+
+		public static boolean doBlockUpdates() {
+			return module().globalDoBlockUpdates.getValue();
+		}
+
+		public static boolean doShapeUpdates() {
+			return module().globalDoShapeUpdates.getValue();
+		}
+
+		/**
+		 * use {@link redstone.tweaks.Tweaks.Piston#doDoubleRetraction Piston.doDoubleRetraction}!
+		 */
+		public static boolean doubleRetraction() {
+			return module().globalDoubleRetraction.getValue();
+		}
+
+		public static boolean instantBlockEvents() {
+			return module().globalInstantBlockEvents.getValue();
+		}
 
 		public static boolean movableBlockEntities() {
 			return module().globalMovableBlockEntities.getValue();
@@ -19,8 +51,28 @@ public class Tweaks {
 			return module().globalMovableMovingBlocks.getValue();
 		}
 
+		public static boolean randomizeBlockEvents() {
+			return module().globalRandomizeBlockEvents.getValue();
+		}
+
+		public static boolean randomizeScheduledTickDelays() {
+			return module().globalRandomizeScheduledTickDelays.getValue();
+		}
+
+		public static boolean randomizeScheduledTickPriorities() {
+			return module().globalRandomizeScheduledTickPriorities.getValue();
+		}
+
+		public static int scheduledTickLimit() {
+			return module().globalScheduledTickLimit.getValue();
+		}
+
 		public static int signalMax() {
 			return module().globalSignalMax.getValue();
+		}
+
+		public static boolean stickyConnections() {
+			return module().globalStickyConnections.getValue();
 		}
 	}
 
@@ -852,7 +904,7 @@ public class Tweaks {
 		}
 
 		public static boolean doDoubleRetraction() {
-			return StickyPiston.doubleRetraction() && !StickyPiston.movableWhenExtended() && !StickyPiston.looseHead();
+			return Global.doubleRetraction() && !movableWhenExtended(true) && !movableWhenExtended(false) && !looseHead(true) && !looseHead(false);
 		}
 
 		public static boolean headUpdatesNeighborsOnExtension(boolean sticky) {
@@ -1360,13 +1412,6 @@ public class Tweaks {
 
 		public static int delayFallingEdge() {
 			return module().stickyPistonDelayFallingEdge.getValue();
-		}
-
-		/**
-		 * use {@link redstone.tweaks.Tweaks.Piston#doDoubleRetraction Piston.doDoubleRetraction}!
-		 */
-		public static boolean doubleRetraction() {
-			return module().stickyPistonDoubleRetraction.getValue();
 		}
 
 		public static boolean headUpdatesNeighborsOnExtension() {
