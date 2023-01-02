@@ -76,6 +76,52 @@ public class Tweaks {
 		}
 	}
 
+	public static class BugFixes {
+
+		public static boolean MC54711() {
+			return module().bugFixesMC54711.getValue();
+		}
+
+		public static boolean MC120986() {
+			return module().bugFixesMC120986.getValue();
+		}
+
+		public static boolean MC136566() {
+			return module().bugFixesMC136566.getValue();
+		}
+
+		public static boolean MC137127() {
+			return module().bugFixesMC137127.getValue();
+		}
+
+		public static boolean MC172213() {
+			return module().bugFixesMC172213.getValue();
+		}
+	}
+
+	public static class PropertyOverrides {
+
+		public static boolean delay() {
+			return module().propertyOverridesDelay.getValue();
+		}
+
+		public static boolean microtickMode() {
+			return module().propertyOverridesMicrotickMode.getValue();
+		}
+
+		public static boolean signal() {
+			return module().propertyOverridesSignal.getValue();
+		}
+
+		public static boolean signalDirect() {
+			return module().propertyOverridesSignalDirect.getValue();
+		}
+
+		public static boolean tickPriority() {
+			return module().propertyOverridesTickPriority.getValue();
+		}
+	}
+
 	public static class ActivatorRail {
 
 		public static int delayRisingEdge() {
@@ -1715,13 +1761,19 @@ public class Tweaks {
 		}
 	}
 
+	private static final RedstoneTweaksModule DUMMY_MODULE = new RedstoneTweaksModule();
+
 	private static RedstoneTweaksModule module() {
 		GSController controller = GSController.getInstanceOnThread();
 
-		if (controller == null) {
-			throw new IllegalStateException("no g4mespeed controller on this thread!");
+		if (controller != null) {
+			RedstoneTweaksModule module = controller.getModule(RedstoneTweaksModule.class);
+
+			if (module != null) {
+				return module;
+			}
 		}
 
-		return controller.getModule(RedstoneTweaksModule.class);
+		return DUMMY_MODULE;
 	}
 }

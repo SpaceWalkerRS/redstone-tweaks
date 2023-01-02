@@ -14,6 +14,7 @@ import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
+import redstone.tweaks.util.Rnd;
 
 @Mixin(CoralBlock.class)
 public class CoralBlockMixin {
@@ -28,7 +29,8 @@ public class CoralBlockMixin {
 	private void rtTweakDelayAndTickPriority(LevelAccessor _level, BlockPos _pos, Block block, int delay, BlockState state, Direction dir, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
 		int min = Tweaks.Coral.delayMin();
 		int max = Tweaks.Coral.delayMax();
-		delay = min + level.getRandom().nextInt(max - min);
+
+		delay = Rnd.nextInt(level.getRandom(), min, max);
 		TickPriority priority = Tweaks.Bamboo.tickPriority();
 
 		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);

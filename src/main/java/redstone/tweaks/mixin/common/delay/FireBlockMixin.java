@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
+import redstone.tweaks.util.Rnd;
 
 @Mixin(FireBlock.class)
 public class FireBlockMixin {
@@ -53,6 +54,6 @@ public class FireBlockMixin {
 		int min = Tweaks.Fire.delayMin();
 		int max = Tweaks.Fire.delayMax();
 
-		cir.setReturnValue(min + rand.nextInt(max - min));
+		cir.setReturnValue(Rnd.nextInt(rand, min, max));
 	}
 }

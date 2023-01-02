@@ -45,6 +45,20 @@ public class RedstoneTweaksModule implements GSIModule {
 	public final GSIntegerSetting globalSignalMax = new GSIntegerSetting("signalMax", Redstone.SIGNAL_MAX, Constants.SIGNAL_MIN, Constants.SIGNAL_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSBooleanSetting globalStickyConnections = new GSBooleanSetting("stickyConnections", false, SHOW_IN_G4MESPEED_GUI);
 
+	public final GSSettingCategory bugFixesCategory = new GSSettingCategory("bugFixes");
+	public final GSBooleanSetting bugFixesMC54711 = new GSBooleanSetting("MC54711", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting bugFixesMC120986 = new GSBooleanSetting("MC120986", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting bugFixesMC136566 = new GSBooleanSetting("MC136566", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting bugFixesMC137127 = new GSBooleanSetting("MC137127", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting bugFixesMC172213 = new GSBooleanSetting("MC172213", false, SHOW_IN_G4MESPEED_GUI);
+
+	public final GSSettingCategory propertyOverridesCategory = new GSSettingCategory("propertyOverrides");
+	public final GSBooleanSetting propertyOverridesDelay = new GSBooleanSetting("delay", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting propertyOverridesMicrotickMode = new GSBooleanSetting("microtickMode", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting propertyOverridesSignal = new GSBooleanSetting("signal", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting propertyOverridesSignalDirect = new GSBooleanSetting("signalDirect", false, SHOW_IN_G4MESPEED_GUI);
+	public final GSBooleanSetting propertyOverridesTickPriority = new GSBooleanSetting("tickPriority", false, SHOW_IN_G4MESPEED_GUI);
+
 	public final GSSettingCategory activatorRailCategory = new GSSettingCategory("activatorRail");
 	public final GSIntegerSetting activatorRailDelayRisingEdge = new GSIntegerSetting("delayRisingEdge", 0, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
 	public final GSIntegerSetting activatorRailDelayFallingEdge = new GSIntegerSetting("delayFallingEdge", 0, 0, Constants.DELAY_MAX, SHOW_IN_G4MESPEED_GUI);
@@ -517,6 +531,18 @@ public class RedstoneTweaksModule implements GSIModule {
 			globalScheduledTickLimit,
 			globalSignalMax,
 			globalStickyConnections);
+		registerSettings(manager, bugFixesCategory,
+			bugFixesMC54711,
+			bugFixesMC120986,
+			bugFixesMC136566,
+			bugFixesMC137127,
+			bugFixesMC172213);
+		registerSettings(manager, propertyOverridesCategory,
+			propertyOverridesDelay,
+			propertyOverridesMicrotickMode,
+			propertyOverridesSignal,
+			propertyOverridesSignalDirect,
+			propertyOverridesTickPriority);
 		registerSettings(manager, activatorRailCategory,
 			activatorRailDelayRisingEdge,
 			activatorRailDelayFallingEdge,

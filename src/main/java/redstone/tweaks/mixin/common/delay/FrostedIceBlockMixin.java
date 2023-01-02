@@ -14,6 +14,7 @@ import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
+import redstone.tweaks.util.Rnd;
 
 @Mixin(FrostedIceBlock.class)
 public class FrostedIceBlockMixin {
@@ -28,7 +29,8 @@ public class FrostedIceBlockMixin {
 	private void rtTweakDelayAndTickPriority(ServerLevel _level, BlockPos _pos, Block block, int delay, BlockState state, ServerLevel level, BlockPos pos, RandomSource rand) {
 		int min = Tweaks.FrostedIce.delayMin();
 		int max = Tweaks.FrostedIce.delayMax();
-		delay = min + rand.nextInt(max - min);
+
+		delay = Rnd.nextInt(rand, min, max);
 		TickPriority priority = Tweaks.FrostedIce.tickPriority();
 
 		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);

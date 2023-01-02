@@ -25,7 +25,7 @@ public class ChainBlockMixin implements BlockOverrides {
 
 	@Override
 	public boolean isStickyToNeighbor(Level level, BlockPos pos, BlockState state, BlockPos neighborPos, BlockState neighborState, Direction dir, Direction moveDir) {
-		// White this tweak is inspired by the Carpet mod setting of the same name,
+		// While this tweak is inspired by the Carpet mod setting of the same name,
 		// it behaves differently. The idea is that chains are strong when in tension,
 		// which we model here by making them 'sticky' if the chain is fully anchored,
 		// i.e. if the chain is attached to some other block on both ends.

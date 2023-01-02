@@ -14,6 +14,7 @@ import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
+import redstone.tweaks.util.Rnd;
 
 @Mixin(FrostWalkerEnchantment.class)
 public class FrostWalkerEnchantmentMixin {
@@ -30,7 +31,8 @@ public class FrostWalkerEnchantmentMixin {
 
 		int min = Tweaks.FrostedIce.delayMin();
 		int max = Tweaks.FrostedIce.delayMax();
-		delay = min + entity.getRandom().nextInt(max - min);
+
+		delay = Rnd.nextInt(level.getRandom(), min, max);
 		TickPriority priority = Tweaks.FrostedIce.tickPriority();
 
 		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority);

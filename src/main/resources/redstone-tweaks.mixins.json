@@ -12,6 +12,8 @@
 
 		"common.burnout.RedstoneTorchBlockMixin",
 
+		"common.chain_bug.DiodeBlockMixin",
+
 		"common.crush.AnvilBlockMixin",
 
 		"common.delay.AmethystClusterBlockMixin",
@@ -84,6 +86,7 @@
 		"common.delay.RedstoneLampBlockMixin",
 		"common.delay.RedStoneOreBlockMixin",
 		"common.delay.RedstoneTorchBlockMixin",
+		"common.delay.RedstoneWallTorchBlockMixin",
 		"common.delay.RedStoneWireBlockMixin",
 		"common.delay.RepeaterBlockMixin",
 		"common.delay.ScaffoldingBlockMixin",
@@ -114,6 +117,8 @@
 		"common.ignore_updates_while_moving.MovingPistonBlockMixin",
 		"common.ignore_updates_while_moving.PistonBaseBlockMixin",
 
+		"common.input_bug.ServerLevelMixin",
+
 		"common.movable.BlockEntityMixin",
 		"common.movable.LevelChunkMixin",
 		"common.movable.LevelMixin",
@@ -132,6 +137,9 @@
 		"common.nou.CactusBlockMixin",
 
 		"common.observer.ObserverBlockMixin",
+
+		"common.property_overrides.BlockBehaviourMixin",
+		"common.property_overrides.BlocksMixin",
 
 		"common.quasi_connectivity.BaseRailBlockMixin",
 		"common.quasi_connectivity.BigDripleafBlockMixin",

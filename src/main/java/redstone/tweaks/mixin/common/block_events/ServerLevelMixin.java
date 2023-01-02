@@ -47,7 +47,7 @@ public abstract class ServerLevelMixin extends Level {
 		super(data, key, dimension, profiler, isClientSide, isDebug, seed, maxChainedNeighborUpdates);
 	}
 
-	@Shadow boolean doBlockEvent(BlockEventData blockEvent) { return false; }
+	@Shadow private boolean doBlockEvent(BlockEventData blockEvent) { return false; }
 
 	@Inject(
 		method = "blockEvent",

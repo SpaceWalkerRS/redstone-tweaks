@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
@@ -14,6 +15,7 @@ import net.minecraft.world.ticks.TickPriority;
 
 import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
+import redstone.tweaks.interfaces.mixin.PropertyOverrides;
 import redstone.tweaks.interfaces.mixin.RedstoneTorchOverrides;
 
 @Mixin(RedstoneTorchBlock.class)
@@ -48,11 +50,23 @@ public abstract class RedstoneTorchBlockMixin implements RedstoneTorchOverrides 
 		delay = Tweaks.RedstoneTorch.delay(lit);
 		TickPriority priority = Tweaks.RedstoneTorch.tickPriority(lit);
 
-		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, Tweaks.RedstoneTorch::microtickMode);
+		Direction facing = getFacing(state);
+		BlockPos behindPos = pos.relative(facing.getOpposite());
+		BlockState behindState = level.getBlockState(behindPos);
+
+		delay = PropertyOverrides.overrideDelay(behindState, delay);
+		priority = PropertyOverrides.overrideTickPriority(behindState, priority);
+
+		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> PropertyOverrides.overrideMicrotickMode(behindState, Tweaks.RedstoneTorch.microtickMode()));
 	}
 
 	@Override
 	public Boolean overrideTriggerEvent(BlockState state, Level level, BlockPos pos, int type, int data) {
 		return BlockOverrides.scheduleOrDoTick(level, pos, state, type, TickPriority.NORMAL, Tweaks.RedstoneTorch::microtickMode);
+	}
+
+	@Override
+	public Direction getFacing(BlockState state) {
+		return Direction.UP;
 	}
 }

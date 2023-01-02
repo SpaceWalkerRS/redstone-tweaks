@@ -3,6 +3,7 @@ package redstone.tweaks.mixin.common.observer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -44,6 +45,25 @@ public class ObserverBlockMixin implements ObserverOverrides {
 		if (Tweaks.Observer.disable()) {
 			ci.cancel();
 		}
+	}
+
+	@ModifyArg(
+		method = "onPlace",
+		index = 2,
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"
+		)
+	)
+	private int rtFixMC136566AndMC137127(int flags) {
+		if (Tweaks.BugFixes.MC136566()) {
+			flags |= Block.UPDATE_NEIGHBORS;
+		}
+		if (Tweaks.BugFixes.MC137127()) {
+			flags &= ~Block.UPDATE_KNOWN_SHAPE;
+		}
+
+		return flags;
 	}
 
 	@Override

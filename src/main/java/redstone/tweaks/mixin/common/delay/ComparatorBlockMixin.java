@@ -18,6 +18,7 @@ import redstone.tweaks.Tweaks;
 import redstone.tweaks.interfaces.mixin.BlockOverrides;
 import redstone.tweaks.interfaces.mixin.DiodeOverrides;
 import redstone.tweaks.interfaces.mixin.ILevel;
+import redstone.tweaks.interfaces.mixin.PropertyOverrides;
 
 @Mixin(ComparatorBlock.class)
 public abstract class ComparatorBlockMixin implements DiodeOverrides {
@@ -74,7 +75,13 @@ public abstract class ComparatorBlockMixin implements DiodeOverrides {
 		)
 	)
 	private void rtTweakDelayAndTickPriority(Level _level, BlockPos _pos, Block block, int delay, TickPriority priority, Level level, BlockPos pos, BlockState state) {
-		BlockOverrides.scheduleOrDoTick(level, pos, state, Tweaks.Comparator.delay(), priority, this::microtickMode);
+		BlockPos belowPos = pos.below();
+		BlockState belowState = level.getBlockState(belowPos);
+
+		delay = PropertyOverrides.overrideDelay(belowState, Tweaks.Comparator.delay());
+		priority = PropertyOverrides.overrideTickPriority(belowState, priority);
+
+		BlockOverrides.scheduleOrDoTick(level, pos, state, delay, priority, () -> PropertyOverrides.overrideMicrotickMode(belowState, microtickMode()));
 	}
 
 	@Inject(
